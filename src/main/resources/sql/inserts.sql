@@ -23,19 +23,19 @@ INSERT INTO sub_categories VALUES
 
 -- ADDRESSES
 INSERT INTO addresses VALUES
-('b64ea00e-53ca-4015-85db-c26629e3cda0','Rua das Flores','100',NULL,'Centro','Sorocaba','SP','Brazil','18130-000',NOW(),NOW(),'ab6c0937-17ac-434e-80dd-c8b581d55935'),
-('a2f78f3c-b290-4573-b56a-311e4ecd2183','Av Brasil','250','Ap 12','Jardim','Sao Paulo','SP','Brazil','01000-000',NOW(),NOW(),'d101df10-ca1d-446a-a897-8ffed7950acb'),
-('33bac100-e500-425e-aef0-270e664a959f','Rua Verde','45',NULL,'Centro','Campinas','SP','Brazil','13000-000',NOW(),NOW(),'966fc885-5107-4466-aa9a-ab7366e56fab');
+('b64ea00e-53ca-4015-85db-c26629e3cda0','Rua das Flores','100',NULL,'Centro','Sorocaba','SP','Brazil','18130-000','ab6c0937-17ac-434e-80dd-c8b581d55935',NOW(),NOW()),
+('a2f78f3c-b290-4573-b56a-311e4ecd2183','Av Brasil','250','Ap 12','Jardim','Sao Paulo','SP','Brazil','01000-000','d101df10-ca1d-446a-a897-8ffed7950acb', NOW(),NOW()),
+('33bac100-e500-425e-aef0-270e664a959f','Rua Verde','45',NULL,'Centro','Campinas','SP','Brazil','13000-000','966fc885-5107-4466-aa9a-ab7366e56fab',NOW(),NOW());
 
 
 -- ITEMS
 INSERT INTO items VALUES
-('9ec286a9-f11b-406a-87f5-956b612fb0cb','Canon T6 Camera','Canon','DSLR camera for photography',80.00,'GOOD',NOW(),NOW(),'eba0769d-36fc-4d36-899f-65d12342d74e','ab6c0937-17ac-434e-80dd-c8b581d55935','b64ea00e-53ca-4015-85db-c26629e3cda0'),
-('2e6fbb11-bbdf-426c-85d7-4ac0d52e81b2','Professional Tripod','Manfrotto','Aluminum tripod',25.00,'EXCELLENT',NOW(),NOW(),'47c5e3d5-5e5e-4bc2-a5b0-214f5835939b','ab6c0937-17ac-434e-80dd-c8b581d55935','b64ea00e-53ca-4015-85db-c26629e3cda0'),
-('efbeb34f-203b-4609-826f-ef49ffdb9c20','Dell XPS 15','Dell','High performance laptop',120.00,'GOOD',NOW(),NOW(),'0f956f80-aa28-4b6f-80a2-9dfc65609c2e','d101df10-ca1d-446a-a897-8ffed7950acb','a2f78f3c-b290-4573-b56a-311e4ecd2183');
+('9ec286a9-f11b-406a-87f5-956b612fb0cb','Canon T6 Camera','Canon','DSLR camera for photography',80.00,'GOOD','eba0769d-36fc-4d36-899f-65d12342d74e','ab6c0937-17ac-434e-80dd-c8b581d55935','b64ea00e-53ca-4015-85db-c26629e3cda0',NOW(),NOW()),
+('2e6fbb11-bbdf-426c-85d7-4ac0d52e81b2','Professional Tripod','Manfrotto','Aluminum tripod',25.00,'EXCELLENT','47c5e3d5-5e5e-4bc2-a5b0-214f5835939b','ab6c0937-17ac-434e-80dd-c8b581d55935','b64ea00e-53ca-4015-85db-c26629e3cda0',NOW(),NOW()),
+('efbeb34f-203b-4609-826f-ef49ffdb9c20','Dell XPS 15','Dell','High performance laptop',120.00,'GOOD','0f956f80-aa28-4b6f-80a2-9dfc65609c2e','d101df10-ca1d-446a-a897-8ffed7950acb','a2f78f3c-b290-4573-b56a-311e4ecd2183',NOW(),NOW());
 
 
 -- RENTALS
 INSERT INTO rentals VALUES
-('5f54c279-9ad6-40c2-8a32-22216d48ca39','ACTIVE','DAILY','2026-03-10 10:00:00','2026-03-12 10:00:00',160.00,NOW(),NOW(),'9ec286a9-f11b-406a-87f5-956b612fb0cb','d101df10-ca1d-446a-a897-8ffed7950acb'),
-('b24fca5b-648a-44e2-ba89-2223d8ab57b0','FINISHED','DAILY','2026-02-01 09:00:00','2026-02-03 09:00:00',240.00,NOW(),NOW(),'efbeb34f-203b-4609-826f-ef49ffdb9c20','ab6c0937-17ac-434e-80dd-c8b581d55935');
+('5f54c279-9ad6-40c2-8a32-22216d48ca39','ACTIVE','DAILY','2026-03-10 10:00:00','2026-03-12 10:00:00',160.00,'9ec286a9-f11b-406a-87f5-956b612fb0cb','d101df10-ca1d-446a-a897-8ffed7950acb',NOW(),NOW()),
+('b24fca5b-648a-44e2-ba89-2223d8ab57b0','FINISHED','DAILY','2026-02-01 09:00:00','2026-02-03 09:00:00',240.00,'efbeb34f-203b-4609-826f-ef49ffdb9c20','ab6c0937-17ac-434e-80dd-c8b581d55935',NOW(),NOW());
