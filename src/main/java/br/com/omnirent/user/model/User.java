@@ -1,5 +1,7 @@
 package br.com.omnirent.user.model;
 
+import java.sql.Date;
+
 import br.com.omnirent.common.model.NamedEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -18,5 +20,7 @@ public class User extends NamedEntity {
 	private String email;
 
 	private String password;
+	
+	private Date birthDate;
 	
 }
