@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `omnirent_db`.`users` (
   `username` VARCHAR(50) NOT NULL,
   `email` VARCHAR(100) NOT NULL,
   `password` VARCHAR(100) NOT NULL,
-  `birthdate` DATE NOT NULL,
+  `birth_date` DATE NOT NULL,
   `status` VARCHAR(20) NOT NULL,
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL,
