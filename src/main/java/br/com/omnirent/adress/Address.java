@@ -1,7 +1,7 @@
-package br.com.omnirent.adress.model;
+package br.com.omnirent.adress;
 
-import br.com.omnirent.common.model.BaseEntity;
-import br.com.omnirent.user.model.User;
+import br.com.omnirent.common.BaseEntity;
+import br.com.omnirent.user.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;

@@ -1,4 +1,4 @@
-package br.com.omnirent.common.model;
+package br.com.omnirent.common;
 
 import jakarta.persistence.MappedSuperclass;
 import lombok.AccessLevel;

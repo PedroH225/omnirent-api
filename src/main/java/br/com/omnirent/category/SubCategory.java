@@ -1,6 +1,6 @@
-package br.com.omnirent.category.model;
+package br.com.omnirent.category;
 
-import br.com.omnirent.common.model.NamedEntity;
+import br.com.omnirent.common.NamedEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;

@@ -1,14 +1,14 @@
-package br.com.omnirent.item.model;
+package br.com.omnirent.item;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import br.com.omnirent.adress.model.Address;
-import br.com.omnirent.category.model.SubCategory;
-import br.com.omnirent.common.model.NamedEntity;
-import br.com.omnirent.item.enums.ItemCondition;
-import br.com.omnirent.rental.model.Rental;
-import br.com.omnirent.user.model.User;
+import br.com.omnirent.adress.Address;
+import br.com.omnirent.category.SubCategory;
+import br.com.omnirent.common.NamedEntity;
+import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.rental.Rental;
+import br.com.omnirent.user.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

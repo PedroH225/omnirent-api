@@ -1,4 +1,4 @@
-package br.com.omnirent.item.enums;
+package br.com.omnirent.common.enums;
 
 public enum ItemCondition {
 	NEW,
