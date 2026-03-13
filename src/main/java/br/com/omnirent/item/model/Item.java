@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import br.com.omnirent.adress.model.Address;
 import br.com.omnirent.common.model.NamedEntity;
 import br.com.omnirent.item.enums.ItemCondition;
+import br.com.omnirent.user.model.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -36,4 +37,7 @@ public class Item extends NamedEntity {
 	@JoinColumn(name = "pickup_address_id")
 	private Address pickupAdress;
 	
+	@ManyToOne
+	@JoinColumn(name = "owner_id")
+	private User owner;
 }
