@@ -3,7 +3,7 @@ package br.com.omnirent.user.model;
 import java.sql.Date;
 import java.util.List;
 
-import br.com.omnirent.adress.model.Adress;
+import br.com.omnirent.adress.model.Address;
 import br.com.omnirent.common.model.NamedEntity;
 import br.com.omnirent.user.enums.UserStatus;
 import jakarta.persistence.Column;
@@ -34,6 +34,6 @@ public class User extends NamedEntity {
 	private UserStatus userStatus;
 	
 	@OneToMany(mappedBy = "user")
-	private List<Adress> adresses;
+	private List<Address> adresses;
 	
 }

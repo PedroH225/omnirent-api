@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @Entity
 @Table(name = "addresses")
-public class Adress extends BaseEntity {
+public class Address extends BaseEntity {
 	private static final long serialVersionUID = 1L;
 	
 	private String street;
