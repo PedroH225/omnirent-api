@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import br.com.omnirent.adress.model.Address;
+import br.com.omnirent.category.model.SubCategory;
 import br.com.omnirent.common.model.NamedEntity;
 import br.com.omnirent.item.enums.ItemCondition;
 import br.com.omnirent.rental.model.Rental;
@@ -35,6 +36,10 @@ public class Item extends NamedEntity {
 	
 	@Enumerated(EnumType.STRING)
 	private ItemCondition itemCondition;
+	
+	@ManyToOne
+	@JoinColumn(name = "sub_category_id")
+	private SubCategory subCategory;
 	
 	@ManyToOne
 	@JoinColumn(name = "pickup_address_id")
