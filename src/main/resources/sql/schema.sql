@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `items` (
   `model` VARCHAR(50) NOT NULL,
   `description` LONGTEXT NULL,
   `base_price` DECIMAL(10,2) NOT NULL,
-  `condition` VARCHAR(20) NOT NULL,
+  `item_condition` VARCHAR(20) NOT NULL,
   `sub_category_id` CHAR(36) NOT NULL,
   `owner_id` CHAR(36) NOT NULL,
   `pickup_address_id` CHAR(36) NOT NULL,
