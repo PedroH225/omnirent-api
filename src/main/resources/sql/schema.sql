@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `omnirent_db`.`users` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `categories` (
   `id` CHAR(36) NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
+  `name` VARCHAR(45) UNIQUE NOT NULL,
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL,
   PRIMARY KEY (`id`)
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `sub_categories` (
   `id` CHAR(36) NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
+  `name` VARCHAR(45) UNIQUE NOT NULL,
   `category_id` CHAR(36) NOT NULL,
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL,
