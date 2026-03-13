@@ -1,9 +1,14 @@
 package br.com.omnirent.item.model;
 
 import java.math.BigDecimal;
+import java.util.concurrent.locks.Condition;
 
 import br.com.omnirent.common.model.NamedEntity;
+import br.com.omnirent.item.enums.ItemCondition;
+import br.com.omnirent.rental.enums.RentalStatus;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,6 +27,9 @@ public class Item extends NamedEntity {
 	private String description;
 
 	private BigDecimal basePrice;
+	
+	@Enumerated(EnumType.STRING)
+	private ItemCondition itemCondition;
 
 
 }
