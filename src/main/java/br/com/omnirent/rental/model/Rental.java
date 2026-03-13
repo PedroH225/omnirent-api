@@ -4,7 +4,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import br.com.omnirent.common.model.BaseEntity;
+import br.com.omnirent.rental.enums.RentalPeriod;
+import br.com.omnirent.rental.enums.RentalStatus;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,5 +25,12 @@ public class Rental extends BaseEntity {
 	private LocalDateTime endDate;
 	
 	private BigDecimal finalPrice;
+	
+	@Enumerated(EnumType.STRING)
+	private RentalStatus rentalStatus;
+	
+	@Enumerated(EnumType.STRING)
+	private RentalPeriod rentalPeriod;
+	
 
 }
