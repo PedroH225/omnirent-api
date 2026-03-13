@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS `omnirent_db`.`users` (
   `username` VARCHAR(50) NOT NULL,
   `email` VARCHAR(100) NOT NULL,
   `password` VARCHAR(100) NOT NULL,
-  `birthdate` DATE NOT NULL,
-  `status` VARCHAR(20) NOT NULL,
+  `birth_date` DATE NOT NULL,
+  `user_status` VARCHAR(20) NOT NULL,
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL,
   PRIMARY KEY (`id`),
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `omnirent_db`.`users` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `categories` (
   `id` CHAR(36) NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
+  `name` VARCHAR(45) UNIQUE NOT NULL,
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL,
   PRIMARY KEY (`id`)
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `sub_categories` (
   `id` CHAR(36) NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
+  `name` VARCHAR(45) UNIQUE NOT NULL,
   `category_id` CHAR(36) NOT NULL,
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL,
@@ -85,9 +85,10 @@ CREATE TABLE IF NOT EXISTS `items` (
   `id` CHAR(36) NOT NULL,
   `name` VARCHAR(100) NOT NULL,
   `brand` VARCHAR(50) NOT NULL,
+  `model` VARCHAR(50) NOT NULL,
   `description` LONGTEXT NULL,
   `base_price` DECIMAL(10,2) NOT NULL,
-  `condition` VARCHAR(20) NOT NULL,
+  `item_condition` VARCHAR(20) NOT NULL,
   `sub_category_id` CHAR(36) NOT NULL,
   `owner_id` CHAR(36) NOT NULL,
   `pickup_address_id` CHAR(36) NOT NULL,
