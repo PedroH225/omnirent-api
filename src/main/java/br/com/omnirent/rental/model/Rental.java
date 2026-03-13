@@ -7,6 +7,7 @@ import br.com.omnirent.common.model.BaseEntity;
 import br.com.omnirent.item.model.Item;
 import br.com.omnirent.rental.enums.RentalPeriod;
 import br.com.omnirent.rental.enums.RentalStatus;
+import br.com.omnirent.user.model.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -38,6 +39,10 @@ public class Rental extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "item_id")
 	private Item item;
+	
+	@ManyToOne
+	@JoinColumn(name = "renter_id")
+	private User renter;
 	
 
 }
