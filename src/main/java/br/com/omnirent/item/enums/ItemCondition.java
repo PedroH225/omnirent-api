@@ -1,6 +1,6 @@
 package br.com.omnirent.item.enums;
 
-public enum Condition {
+public enum ItemCondition {
 	NEW,
 	LIKE_NEW,
 	GOOD,
