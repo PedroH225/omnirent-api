@@ -3,7 +3,7 @@ package br.com.omnirent.user;
 import java.sql.Date;
 import java.util.List;
 
-import br.com.omnirent.adress.Address;
+import br.com.omnirent.address.Address;
 import br.com.omnirent.common.NamedEntity;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.item.Item;

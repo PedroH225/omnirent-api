@@ -3,7 +3,7 @@ package br.com.omnirent.item;
 import java.math.BigDecimal;
 import java.util.List;
 
-import br.com.omnirent.adress.Address;
+import br.com.omnirent.address.Address;
 import br.com.omnirent.category.SubCategory;
 import br.com.omnirent.common.NamedEntity;
 import br.com.omnirent.common.enums.ItemCondition;

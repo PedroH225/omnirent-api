@@ -1,4 +1,4 @@
-package br.com.omnirent.adress;
+package br.com.omnirent.address;
 
 import br.com.omnirent.common.BaseEntity;
 import br.com.omnirent.user.User;
