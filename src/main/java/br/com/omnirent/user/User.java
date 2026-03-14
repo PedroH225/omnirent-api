@@ -1,7 +1,8 @@
 package br.com.omnirent.user;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -12,7 +13,6 @@ import br.com.omnirent.common.NamedEntity;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.item.Item;
 import br.com.omnirent.rental.Rental;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -34,7 +34,7 @@ public class User extends NamedEntity implements UserDetails {
 
 	private String password;
 	
-	private Date birthDate;
+	private LocalDate birthDate;
 	
 	@Enumerated(EnumType.STRING)
 	private UserStatus userStatus;
