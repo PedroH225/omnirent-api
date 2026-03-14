@@ -2,6 +2,7 @@ package br.com.omnirent.user;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -58,7 +59,7 @@ public class User extends NamedEntity implements UserDetails {
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyList();
 	}
 	
 	@Override
