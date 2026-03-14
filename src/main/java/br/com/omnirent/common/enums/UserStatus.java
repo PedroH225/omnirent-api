@@ -1,4 +1,4 @@
-package br.com.omnirent.user.enums;
+package br.com.omnirent.common.enums;
 
 public enum UserStatus {
 	ACTIVE,

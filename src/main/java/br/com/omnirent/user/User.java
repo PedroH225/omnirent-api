@@ -1,13 +1,13 @@
-package br.com.omnirent.user.model;
+package br.com.omnirent.user;
 
 import java.sql.Date;
 import java.util.List;
 
-import br.com.omnirent.adress.model.Address;
-import br.com.omnirent.common.model.NamedEntity;
-import br.com.omnirent.item.model.Item;
-import br.com.omnirent.rental.model.Rental;
-import br.com.omnirent.user.enums.UserStatus;
+import br.com.omnirent.address.Address;
+import br.com.omnirent.common.NamedEntity;
+import br.com.omnirent.common.enums.UserStatus;
+import br.com.omnirent.item.Item;
+import br.com.omnirent.rental.Rental;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

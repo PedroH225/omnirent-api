@@ -1,8 +1,8 @@
-package br.com.omnirent.category.model;
+package br.com.omnirent.category;
 
 import java.util.List;
 
-import br.com.omnirent.common.model.NamedEntity;
+import br.com.omnirent.common.NamedEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;

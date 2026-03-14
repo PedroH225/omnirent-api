@@ -1,4 +1,4 @@
-package br.com.omnirent.rental.enums;
+package br.com.omnirent.common.enums;
 
 public enum RentalStatus {
 	RESERVED,

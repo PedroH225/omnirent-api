@@ -1,4 +1,4 @@
-package br.com.omnirent.common.model;
+package br.com.omnirent.common;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

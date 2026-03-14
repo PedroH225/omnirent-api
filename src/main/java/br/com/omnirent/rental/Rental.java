@@ -1,13 +1,13 @@
-package br.com.omnirent.rental.model;
+package br.com.omnirent.rental;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import br.com.omnirent.common.model.BaseEntity;
-import br.com.omnirent.item.model.Item;
-import br.com.omnirent.rental.enums.RentalPeriod;
-import br.com.omnirent.rental.enums.RentalStatus;
-import br.com.omnirent.user.model.User;
+import br.com.omnirent.common.BaseEntity;
+import br.com.omnirent.common.enums.RentalPeriod;
+import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.item.Item;
+import br.com.omnirent.user.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
