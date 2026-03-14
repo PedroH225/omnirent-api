@@ -14,7 +14,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.UserStatus;
-import br.com.omnirent.user.RegisterDTO;
 import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserRepository;
 import lombok.AllArgsConstructor;
