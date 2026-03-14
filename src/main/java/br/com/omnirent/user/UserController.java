@@ -1,5 +1,7 @@
 package br.com.omnirent.user;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.omnirent.security.AuthenticationService;
+import br.com.omnirent.security.LoginDTO;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -30,4 +33,8 @@ public class UserController {
 		return authenticationService.register(registerDTO);
 	}
 	
+	@PostMapping("/login")
+	public Map<String, String> login(@RequestBody LoginDTO loginDTO) {
+		return authenticationService.login(loginDTO);
+	}
 }

@@ -41,6 +41,15 @@ public class AuthenticationService implements UserDetailsService {
         return userRepository.findByEmail(email);
     } 
 
+    public Map<String, String> login(LoginDTO data){
+        authenticationManager = context.getBean(AuthenticationManager.class);
+
+        var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
+        var auth = this.authenticationManager.authenticate(usernamePassword);
+        var token = tokenService.generateToken((User) auth.getPrincipal());
+        return Map.of("token", token);
+    }
+
     public ResponseEntity<Object> register (RegisterDTO registerDto){
     	if (verifyExistingEmail(registerDto.email())) {
 			throw new RuntimeException("Email already in use.");
