@@ -12,6 +12,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,5 +37,17 @@ public abstract class BaseEntity implements Serializable {
 	@LastModifiedDate
 	protected LocalDateTime updatedAt;
 
+	@PrePersist
+	protected void onPersist() {
+		LocalDateTime currentDateTime = LocalDateTime.now();
+		setCreatedAt(currentDateTime);
+		setUpdatedAt(currentDateTime);
+	}
+	
+	@PreUpdate
+	protected void onUpdate() {
+		LocalDateTime currentDateTime = LocalDateTime.now();
+		setUpdatedAt(currentDateTime);
+	}
 }
 	
