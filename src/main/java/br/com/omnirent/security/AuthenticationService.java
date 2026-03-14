@@ -41,5 +41,26 @@ public class AuthenticationService implements UserDetailsService {
         return userRepository.findByEmail(email);
     } 
 
+    public ResponseEntity<Object> register (RegisterDTO registerDto){
+    	if (verifyExistingEmail(registerDto.email())) {
+			throw new RuntimeException("Email already in use.");
+		}
+    	
+    	String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
+        
+        this.userRepository.save(fromRegisterDTO(registerDto, encryptedPassword));
+        return ResponseEntity.ok().build();
+    }
+    
+    private User fromRegisterDTO(RegisterDTO registerDTO, String encryptedPassword) {
+        User user = new User();
 
+        user.setName(registerDTO.name());
+        user.setUsername(registerDTO.username());
+        user.setEmail(registerDTO.email());
+        user.setBirthDate(registerDTO.birthDate());
+        user.setPassword(encryptedPassword);
+        
+        return user;
+    }
 }
