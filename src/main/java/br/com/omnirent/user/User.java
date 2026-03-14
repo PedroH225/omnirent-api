@@ -13,10 +13,12 @@ import br.com.omnirent.common.NamedEntity;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.item.Item;
 import br.com.omnirent.rental.Rental;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -47,6 +49,11 @@ public class User extends NamedEntity implements UserDetails {
 	
 	@OneToMany(mappedBy = "renter")
 	private List<Rental> rented;
+	
+	@PrePersist
+	public void onCreate() {
+		setUserStatus(UserStatus.ACTIVE);
+	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
