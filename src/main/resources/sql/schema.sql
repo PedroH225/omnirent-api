@@ -15,9 +15,9 @@ CREATE TABLE IF NOT EXISTS `omnirent_db`.`users` (
   `email` VARCHAR(100) NOT NULL,
   `password` VARCHAR(100) NOT NULL,
   `birth_date` DATE NOT NULL,
-  `user_status` VARCHAR(20) NOT NULL,
-  `created_at` DATETIME NOT NULL,
-  `updated_at` DATETIME NOT NULL,
+  `user_status` VARCHAR(20) DEFAULT 'ACTIVE',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `email_UNIQUE` (`email`),
   UNIQUE INDEX `username_UNIQUE` (`username`)

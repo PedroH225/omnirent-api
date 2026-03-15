@@ -13,10 +13,9 @@ import lombok.AllArgsConstructor;
 public class UserController {
 
 	private UserService userService;
-	
+		
 	@GetMapping("/find/{id}")
 	public User findById(@PathVariable String id) {
 		return userService.findById(id);
 	}
-	
 }
