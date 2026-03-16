@@ -1,9 +1,11 @@
 package br.com.omnirent.address;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.user.UserService;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -11,6 +13,8 @@ import lombok.AllArgsConstructor;
 public class AddressService {
 
 	private AddressRepository addressRepository;
+	
+	private UserService userService;
 	
 	public Address findById(String id) {
 		Optional<Address> address = addressRepository.findById(id);
@@ -20,5 +24,11 @@ public class AddressService {
 		}
 		
 		return address.get();
+	}
+	
+	public List<AddressResponseDTO> getUserAddresses(String userId) {
+		List<Address> userAddresses = userService.findById(userId).getAddresses();
+		
+		return AddressMapper.toDto(userAddresses);
 	}
 }
