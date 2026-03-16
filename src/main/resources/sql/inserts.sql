@@ -25,8 +25,8 @@ INSERT INTO sub_categories VALUES
 INSERT INTO addresses VALUES
 ('b64ea00e-53ca-4015-85db-c26629e3cda0','Rua das Flores','100',NULL,'Centro','Sorocaba','SP','Brazil','18130-000','ab6c0937-17ac-434e-80dd-c8b581d55935',NOW(),NOW()),
 ('a2f78f3c-b290-4573-b56a-311e4ecd2183','Av Brasil','250','Ap 12','Jardim','Sao Paulo','SP','Brazil','01000-000','d101df10-ca1d-446a-a897-8ffed7950acb', NOW(),NOW()),
-('33bac100-e500-425e-aef0-270e664a959f','Rua Verde','45',NULL,'Centro','Campinas','SP','Brazil','13000-000','966fc885-5107-4466-aa9a-ab7366e56fab',NOW(),NOW());
-
+('33bac100-e500-425e-aef0-270e664a959f','Rua Verde','45',NULL,'Centro','Campinas','SP','Brazil','13000-000','966fc885-5107-4466-aa9a-ab7366e56fab',NOW(),NOW()),
+('abcf307a-057f-413b-86b8-6b643f0d8dd6','Rua Vermelha','50',NULL,'Centro','Campinas','SP','Brazil','13000-000','966fc885-5107-4466-aa9a-ab7366e56fab',NOW(),NOW());
 
 -- ITEMS
 INSERT INTO items VALUES
