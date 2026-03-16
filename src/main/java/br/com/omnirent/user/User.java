@@ -51,6 +51,15 @@ public class User extends NamedEntity implements UserDetails {
 	@OneToMany(mappedBy = "renter")
 	private List<Rental> rented;
 	
+	public User update(UserRequestDTO userDTO) {
+		this.name = userDTO.name();
+		this.username = userDTO.username();
+		this.email = userDTO.email();
+		this.birthDate = userDTO.birthDate();
+		
+		return this;
+	}
+	
 	@PrePersist
 	public void onCreate() {
 		setUserStatus(UserStatus.ACTIVE);
