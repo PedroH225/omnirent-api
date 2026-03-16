@@ -1,8 +1,8 @@
 -- USERS
 INSERT INTO users VALUES
-('ab6c0937-17ac-434e-80dd-c8b581d55935','Pedro Alves','pedro','pedro@email.com','hash123','1998-05-10','ACTIVE',NOW(),NOW()),
-('d101df10-ca1d-446a-a897-8ffed7950acb','Maria Costa','maria','maria@email.com','hash123','1995-03-22','ACTIVE',NOW(),NOW()),
-('966fc885-5107-4466-aa9a-ab7366e56fab','Lucas Lima','lucas','lucas@email.com','hash123','1992-11-01','ACTIVE',NOW(),NOW());
+('ab6c0937-17ac-434e-80dd-c8b581d55935','Pedro Alves','pedro','pedro@email.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1998-05-10','ACTIVE',NOW(),NOW()),
+('d101df10-ca1d-446a-a897-8ffed7950acb','Maria Costa','maria','maria@email.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1995-03-22','ACTIVE',NOW(),NOW()),
+('966fc885-5107-4466-aa9a-ab7366e56fab','Lucas Lima','lucas','lucas@email.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1992-11-01','ACTIVE',NOW(),NOW());
 
 
 -- CATEGORIES
