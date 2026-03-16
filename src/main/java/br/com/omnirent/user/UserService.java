@@ -1,5 +1,6 @@
 package br.com.omnirent.user;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -20,5 +21,9 @@ public class UserService {
 		}
 		
 		return user.get();
+	}
+
+	public List<UserResponseDTO> findAll() {
+		return UserMapper.toDto(userRepository.findAll());
 	}
 }
