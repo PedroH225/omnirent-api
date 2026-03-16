@@ -22,8 +22,14 @@ public class UserService {
 		
 		return user.get();
 	}
+	
+	public UserDetailsDTO getUserDetailsById(String id) {
+		return UserMapper.toDetailsDto(findById(id));
+	}
 
 	public List<UserResponseDTO> findAll() {
 		return UserMapper.toDto(userRepository.findAll());
 	}
+	
+
 }

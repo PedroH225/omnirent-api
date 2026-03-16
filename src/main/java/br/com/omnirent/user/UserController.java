@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.omnirent.security.SecurityUtils;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -20,8 +21,9 @@ public class UserController {
 	public List<UserResponseDTO> findAll() {
 		return userService.findAll();
 	}
-	@GetMapping("/find/{id}")
-	public User findById(@PathVariable String id) {
-		return userService.findById(id);
+	
+	@GetMapping("/find")
+	public UserDetailsDTO findById() {
+		return userService.getUserDetailsById(SecurityUtils.currentUserId());
 	}
 }
