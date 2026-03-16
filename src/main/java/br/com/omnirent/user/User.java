@@ -43,13 +43,40 @@ public class User extends NamedEntity implements UserDetails {
 	private UserStatus userStatus;
 	
 	@OneToMany(mappedBy = "user")
-	private List<Address> adresses;
+	private List<Address> addresses;
 	
 	@OneToMany(mappedBy = "owner")
 	private List<Item> items;
 	
 	@OneToMany(mappedBy = "renter")
 	private List<Rental> rented;
+	
+	public User update(UserRequestDTO userDTO) {
+		this.name = userDTO.name();
+		this.username = userDTO.username();
+		this.email = userDTO.email();
+		this.birthDate = userDTO.birthDate();
+		
+		return this;
+	}
+	
+	public User deactivate() {
+		if (this.userStatus == UserStatus.BANNED) {
+			throw new RuntimeException("User is banned.");
+		}
+		
+		this.userStatus = UserStatus.INACTIVE;
+		return this;
+	}
+	
+	public User activate() {
+		if (this.userStatus == UserStatus.BANNED) {
+			throw new RuntimeException("User is banned.");
+		}
+		
+		this.userStatus = UserStatus.ACTIVE;
+		return this;
+	}
 	
 	@PrePersist
 	public void onCreate() {
@@ -71,6 +98,10 @@ public class User extends NamedEntity implements UserDetails {
 	@Override
 	public String getUsername() {
 		return email;
+	}
+	
+	public String getDisplayUsername() {
+		return username;
 	}
 	
 	@Override
