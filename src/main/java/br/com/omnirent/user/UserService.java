@@ -39,4 +39,17 @@ public class UserService {
 		
 		return UserMapper.toDetailsDto(updatedUser);
 	}
+
+	public void deactivateUser(String userId) {
+		User user = findById(userId);
+		
+		userRepository.save(user.deactivate());
+		
+	}
+
+	public void activateUser(String userId) {
+		User user = findById(userId);
+		
+		userRepository.save(user.activate());		
+	}
 }

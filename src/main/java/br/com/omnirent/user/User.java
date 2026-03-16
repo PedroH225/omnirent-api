@@ -60,6 +60,24 @@ public class User extends NamedEntity implements UserDetails {
 		return this;
 	}
 	
+	public User deactivate() {
+		if (this.userStatus == UserStatus.BANNED) {
+			throw new RuntimeException("User is banned.");
+		}
+		
+		this.userStatus = UserStatus.INACTIVE;
+		return this;
+	}
+	
+	public User activate() {
+		if (this.userStatus == UserStatus.BANNED) {
+			throw new RuntimeException("User is banned.");
+		}
+		
+		this.userStatus = UserStatus.ACTIVE;
+		return this;
+	}
+	
 	@PrePersist
 	public void onCreate() {
 		setUserStatus(UserStatus.ACTIVE);
