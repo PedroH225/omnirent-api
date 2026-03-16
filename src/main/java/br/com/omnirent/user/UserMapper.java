@@ -14,4 +14,9 @@ public class UserMapper {
 		UserResponseDTO userDTO = new UserResponseDTO(user);
 		return userDTO;
 	}
+	
+	public static UserDetailsDTO toDetailsDto(User user) {
+		UserDetailsDTO userDTO = new UserDetailsDTO(user);
+		return userDTO;
+	}
 }
