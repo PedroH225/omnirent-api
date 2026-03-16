@@ -43,7 +43,7 @@ public class User extends NamedEntity implements UserDetails {
 	private UserStatus userStatus;
 	
 	@OneToMany(mappedBy = "user")
-	private List<Address> adresses;
+	private List<Address> addresses;
 	
 	@OneToMany(mappedBy = "owner")
 	private List<Item> items;
