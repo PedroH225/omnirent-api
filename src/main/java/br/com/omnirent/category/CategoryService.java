@@ -34,4 +34,16 @@ public class CategoryService {
 		return subCategory.get();
 	}
 	
+	public CategoryResponseDTO getCategoryById(String id) {
+		Category category = findById(id);
+		
+		return CategoryMapper.toDto(category);
+ 	}
+	
+	public SubCategoryResDTO getSubCategoryById(String id) {
+		SubCategory subCategory = findSubById(id);
+		
+		return CategoryMapper.toSubDto(subCategory);
+ 	}
+	
 }

@@ -15,13 +15,13 @@ public class CategoryController {
 	private CategoryService categoryService;
 		
 	@GetMapping("/find/{id}")
-	public Category findById(@PathVariable String id) {
-		return categoryService.findById(id);
+	public CategoryResponseDTO findById(@PathVariable String id) {
+		return categoryService.getCategoryById(id);
 	}
 	
 	@GetMapping("/findSub/{id}")
-	public SubCategory findSubById(@PathVariable String id) {
-		return categoryService.findSubById(id);
+	public SubCategoryResDTO findSubById(@PathVariable String id) {
+		return categoryService.getSubCategoryById(id);
 	}
 	
 }
