@@ -1,5 +1,6 @@
 package br.com.omnirent.category;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -45,5 +46,13 @@ public class CategoryService {
 		
 		return CategoryMapper.toSubDto(subCategory);
  	}
+
+	public List<CategoryResponseDTO> findAll() {
+		return CategoryMapper.toDto(categoryRepository.findAll());
+	}
+	
+	public List<SubCategoryResDTO> findAllSub() {
+		return CategoryMapper.toSubDto(subRepository.findAll());
+	}
 	
 }
