@@ -35,5 +35,10 @@ public class Address extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User user;
+	
+	public void addUser(User user) {
+		setUser(user);
+		user.getAddresses().add(this);
+	}
 
 }

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserService;
 import lombok.AllArgsConstructor;
 
@@ -31,4 +32,15 @@ public class AddressService {
 		
 		return AddressMapper.toDto(userAddresses);
 	}
+
+	public AddressResponseDTO addAddress(AddressRequestDTO addressDto, String userId) {
+		User user = userService.findById(userId);
+		
+		Address address = AddressMapper.fromAddressDTO(addressDto);
+		
+		address.addUser(user);
+				
+		return AddressMapper.toDto(addressRepository.save(address));
+	}
+	
 }
