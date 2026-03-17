@@ -43,4 +43,12 @@ public class AddressService {
 		return AddressMapper.toDto(addressRepository.save(address));
 	}
 	
+	public AddressResponseDTO updateAddress(AddressRequestDTO addressDTO) {
+		Address address = findById(addressDTO.id());
+		
+		address.updateFields(addressDTO);
+		
+		return AddressMapper.toDto(addressRepository.save(address));
+	}
+	
 }
