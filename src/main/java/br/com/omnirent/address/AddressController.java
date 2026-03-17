@@ -2,6 +2,7 @@ package br.com.omnirent.address;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +39,11 @@ public class AddressController {
 	@PutMapping
 	public AddressResponseDTO updateAddress(@RequestBody AddressRequestDTO addressDto) {
 		return addressService.updateAddress(addressDto);
+	}
+	
+	@DeleteMapping("/{addressId}")
+	public void deleteAddress(@PathVariable String addressId) {
+		addressService.deleteAddress(addressId);
 	}
 	
 }

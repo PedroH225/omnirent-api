@@ -51,4 +51,9 @@ public class AddressService {
 		return AddressMapper.toDto(addressRepository.save(address));
 	}
 	
+	public void deleteAddress(String addressId) {
+		Address address = findById(addressId);
+		addressRepository.delete(address);
+	}
+	
 }
