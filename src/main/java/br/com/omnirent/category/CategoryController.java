@@ -36,4 +36,9 @@ public class CategoryController {
 		return categoryService.getSubCategoryById(id);
 	}
 	
+	@GetMapping("/findSubsByCategory/{categoryName}")
+	public List<SubCategoryResDTO> findSubsByCategory(@PathVariable String categoryName) {
+		return categoryService.findSubsByCategory(categoryName);
+	}
+	
 }
