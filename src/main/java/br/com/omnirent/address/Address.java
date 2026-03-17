@@ -16,6 +16,7 @@ import lombok.EqualsAndHashCode;
 public class Address extends BaseEntity {
 	private static final long serialVersionUID = 1L;
 	
+	
 	private String street;
 
 	private String number;
@@ -35,5 +36,21 @@ public class Address extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User user;
+	
+	public void addUser(User user) {
+		setUser(user);
+		user.getAddresses().add(this);
+	}
+	
+	public void updateFields(AddressRequestDTO addressDTO) {
+	    this.street = addressDTO.street();
+	    this.number = addressDTO.number();
+	    this.complement = addressDTO.complement();
+	    this.district = addressDTO.district();
+	    this.city = addressDTO.city();
+	    this.state = addressDTO.state();
+	    this.country = addressDTO.country();
+	    this.zipCode = addressDTO.zipCode();
+	}
 
 }
