@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.security.SecurityUtils;
 import lombok.AllArgsConstructor;
 
@@ -29,6 +30,11 @@ public class ItemController {
 	@GetMapping("/find/user")
 	public List<ItemResponseDTO> findUserItems() {
 		return itemService.getUserItems(SecurityUtils.currentUserId());
+	}
+	
+	@GetMapping("/enums")
+	public ItemEnums getEnums() {
+		return new ItemEnums();
 	}
 	
 	@PostMapping
