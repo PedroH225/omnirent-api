@@ -31,6 +31,8 @@ public class ItemResponseDTO {
 	
 	private String itemCondition;
 	
+	private String itemStatus;
+	
 	private SubCategoryResDTO subCategory;
 	
 	private AddressResponseDTO pickupAddress;
@@ -52,6 +54,7 @@ public class ItemResponseDTO {
 	    this.description = item.getDescription();
 	    this.basePrice = item.getBasePrice();
 	    this.itemCondition = item.getItemCondition().toString();
+	    this.itemStatus = item.getItemStatus().toString();
 	
 	    this.subCategory = CategoryMapper.toSubDto(item.getSubCategory());
 	    this.pickupAddress = AddressMapper.toDto(item.getPickupAdress());

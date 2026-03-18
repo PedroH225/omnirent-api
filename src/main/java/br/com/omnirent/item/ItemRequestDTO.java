@@ -10,6 +10,7 @@ public record ItemRequestDTO(
 		String description,
 		BigDecimal basePrice,
 		String itemCondition,
+		String itemStatus,
 		String subCategoryId,
 		String addressId
 		) {}

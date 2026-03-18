@@ -7,6 +7,7 @@ import br.com.omnirent.address.Address;
 import br.com.omnirent.category.SubCategory;
 import br.com.omnirent.common.NamedEntity;
 import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.rental.Rental;
 import br.com.omnirent.user.User;
 import jakarta.persistence.CascadeType;
@@ -16,6 +17,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -37,6 +39,9 @@ public class Item extends NamedEntity {
 	
 	@Enumerated(EnumType.STRING)
 	private ItemCondition itemCondition;
+	
+	@Enumerated(EnumType.STRING)
+	private ItemStatus itemStatus;
 	
 	@ManyToOne
 	@JoinColumn(name = "sub_category_id")

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import br.com.omnirent.address.Address;
 import br.com.omnirent.category.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.ItemStatus;
 
 public class ItemMapper {
 
@@ -28,6 +29,7 @@ public class ItemMapper {
 		item.setDescription(itemDTO.description());
 		item.setBasePrice(itemDTO.basePrice());
 		item.setItemCondition(ItemCondition.fromString(itemDTO.itemCondition()));
+		item.setItemStatus(ItemStatus.fromString(itemDTO.itemStatus()));
 		
 		return item;
 	}
@@ -39,6 +41,7 @@ public class ItemMapper {
 		item.setDescription(itemDTO.description());
 		item.setBasePrice(itemDTO.basePrice());
 		item.setItemCondition(ItemCondition.fromString(itemDTO.itemCondition()));
+		item.setItemStatus(ItemStatus.fromString(itemDTO.itemStatus()));
 		
 		if (address != null) {
 			item.setPickupAdress(address);
