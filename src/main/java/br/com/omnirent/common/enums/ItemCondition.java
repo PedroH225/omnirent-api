@@ -13,6 +13,15 @@ public enum ItemCondition {
 		this.itemCondition = itemCondition;
 	}
 	
+	public static ItemCondition fromString(String text) {
+        for (ItemCondition itemCondition : ItemCondition.values()) {
+            if (itemCondition.itemCondition.equalsIgnoreCase(text)) {
+                return itemCondition;
+            }
+        }
+        throw new IllegalArgumentException("Item condition enumaration not found: " + text);
+    }
+	
 	@Override
 	public String toString() {
 		return this.itemCondition;
