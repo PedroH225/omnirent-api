@@ -3,6 +3,7 @@ package br.com.omnirent.item;
 import java.math.BigDecimal;
 
 public record ItemRequestDTO(
+		String id,
 		String name,
 		String model,
 		String brand,

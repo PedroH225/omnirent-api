@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,5 +33,10 @@ public class ItemController {
 	@PostMapping
 	public ItemResponseDTO addItem(@RequestBody ItemRequestDTO itemDTO) {
 		return itemService.addItem(itemDTO, SecurityUtils.currentUserId());
+	}
+	
+	@PutMapping
+	public ItemResponseDTO updateItem(@RequestBody ItemRequestDTO itemDTO) {
+		return itemService.updateItem(itemDTO, SecurityUtils.currentUserId());
 	}
 }
