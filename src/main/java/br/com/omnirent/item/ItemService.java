@@ -10,6 +10,7 @@ import br.com.omnirent.address.Address;
 import br.com.omnirent.address.AddressService;
 import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.SubCategory;
+import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserService;
 import jakarta.transaction.Transactional;
@@ -78,6 +79,15 @@ public class ItemService {
 		
 		return ItemMapper.toDto(itemRepository.save(updatedItem));
 
+	}
+
+	@Transactional
+	public ItemResponseDTO updateStatus(String itemId, String itemStatusStr) {
+		Item item = findById(itemId);
+		
+		item.updateItemStatus(itemStatusStr);
+		
+		return ItemMapper.toDto(itemRepository.save(item));
 	}
 	
 }

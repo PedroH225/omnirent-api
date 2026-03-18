@@ -57,4 +57,8 @@ public class Item extends NamedEntity {
 	
 	@OneToMany(mappedBy = "item")
 	private List<Rental> rentals;
+	
+	public void updateItemStatus(String status) {
+	    this.itemStatus = ItemStatus.fromString(status);
+	}
 }

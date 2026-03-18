@@ -3,6 +3,7 @@ package br.com.omnirent.item;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -38,5 +39,10 @@ public class ItemController {
 	@PutMapping
 	public ItemResponseDTO updateItem(@RequestBody ItemRequestDTO itemDTO) {
 		return itemService.updateItem(itemDTO, SecurityUtils.currentUserId());
+	}
+	
+	@PatchMapping("/updateStatus/{itemId}/{itemStatus}")
+	public ItemResponseDTO updateStatus(@PathVariable String itemId ,@PathVariable String itemStatus) {
+		return itemService.updateStatus(itemId, itemStatus);
 	}
 }
