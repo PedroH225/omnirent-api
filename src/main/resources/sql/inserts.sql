@@ -31,7 +31,7 @@ INSERT INTO addresses VALUES
 -- ITEMS
 INSERT INTO items VALUES
 ('9ec286a9-f11b-406a-87f5-956b612fb0cb','Canon T6 Camera','Canon','T6','DSLR camera for photography',80.00,'GOOD','eba0769d-36fc-4d36-899f-65d12342d74e','ab6c0937-17ac-434e-80dd-c8b581d55935','b64ea00e-53ca-4015-85db-c26629e3cda0',NOW(),NOW()),
-('2e6fbb11-bbdf-426c-85d7-4ac0d52e81b2','Professional Tripod','Manfrotto','MK190XPRO4','Aluminum tripod',25.00,'EXCELLENT','47c5e3d5-5e5e-4bc2-a5b0-214f5835939b','ab6c0937-17ac-434e-80dd-c8b581d55935','b64ea00e-53ca-4015-85db-c26629e3cda0',NOW(),NOW()),
+('2e6fbb11-bbdf-426c-85d7-4ac0d52e81b2','Professional Tripod','Manfrotto','MK190XPRO4','Aluminum tripod',25.00,'LIKE_NEW','47c5e3d5-5e5e-4bc2-a5b0-214f5835939b','ab6c0937-17ac-434e-80dd-c8b581d55935','b64ea00e-53ca-4015-85db-c26629e3cda0',NOW(),NOW()),
 ('efbeb34f-203b-4609-826f-ef49ffdb9c20','Dell XPS 15','Dell','9520','High performance laptop',120.00,'GOOD','0f956f80-aa28-4b6f-80a2-9dfc65609c2e','d101df10-ca1d-446a-a897-8ffed7950acb','a2f78f3c-b290-4573-b56a-311e4ecd2183',NOW(),NOW());
 
 -- RENTALS
