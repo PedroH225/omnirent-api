@@ -1,9 +1,12 @@
 package br.com.omnirent.item;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.user.User;
+import br.com.omnirent.user.UserService;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -11,6 +14,8 @@ import lombok.AllArgsConstructor;
 public class ItemService {
 
 	private ItemRepository itemRepository;
+	
+	private UserService userService;
 	
 	public Item findById(String id) {
 		Optional<Item> item = itemRepository.findById(id);
@@ -24,6 +29,12 @@ public class ItemService {
 	
 	public ItemResponseDTO getItemById(String id) {
 		return ItemMapper.toDto(findById(id));
+	}
+
+	public List<ItemResponseDTO> getUserItems(String userId) {
+		User user = userService.findById(userId);
+		
+		return ItemMapper.toDto(user.getItems());
 	}
 	
 }
