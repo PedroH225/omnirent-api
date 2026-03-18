@@ -15,8 +15,8 @@ public class ItemController {
 	private ItemService itemService;
 	
 	@GetMapping("/find/{id}")
-	public Item findById(@PathVariable String id) {
-		return itemService.findById(id);
+	public ItemResponseDTO findById(@PathVariable String id) {
+		return itemService.getItemById(id);
 	}
 	
 }

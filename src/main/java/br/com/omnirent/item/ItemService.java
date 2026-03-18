@@ -21,4 +21,9 @@ public class ItemService {
 		
 		return item.get();
 	}
+	
+	public ItemResponseDTO getItemById(String id) {
+		return ItemMapper.toDto(findById(id));
+	}
+	
 }
