@@ -55,9 +55,6 @@ public class Item extends NamedEntity {
 	@JoinColumn(name = "owner_id")
 	private User owner;
 	
-	@OneToMany(mappedBy = "item")
-	private List<Rental> rentals;
-	
 	public void updateItemStatus(String status) {
 	    this.itemStatus = ItemStatus.fromString(status);
 	}
