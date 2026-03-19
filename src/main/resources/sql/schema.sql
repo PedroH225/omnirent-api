@@ -127,12 +127,18 @@ CREATE TABLE IF NOT EXISTS `rentals` (
   `end_date` DATETIME NOT NULL,
   `final_price` DECIMAL(10,2) NOT NULL,
   `renter_id` CHAR(36) NOT NULL,
+  `owner_id` CHAR(36) NOT NULL,
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `idx_rentals_renter` (`renter_id`),
   CONSTRAINT `fk_rentals_renter`
     FOREIGN KEY (`renter_id`)
+    REFERENCES `users` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_rentals_owner`
+    FOREIGN KEY (`owner_id`)
     REFERENCES `users` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION

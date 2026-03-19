@@ -51,6 +51,9 @@ public class User extends NamedEntity implements UserDetails {
 	@OneToMany(mappedBy = "renter")
 	private List<Rental> rented;
 	
+	@OneToMany(mappedBy = "owner")
+	private List<Rental> rentals;
+	
 	public User update(UserRequestDTO userDTO) {
 		this.name = userDTO.name();
 		this.username = userDTO.username();

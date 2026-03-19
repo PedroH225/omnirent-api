@@ -45,6 +45,10 @@ public class Rental extends BaseEntity {
 	@JoinColumn(name = "renter_id")
 	private User renter;
 	
+	@ManyToOne
+	@JoinColumn(name = "owner_id")
+	private User owner;
+	
 	@OneToOne(mappedBy = "rental", cascade = CascadeType.ALL, orphanRemoval = true)
 	private ItemSnapshot itemSnapshot;
 	
