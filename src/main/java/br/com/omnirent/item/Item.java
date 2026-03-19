@@ -11,6 +11,7 @@ import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.rental.Rental;
 import br.com.omnirent.user.User;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -29,19 +30,8 @@ import lombok.EqualsAndHashCode;
 public class Item extends NamedEntity {
 	private static final long serialVersionUID = 1L;
 	
-	private String brand;
-
-	private String model;
-
-	private String description;
-
-	private BigDecimal basePrice;
-	
-	@Enumerated(EnumType.STRING)
-	private ItemCondition itemCondition;
-	
-	@Enumerated(EnumType.STRING)
-	private ItemStatus itemStatus;
+	@Embedded
+	private ItemData itemData;
 	
 	@ManyToOne
 	@JoinColumn(name = "sub_category_id")
@@ -56,6 +46,6 @@ public class Item extends NamedEntity {
 	private User owner;
 	
 	public void updateItemStatus(String status) {
-	    this.itemStatus = ItemStatus.fromString(status);
+	    this.itemData.setItemStatus(ItemStatus.fromString(status));
 	}
 }
