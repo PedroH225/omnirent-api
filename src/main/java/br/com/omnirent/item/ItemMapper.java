@@ -7,6 +7,7 @@ import br.com.omnirent.address.Address;
 import br.com.omnirent.category.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.rental.Rental;
 
 public class ItemMapper {
 
@@ -50,6 +51,14 @@ public class ItemMapper {
 		if (subCategory != null) {
 			item.setSubCategory(subCategory);
 		}
+	}
+	
+	public ItemSnapshot fromItem(Item item, Rental rental) {
+		ItemSnapshot itemSnapshot = new ItemSnapshot(item);
+		
+		itemSnapshot.setRental(rental);
+		
+		return itemSnapshot;
 	}
 	
 }
