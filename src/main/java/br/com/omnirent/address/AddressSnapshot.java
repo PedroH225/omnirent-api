@@ -1,6 +1,7 @@
 package br.com.omnirent.address;
 
 import br.com.omnirent.rental.Rental;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -17,21 +18,8 @@ public class AddressSnapshot {
 	@Id
 	private String rentalId;
 	
-	private String street;
-
-	private String number;
-
-	private String complement;
-	
-	private String district;
-	
-	private String city;
-
-	private String state;
-
-	private String country;
-
-	private String zipCode;
+	@Embedded
+	private AddressData addressData;
 	
 	@MapsId
 	@OneToOne
@@ -39,15 +27,6 @@ public class AddressSnapshot {
 	private Rental rental;
 
 	public AddressSnapshot(Address address) {
-		this.street = address.getStreet();
-		this.number = address.getNumber();
-		this.complement = address.getComplement();
-		this.district = address.getDistrict();
-		this.city = address.getCity();
-		this.state = address.getState();
-		this.country = address.getCountry();
-		this.zipCode = address.getZipCode();
+		this.addressData = address.getAddressData();
 	}
-	
-	
 }
