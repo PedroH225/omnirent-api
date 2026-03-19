@@ -3,6 +3,8 @@ package br.com.omnirent.address;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import br.com.omnirent.rental.Rental;
+
 public class AddressMapper {
 
 	public static List<AddressResponseDTO> toDto(List<Address> addresses) {
@@ -27,5 +29,13 @@ public class AddressMapper {
 		address.setCountry(addressDTO.country());
 		address.setZipCode(addressDTO.zipCode());
 		return address;
+	}
+	
+	public static AddressSnapshot fromAddress(Address address, Rental rental) {
+		AddressSnapshot addressSnapshot = new AddressSnapshot(address);
+		
+		addressSnapshot.setRental(rental);
+		
+		return addressSnapshot;
 	}
 }
