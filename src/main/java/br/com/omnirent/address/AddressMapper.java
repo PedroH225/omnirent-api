@@ -20,14 +20,10 @@ public class AddressMapper {
 	public static Address fromAddressDTO(AddressRequestDTO addressDTO) {
 		Address address = new Address();
 		
-		address.setStreet(addressDTO.street());
-		address.setNumber(addressDTO.number());
-		address.setComplement(addressDTO.complement());
-		address.setDistrict(addressDTO.district());
-		address.setCity(addressDTO.city());
-		address.setState(addressDTO.state());
-		address.setCountry(addressDTO.country());
-		address.setZipCode(addressDTO.zipCode());
+		AddressData addressData = new AddressData(addressDTO);
+		
+		address.setAddressData(addressData);
+		
 		return address;
 	}
 	
