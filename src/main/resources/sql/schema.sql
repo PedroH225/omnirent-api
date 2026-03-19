@@ -89,6 +89,7 @@ CREATE TABLE IF NOT EXISTS `items` (
   `description` LONGTEXT NULL,
   `base_price` DECIMAL(10,2) NOT NULL,
   `item_condition` VARCHAR(20) NOT NULL,
+  `item_status` VARCHAR(20) NOT NULL,
   `sub_category_id` CHAR(36) NOT NULL,
   `owner_id` CHAR(36) NOT NULL,
   `pickup_address_id` CHAR(36) NOT NULL,
@@ -125,21 +126,30 @@ CREATE TABLE IF NOT EXISTS `rentals` (
   `start_date` DATETIME NOT NULL,
   `end_date` DATETIME NOT NULL,
   `final_price` DECIMAL(10,2) NOT NULL,
-  `item_id` CHAR(36) NOT NULL,
   `renter_id` CHAR(36) NOT NULL,
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `idx_rentals_item` (`item_id`),
   INDEX `idx_rentals_renter` (`renter_id`),
-  CONSTRAINT `fk_rentals_item`
-    FOREIGN KEY (`item_id`)
-    REFERENCES `items` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
   CONSTRAINT `fk_rentals_renter`
     FOREIGN KEY (`renter_id`)
     REFERENCES `users` (`id`)
     ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS `item_snapshots` (
+  `rental_id` CHAR(36) NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `brand` VARCHAR(50) NOT NULL,
+  `model` VARCHAR(50) NOT NULL,
+  `base_price` DECIMAL(10,2) NOT NULL,
+  `item_condition` VARCHAR(20) NOT NULL,
+  `sub_category_name` VARCHAR(100) NOT NULL,
+  PRIMARY KEY (`rental_id`),
+  CONSTRAINT `fk_item_snapshot_rental`
+    FOREIGN KEY (`rental_id`)
+    REFERENCES `rentals` (`id`)
+    ON DELETE CASCADE
     ON UPDATE NO ACTION
 ) ENGINE=InnoDB;
