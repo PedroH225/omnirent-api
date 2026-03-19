@@ -2,6 +2,7 @@ package br.com.omnirent.address;
 
 import br.com.omnirent.common.BaseEntity;
 import br.com.omnirent.user.User;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -16,22 +17,8 @@ import lombok.EqualsAndHashCode;
 public class Address extends BaseEntity {
 	private static final long serialVersionUID = 1L;
 	
-	
-	private String street;
-
-	private String number;
-
-	private String complement;
-	
-	private String district;
-	
-	private String city;
-
-	private String state;
-
-	private String country;
-
-	private String zipCode;
+	@Embedded
+	private AddressData addressData;
 	
 	@ManyToOne
 	@JoinColumn(name = "user_id")
@@ -43,14 +30,7 @@ public class Address extends BaseEntity {
 	}
 	
 	public void updateFields(AddressRequestDTO addressDTO) {
-	    this.street = addressDTO.street();
-	    this.number = addressDTO.number();
-	    this.complement = addressDTO.complement();
-	    this.district = addressDTO.district();
-	    this.city = addressDTO.city();
-	    this.state = addressDTO.state();
-	    this.country = addressDTO.country();
-	    this.zipCode = addressDTO.zipCode();
+	    this.addressData = new AddressData(addressDTO);
 	}
 
 }
