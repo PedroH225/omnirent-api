@@ -138,6 +138,25 @@ CREATE TABLE IF NOT EXISTS `rentals` (
     ON UPDATE NO ACTION
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS `address_snapshots` (
+  `rental_id` CHAR(36) NOT NULL,
+  `street` VARCHAR(120) NOT NULL,
+  `number` VARCHAR(20) NOT NULL,
+  `complement` VARCHAR(80) NULL,
+  `district` VARCHAR(80) NOT NULL,
+  `city` VARCHAR(80) NOT NULL,
+  `state` VARCHAR(40) NOT NULL,
+  `country` VARCHAR(40) NOT NULL,
+  `zip_code` VARCHAR(20) NOT NULL,
+  PRIMARY KEY (`rental_id`),
+  INDEX `idx_addresses_snapshot_city` (`city`),
+  CONSTRAINT `fk_addresses_snapshot_rental`
+    FOREIGN KEY (`rental_id`)
+    REFERENCES `rentals` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS `item_snapshots` (
   `rental_id` CHAR(36) NOT NULL,
   `name` VARCHAR(100) NOT NULL,
