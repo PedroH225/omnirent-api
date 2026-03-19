@@ -8,7 +8,6 @@ import lombok.Data;
 
 @Data
 public class AddressResponseDTO {
-	private static final long serialVersionUID = 1L;
 	
 	private String id;
 	
@@ -37,14 +36,17 @@ public class AddressResponseDTO {
 	
 	public AddressResponseDTO(Address address) {
 	    this.id = address.getId();
-	    this.street = address.getStreet();
-	    this.number = address.getNumber();
-	    this.complement = address.getComplement();
-	    this.district = address.getDistrict();
-	    this.city = address.getCity();
-	    this.state = address.getState();
-	    this.country = address.getCountry();
-	    this.zipCode = address.getZipCode();
+	    
+	    AddressData addressData = address.getAddressData();
+	    
+	    this.street = addressData.getStreet();
+	    this.number = addressData.getNumber();
+	    this.complement = addressData.getComplement();
+	    this.district = addressData.getDistrict();
+	    this.city = addressData.getCity();
+	    this.state = addressData.getState();
+	    this.country = addressData.getCountry();
+	    this.zipCode = addressData.getZipCode();
 
 	    this.createdAt = dtf.format(address.getCreatedAt());
 	    this.updatedAt = dtf.format(address.getUpdatedAt());
