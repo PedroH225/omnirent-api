@@ -40,10 +40,13 @@ public class ItemSnapshot {
 
 	public ItemSnapshot(Item item) {
 		this.name = item.getName();
-		this.brand = item.getBrand();
-		this.model = item.getModel();
-		this.basePrice = item.getBasePrice();
-		this.itemCondition = item.getItemCondition().toString();
+		
+		ItemData itemData = item.getItemData();
+		
+		this.brand = itemData.getBrand();
+		this.model = itemData.getModel();
+		this.basePrice = itemData.getBasePrice();
+		this.itemCondition = itemData.getItemCondition().toString();
 		this.subCategoryName = item.getSubCategory().getName();
 	}
 	

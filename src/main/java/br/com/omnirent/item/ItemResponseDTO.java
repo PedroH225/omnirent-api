@@ -49,12 +49,15 @@ public class ItemResponseDTO {
 	public ItemResponseDTO(Item item) {
 	    this.id = item.getId();
 	    this.name = item.getName();
-	    this.brand = item.getBrand();
-	    this.model = item.getModel();
-	    this.description = item.getDescription();
-	    this.basePrice = item.getBasePrice();
-	    this.itemCondition = item.getItemCondition().toString();
-	    this.itemStatus = item.getItemStatus().toString();
+	    
+	    ItemData itemData = item.getItemData();
+	    
+	    this.brand = itemData.getBrand();
+	    this.model = itemData.getModel();
+	    this.description = itemData.getDescription();
+	    this.basePrice = itemData.getBasePrice();
+	    this.itemCondition = itemData.getItemCondition().toString();
+	    this.itemStatus = itemData.getItemStatus().toString();
 	
 	    this.subCategory = CategoryMapper.toSubDto(item.getSubCategory());
 	    this.pickupAddress = AddressMapper.toDto(item.getPickupAdress());

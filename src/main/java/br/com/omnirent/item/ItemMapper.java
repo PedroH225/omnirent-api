@@ -25,24 +25,20 @@ public class ItemMapper {
 		Item item = new Item();
 		
 		item.setName(itemDTO.name());
-		item.setModel(itemDTO.model());
-		item.setBrand(itemDTO.brand());
-		item.setDescription(itemDTO.description());
-		item.setBasePrice(itemDTO.basePrice());
-		item.setItemCondition(ItemCondition.fromString(itemDTO.itemCondition()));
-		item.setItemStatus(ItemStatus.fromString(itemDTO.itemStatus()));
+		
+		ItemData itemData = new ItemData(itemDTO);
+		
+		item.setItemData(itemData);
 		
 		return item;
 	}
 	
 	public static void updateItem(ItemRequestDTO itemDTO, Address address, SubCategory subCategory, Item item) {		
 		item.setName(itemDTO.name());
-		item.setModel(itemDTO.model());
-		item.setBrand(itemDTO.brand());
-		item.setDescription(itemDTO.description());
-		item.setBasePrice(itemDTO.basePrice());
-		item.setItemCondition(ItemCondition.fromString(itemDTO.itemCondition()));
-		item.setItemStatus(ItemStatus.fromString(itemDTO.itemStatus()));
+		
+		ItemData itemData = new ItemData(itemDTO);
+		
+		item.setItemData(itemData);
 		
 		if (address != null) {
 			item.setPickupAdress(address);
