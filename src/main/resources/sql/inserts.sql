@@ -39,11 +39,15 @@ INSERT INTO items VALUES
 -- =========================
 INSERT INTO rentals VALUES
 ('5f54c279-9ad6-40c2-8a32-22216d48ca39','ACTIVE','DAILY','2026-03-10 10:00:00','2026-03-12 10:00:00',160.00,'d101df10-ca1d-446a-a897-8ffed7950acb','ab6c0937-17ac-434e-80dd-c8b581d55935',NOW(),NOW()),
-('b24fca5b-648a-44e2-ba89-2223d8ab57b0','FINISHED','DAILY','2026-02-01 09:00:00','2026-02-03 09:00:00',240.00,'ab6c0937-17ac-434e-80dd-c8b581d55935','d101df10-ca1d-446a-a897-8ffed7950acb',NOW(),NOW());
+('b24fca5b-648a-44e2-ba89-2223d8ab57b0','RETURNED','DAILY','2026-02-01 09:00:00','2026-02-03 09:00:00',240.00,'ab6c0937-17ac-434e-80dd-c8b581d55935','d101df10-ca1d-446a-a897-8ffed7950acb',NOW(),NOW());
 
 -- =========================
 -- ITEM SNAPSHOTS
 -- =========================
 INSERT INTO item_snapshots VALUES
-('5f54c279-9ad6-40c2-8a32-22216d48ca39','Canon T6 Camera','Canon','T6',80.00,'GOOD','Camera'),
-('b24fca5b-648a-44e2-ba89-2223d8ab57b0','Dell XPS 15','Dell','9520',120.00,'GOOD','Laptop');
+('5f54c279-9ad6-40c2-8a32-22216d48ca39','Canon T6 Camera','Canon','T6', 'DSLR camera for photography', 80.00,'GOOD','Camera'),
+('b24fca5b-648a-44e2-ba89-2223d8ab57b0','Dell XPS 15','Dell','9520', 'High performance laptop',120.00,'GOOD','Laptop');
+
+INSERT INTO address_snapshots VALUES
+('5f54c279-9ad6-40c2-8a32-22216d48ca39','Rua das Flores','123',NULL,'Centro','São Paulo','SP','Brasil','01001-000'),
+('b24fca5b-648a-44e2-ba89-2223d8ab57b0','Av. Paulista','1578','Apto 42','Bela Vista','São Paulo','SP','Brasil','01310-200');
