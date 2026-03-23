@@ -33,6 +33,9 @@ public class Item extends NamedEntity {
 	@Embedded
 	private ItemData itemData;
 	
+	@Enumerated(EnumType.STRING)
+	public ItemStatus itemStatus;
+	
 	@ManyToOne
 	@JoinColumn(name = "sub_category_id")
 	private SubCategory subCategory;
@@ -46,6 +49,6 @@ public class Item extends NamedEntity {
 	private User owner;
 	
 	public void updateItemStatus(String status) {
-	    this.itemData.setItemStatus(ItemStatus.fromString(status));
+	    setItemStatus(ItemStatus.fromString(status));
 	}
 }

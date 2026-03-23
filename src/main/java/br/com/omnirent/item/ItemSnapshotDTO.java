@@ -19,14 +19,18 @@ public class ItemSnapshotDTO {
 	
 	private String itemCondition;
 	
-	private String subCategoryName;
-	
+	private String description;
+		
 	public ItemSnapshotDTO(ItemSnapshot item) {
+		this.rentalId = item.getRentalId();
 		this.name = item.getName();
-		this.brand = item.getBrand();
-		this.model = item.getModel();
-		this.basePrice = item.getBasePrice();
-		this.itemCondition = item.getItemCondition();
-		this.subCategoryName = item.getSubCategoryName();
+		
+		ItemData itemData = item.getItemData();
+		
+		this.brand = itemData.getBrand();
+		this.model = itemData.getModel();
+		this.description = itemData.getDescription();
+		this.basePrice = itemData.getBasePrice();
+		this.itemCondition = itemData.getItemCondition().toString();
 	}
 }

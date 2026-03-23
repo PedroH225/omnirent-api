@@ -57,8 +57,8 @@ public class ItemResponseDTO {
 	    this.description = itemData.getDescription();
 	    this.basePrice = itemData.getBasePrice();
 	    this.itemCondition = itemData.getItemCondition().toString();
-	    this.itemStatus = itemData.getItemStatus().toString();
-	
+	    
+	    this.itemStatus = item.getItemStatus().toString();
 	    this.subCategory = CategoryMapper.toSubDto(item.getSubCategory());
 	    this.pickupAddress = AddressMapper.toDto(item.getPickupAdress());
 	    this.owner = UserMapper.toDto(item.getOwner());

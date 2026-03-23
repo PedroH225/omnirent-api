@@ -168,6 +168,7 @@ CREATE TABLE IF NOT EXISTS `item_snapshots` (
   `name` VARCHAR(100) NOT NULL,
   `brand` VARCHAR(50) NOT NULL,
   `model` VARCHAR(50) NOT NULL,
+  `description` LONGTEXT NULL,
   `base_price` DECIMAL(10,2) NOT NULL,
   `item_condition` VARCHAR(20) NOT NULL,
   `sub_category_name` VARCHAR(100) NOT NULL,

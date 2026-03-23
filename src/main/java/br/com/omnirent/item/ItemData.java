@@ -22,19 +22,15 @@ public class ItemData {
 	private String description;
 
 	private BigDecimal basePrice;
-		
-	@Enumerated(EnumType.STRING)
-	private ItemCondition itemCondition;
 	
 	@Enumerated(EnumType.STRING)
-	private ItemStatus itemStatus;
+	private ItemCondition itemCondition;
 
 	public ItemData(ItemRequestDTO itemDTO) {
 	    this.brand = itemDTO.brand();
 	    this.model = itemDTO.model();
 	    this.description = itemDTO.description();
 	    this.basePrice = itemDTO.basePrice();
-	    this.itemCondition = ItemCondition.fromString(itemDTO.itemCondition());
-	    this.itemStatus = ItemStatus.fromString(itemDTO.itemStatus());
+
 	}
 }
