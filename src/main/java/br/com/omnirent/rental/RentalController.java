@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.omnirent.security.SecurityUtils;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -15,8 +16,8 @@ public class RentalController {
 	private RentalService rentalService;
 	
 	@GetMapping("/find/{id}")
-	public Rental findById(@PathVariable String id) {
-		return rentalService.findById(id);
+	public RentalResponseDTO findById(@PathVariable String id) {
+		return rentalService.getRentalById(id);
 	}
 	
 }

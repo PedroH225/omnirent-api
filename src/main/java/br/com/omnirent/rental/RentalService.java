@@ -21,4 +21,9 @@ public class RentalService {
 		
 		return rental.get();
 	}
+	
+	public RentalResponseDTO getRentalById(String id) {
+		return RentalMapper.toDto(findById(id));
+	}
+	
 }
