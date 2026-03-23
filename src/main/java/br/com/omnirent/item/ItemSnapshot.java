@@ -1,11 +1,8 @@
 package br.com.omnirent.item;
 
-import br.com.omnirent.common.enums.ItemCondition;
-import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.rental.Rental;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
@@ -25,6 +22,7 @@ public class ItemSnapshot {
 	
 	private String name;
 	
+	@Embedded
 	private ItemData itemData;
 	
 	@MapsId("rentalId")

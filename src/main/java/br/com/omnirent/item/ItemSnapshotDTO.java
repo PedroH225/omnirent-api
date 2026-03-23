@@ -22,6 +22,7 @@ public class ItemSnapshotDTO {
 	private String description;
 		
 	public ItemSnapshotDTO(ItemSnapshot item) {
+		this.rentalId = item.getRentalId();
 		this.name = item.getName();
 		
 		ItemData itemData = item.getItemData();
