@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class ItemSnapshotDTO {
 
-	private String rentalId;
+	private String id;
 	
 	private String name;
 	
@@ -22,7 +22,7 @@ public class ItemSnapshotDTO {
 	private String description;
 		
 	public ItemSnapshotDTO(ItemSnapshot item) {
-		this.rentalId = item.getRentalId();
+		this.id = item.getId();
 		this.name = item.getName();
 		
 		ItemData itemData = item.getItemData();

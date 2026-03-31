@@ -1,8 +1,10 @@
 package br.com.omnirent.item;
 
-import br.com.omnirent.rental.Rental;
+import br.com.omnirent.rental.domain.Rental;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
@@ -18,14 +20,14 @@ import lombok.NoArgsConstructor;
 public class ItemSnapshot {	
 	
 	@Id
-	private String rentalId;
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private String id;
 	
 	private String name;
 	
 	@Embedded
 	private ItemData itemData;
 	
-	@MapsId("rentalId")
 	@OneToOne
 	@JoinColumn(name = "rental_id")
 	private Rental rental;
