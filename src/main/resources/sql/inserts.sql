@@ -45,9 +45,9 @@ INSERT INTO rentals VALUES
 -- ITEM SNAPSHOTS
 -- =========================
 INSERT INTO item_snapshots VALUES
-('5f54c279-9ad6-40c2-8a32-22216d48ca39','Canon T6 Camera','Canon','T6', 'DSLR camera for photography', 80.00,'GOOD','Camera'),
-('b24fca5b-648a-44e2-ba89-2223d8ab57b0','Dell XPS 15','Dell','9520', 'High performance laptop',120.00,'GOOD','Laptop');
+('3db9a3e6-0368-45ac-9200-8ee3d0a10f44','Canon T6 Camera','Canon','T6', 'DSLR camera for photography', 80.00,'GOOD','Camera', '5f54c279-9ad6-40c2-8a32-22216d48ca39'),
+('faefe02d-cc3e-4e33-aefb-2b3e556fabc2','Dell XPS 15','Dell','9520', 'High performance laptop',120.00,'GOOD','Laptop', 'b24fca5b-648a-44e2-ba89-2223d8ab57b0');
 
 INSERT INTO address_snapshots VALUES
-('5f54c279-9ad6-40c2-8a32-22216d48ca39','Rua das Flores','123',NULL,'Centro','São Paulo','SP','Brasil','01001-000'),
-('b24fca5b-648a-44e2-ba89-2223d8ab57b0','Av. Paulista','1578','Apto 42','Bela Vista','São Paulo','SP','Brasil','01310-200');
+('80b6696f-d7fe-4f0d-81b9-3ae47ab7de99','Rua das Flores','123',NULL,'Centro','São Paulo','SP','Brasil','01001-000', '5f54c279-9ad6-40c2-8a32-22216d48ca39'),
+('3f9ce4e3-8fec-4782-b9d5-c6ddf3607f8b','Av. Paulista','1578','Apto 42','Bela Vista','São Paulo','SP','Brasil','01310-200', 'b24fca5b-648a-44e2-ba89-2223d8ab57b0');
