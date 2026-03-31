@@ -33,4 +33,13 @@ public enum RentalPeriod {
 	public String toString() {
 		return this.rentalPeriod;
 	}
+	
+	public static RentalPeriod fromString(String text) {
+        for (RentalPeriod rentalPeriod : RentalPeriod.values()) {
+            if (rentalPeriod.rentalPeriod.equalsIgnoreCase(text)) {
+                return rentalPeriod;
+            }
+        }
+        throw new IllegalArgumentException("RentalPeriod enumaration not found: " + text);
+    }
 }
