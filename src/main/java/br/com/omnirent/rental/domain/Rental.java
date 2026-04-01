@@ -117,4 +117,11 @@ public class Rental extends BaseEntity {
 		}
 		this.rentalStatus = RentalStatus.CANCELLED;
 	}
+	
+	public void markLate() {
+		if (this.rentalStatus != RentalStatus.IN_USE) {
+			throw new IllegalArgumentException("Illegal argument.");
+		}
+		this.rentalStatus = RentalStatus.LATE;
+	}
 }
