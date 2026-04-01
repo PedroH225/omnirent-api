@@ -21,7 +21,7 @@ public class RentalMapper {
 	
 	public static Rental create(User renter, User owner, Item item,
 		    RentalPeriod rentalPeriod, RentalStatus rentalStatus,
-		    LocalDateTime startDate, LocalDateTime endDate, BigDecimal finalPrice) {
+		    BigDecimal finalPrice) {
 		Rental rental = new Rental();
 		
 		rental.setRenter(renter);
@@ -30,9 +30,6 @@ public class RentalMapper {
 		rental.setRentalPeriod(rentalPeriod);
 		
 		rental.setRentalStatus(rentalStatus);
-		
-		rental.setStartDate(startDate);
-		rental.setEndDate(endDate);
 		
 		rental.setFinalPrice(finalPrice);
 		

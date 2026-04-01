@@ -46,8 +46,7 @@ public class RentalResponseDTO {
 
 	public RentalResponseDTO(Rental rental) {
 		this.id = rental.getId();
-		this.startDate = dtf.format(rental.getStartDate());
-		this.endDate = dtf.format(rental.getEndDate());
+		
 		this.finalPrice = rental.getFinalPrice();
 		this.rentalStatus = rental.getRentalStatus().toString();
 		this.rentalPeriod = rental.getRentalPeriod().toString();
@@ -57,5 +56,13 @@ public class RentalResponseDTO {
 		
 		this.itemSnapshot = new ItemSnapshotDTO(rental.getItemSnapshot());
 		this.addressSnapshot = new AddressSnapshotDTO(rental.getAddressSnapshot());
+		
+		if (rental.getStartDate() != null) {
+			this.startDate = dtf.format(rental.getStartDate());
+		}
+		
+		if (rental.getStartDate() != null) {
+			this.endDate = dtf.format(rental.getEndDate());
+		}
 	}
 }

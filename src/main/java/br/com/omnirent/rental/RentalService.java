@@ -48,16 +48,14 @@ public class RentalService {
 		Item item = itemService.findById(rentalRequestDTO.itemId());
 		User owner = item.getOwner();
 		
-		RentalStatus rentalStatus = RentalStatus.ACTIVE;
+		RentalStatus rentalStatus = RentalStatus.CREATED;
 		RentalPeriod rentalPeriod = RentalPeriod.fromString(rentalRequestDTO.rentalPeriod());
 		
-		LocalDateTime startDate = LocalDateTime.now();
-		LocalDateTime endDateTime = RentalDateService.calculateEndDate(startDate, rentalPeriod);
 		BigDecimal finalPrice = RentalPriceService.calculateFinalPrice(item, rentalPeriod);
 		
 		Rental rental = RentalMapper.create(renter, owner, item,
 			    rentalPeriod, rentalStatus,
-			    startDate, endDateTime, finalPrice);
+			    finalPrice);
 		
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
