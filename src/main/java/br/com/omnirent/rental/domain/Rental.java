@@ -79,4 +79,11 @@ public class Rental extends BaseEntity {
 		this.rentalStatus = RentalStatus.IN_USE;
 		
 	}
+
+	public void requestReturn() {
+		if (this.rentalStatus != RentalStatus.IN_USE) {
+			throw new IllegalArgumentException("Illegal argument.");
+		}
+		this.rentalStatus = RentalStatus.RETURN_REQUESTED;
+	}
 }

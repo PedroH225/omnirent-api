@@ -45,5 +45,9 @@ public class RentalController {
 		return rentalService.markInUse(rentId, SecurityUtils.currentUserId());
 	}
 	
+	@PatchMapping("/{rentId}/request-return")
+	public RentalResponseDTO requestReturn(@PathVariable String rentId) {
+		return rentalService.requestReturn(rentId, SecurityUtils.currentUserId());
+	}
 	
 }
