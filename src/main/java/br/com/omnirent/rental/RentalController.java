@@ -40,5 +40,10 @@ public class RentalController {
 		return rentalService.ship(rentId, SecurityUtils.currentUserId());
 	}
 	
+	@PatchMapping("/{rentId}/in-use")
+	public RentalResponseDTO markInUse(@PathVariable String rentId) {
+		return rentalService.markInUse(rentId, SecurityUtils.currentUserId());
+	}
+	
 	
 }

@@ -83,5 +83,12 @@ public class RentalService {
 		
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
+
+	public RentalResponseDTO markInUse(String rentId, String userId) {
+		Rental rental = findById(rentId);
+		rental.markInUse();
+		
+		return RentalMapper.toDto(rentalRepository.save(rental));
+	}
 	
 }

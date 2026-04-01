@@ -71,4 +71,12 @@ public class Rental extends BaseEntity {
 		}
 		this.rentalStatus = RentalStatus.SHIPPED;
 	}
+
+	public void markInUse() {
+		if (this.rentalStatus != RentalStatus.SHIPPED) {
+			throw new IllegalArgumentException("Illegal argument.");
+		}
+		this.rentalStatus = RentalStatus.IN_USE;
+		
+	}
 }
