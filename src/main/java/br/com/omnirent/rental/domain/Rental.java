@@ -57,6 +57,13 @@ public class Rental extends BaseEntity {
 		this.rentalStatus = RentalStatus.fromString(status);
 	}
 	
+	public void confirm() {
+		if (this.rentalStatus != RentalStatus.CREATED) {
+			throw new IllegalArgumentException("Illegal argument.");
+		}
+		this.rentalStatus = RentalStatus.CONFIRMED;
+	}
+	
 	public void startPreparing() {
 		if (this.rentalStatus != RentalStatus.CONFIRMED) {
 			throw new IllegalArgumentException("Illegal argument.");

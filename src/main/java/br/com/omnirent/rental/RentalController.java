@@ -65,4 +65,9 @@ public class RentalController {
 		return rentalService.cancel(rentId, SecurityUtils.currentUserId());
 	}
 	
+	@PatchMapping("/{rentId}/confirm")
+	public RentalResponseDTO confirm(@PathVariable String rentId) {
+		return rentalService.confirm(rentId, SecurityUtils.currentUserId());
+	}
+	
 }

@@ -118,4 +118,11 @@ public class RentalService {
 		
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
+
+	public RentalResponseDTO confirm(String rentId, String userId) {
+		Rental rental = findById(rentId);
+		rental.confirm();
+		
+		return RentalMapper.toDto(rentalRepository.save(rental));
+	}
 }
