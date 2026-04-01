@@ -35,5 +35,10 @@ public class RentalController {
 		return rentalService.startPreparing(rentId, SecurityUtils.currentUserId());
 	}
 	
+	@PatchMapping("/{rentId}/ship")
+	public RentalResponseDTO ship(@PathVariable String rentId) {
+		return rentalService.ship(rentId, SecurityUtils.currentUserId());
+	}
+	
 	
 }

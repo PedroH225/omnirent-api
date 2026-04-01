@@ -56,7 +56,7 @@ public class Rental extends BaseEntity {
 	public void updateStatus(String status) {
 		this.rentalStatus = RentalStatus.fromString(status);
 	}
-
+	
 	public void startPreparing() {
 		if (this.rentalStatus != RentalStatus.CONFIRMED) {
 			throw new IllegalArgumentException("Illegal argument.");
@@ -65,4 +65,10 @@ public class Rental extends BaseEntity {
 		
 	}
 
+	public void ship() {
+		if (this.rentalStatus != RentalStatus.PREPARING) {
+			throw new IllegalArgumentException("Illegal argument.");
+		}
+		this.rentalStatus = RentalStatus.SHIPPED;
+	}
 }
