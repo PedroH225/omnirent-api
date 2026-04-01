@@ -30,8 +30,10 @@ public class RentalController {
 		return rentalService.addRent(rentalRequestDTO, SecurityUtils.currentUserId());
 	}
 	
-	@PatchMapping("/updateStatus/{rentId}/{status}")
-	public RentalResponseDTO updateStatus(@PathVariable String rentId, @PathVariable String status) {
-		return rentalService.updateStatus(rentId, status);
+	@PatchMapping("/{rentId}/start-preparing")
+	public RentalResponseDTO startPreparing(@PathVariable String rentId) {
+		return rentalService.startPreparing(rentId, SecurityUtils.currentUserId());
 	}
+	
+	
 }

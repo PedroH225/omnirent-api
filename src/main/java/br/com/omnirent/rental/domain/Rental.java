@@ -7,11 +7,9 @@ import br.com.omnirent.address.AddressSnapshot;
 import br.com.omnirent.common.BaseEntity;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
-import br.com.omnirent.item.Item;
 import br.com.omnirent.item.ItemSnapshot;
 import br.com.omnirent.user.User;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -57,6 +55,14 @@ public class Rental extends BaseEntity {
 	
 	public void updateStatus(String status) {
 		this.rentalStatus = RentalStatus.fromString(status);
+	}
+
+	public void startPreparing() {
+		if (this.rentalStatus != RentalStatus.CONFIRMED) {
+			throw new IllegalArgumentException("Illegal argument.");
+		}
+		this.rentalStatus = RentalStatus.PREPARING;
+		
 	}
 
 }
