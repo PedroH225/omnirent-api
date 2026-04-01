@@ -50,4 +50,9 @@ public class RentalController {
 		return rentalService.requestReturn(rentId, SecurityUtils.currentUserId());
 	}
 	
+	@PatchMapping("/{rentId}/return-shipped")
+	public RentalResponseDTO markReturnShipped(@PathVariable String rentId) {
+		return rentalService.markReturnShipped(rentId, SecurityUtils.currentUserId());
+	}
+	
 }

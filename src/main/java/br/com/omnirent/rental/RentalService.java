@@ -98,4 +98,11 @@ public class RentalService {
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 	
+	public RentalResponseDTO markReturnShipped(String rentId, String userId) {
+		Rental rental = findById(rentId);
+		rental.markReturnShipped();
+		
+		return RentalMapper.toDto(rentalRepository.save(rental));
+	}
+	
 }
