@@ -1,11 +1,17 @@
 package br.com.omnirent.common.enums;
 
 public enum RentalStatus {
-	RESERVED("Reserved"),
-	ACTIVE("Active"),
+	CREATED("Created"),
+	CONFIRMED("Confirmed"),
+	PREPARING("Preparing"),
+	SHIPPED("Shipped"),
+	IN_USE("In use"),
+	RETURN_REQUESTED("Return requested"),
+	RETURN_SHIPPED("Return shipped"),
 	RETURNED("Returned"),
 	CANCELLED("Cancelled"),
-	LATE("Late");
+	LATE("Late"),
+	ACTIVE("Active");
 	
 	private String rentalStatus;
 	
