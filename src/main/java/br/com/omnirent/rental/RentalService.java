@@ -17,6 +17,7 @@ import br.com.omnirent.rental.domain.RentalRequestDTO;
 import br.com.omnirent.rental.domain.RentalResponseDTO;
 import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -60,6 +61,7 @@ public class RentalService {
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
+	@Transactional
 	public RentalResponseDTO updateStatus(String rentId, String status) {
 		Rental rent = findById(rentId);
 		
@@ -68,6 +70,7 @@ public class RentalService {
 		return RentalMapper.toDto(rentalRepository.save(rent));
 	}
 
+	@Transactional
 	public RentalResponseDTO startPreparing(String rentId, String currentUserId) {
 		Rental rental = findById(rentId);
 		rental.startPreparing();
@@ -75,6 +78,7 @@ public class RentalService {
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
+	@Transactional
 	public RentalResponseDTO ship(String rentId, String userId) {
 		Rental rental = findById(rentId);
 		rental.ship();
@@ -82,6 +86,7 @@ public class RentalService {
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
+	@Transactional
 	public RentalResponseDTO markInUse(String rentId, String userId) {
 		Rental rental = findById(rentId);
 		rental.markInUse();
@@ -95,6 +100,7 @@ public class RentalService {
 		return RentalMapper.toDto(rentalRepository.save(updatedRental));
 	}
 
+	@Transactional
 	public RentalResponseDTO requestReturn(String rentId, String userId) {
 		Rental rental = findById(rentId);
 		rental.requestReturn();
@@ -102,6 +108,7 @@ public class RentalService {
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 	
+	@Transactional
 	public RentalResponseDTO markReturnShipped(String rentId, String userId) {
 		Rental rental = findById(rentId);
 		rental.markReturnShipped();
@@ -109,6 +116,7 @@ public class RentalService {
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 	
+	@Transactional
 	public RentalResponseDTO markReturned(String rentId, String userId) {
 		Rental rental = findById(rentId);
 		rental.markReturned();
@@ -116,6 +124,7 @@ public class RentalService {
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
+	@Transactional
 	public RentalResponseDTO cancel(String rentId, String userId) {
 		Rental rental = findById(rentId);
 		rental.cancel();
@@ -123,6 +132,7 @@ public class RentalService {
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
+	@Transactional
 	public RentalResponseDTO confirm(String rentId, String userId) {
 		Rental rental = findById(rentId);
 		rental.confirm();
