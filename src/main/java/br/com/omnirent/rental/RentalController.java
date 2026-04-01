@@ -1,5 +1,7 @@
 package br.com.omnirent.rental;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +25,11 @@ public class RentalController {
 	@GetMapping("/find/{id}")
 	public RentalResponseDTO findById(@PathVariable String id) {
 		return rentalService.getRentalById(id);
+	}
+	
+	@GetMapping("/find/rented")
+	public List<RentalResponseDTO> findUserRented() {
+		return rentalService.findUserRented(SecurityUtils.currentUserId());
 	}
 	
 	@PostMapping

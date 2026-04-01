@@ -1,6 +1,8 @@
  package br.com.omnirent.rental;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import br.com.omnirent.address.AddressMapper;
 import br.com.omnirent.address.AddressSnapshot;
@@ -17,6 +19,12 @@ public class RentalMapper {
 
 	public static RentalResponseDTO toDto(Rental rental) {
 		return new RentalResponseDTO(rental);
+	}
+	
+	public static List<RentalResponseDTO> toDto(List<Rental> rentals) {
+		return rentals.stream()
+				.map(RentalResponseDTO::new)
+				.collect(Collectors.toList());
 	}
 	
 	public static Rental create(User renter, User owner, Item item,

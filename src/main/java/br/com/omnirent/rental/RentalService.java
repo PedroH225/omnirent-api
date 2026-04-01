@@ -2,6 +2,7 @@ package br.com.omnirent.rental;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -138,5 +139,10 @@ public class RentalService {
 		rental.confirm();
 		
 		return RentalMapper.toDto(rentalRepository.save(rental));
+	}
+
+	public List<RentalResponseDTO> findUserRented(String userId) {
+		User user = userService.findById(userId);
+		return RentalMapper.toDto(user.getRented());
 	}
 }
