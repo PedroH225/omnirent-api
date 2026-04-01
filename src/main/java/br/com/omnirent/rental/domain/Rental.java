@@ -94,4 +94,12 @@ public class Rental extends BaseEntity {
 		this.rentalStatus = RentalStatus.RETURN_SHIPPED;
 		
 	}
+
+	public void markReturned() {
+		if (this.rentalStatus != RentalStatus.RETURN_SHIPPED) {
+			throw new IllegalArgumentException("Illegal argument.");
+		}
+		this.rentalStatus = RentalStatus.RETURNED;
+		
+	}
 }

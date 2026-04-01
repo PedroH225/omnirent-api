@@ -105,4 +105,10 @@ public class RentalService {
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 	
+	public RentalResponseDTO markReturned(String rentId, String userId) {
+		Rental rental = findById(rentId);
+		rental.markReturned();
+		
+		return RentalMapper.toDto(rentalRepository.save(rental));
+	}
 }
