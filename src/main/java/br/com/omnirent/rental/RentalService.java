@@ -86,7 +86,13 @@ public class RentalService {
 		Rental rental = findById(rentId);
 		rental.markInUse();
 		
-		return RentalMapper.toDto(rentalRepository.save(rental));
+		LocalDateTime startDate = LocalDateTime.now();
+		LocalDateTime endDateTime = RentalDateService.
+				calculateEndDate(startDate, rental.getRentalPeriod());
+		
+		Rental updatedRental = RentalMapper.setDates(rental, startDate, endDateTime);
+		
+		return RentalMapper.toDto(rentalRepository.save(updatedRental));
 	}
 
 	public RentalResponseDTO requestReturn(String rentId, String userId) {

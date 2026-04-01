@@ -38,4 +38,11 @@ public class RentalMapper {
 		
 		return rental;
 	}
+	
+	public static Rental setDates(Rental rental, LocalDateTime startDate, LocalDateTime endDate) {
+		rental.setStartDate(startDate);
+		rental.setEndDate(endDate);
+		
+		return rental;
+	}
 }
