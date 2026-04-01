@@ -61,5 +61,13 @@ public class RentalService {
 		
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
+
+	public RentalResponseDTO cancelRent(String rentId) {
+		Rental rent = findById(rentId);
+		
+		rent.setRentalStatus(RentalStatus.CANCELLED);
+		
+		return RentalMapper.toDto(rentalRepository.save(rent));
+	}
 	
 }
