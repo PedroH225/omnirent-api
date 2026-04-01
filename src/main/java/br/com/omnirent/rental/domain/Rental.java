@@ -54,5 +54,9 @@ public class Rental extends BaseEntity {
 	
 	@OneToOne(mappedBy = "rental", cascade = CascadeType.ALL, orphanRemoval = true)
 	private AddressSnapshot addressSnapshot;
+	
+	public void updateStatus(String status) {
+		this.rentalStatus = RentalStatus.fromString(status);
+	}
 
 }

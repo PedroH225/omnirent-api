@@ -30,8 +30,8 @@ public class RentalController {
 		return rentalService.addRent(rentalRequestDTO, SecurityUtils.currentUserId());
 	}
 	
-	@PatchMapping("/cancel/{rentId}")
-	public RentalResponseDTO cancelRent(@PathVariable String rentId) {
-		return rentalService.cancelRent(rentId);
+	@PatchMapping("/updateStatus/{rentId}/{status}")
+	public RentalResponseDTO updateStatus(@PathVariable String rentId, @PathVariable String status) {
+		return rentalService.updateStatus(rentId, status);
 	}
 }

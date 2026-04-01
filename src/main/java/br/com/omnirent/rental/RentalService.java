@@ -62,10 +62,10 @@ public class RentalService {
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
-	public RentalResponseDTO cancelRent(String rentId) {
+	public RentalResponseDTO updateStatus(String rentId, String status) {
 		Rental rent = findById(rentId);
 		
-		rent.setRentalStatus(RentalStatus.CANCELLED);
+		rent.updateStatus(status);
 		
 		return RentalMapper.toDto(rentalRepository.save(rent));
 	}
