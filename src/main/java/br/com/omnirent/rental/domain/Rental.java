@@ -102,4 +102,12 @@ public class Rental extends BaseEntity {
 		this.rentalStatus = RentalStatus.RETURNED;
 		
 	}
+
+	public void cancel() {
+		if (this.rentalStatus != RentalStatus.CREATED
+				&& this.rentalStatus != RentalStatus.CONFIRMED) {
+			throw new IllegalArgumentException("Illegal argument.");
+		}
+		this.rentalStatus = RentalStatus.CANCELLED;
+	}
 }

@@ -60,4 +60,9 @@ public class RentalController {
 		return rentalService.markReturned(rentId, SecurityUtils.currentUserId());
 	}
 	
+	@PatchMapping("/{rentId}/cancel")
+	public RentalResponseDTO cancel(@PathVariable String rentId) {
+		return rentalService.cancel(rentId, SecurityUtils.currentUserId());
+	}
+	
 }

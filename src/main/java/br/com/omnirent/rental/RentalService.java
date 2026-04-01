@@ -111,4 +111,11 @@ public class RentalService {
 		
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
+
+	public RentalResponseDTO cancel(String rentId, String userId) {
+		Rental rental = findById(rentId);
+		rental.cancel();
+		
+		return RentalMapper.toDto(rentalRepository.save(rental));
+	}
 }
