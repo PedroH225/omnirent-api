@@ -21,5 +21,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(e.getHttpStatus()).body(err);
 	}
 	
-	
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<StandardError> handleGeneric(Exception e, HttpServletRequest request) {
+	    StandardError err = new StandardError(
+	            Instant.now(),
+	            500,
+	            "Internal server error",
+	            "Unexpected error",
+	            request.getRequestURI()
+	    );
+
+	    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
+	}
 }
