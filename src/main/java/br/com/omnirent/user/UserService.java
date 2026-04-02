@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.security.SecurityUtils;
 import lombok.AllArgsConstructor;
 
@@ -18,7 +19,7 @@ public class UserService {
 		Optional<User> user = userRepository.findById(id);
 		
 		if (user.isEmpty()) {
-			throw new RuntimeException("User not found.");
+			throw new UserNotFoundException();
 		}
 		
 		return user.get();
