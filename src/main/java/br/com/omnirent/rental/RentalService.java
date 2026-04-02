@@ -145,4 +145,9 @@ public class RentalService {
 		User user = userService.findById(userId);
 		return RentalMapper.toDto(user.getRented());
 	}
+
+	public List<RentalResponseDTO> findUserRentals(String userId) {
+		User user = userService.findById(userId);
+		return RentalMapper.toDto(user.getRentals());
+	}
 }

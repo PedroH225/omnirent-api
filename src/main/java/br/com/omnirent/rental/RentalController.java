@@ -32,6 +32,11 @@ public class RentalController {
 		return rentalService.findUserRented(SecurityUtils.currentUserId());
 	}
 	
+	@GetMapping("/find/userRentals")
+	public List<RentalResponseDTO> findUserRentals() {
+		return rentalService.findUserRentals(SecurityUtils.currentUserId());
+	}
+	
 	@PostMapping
 	public RentalResponseDTO addRent(@RequestBody RentalRequestDTO rentalRequestDTO) {
 		return rentalService.addRent(rentalRequestDTO, SecurityUtils.currentUserId());
