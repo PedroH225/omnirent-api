@@ -1,10 +1,12 @@
 package br.com.omnirent.address;
 
-import br.com.omnirent.rental.Rental;
 import jakarta.persistence.Embedded;
+import br.com.omnirent.rental.domain.Rental;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
@@ -20,12 +22,12 @@ import lombok.NoArgsConstructor;
 public class AddressSnapshot {	
 	
 	@Id
-	private String rentalId;
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private String id;
 	
 	@Embedded
 	private AddressData addressData;
 	
-	@MapsId("rentalId")
 	@OneToOne
 	@JoinColumn(name = "rental_id")
 	private Rental rental;

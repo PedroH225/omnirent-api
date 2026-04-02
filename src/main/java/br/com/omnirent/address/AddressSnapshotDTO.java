@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class AddressSnapshotDTO {
 	
-	private String rentalId;
+	private String id;
 	
 	private String street;
 
@@ -24,7 +24,7 @@ public class AddressSnapshotDTO {
 	private String zipCode;
 
 	public AddressSnapshotDTO(AddressSnapshot address) {
-		this.rentalId = address.getRentalId();
+		this.id = address.getId();
 		
 		AddressData addressData = address.getAddressData();
 		

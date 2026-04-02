@@ -123,8 +123,8 @@ CREATE TABLE IF NOT EXISTS `rentals` (
   `id` CHAR(36) NOT NULL,
   `rental_status` VARCHAR(20) NOT NULL,
   `rental_period` VARCHAR(20) NOT NULL,
-  `start_date` DATETIME NOT NULL,
-  `end_date` DATETIME NOT NULL,
+  `start_date` DATETIME,
+  `end_date` DATETIME,
   `final_price` DECIMAL(10,2) NOT NULL,
   `renter_id` CHAR(36) NOT NULL,
   `owner_id` CHAR(36) NOT NULL,
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS `rentals` (
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `address_snapshots` (
-  `rental_id` CHAR(36) NOT NULL,
+  `id` CHAR(36) NOT NULL,
   `street` VARCHAR(120) NOT NULL,
   `number` VARCHAR(20) NOT NULL,
   `complement` VARCHAR(80) NULL,
@@ -154,6 +154,7 @@ CREATE TABLE IF NOT EXISTS `address_snapshots` (
   `state` VARCHAR(40) NOT NULL,
   `country` VARCHAR(40) NOT NULL,
   `zip_code` VARCHAR(20) NOT NULL,
+  `rental_id` CHAR(36) NOT NULL,
   PRIMARY KEY (`rental_id`),
   INDEX `idx_addresses_snapshot_city` (`city`),
   CONSTRAINT `fk_addresses_snapshot_rental`
@@ -164,14 +165,15 @@ CREATE TABLE IF NOT EXISTS `address_snapshots` (
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `item_snapshots` (
-  `rental_id` CHAR(36) NOT NULL,
+  `id` CHAR(36) NOT NULL,
   `name` VARCHAR(100) NOT NULL,
   `brand` VARCHAR(50) NOT NULL,
   `model` VARCHAR(50) NOT NULL,
   `description` LONGTEXT NULL,
   `base_price` DECIMAL(10,2) NOT NULL,
   `item_condition` VARCHAR(20) NOT NULL,
-  `sub_category_name` VARCHAR(100) NOT NULL,
+  `sub_category_name` VARCHAR(100),
+  `rental_id` CHAR(36) NOT NULL,
   PRIMARY KEY (`rental_id`),
   CONSTRAINT `fk_item_snapshot_rental`
     FOREIGN KEY (`rental_id`)

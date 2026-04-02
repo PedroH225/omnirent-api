@@ -7,7 +7,7 @@ import br.com.omnirent.address.Address;
 import br.com.omnirent.category.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
-import br.com.omnirent.rental.Rental;
+import br.com.omnirent.rental.domain.Rental;
 
 public class ItemMapper {
 
@@ -49,7 +49,7 @@ public class ItemMapper {
 		}
 	}
 	
-	public ItemSnapshot fromItem(Item item, Rental rental) {
+	public static ItemSnapshot fromItem(Item item, Rental rental) {
 		ItemSnapshot itemSnapshot = new ItemSnapshot(item);
 		
 		itemSnapshot.setRental(rental);

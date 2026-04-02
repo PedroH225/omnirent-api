@@ -13,7 +13,7 @@ import br.com.omnirent.address.Address;
 import br.com.omnirent.common.NamedEntity;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.item.Item;
-import br.com.omnirent.rental.Rental;
+import br.com.omnirent.rental.domain.Rental;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

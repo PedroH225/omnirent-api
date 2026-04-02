@@ -3,7 +3,7 @@ package br.com.omnirent.address;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import br.com.omnirent.rental.Rental;
+import br.com.omnirent.rental.domain.Rental;
 
 public class AddressMapper {
 
