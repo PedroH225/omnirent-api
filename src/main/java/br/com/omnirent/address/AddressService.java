@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.exception.domain.AddressNotFoundException;
 import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserService;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,7 @@ public class AddressService {
 		Optional<Address> address = addressRepository.findById(id);
 		
 		if (address.isEmpty()) {
-			throw new RuntimeException("Address not found.");
+			throw new AddressNotFoundException();
 		}
 		
 		return address.get();

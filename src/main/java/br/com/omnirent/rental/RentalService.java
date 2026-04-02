@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.exception.domain.RentalNotFoundException;
 import br.com.omnirent.item.Item;
 import br.com.omnirent.item.ItemService;
 import br.com.omnirent.rental.domain.Rental;
@@ -35,7 +36,7 @@ public class RentalService {
 		Optional<Rental> rental = rentalRepository.findById(id);
 		
 		if (rental.isEmpty()) {
-			throw new RuntimeException("Rental not found.");
+			throw new RentalNotFoundException();
 		}
 		
 		return rental.get();

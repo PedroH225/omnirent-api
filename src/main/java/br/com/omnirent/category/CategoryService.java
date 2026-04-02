@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.exception.domain.CategoryNotFoundException;
+import br.com.omnirent.exception.domain.SubCategoryNotFoundException;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -19,7 +21,7 @@ public class CategoryService {
 		Optional<Category> category = categoryRepository.findById(id);
 		
 		if (category.isEmpty()) {
-			throw new RuntimeException("Category not found.");
+			throw new CategoryNotFoundException();
 		}
 		
 		return category.get();
@@ -29,7 +31,7 @@ public class CategoryService {
 		Optional<SubCategory> subCategory = subRepository.findById(id);
 		
 		if (subCategory.isEmpty()) {
-			throw new RuntimeException("Sub Category not found.");
+			throw new SubCategoryNotFoundException();
 		}
 		
 		return subCategory.get();
