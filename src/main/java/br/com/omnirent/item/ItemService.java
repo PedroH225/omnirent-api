@@ -55,6 +55,7 @@ public class ItemService {
 		item.setOwner(userService.findById(userId));
 		item.setPickupAdress(addressService.findById(itemDTO.addressId()));
 		item.setSubCategory(categoryService.findSubById(itemDTO.subCategoryId()));
+		item.setItemStatus(ItemStatus.AVAILABLE);
 		
 		return ItemMapper.toDto(itemRepository.save(item));
 	}
