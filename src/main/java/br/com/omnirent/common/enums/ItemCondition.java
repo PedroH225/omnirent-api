@@ -1,5 +1,7 @@
 package br.com.omnirent.common.enums;
 
+import br.com.omnirent.exception.domain.IllegalEnumerationException;
+
 public enum ItemCondition {
 	NEW("New"),
 	LIKE_NEW("Like new"),
@@ -19,7 +21,7 @@ public enum ItemCondition {
                 return itemCondition;
             }
         }
-        throw new IllegalArgumentException("Item condition enumaration not found: " + text);
+        throw new IllegalEnumerationException(ItemCondition.class, text);
     }
 	
 	@Override

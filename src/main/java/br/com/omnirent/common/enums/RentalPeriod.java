@@ -3,6 +3,8 @@ package br.com.omnirent.common.enums;
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 
+import br.com.omnirent.exception.domain.IllegalEnumerationException;
+
 public enum RentalPeriod {
 	HOURLY("Hourly", ChronoUnit.HOURS, new BigDecimal("0.2")),
 	DAILY("Daily", ChronoUnit.DAYS, BigDecimal.ONE),
@@ -40,6 +42,6 @@ public enum RentalPeriod {
                 return rentalPeriod;
             }
         }
-        throw new IllegalArgumentException("RentalPeriod enumaration not found: " + text);
+        throw new IllegalEnumerationException(RentalPeriod.class, text);
     }
 }
