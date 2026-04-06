@@ -2,10 +2,13 @@ package br.com.omnirent.security;
 
 import java.util.Map;
 
+import javax.security.auth.login.LoginException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,11 +16,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.exception.domain.EmailInUseException;
+import br.com.omnirent.exception.domain.FailedLoginException;
 import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserRepository;
-import lombok.AllArgsConstructor;
 
 @Service
 public class AuthenticationService implements UserDetailsService {
@@ -45,9 +47,13 @@ public class AuthenticationService implements UserDetailsService {
         authenticationManager = context.getBean(AuthenticationManager.class);
 
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
-        var auth = this.authenticationManager.authenticate(usernamePassword);
-        var token = tokenService.generateToken((User) auth.getPrincipal());
-        return Map.of("token", token);
+        try {
+        	 var auth = this.authenticationManager.authenticate(usernamePassword);
+             var token = tokenService.generateToken((User) auth.getPrincipal());
+             return Map.of("token", token);
+		} catch (BadCredentialsException e) {
+			throw new FailedLoginException();
+		}
     }
 
     public ResponseEntity<Object> register (RegisterDTO registerDto){
