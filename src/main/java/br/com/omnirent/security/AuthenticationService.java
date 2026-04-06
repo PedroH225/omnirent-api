@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.UserStatus;
+import br.com.omnirent.exception.domain.EmailInUseException;
 import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserRepository;
 import lombok.AllArgsConstructor;
@@ -50,8 +51,9 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public ResponseEntity<Object> register (RegisterDTO registerDto){
-    	if (verifyExistingEmail(registerDto.email())) {
-			throw new RuntimeException("Email already in use.");
+    	String email = registerDto.email();
+    	if (verifyExistingEmail(email)) {
+			throw new EmailInUseException(email);
 		}
     	
     	String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
