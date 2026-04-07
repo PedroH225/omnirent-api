@@ -1,6 +1,7 @@
 package br.com.omnirent.security;
 
 import java.util.Map;
+import java.util.Optional;
 
 import javax.security.auth.login.LoginException;
 
@@ -9,6 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.exception.domain.EmailInUseException;
 import br.com.omnirent.exception.domain.FailedLoginException;
+import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserRepository;
 
@@ -40,14 +43,21 @@ public class AuthenticationService implements UserDetailsService {
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email);
+        Optional<UserDetails> user = userRepository.findByEmail(email);
+        
+        if (user.isEmpty()) {
+			throw new UsernameNotFoundException(email);
+		}
+        
+        return user.get();
+
     } 
 
     public Map<String, String> login(LoginDTO data){
+    	try {
         authenticationManager = context.getBean(AuthenticationManager.class);
 
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
-        try {
         	 var auth = this.authenticationManager.authenticate(usernamePassword);
              var token = tokenService.generateToken((User) auth.getPrincipal());
              return Map.of("token", token);
