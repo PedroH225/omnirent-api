@@ -32,6 +32,8 @@ public class ItemService {
 	
 	private CategoryService categoryService;
 	
+	private ItemAuthorizationService authorizationService;
+	
 	public Item findById(String id) {
 		Optional<Item> item = itemRepository.findById(id);
 		
@@ -65,9 +67,10 @@ public class ItemService {
 	}
 	
 	@Transactional
-	public ItemResponseDTO updateItem(ItemRequestDTO itemDTO, String userId) {
-		User user = userService.findById(userId);
+	public ItemResponseDTO updateItem(ItemRequestDTO itemDTO, String currentUserId) {
 		Item updatedItem = findById(itemDTO.id());
+		
+		authorizationService.requireOwner(updatedItem, currentUserId);
 
 		Address address = null;
 		if (StringUtils.isNotBlank(itemDTO.addressId()) && 
@@ -87,8 +90,10 @@ public class ItemService {
 	}
 
 	@Transactional
-	public ItemResponseDTO updateStatus(String itemId, String itemStatusStr) {
+	public ItemResponseDTO updateStatus(String itemId, String itemStatusStr, String currentUserId) {
 		Item item = findById(itemId);
+		
+		authorizationService.requireOwner(item, currentUserId);
 		
 		item.updateItemStatus(itemStatusStr);
 		

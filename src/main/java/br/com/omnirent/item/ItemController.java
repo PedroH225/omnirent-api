@@ -50,7 +50,7 @@ public class ItemController {
 	}
 	
 	@PatchMapping("/updateStatus/{itemId}/{itemStatus}")
-	public ItemResponseDTO updateStatus(@PathVariable String itemId ,@PathVariable String itemStatus) {
-		return itemService.updateStatus(itemId, itemStatus);
+	public ItemResponseDTO updateStatus(@PathVariable String itemId, @PathVariable String itemStatus) {
+		return itemService.updateStatus(itemId, itemStatus, SecurityUtils.currentUserId());
 	}
 }
