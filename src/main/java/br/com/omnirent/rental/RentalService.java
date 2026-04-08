@@ -100,6 +100,9 @@ public class RentalService {
 		Rental rental = findById(rentId);
 		rental.markInUse();
 		
+		// TEMPORARY
+		authorizationService.requireOne(rental, userId);
+		
 		LocalDateTime startDate = LocalDateTime.now();
 		LocalDateTime endDateTime = RentalDateService.
 				calculateEndDate(startDate, rental.getRentalPeriod());
@@ -142,16 +145,21 @@ public class RentalService {
 	@Transactional
 	public RentalResponseDTO cancel(String rentId, String userId) {
 		Rental rental = findById(rentId);
-		rental.cancel();
 		
+		authorizationService.requireOne(rental, userId);
+		
+		rental.cancel();
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
 	@Transactional
 	public RentalResponseDTO confirm(String rentId, String userId) {
 		Rental rental = findById(rentId);
-		rental.confirm();
 		
+		// TEMPORARY
+		authorizationService.requireOne(rental, userId);
+		
+		rental.confirm();
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
