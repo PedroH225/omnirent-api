@@ -112,16 +112,20 @@ public class RentalService {
 	@Transactional
 	public RentalResponseDTO requestReturn(String rentId, String userId) {
 		Rental rental = findById(rentId);
-		rental.requestReturn();
 		
+		authorizationService.requireRenter(rental, userId);
+
+		rental.requestReturn();				
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 	
 	@Transactional
 	public RentalResponseDTO markReturnShipped(String rentId, String userId) {
 		Rental rental = findById(rentId);
-		rental.markReturnShipped();
 		
+		authorizationService.requireRenter(rental, userId);
+
+		rental.markReturnShipped();		
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 	
