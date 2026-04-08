@@ -11,10 +11,12 @@ import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.user.User;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -36,19 +38,44 @@ public class Item extends NamedEntity {
 	@Enumerated(EnumType.STRING)
 	public ItemStatus itemStatus;
 	
-	@ManyToOne
-	@JoinColumn(name = "sub_category_id")
+	@Column(name = "owner_id")
+	private String ownerId;
+	
+	@Column(name = "sub_category_id")
+	private String subCategoryId;
+	
+	@Column(name = "pickup_address_id")
+	private String pickupAddressId;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "sub_category_id", insertable = false, updatable = false)
 	private SubCategory subCategory;
 	
-	@ManyToOne
-	@JoinColumn(name = "pickup_address_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "pickup_address_id", insertable = false, updatable = false)
 	private Address pickupAdress;
 	
-	@ManyToOne
-	@JoinColumn(name = "owner_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "owner_id", insertable = false, updatable = false)
 	private User owner;
 	
 	public void updateItemStatus(String status) {
 	    setItemStatus(ItemStatus.fromString(status));
+	}
+	
+	public void assignOwner(User owner) {
+		this.owner = owner;
+		this.ownerId = owner.getId();
+
+	}
+	
+	public void assignSubCategory(SubCategory subCategory) {
+		this.subCategory = subCategory;
+		this.subCategoryId = subCategory.getId();
+	}
+	
+	public void assignAddress(Address address) {
+		this.pickupAdress = address;
+		this.pickupAddressId = pickupAdress.getId();
 	}
 }

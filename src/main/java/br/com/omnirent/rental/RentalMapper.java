@@ -32,8 +32,8 @@ public class RentalMapper {
 		    BigDecimal finalPrice) {
 		Rental rental = new Rental();
 		
-		rental.setRenter(renter);
-		rental.setOwner(owner);
+		rental.assignOwner(owner);
+		rental.assignRenter(renter);
 		
 		rental.setRentalPeriod(rentalPeriod);
 		

@@ -50,12 +50,13 @@ public class ItemService {
 	}
 
 	public ItemResponseDTO addItem(ItemRequestDTO itemDTO, String userId) {
-		Item item = ItemMapper.fromDto(itemDTO);
+		User user = userService.findById(userId);
+		Address pickupAddress = addressService.findById(itemDTO.addressId());
+		SubCategory subCategory = categoryService.findSubById(itemDTO.subCategoryId());
 		
-		item.setOwner(userService.findById(userId));
-		item.setPickupAdress(addressService.findById(itemDTO.addressId()));
-		item.setSubCategory(categoryService.findSubById(itemDTO.subCategoryId()));
-		item.setItemStatus(ItemStatus.AVAILABLE);
+		Item item = ItemMapper.fromDto(itemDTO, user, 
+				pickupAddress, subCategory,
+				ItemStatus.AVAILABLE);
 		
 		return ItemMapper.toDto(itemRepository.save(item));
 	}
@@ -64,23 +65,22 @@ public class ItemService {
 	public ItemResponseDTO updateItem(ItemRequestDTO itemDTO, String userId) {
 		User user = userService.findById(userId);
 		Item updatedItem = findById(itemDTO.id());
-				
+
 		Address address = null;
 		if (StringUtils.isNotBlank(itemDTO.addressId()) && 
-				!updatedItem.getPickupAdress().getId().equals(itemDTO.addressId())) {
+				!updatedItem.getPickupAddressId().equals(itemDTO.addressId())) {
 			address = addressService.findById(itemDTO.addressId());
 		}
 		
 		SubCategory subCategory = null;
 		if (StringUtils.isNotBlank(itemDTO.subCategoryId()) && 
-				!updatedItem.getSubCategory().getId().equals(itemDTO.subCategoryId())) {
+				!updatedItem.getSubCategoryId().equals(itemDTO.subCategoryId())) {
 			subCategory = categoryService.findSubById(itemDTO.subCategoryId());
 		}
 		
 		ItemMapper.updateItem(itemDTO, address, subCategory, updatedItem);
 		
 		return ItemMapper.toDto(itemRepository.save(updatedItem));
-
 	}
 
 	@Transactional
