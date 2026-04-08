@@ -65,23 +65,22 @@ public class ItemService {
 	public ItemResponseDTO updateItem(ItemRequestDTO itemDTO, String userId) {
 		User user = userService.findById(userId);
 		Item updatedItem = findById(itemDTO.id());
-				
+
 		Address address = null;
 		if (StringUtils.isNotBlank(itemDTO.addressId()) && 
-				!updatedItem.getPickupAdress().getId().equals(itemDTO.addressId())) {
+				!updatedItem.getPickupAddressId().equals(itemDTO.addressId())) {
 			address = addressService.findById(itemDTO.addressId());
 		}
 		
 		SubCategory subCategory = null;
 		if (StringUtils.isNotBlank(itemDTO.subCategoryId()) && 
-				!updatedItem.getSubCategory().getId().equals(itemDTO.subCategoryId())) {
+				!updatedItem.getSubCategoryId().equals(itemDTO.subCategoryId())) {
 			subCategory = categoryService.findSubById(itemDTO.subCategoryId());
 		}
 		
 		ItemMapper.updateItem(itemDTO, address, subCategory, updatedItem);
 		
 		return ItemMapper.toDto(itemRepository.save(updatedItem));
-
 	}
 
 	@Transactional
