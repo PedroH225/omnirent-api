@@ -20,4 +20,11 @@ public class RentalAuthorizationService {
 			throw new ForbiddenException(DEFAULT_MESSAGE);
 		}
 	}
+	
+	public void requireOne(Rental rental, String currentUserId) {
+		if (!rental.getRenterId().equals(currentUserId) &&
+				!rental.getOwnerId().equals(currentUserId)) {
+			throw new ForbiddenException(DEFAULT_MESSAGE);
+		}
+	}
 }
