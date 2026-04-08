@@ -88,10 +88,10 @@ public class RentalService {
 	@Transactional
 	public RentalResponseDTO ship(String rentId, String currentUserId) {
 		Rental rental = findById(rentId);
-		rental.ship();
 		
 		authorizationService.requireOwner(rental, currentUserId);
-		
+
+		rental.ship();				
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
@@ -132,10 +132,10 @@ public class RentalService {
 	@Transactional
 	public RentalResponseDTO markReturned(String rentId, String currentUserId) {
 		Rental rental = findById(rentId);
-		rental.markReturned();
 		
 		authorizationService.requireOwner(rental, currentUserId);
 		
+		rental.markReturned();
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
