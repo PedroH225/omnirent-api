@@ -1,4 +1,4 @@
-package br.com.omnirent.item;
+package br.com.omnirent.item.domain;
 
 import br.com.omnirent.rental.domain.Rental;
 import jakarta.persistence.Embedded;

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.omnirent.common.enums.ItemEnums;
+import br.com.omnirent.item.domain.ItemRequestDTO;
+import br.com.omnirent.item.domain.ItemResponseDTO;
 import br.com.omnirent.security.SecurityUtils;
 import lombok.AllArgsConstructor;
 

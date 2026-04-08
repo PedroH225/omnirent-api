@@ -10,8 +10,8 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import br.com.omnirent.address.AddressSnapshot;
 import br.com.omnirent.address.AddressSnapshotDTO;
-import br.com.omnirent.item.ItemSnapshot;
-import br.com.omnirent.item.ItemSnapshotDTO;
+import br.com.omnirent.item.domain.ItemSnapshot;
+import br.com.omnirent.item.domain.ItemSnapshotDTO;
 import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.UserResponseDTO;
 import lombok.Data;
