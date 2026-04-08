@@ -50,12 +50,13 @@ public class ItemService {
 	}
 
 	public ItemResponseDTO addItem(ItemRequestDTO itemDTO, String userId) {
-		Item item = ItemMapper.fromDto(itemDTO);
+		User user = userService.findById(userId);
+		Address pickupAddress = addressService.findById(itemDTO.addressId());
+		SubCategory subCategory = categoryService.findSubById(itemDTO.subCategoryId());
 		
-		item.setOwner(userService.findById(userId));
-		item.setPickupAdress(addressService.findById(itemDTO.addressId()));
-		item.setSubCategory(categoryService.findSubById(itemDTO.subCategoryId()));
-		item.setItemStatus(ItemStatus.AVAILABLE);
+		Item item = ItemMapper.fromDto(itemDTO, user, 
+				pickupAddress, subCategory,
+				ItemStatus.AVAILABLE);
 		
 		return ItemMapper.toDto(itemRepository.save(item));
 	}

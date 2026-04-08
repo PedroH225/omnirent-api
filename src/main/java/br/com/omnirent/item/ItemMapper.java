@@ -5,9 +5,9 @@ import java.util.stream.Collectors;
 
 import br.com.omnirent.address.Address;
 import br.com.omnirent.category.SubCategory;
-import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.rental.domain.Rental;
+import br.com.omnirent.user.User;
 
 public class ItemMapper {
 
@@ -21,12 +21,18 @@ public class ItemMapper {
 		return new ItemResponseDTO(item);
 	}
 
-	public static Item fromDto(ItemRequestDTO itemDTO) {
+	public static Item fromDto(ItemRequestDTO itemDTO, User owner, Address pickUpAddress,
+			SubCategory subCategory, ItemStatus itemStatus) {
 		Item item = new Item();
 		
 		item.setName(itemDTO.name());
-		
 		ItemData itemData = new ItemData(itemDTO);
+		
+		item.assignOwner(owner);
+		item.assignAddress(pickUpAddress);
+		item.assignSubCategory(subCategory);
+		
+		item.setItemStatus(itemStatus);
 		
 		item.setItemData(itemData);
 		
@@ -41,11 +47,11 @@ public class ItemMapper {
 		item.setItemData(itemData);
 		
 		if (address != null) {
-			item.setPickupAdress(address);
+			item.assignAddress(address);
 		}
 		
 		if (subCategory != null) {
-			item.setSubCategory(subCategory);
+			item.assignSubCategory(subCategory);
 		}
 	}
 	
