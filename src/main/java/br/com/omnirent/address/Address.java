@@ -2,8 +2,10 @@ package br.com.omnirent.address;
 
 import br.com.omnirent.common.BaseEntity;
 import br.com.omnirent.user.User;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -20,13 +22,16 @@ public class Address extends BaseEntity {
 	@Embedded
 	private AddressData addressData;
 	
-	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@Column(name = "user_id")
+	private String userId;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", insertable = false, updatable = false)
 	private User user;
 	
-	public void addUser(User user) {
-		setUser(user);
-		user.getAddresses().add(this);
+	public void assignUser(User user) {
+		this.user = user;
+		this.userId = user.getId();
 	}
 	
 	public void updateFields(AddressRequestDTO addressDTO) {
