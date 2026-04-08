@@ -1,5 +1,7 @@
 package br.com.omnirent.common.enums;
 
+import br.com.omnirent.exception.domain.IllegalEnumerationException;
+
 public enum ItemStatus {
     AVAILABLE("Available"),
     UNAVAILABLE("Unavailable"),
@@ -19,7 +21,7 @@ public enum ItemStatus {
                 return itemStatus;
             }
         }
-        throw new IllegalArgumentException("Item status enumaration not found: " + text);
+        throw new IllegalEnumerationException(ItemStatus.class, text);
     }
 
     public String toString(){

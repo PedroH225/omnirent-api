@@ -1,5 +1,7 @@
 package br.com.omnirent.common.enums;
 
+import br.com.omnirent.exception.domain.IllegalEnumerationException;
+
 public enum RentalStatus {
 	CREATED("Created"),
 	CONFIRMED("Confirmed"),
@@ -25,7 +27,7 @@ public enum RentalStatus {
                 return rentalStatus;
             }
         }
-        throw new IllegalArgumentException("Rental status enumaration not found: " + text);
+        throw new IllegalEnumerationException(RentalStatus.class, text);
     }
 
     public String toString(){

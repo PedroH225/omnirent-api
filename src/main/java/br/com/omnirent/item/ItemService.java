@@ -11,6 +11,7 @@ import br.com.omnirent.address.AddressService;
 import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.SubCategory;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserService;
 import jakarta.transaction.Transactional;
@@ -32,7 +33,7 @@ public class ItemService {
 		Optional<Item> item = itemRepository.findById(id);
 		
 		if (item.isEmpty()) {
-			throw new RuntimeException("Item not found.");
+			throw new ItemNotFoundException();
 		}
 		
 		return item.get();
@@ -54,6 +55,7 @@ public class ItemService {
 		item.setOwner(userService.findById(userId));
 		item.setPickupAdress(addressService.findById(itemDTO.addressId()));
 		item.setSubCategory(categoryService.findSubById(itemDTO.subCategoryId()));
+		item.setItemStatus(ItemStatus.AVAILABLE);
 		
 		return ItemMapper.toDto(itemRepository.save(item));
 	}
