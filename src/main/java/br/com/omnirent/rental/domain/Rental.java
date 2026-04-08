@@ -11,9 +11,11 @@ import br.com.omnirent.exception.domain.IllegalRentalStateException;
 import br.com.omnirent.item.ItemSnapshot;
 import br.com.omnirent.user.User;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
@@ -40,12 +42,18 @@ public class Rental extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	private RentalPeriod rentalPeriod;
 	
-	@ManyToOne
-	@JoinColumn(name = "renter_id")
+	@Column(name = "renter_id")
+	private String renterId;
+	
+	@Column(name = "owner_id")
+	private String ownerId;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "renter_id", insertable = false, updatable = false)
 	private User renter;
 	
-	@ManyToOne
-	@JoinColumn(name = "owner_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "owner_id", insertable = false, updatable = false)
 	private User owner;
 	
 	@OneToOne(mappedBy = "rental", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -53,6 +61,16 @@ public class Rental extends BaseEntity {
 	
 	@OneToOne(mappedBy = "rental", cascade = CascadeType.ALL, orphanRemoval = true)
 	private AddressSnapshot addressSnapshot;
+	
+	public void assignOwner(User owner) {
+		this.owner = owner;
+		this.ownerId = owner.getId();
+	}
+	
+	public void assignRenter(User renter) {
+		this.renter = renter;
+		this.renterId = renter.getId();
+	}
 	
 	public void updateStatus(String status) {
 		this.rentalStatus = RentalStatus.fromString(status);
