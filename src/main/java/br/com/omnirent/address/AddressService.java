@@ -39,7 +39,7 @@ public class AddressService {
 		
 		Address address = AddressMapper.fromAddressDTO(addressDto);
 		
-		address.addUser(user);
+		address.assignUser(user);
 				
 		return AddressMapper.toDto(addressRepository.save(address));
 	}
