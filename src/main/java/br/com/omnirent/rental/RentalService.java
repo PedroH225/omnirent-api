@@ -13,6 +13,7 @@ import br.com.omnirent.exception.domain.RentalNotFoundException;
 import br.com.omnirent.item.Item;
 import br.com.omnirent.item.ItemService;
 import br.com.omnirent.rental.domain.Rental;
+import br.com.omnirent.rental.domain.RentalAuthorizationService;
 import br.com.omnirent.rental.domain.RentalDateService;
 import br.com.omnirent.rental.domain.RentalPriceService;
 import br.com.omnirent.rental.domain.RentalRequestDTO;
@@ -31,6 +32,8 @@ public class RentalService {
 	private ItemService itemService;
 	
 	private UserService userService;
+	
+	private RentalAuthorizationService authorizationService;
 	
 	public Rental findById(String id) {
 		Optional<Rental> rental = rentalRepository.findById(id);
@@ -75,15 +78,19 @@ public class RentalService {
 	@Transactional
 	public RentalResponseDTO startPreparing(String rentId, String currentUserId) {
 		Rental rental = findById(rentId);
-		rental.startPreparing();
 		
+		authorizationService.requireOwner(rental, currentUserId);
+
+		rental.startPreparing();
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
 	@Transactional
-	public RentalResponseDTO ship(String rentId, String userId) {
+	public RentalResponseDTO ship(String rentId, String currentUserId) {
 		Rental rental = findById(rentId);
 		rental.ship();
+		
+		authorizationService.requireOwner(rental, currentUserId);
 		
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
@@ -119,9 +126,11 @@ public class RentalService {
 	}
 	
 	@Transactional
-	public RentalResponseDTO markReturned(String rentId, String userId) {
+	public RentalResponseDTO markReturned(String rentId, String currentUserId) {
 		Rental rental = findById(rentId);
 		rental.markReturned();
+		
+		authorizationService.requireOwner(rental, currentUserId);
 		
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
