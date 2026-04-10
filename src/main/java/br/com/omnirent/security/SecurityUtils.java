@@ -11,8 +11,8 @@ public class SecurityUtils {
         Authentication authentication =
             SecurityContextHolder.getContext().getAuthentication();
 
-        User user = (User) authentication.getPrincipal();
+        AuthenticatedUser authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
 
-        return user.getId();
+        return authenticatedUser.getId();
     }
 }
