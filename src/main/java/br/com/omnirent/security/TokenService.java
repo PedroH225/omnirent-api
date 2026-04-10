@@ -42,6 +42,7 @@ public class TokenService {
                 )
                 .withClaim("ver", authMetadata.getTokenVersion())
                 .withClaim("gver", authMetadata.getGlobalVersion())
+                .withExpiresAt(getExpirationDate())
                 .sign(algorithm);
             return token;
 
