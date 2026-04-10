@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS `omnirent_db`.`users` (
   `user_status` VARCHAR(20) DEFAULT 'ACTIVE',
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `token_version` INT NOT NULL DEFAULT 1,
+  `global_version` INT NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `email_UNIQUE` (`email`),
   UNIQUE INDEX `username_UNIQUE` (`username`)
