@@ -11,6 +11,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import br.com.omnirent.config.GlobalConfigHolder;
+import br.com.omnirent.security.domain.AuthenticatedUser;
 import br.com.omnirent.user.AuthMetadata;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserService;
@@ -26,6 +28,9 @@ public class SecurityFilter extends OncePerRequestFilter{
     
     @Autowired
 	private UserService userService;
+    
+    @Autowired
+    private GlobalConfigHolder globalConfigHolder;
  
     @Override
     protected void doFilterInternal
@@ -51,9 +56,13 @@ public class SecurityFilter extends OncePerRequestFilter{
                 AuthMetadata authMetadata = userService.getTokenVersion(id);
                 if (!tokenVer.equals(authMetadata.getTokenVersion())) {
 					throw new Exception();
-				}
+				} 
                 
-                Integer globalVer = decoded.getClaim("ver").asInt();
+                Integer globalVer = globalConfigHolder.getGlobalTokenVersion();
+                Integer currGlobalVer = decoded.getClaim("ver").asInt();
+                if (!globalVer.equals(currGlobalVer)) {
+					throw new Exception();
+				}
                 
                 AuthenticatedUser authenticatedUser = new AuthenticatedUser
                 		(id, authorities, tokenVer, globalVer);
