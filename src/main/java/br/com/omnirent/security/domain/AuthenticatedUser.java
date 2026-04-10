@@ -1,4 +1,4 @@
-package br.com.omnirent.security;
+package br.com.omnirent.security.domain;
 
 import java.util.List;
 

@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import br.com.omnirent.exception.domain.EmailInUseException;
 import br.com.omnirent.exception.domain.FailedLoginException;
 import br.com.omnirent.exception.domain.UserNotFoundException;
+import br.com.omnirent.security.domain.LoginDTO;
+import br.com.omnirent.security.domain.RegisterDTO;
 import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserRepository;
 
