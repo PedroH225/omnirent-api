@@ -5,29 +5,43 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 
+import br.com.omnirent.exception.common.ForbiddenException;
+import br.com.omnirent.exception.common.UnauthorizedException;
+import br.com.omnirent.user.AuthMetadata;
 import br.com.omnirent.user.User;
+import br.com.omnirent.user.UserRepository;
 
 @Service
 public class TokenService {
 
 	@Value("${tokenPass}")
     private String tokenPass;
-
+	
     public String generateToken(User userModel){
         try {
             Algorithm algorithm = Algorithm.HMAC256(tokenPass);
 
+            AuthMetadata authMetadata = userModel.getAuthMetadata();
             String token = JWT.create()
                 .withIssuer("auth")
                 .withSubject(userModel.getId())
-                .withExpiresAt(getExpirationDate())
+                .withClaim("roles",
+                        userModel.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList()
+                )
+                .withClaim("ver", authMetadata.getTokenVersion())
+                .withClaim("gver", authMetadata.getGlobalVersion())
                 .sign(algorithm);
             return token;
 
@@ -37,19 +51,18 @@ public class TokenService {
         }
     }
 
-        public String validateToken(String token){
+        public DecodedJWT validateToken(String token){
             try {
                 Algorithm algorithm = Algorithm.HMAC256(tokenPass);
 
                 return JWT.require(algorithm)
                     .withIssuer("auth")
                     .build()
-                    .verify(token)
-                    .getSubject();
+                    .verify(token);
             } 
             
             catch (JWTVerificationException exception) {
-                return "";
+            	throw new UnauthorizedException("Requires authentication");
             }
         }
 
