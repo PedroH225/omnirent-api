@@ -15,6 +15,7 @@ import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.rental.domain.Rental;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -38,7 +39,7 @@ public class User extends NamedEntity implements UserDetails {
 	private String password;
 	
 	private LocalDate birthDate;
-	
+		
 	@Enumerated(EnumType.STRING)
 	private UserStatus userStatus;
 	
@@ -53,6 +54,9 @@ public class User extends NamedEntity implements UserDetails {
 	
 	@OneToMany(mappedBy = "owner")
 	private List<Rental> rentals;
+	
+	@Embedded
+	private AuthMetadata authMetadata;
 	
 	public User update(UserRequestDTO userDTO) {
 		this.name = userDTO.name();

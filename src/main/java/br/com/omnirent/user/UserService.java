@@ -3,7 +3,11 @@ package br.com.omnirent.user;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
 
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.security.SecurityUtils;
@@ -14,7 +18,7 @@ import lombok.AllArgsConstructor;
 public class UserService {
 
 	private UserRepository userRepository;
-	
+		
 	public User findById(String id) {
 		Optional<User> user = userRepository.findById(id);
 		
@@ -24,7 +28,7 @@ public class UserService {
 		
 		return user.get();
 	}
-
+	
 	public UserDetailsDTO getUserDetailsById(String id) {
 		return UserMapper.toDetailsDto(findById(id));
 	}
@@ -35,9 +39,9 @@ public class UserService {
 
 	public UserDetailsDTO update(UserRequestDTO userDTO) {
 		User user = findById(SecurityUtils.currentUserId());
-		
+				
 		User updatedUser = userRepository.save(user.update(userDTO));
-		
+				
 		return UserMapper.toDetailsDto(updatedUser);
 	}
 
@@ -45,7 +49,6 @@ public class UserService {
 		User user = findById(userId);
 		
 		userRepository.save(user.deactivate());
-		
 	}
 
 	public void activateUser(String userId) {
@@ -53,4 +56,20 @@ public class UserService {
 		
 		userRepository.save(user.activate());		
 	}
+	
+	@Cacheable(value = "tokenVersion", key = "#userId")
+	public AuthMetadata getTokenVersion(String userId) {
+	    AuthMetadata authMetadata = userRepository.findTokenVersionById(userId);
+	    
+	    return authMetadata;
+	}
+	
+	@CacheEvict(value = "tokenVersion", key = "#user.id")
+	public User saveUpdatingToken(User user) {
+		AuthMetadata authMetadata = user.getAuthMetadata();
+		Integer currentTokenVer = authMetadata.getTokenVersion();
+		authMetadata.setTokenVersion(currentTokenVer == null ? 1 : currentTokenVer + 1);
+	    return userRepository.save(user);
+	}
+
 }
