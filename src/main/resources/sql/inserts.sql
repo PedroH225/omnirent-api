@@ -1,3 +1,7 @@
+-- SYSTEM CONFIG
+INSERT INTO global_configurations (id, global_token_version) VALUES
+(1, 1);
+
 -- USERS
 INSERT INTO users (id, name, username, email, password, birth_date, user_status, created_at, updated_at) VALUES
 ('ab6c0937-17ac-434e-80dd-c8b581d55935','Pedro Alves','pedro','pedro@email.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1998-05-10','ACTIVE',NOW(),NOW()),

@@ -5,6 +5,13 @@ DROP SCHEMA IF EXISTS `omnirent_db`;
 CREATE SCHEMA IF NOT EXISTS `omnirent_db`;
 USE `omnirent_db`;
 
+CREATE TABLE IF NOT EXISTS `omnirent_db`.`global_configurations` (
+  `id` INT NOT NULL,
+  `global_token_version` INT NOT NULL,
+  `last_updated` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+
 -- -----------------------------------------------------
 -- Table `users`
 -- -----------------------------------------------------
