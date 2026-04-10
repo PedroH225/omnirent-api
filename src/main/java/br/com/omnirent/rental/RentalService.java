@@ -10,9 +10,10 @@ import org.springframework.stereotype.Service;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.exception.domain.RentalNotFoundException;
-import br.com.omnirent.item.Item;
 import br.com.omnirent.item.ItemService;
+import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.rental.domain.Rental;
+import br.com.omnirent.rental.domain.RentalAuthorizationService;
 import br.com.omnirent.rental.domain.RentalDateService;
 import br.com.omnirent.rental.domain.RentalPriceService;
 import br.com.omnirent.rental.domain.RentalRequestDTO;
@@ -31,6 +32,8 @@ public class RentalService {
 	private ItemService itemService;
 	
 	private UserService userService;
+	
+	private RentalAuthorizationService authorizationService;
 	
 	public Rental findById(String id) {
 		Optional<Rental> rental = rentalRepository.findById(id);
@@ -75,16 +78,20 @@ public class RentalService {
 	@Transactional
 	public RentalResponseDTO startPreparing(String rentId, String currentUserId) {
 		Rental rental = findById(rentId);
-		rental.startPreparing();
 		
+		authorizationService.requireOwner(rental, currentUserId);
+
+		rental.startPreparing();
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
 	@Transactional
-	public RentalResponseDTO ship(String rentId, String userId) {
+	public RentalResponseDTO ship(String rentId, String currentUserId) {
 		Rental rental = findById(rentId);
-		rental.ship();
 		
+		authorizationService.requireOwner(rental, currentUserId);
+
+		rental.ship();				
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
@@ -92,6 +99,9 @@ public class RentalService {
 	public RentalResponseDTO markInUse(String rentId, String userId) {
 		Rental rental = findById(rentId);
 		rental.markInUse();
+		
+		// TEMPORARY
+		authorizationService.requireOne(rental, userId);
 		
 		LocalDateTime startDate = LocalDateTime.now();
 		LocalDateTime endDateTime = RentalDateService.
@@ -105,40 +115,51 @@ public class RentalService {
 	@Transactional
 	public RentalResponseDTO requestReturn(String rentId, String userId) {
 		Rental rental = findById(rentId);
-		rental.requestReturn();
 		
+		authorizationService.requireRenter(rental, userId);
+
+		rental.requestReturn();				
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 	
 	@Transactional
 	public RentalResponseDTO markReturnShipped(String rentId, String userId) {
 		Rental rental = findById(rentId);
-		rental.markReturnShipped();
 		
+		authorizationService.requireRenter(rental, userId);
+
+		rental.markReturnShipped();		
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 	
 	@Transactional
-	public RentalResponseDTO markReturned(String rentId, String userId) {
+	public RentalResponseDTO markReturned(String rentId, String currentUserId) {
 		Rental rental = findById(rentId);
-		rental.markReturned();
 		
+		authorizationService.requireOwner(rental, currentUserId);
+		
+		rental.markReturned();
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
 	@Transactional
 	public RentalResponseDTO cancel(String rentId, String userId) {
 		Rental rental = findById(rentId);
-		rental.cancel();
 		
+		authorizationService.requireOne(rental, userId);
+		
+		rental.cancel();
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
 	@Transactional
 	public RentalResponseDTO confirm(String rentId, String userId) {
 		Rental rental = findById(rentId);
-		rental.confirm();
 		
+		// TEMPORARY
+		authorizationService.requireOne(rental, userId);
+		
+		rental.confirm();
 		return RentalMapper.toDto(rentalRepository.save(rental));
 	}
 
