@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.exception.domain.AddressNotFoundException;
+import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,8 @@ import lombok.AllArgsConstructor;
 public class AddressService {
 
 	private AddressRepository addressRepository;
+	
+	private UserRepository userRepository;
 	
 	private UserService userService;
 	
@@ -32,9 +35,9 @@ public class AddressService {
 		return addressRepository.findAddressByUser(userId);
 	}
 
-	public AddressResponseDTO addAddress(AddressRequestDTO addressDto, String userId) {
-		User user = userService.findById(userId);
-		
+	public AddressResponseDTO addAddress(AddressRequestDTO addressDto, String userId) {	
+		User user = userRepository.getReferenceById(userId);
+				
 		Address address = AddressMapper.fromAddressDTO(addressDto);
 		
 		address.assignUser(user);
