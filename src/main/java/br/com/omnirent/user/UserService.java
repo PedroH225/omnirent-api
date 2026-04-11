@@ -37,7 +37,13 @@ public class UserService {
 	}
 	
 	public UserDetailsDTO getUserDetailsById(String id) {
-		return userMapper.toDetailsDto(findById(id));
+		Optional<UserDetailsDTO> user = userRepository.findUserDetailsById(id);
+
+		if (user.isEmpty()) {
+			throw new UserNotFoundException();
+		}
+		
+		return user.get();
 	}
 
 	public List<UserResponseDTO> findAll() {

@@ -10,9 +10,17 @@ import org.springframework.stereotype.Repository;
 
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
+import br.com.omnirent.user.domain.UserDetailsDTO;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
+	
+	@Query("""
+			SELECT new br.com.omnirent.user.domain.UserDetailsDTO(u.id, u.name, u.username, 
+			u.email, u.birthDate, u.userStatus)
+			FROM User u WHERE u.id = :id
+			""")
+	Optional<UserDetailsDTO> findUserDetailsById(String id);
 
 	Optional<UserDetails> findByEmail(String email);
 	
