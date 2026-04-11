@@ -1,5 +1,6 @@
 package br.com.omnirent.address;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,6 +35,8 @@ public class AddressResponseDTO {
 	@JsonIgnore
 	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 	
+	
+	
 	public AddressResponseDTO(Address address) {
 	    this.id = address.getId();
 	    
@@ -50,6 +53,24 @@ public class AddressResponseDTO {
 
 	    this.createdAt = dtf.format(address.getCreatedAt());
 	    this.updatedAt = dtf.format(address.getUpdatedAt());
+	}
+
+
+
+	public AddressResponseDTO(String id, String street, String number, String complement, String district, String city,
+			String state, String country, String zipCode, LocalDateTime createdAt, LocalDateTime updatedAt) {
+		this.id = id;
+		this.street = street;
+		this.number = number;
+		this.complement = complement;
+		this.district = district;
+		this.city = city;
+		this.state = state;
+		this.country = country;
+		this.zipCode = zipCode;
+		
+	    this.createdAt = dtf.format(createdAt);
+	    this.updatedAt = dtf.format(updatedAt);
 	}
 	
 }

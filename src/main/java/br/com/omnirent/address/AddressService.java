@@ -29,9 +29,7 @@ public class AddressService {
 	}
 	
 	public List<AddressResponseDTO> getUserAddresses(String userId) {
-		List<Address> userAddresses = userService.findById(userId).getAddresses();
-		
-		return AddressMapper.toDto(userAddresses);
+		return addressRepository.findAddressByUser(userId);
 	}
 
 	public AddressResponseDTO addAddress(AddressRequestDTO addressDto, String userId) {
