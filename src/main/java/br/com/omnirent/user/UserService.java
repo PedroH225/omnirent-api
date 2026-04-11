@@ -47,7 +47,7 @@ public class UserService {
 	}
 
 	public List<UserResponseDTO> findAll() {
-		return UserMapper.toDto(userRepository.findAll());
+		return userRepository.findAllUser();
 	}
 
 	public UserDetailsDTO update(UserRequestDTO userDTO) {

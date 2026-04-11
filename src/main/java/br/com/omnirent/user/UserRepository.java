@@ -1,5 +1,6 @@
 package br.com.omnirent.user;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.domain.UserDetailsDTO;
+import br.com.omnirent.user.domain.UserResponseDTO;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
@@ -22,6 +24,11 @@ public interface UserRepository extends JpaRepository<User, String> {
 			""")
 	Optional<UserDetailsDTO> findUserDetailsById(String id);
 
+	@Query("""
+			SELECT new br.com.omnirent.user.domain.UserResponseDTO(u.id, u.username) FROM User u
+			""")
+	List<UserResponseDTO> findAllUser();
+	
 	Optional<UserDetails> findByEmail(String email);
 	
 	Optional<User> findByEmailAndIdNot(String email, String id);
