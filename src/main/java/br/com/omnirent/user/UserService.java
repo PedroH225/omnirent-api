@@ -16,6 +16,7 @@ import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.domain.UserDetailsDTO;
 import br.com.omnirent.user.domain.UserRequestDTO;
 import br.com.omnirent.user.domain.UserResponseDTO;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -50,20 +51,23 @@ public class UserService {
 		return userRepository.findAllUser();
 	}
 
+	@Transactional
 	public UserDetailsDTO update(UserRequestDTO userDTO) {
 		User user = findById(SecurityUtils.currentUserId());
 				
 		User updatedUser = userRepository.save(user.update(userDTO));
 				
-		return UserMapper.toDetailsDto(updatedUser);
+		return userMapper.toDetailsDto(updatedUser);
 	}
 
+	@Transactional
 	public void deactivateUser(String userId) {
 		User user = findById(userId);
 		
 		userRepository.save(user.deactivate());
 	}
 
+	@Transactional
 	public void activateUser(String userId) {
 		User user = findById(userId);
 		
