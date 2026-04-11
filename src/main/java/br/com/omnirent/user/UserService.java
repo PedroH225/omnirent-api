@@ -11,11 +11,18 @@ import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
 
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.security.SecurityUtils;
+import br.com.omnirent.user.domain.AuthMetadata;
+import br.com.omnirent.user.domain.User;
+import br.com.omnirent.user.domain.UserDetailsDTO;
+import br.com.omnirent.user.domain.UserRequestDTO;
+import br.com.omnirent.user.domain.UserResponseDTO;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
 public class UserService {
+	
+	private UserMapper userMapper;
 
 	private UserRepository userRepository;
 		
@@ -30,7 +37,7 @@ public class UserService {
 	}
 	
 	public UserDetailsDTO getUserDetailsById(String id) {
-		return UserMapper.toDetailsDto(findById(id));
+		return userMapper.toDetailsDto(findById(id));
 	}
 
 	public List<UserResponseDTO> findAll() {

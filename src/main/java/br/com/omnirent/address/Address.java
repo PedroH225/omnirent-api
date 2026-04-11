@@ -1,7 +1,7 @@
 package br.com.omnirent.address;
 
 import br.com.omnirent.common.BaseEntity;
-import br.com.omnirent.user.User;
+import br.com.omnirent.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;

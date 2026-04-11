@@ -15,8 +15,8 @@ import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemRequestDTO;
 import br.com.omnirent.item.domain.ItemResponseDTO;
-import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserService;
+import br.com.omnirent.user.domain.User;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 

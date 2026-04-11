@@ -3,6 +3,13 @@ package br.com.omnirent.user;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+
+import br.com.omnirent.user.domain.User;
+import br.com.omnirent.user.domain.UserDetailsDTO;
+import br.com.omnirent.user.domain.UserResponseDTO;
+
+@Component
 public class UserMapper {
 	public static List<UserResponseDTO> toDto(List<User> users) {
 		return users.stream()
@@ -15,7 +22,7 @@ public class UserMapper {
 		return userDTO;
 	}
 	
-	public static UserDetailsDTO toDetailsDto(User user) {
+	public UserDetailsDTO toDetailsDto(User user) {
 		UserDetailsDTO userDTO = new UserDetailsDTO(user);
 		return userDTO;
 	}

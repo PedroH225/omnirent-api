@@ -18,8 +18,8 @@ import br.com.omnirent.rental.domain.RentalDateService;
 import br.com.omnirent.rental.domain.RentalPriceService;
 import br.com.omnirent.rental.domain.RentalRequestDTO;
 import br.com.omnirent.rental.domain.RentalResponseDTO;
-import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserService;
+import br.com.omnirent.user.domain.User;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 

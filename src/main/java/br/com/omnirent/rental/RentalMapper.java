@@ -13,7 +13,7 @@ import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.domain.RentalResponseDTO;
-import br.com.omnirent.user.User;
+import br.com.omnirent.user.domain.User;
 
 public class RentalMapper {
 

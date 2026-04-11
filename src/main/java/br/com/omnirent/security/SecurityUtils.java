@@ -4,7 +4,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import br.com.omnirent.security.domain.AuthenticatedUser;
-import br.com.omnirent.user.User;
+import br.com.omnirent.user.domain.User;
 
 public class SecurityUtils {
 

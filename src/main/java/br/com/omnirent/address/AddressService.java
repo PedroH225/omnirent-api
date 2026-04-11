@@ -6,8 +6,8 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.exception.domain.AddressNotFoundException;
-import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserService;
+import br.com.omnirent.user.domain.User;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor

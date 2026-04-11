@@ -9,7 +9,7 @@ import br.com.omnirent.common.NamedEntity;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.rental.domain.Rental;
-import br.com.omnirent.user.User;
+import br.com.omnirent.user.domain.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;

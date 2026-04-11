@@ -1,4 +1,4 @@
-package br.com.omnirent.user;
+package br.com.omnirent.user.domain;
 
 import java.time.LocalDate;
 

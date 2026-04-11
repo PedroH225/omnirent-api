@@ -17,9 +17,9 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 
 import br.com.omnirent.exception.common.ForbiddenException;
 import br.com.omnirent.exception.common.UnauthorizedException;
-import br.com.omnirent.user.AuthMetadata;
-import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserRepository;
+import br.com.omnirent.user.domain.AuthMetadata;
+import br.com.omnirent.user.domain.User;
 
 @Service
 public class TokenService {

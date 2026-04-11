@@ -23,8 +23,8 @@ import br.com.omnirent.exception.domain.FailedLoginException;
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.security.domain.LoginDTO;
 import br.com.omnirent.security.domain.RegisterDTO;
-import br.com.omnirent.user.User;
 import br.com.omnirent.user.UserRepository;
+import br.com.omnirent.user.domain.User;
 
 @Service
 public class AuthenticationService implements UserDetailsService {

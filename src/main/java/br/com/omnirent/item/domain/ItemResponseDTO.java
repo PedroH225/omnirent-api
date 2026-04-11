@@ -11,7 +11,7 @@ import br.com.omnirent.address.AddressResponseDTO;
 import br.com.omnirent.category.CategoryMapper;
 import br.com.omnirent.category.SubCategoryResDTO;
 import br.com.omnirent.user.UserMapper;
-import br.com.omnirent.user.UserResponseDTO;
+import br.com.omnirent.user.domain.UserResponseDTO;
 import lombok.Data;
 
 @Data

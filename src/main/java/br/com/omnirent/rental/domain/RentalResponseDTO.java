@@ -13,7 +13,7 @@ import br.com.omnirent.address.AddressSnapshotDTO;
 import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.item.domain.ItemSnapshotDTO;
 import br.com.omnirent.user.UserMapper;
-import br.com.omnirent.user.UserResponseDTO;
+import br.com.omnirent.user.domain.UserResponseDTO;
 import lombok.Data;
 
 @Data

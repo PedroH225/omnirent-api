@@ -13,9 +13,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.security.domain.AuthenticatedUser;
-import br.com.omnirent.user.AuthMetadata;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserService;
+import br.com.omnirent.user.domain.AuthMetadata;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
