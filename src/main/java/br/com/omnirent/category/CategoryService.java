@@ -62,11 +62,30 @@ public class CategoryService {
  	}
 
 	public List<CategoryResponseDTO> findAll() {
-		return CategoryMapper.toDto(categoryRepository.findAll());
+		List<CategoryResponseDTO> categories = categoryRepository.getAllCategories();
+		
+		List<SubCategoryResDTO> subCategories = findAllSub();
+		
+		Map<String, List<SubCategoryResDTO>> groupByCat = new HashMap<String, List<SubCategoryResDTO>>();
+		for (SubCategoryResDTO sub : subCategories) {
+	        String categoryName = sub.getCategory();
+
+	        groupByCat
+	            .computeIfAbsent(categoryName, k -> new ArrayList<>())
+	            .add(sub);
+	    }
+		
+		for (CategoryResponseDTO cat : categories) {
+	        List<SubCategoryResDTO> subs = groupByCat.get(cat.getName());
+
+	        cat.setSubCategories(subs != null ? subs : new ArrayList<>());
+	    }
+		
+		return categories;
 	}
 	
 	public List<SubCategoryResDTO> findAllSub() {
-		return CategoryMapper.toSubDto(subRepository.findAll());
+		return subRepository.findAllSubCat();
 	}
 
 	public List<SubCategoryResDTO> findSubsByCategory(String categoryName) {
