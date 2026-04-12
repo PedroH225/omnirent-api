@@ -1,5 +1,6 @@
 package br.com.omnirent.category;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
@@ -11,13 +12,11 @@ public class CategoryResponseDTO {
 	
 	private String name;
 	
-	private List<SubCategoryResDTO> subCategories;
+	private List<SubCategoryResDTO> subCategories = new ArrayList<SubCategoryResDTO>();
 
-	public CategoryResponseDTO(Category category) {
-		this.id = category.getId();
-		this.name = category.getName();
-		
-		this.subCategories = CategoryMapper.toSubDto(category.getSubCategories());
+	public CategoryResponseDTO(String id, String name) {
+		this.id = id;
+		this.name = name;
 	}
 	
 	
