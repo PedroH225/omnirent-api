@@ -16,4 +16,9 @@ public interface CategoryRepository extends JpaRepository<Category, String> {
 			""")
 	Optional<CategoryResponseDTO> getCategoryById(String id);
 	
+	@Query("""
+			SELECT new br.com.omnirent.category.CategoryResponseDTO(c.id, c.name)
+			FROM Category c
+			""")
+	List<CategoryResponseDTO> getAllCategories();
 }
