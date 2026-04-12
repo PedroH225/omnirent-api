@@ -17,4 +17,12 @@ public class SubCategoryResDTO {
 		
 		this.category = subCategory.getCategory().getName();
 	}
+
+	public SubCategoryResDTO(String id, String name, String categoryName) {
+		this.id = id;
+		this.name = name;
+		this.category = categoryName;
+	}
+	
+	
 }
