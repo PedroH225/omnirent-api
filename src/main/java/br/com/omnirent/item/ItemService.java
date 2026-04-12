@@ -13,8 +13,8 @@ import br.com.omnirent.category.SubCategory;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.item.domain.Item;
+import br.com.omnirent.item.domain.ItemDetailDTO;
 import br.com.omnirent.item.domain.ItemRequestDTO;
-import br.com.omnirent.item.domain.ItemResponseDTO;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
 import jakarta.transaction.Transactional;
@@ -44,17 +44,23 @@ public class ItemService {
 		return item.get();
 	}
 	
-	public ItemResponseDTO getItemById(String id) {
-		return ItemMapper.toDto(findById(id));
+	public ItemDetailDTO getItemById(String id) {
+		Optional<ItemDetailDTO> itemDetail = itemRepository.findItemDetailDTO(id);
+		
+		if (itemDetail.isEmpty()) {
+			throw new ItemNotFoundException();
+		}
+		
+		return itemDetail.get();
 	}
 
-	public List<ItemResponseDTO> getUserItems(String userId) {
+	public List<ItemDetailDTO> getUserItems(String userId) {
 		User user = userService.findById(userId);
 		
 		return ItemMapper.toDto(user.getItems());
 	}
 
-	public ItemResponseDTO addItem(ItemRequestDTO itemDTO, String userId) {
+	public ItemDetailDTO addItem(ItemRequestDTO itemDTO, String userId) {
 		User user = userService.findById(userId);
 		Address pickupAddress = addressService.findById(itemDTO.addressId());
 		SubCategory subCategory = categoryService.findSubById(itemDTO.subCategoryId());
@@ -67,7 +73,7 @@ public class ItemService {
 	}
 	
 	@Transactional
-	public ItemResponseDTO updateItem(ItemRequestDTO itemDTO, String currentUserId) {
+	public ItemDetailDTO updateItem(ItemRequestDTO itemDTO, String currentUserId) {
 		Item updatedItem = findById(itemDTO.id());
 		
 		authorizationService.requireOwner(updatedItem, currentUserId);
@@ -90,7 +96,7 @@ public class ItemService {
 	}
 
 	@Transactional
-	public ItemResponseDTO updateStatus(String itemId, String itemStatusStr, String currentUserId) {
+	public ItemDetailDTO updateStatus(String itemId, String itemStatusStr, String currentUserId) {
 		Item item = findById(itemId);
 		
 		authorizationService.requireOwner(item, currentUserId);
