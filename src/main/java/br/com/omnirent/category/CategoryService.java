@@ -1,7 +1,11 @@
 package br.com.omnirent.category;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -38,9 +42,17 @@ public class CategoryService {
 	}
 	
 	public CategoryResponseDTO getCategoryById(String id) {
-		Category category = findById(id);
+		Optional<CategoryResponseDTO> optCategory = categoryRepository.getCategoryById(id);
 		
-		return CategoryMapper.toDto(category);
+		List<SubCategoryResDTO> subCategories = subRepository.findSubByCategoryId(id);
+		
+		if (optCategory.isEmpty()) {
+			throw new RuntimeException();
+		}
+		CategoryResponseDTO category = optCategory.get();
+		category.setSubCategories(subCategories);
+		
+		return category;
  	}
 	
 	public SubCategoryResDTO getSubCategoryById(String id) {
