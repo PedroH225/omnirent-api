@@ -9,11 +9,12 @@ import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import br.com.omnirent.address.Address;
+import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.common.NamedEntity;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.rental.domain.Rental;
+import br.com.omnirent.user.dto.UserRequestDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;

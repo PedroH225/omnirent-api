@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.omnirent.security.SecurityUtils;
-import br.com.omnirent.user.domain.UserDetailsDTO;
-import br.com.omnirent.user.domain.UserRequestDTO;
-import br.com.omnirent.user.domain.UserResponseDTO;
+import br.com.omnirent.user.dto.UserDetailsDTO;
+import br.com.omnirent.user.dto.UserRequestDTO;
+import br.com.omnirent.user.dto.UserResponseDTO;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor

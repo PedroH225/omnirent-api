@@ -1,4 +1,4 @@
-package br.com.omnirent.address;
+package br.com.omnirent.address.dto;
 
 public record AddressRequestDTO( 
 			String id,

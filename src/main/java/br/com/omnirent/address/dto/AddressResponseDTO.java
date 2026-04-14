@@ -1,10 +1,12 @@
-package br.com.omnirent.address;
+package br.com.omnirent.address.dto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import br.com.omnirent.address.domain.Address;
+import br.com.omnirent.address.domain.AddressData;
 import lombok.Data;
 
 @Data

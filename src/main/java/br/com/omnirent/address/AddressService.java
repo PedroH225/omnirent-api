@@ -5,6 +5,9 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.address.domain.Address;
+import br.com.omnirent.address.dto.AddressRequestDTO;
+import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.exception.domain.AddressNotFoundException;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserService;

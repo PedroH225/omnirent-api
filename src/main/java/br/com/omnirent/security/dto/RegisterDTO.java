@@ -1,4 +1,4 @@
-package br.com.omnirent.security.domain;
+package br.com.omnirent.security.dto;
 
 import java.time.LocalDate;
 

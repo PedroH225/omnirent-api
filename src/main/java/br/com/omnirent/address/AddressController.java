@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.omnirent.address.domain.Address;
+import br.com.omnirent.address.dto.AddressRequestDTO;
+import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.security.SecurityUtils;
 import lombok.AllArgsConstructor;
 

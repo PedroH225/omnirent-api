@@ -3,7 +3,7 @@ package br.com.omnirent.rental.domain;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import br.com.omnirent.address.AddressSnapshot;
+import br.com.omnirent.address.domain.AddressSnapshot;
 import br.com.omnirent.common.BaseEntity;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;

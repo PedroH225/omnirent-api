@@ -3,27 +3,27 @@ package br.com.omnirent.item;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import br.com.omnirent.address.Address;
-import br.com.omnirent.category.SubCategory;
+import br.com.omnirent.address.domain.Address;
+import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
-import br.com.omnirent.item.domain.ItemRequestDTO;
-import br.com.omnirent.item.domain.ItemResponseDTO;
 import br.com.omnirent.item.domain.ItemSnapshot;
+import br.com.omnirent.item.dto.ItemDetailDTO;
+import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.user.domain.User;
 
 public class ItemMapper {
 
-	public static List<ItemResponseDTO> toDto(List<Item> item) {
+	public static List<ItemDetailDTO> toDto(List<Item> item) {
 		return item.stream()
-				.map(ItemResponseDTO::new)
+				.map(ItemDetailDTO::new)
 				.collect(Collectors.toList());
 	}
 	
-	public static ItemResponseDTO toDto(Item item) {
-		return new ItemResponseDTO(item);
+	public static ItemDetailDTO toDto(Item item) {
+		return new ItemDetailDTO(item);
 	}
 
 	public static Item fromDto(ItemRequestDTO itemDTO, User owner, Address pickUpAddress,

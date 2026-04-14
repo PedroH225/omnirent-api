@@ -1,5 +1,6 @@
-package br.com.omnirent.user.domain;
+package br.com.omnirent.user.dto;
 
+import br.com.omnirent.user.domain.User;
 import lombok.Data;
 
 @Data

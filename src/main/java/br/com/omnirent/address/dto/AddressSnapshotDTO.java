@@ -1,5 +1,7 @@
-package br.com.omnirent.address;
+package br.com.omnirent.address.dto;
 
+import br.com.omnirent.address.domain.AddressData;
+import br.com.omnirent.address.domain.AddressSnapshot;
 import lombok.Data;
 
 @Data

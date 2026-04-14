@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.omnirent.rental.domain.RentalRequestDTO;
-import br.com.omnirent.rental.domain.RentalResponseDTO;
+import br.com.omnirent.rental.dto.RentalRequestDTO;
+import br.com.omnirent.rental.dto.RentalResponseDTO;
 import br.com.omnirent.security.SecurityUtils;
 import lombok.AllArgsConstructor;
 

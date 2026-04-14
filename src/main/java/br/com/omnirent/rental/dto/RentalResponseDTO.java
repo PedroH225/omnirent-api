@@ -1,4 +1,4 @@
-package br.com.omnirent.rental.domain;
+package br.com.omnirent.rental.dto;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
@@ -8,12 +8,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
-import br.com.omnirent.address.AddressSnapshot;
-import br.com.omnirent.address.AddressSnapshotDTO;
+import br.com.omnirent.address.domain.AddressSnapshot;
+import br.com.omnirent.address.dto.AddressSnapshotDTO;
 import br.com.omnirent.item.domain.ItemSnapshot;
-import br.com.omnirent.item.domain.ItemSnapshotDTO;
+import br.com.omnirent.item.dto.ItemSnapshotDTO;
+import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.user.UserMapper;
-import br.com.omnirent.user.domain.UserResponseDTO;
+import br.com.omnirent.user.dto.UserResponseDTO;
 import lombok.Data;
 
 @Data

@@ -1,7 +1,7 @@
 package br.com.omnirent.item.domain;
 
-import br.com.omnirent.address.Address;
-import br.com.omnirent.category.SubCategory;
+import br.com.omnirent.address.domain.Address;
+import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.NamedEntity;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.user.domain.User;

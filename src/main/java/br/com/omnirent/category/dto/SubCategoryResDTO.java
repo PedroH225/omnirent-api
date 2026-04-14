@@ -1,5 +1,6 @@
-package br.com.omnirent.category;
+package br.com.omnirent.category.dto;
 
+import br.com.omnirent.category.domain.SubCategory;
 import lombok.Data;
 
 @Data

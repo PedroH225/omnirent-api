@@ -1,4 +1,4 @@
-package br.com.omnirent.user.domain;
+package br.com.omnirent.user.dto;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import br.com.omnirent.common.enums.UserStatus;
+import br.com.omnirent.user.domain.User;
 import lombok.Data;
 
 @Data

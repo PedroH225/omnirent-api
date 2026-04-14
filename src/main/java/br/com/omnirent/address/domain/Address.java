@@ -1,5 +1,6 @@
-package br.com.omnirent.address;
+package br.com.omnirent.address.domain;
 
+import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.common.BaseEntity;
 import br.com.omnirent.user.domain.User;
 import jakarta.persistence.Column;

@@ -1,4 +1,4 @@
-package br.com.omnirent.category;
+package br.com.omnirent.category.domain;
 
 import br.com.omnirent.common.NamedEntity;
 import jakarta.persistence.Entity;

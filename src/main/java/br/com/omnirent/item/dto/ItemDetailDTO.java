@@ -1,4 +1,4 @@
-package br.com.omnirent.item.domain;
+package br.com.omnirent.item.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -6,11 +6,11 @@ import java.time.format.DateTimeFormatter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import br.com.omnirent.address.AddressResponseDTO;
-import br.com.omnirent.category.SubCategoryResDTO;
+import br.com.omnirent.address.dto.AddressResponseDTO;
+import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
-import br.com.omnirent.user.domain.UserResponseDTO;
+import br.com.omnirent.user.dto.UserResponseDTO;
 import lombok.Data;
 
 @Data

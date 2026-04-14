@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.category.domain.Category;
+import br.com.omnirent.category.domain.SubCategory;
+import br.com.omnirent.category.dto.CategoryResponseDTO;
+import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.exception.domain.CategoryNotFoundException;
 import br.com.omnirent.exception.domain.SubCategoryNotFoundException;
 import lombok.AllArgsConstructor;

@@ -1,7 +1,9 @@
-package br.com.omnirent.item.domain;
+package br.com.omnirent.item.dto;
 
 import java.math.BigDecimal;
 
+import br.com.omnirent.item.domain.ItemData;
+import br.com.omnirent.item.domain.ItemSnapshot;
 import lombok.Data;
 
 @Data

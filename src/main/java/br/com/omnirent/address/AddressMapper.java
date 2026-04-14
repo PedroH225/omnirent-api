@@ -3,6 +3,11 @@ package br.com.omnirent.address;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import br.com.omnirent.address.domain.Address;
+import br.com.omnirent.address.domain.AddressData;
+import br.com.omnirent.address.domain.AddressSnapshot;
+import br.com.omnirent.address.dto.AddressRequestDTO;
+import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.rental.domain.Rental;
 
 public class AddressMapper {

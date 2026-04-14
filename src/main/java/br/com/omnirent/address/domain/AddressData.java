@@ -1,5 +1,6 @@
-package br.com.omnirent.address;
+package br.com.omnirent.address.domain;
 
+import br.com.omnirent.address.dto.AddressRequestDTO;
 import jakarta.persistence.Embeddable;
 import lombok.Data;
 import lombok.NoArgsConstructor;

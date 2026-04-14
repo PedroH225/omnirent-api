@@ -13,9 +13,9 @@ import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.security.SecurityUtils;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
-import br.com.omnirent.user.domain.UserDetailsDTO;
-import br.com.omnirent.user.domain.UserRequestDTO;
-import br.com.omnirent.user.domain.UserResponseDTO;
+import br.com.omnirent.user.dto.UserDetailsDTO;
+import br.com.omnirent.user.dto.UserRequestDTO;
+import br.com.omnirent.user.dto.UserResponseDTO;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 

@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import br.com.omnirent.user.domain.User;
-import br.com.omnirent.user.domain.UserDetailsDTO;
-import br.com.omnirent.user.domain.UserResponseDTO;
+import br.com.omnirent.user.dto.UserDetailsDTO;
+import br.com.omnirent.user.dto.UserResponseDTO;
 
 @Component
 public class UserMapper {

@@ -3,6 +3,7 @@ package br.com.omnirent.item.domain;
 import java.math.BigDecimal;
 
 import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.item.dto.ItemRequestDTO;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
