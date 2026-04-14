@@ -26,6 +26,12 @@ public class UserService {
 	private UserMapper userMapper;
 
 	private UserRepository userRepository;
+	
+	public void requireExistence(String userId) {
+		if (!userRepository.verifyUser(userId)) {
+			throw new UserNotFoundException();
+		}
+	}
 		
 	public User findById(String id) {
 		Optional<User> user = userRepository.findById(id);

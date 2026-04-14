@@ -38,4 +38,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 	
 	@Query("SELECT u.authMetadata FROM User u WHERE u.id = :id")
 	AuthMetadata findTokenVersionById(@Param("id") String id);
+	
+	@Query("SELECT COUNT(u) > 0 FROM User u WHERE u.id = :id AND u.userStatus=ACTIVE")
+	Boolean verifyUser(@Param("id")String userId);
 }
