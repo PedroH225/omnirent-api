@@ -32,6 +32,12 @@ public class UserService {
 			throw new UserNotFoundException();
 		}
 	}
+	
+	public User getUserReference(String userId) {
+		User user = userRepository.getReferenceById(userId);
+		
+		return user;
+	}
 		
 	public User findById(String id) {
 		Optional<User> user = userRepository.findById(id);
