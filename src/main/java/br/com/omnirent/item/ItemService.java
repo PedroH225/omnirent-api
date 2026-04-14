@@ -14,7 +14,9 @@ import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemDetailDTO;
+import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.security.SecurityUtils;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
 import jakarta.transaction.Transactional;
@@ -54,10 +56,9 @@ public class ItemService {
 		return itemDetail.get();
 	}
 
-	public List<ItemDetailDTO> getUserItems(String userId) {
-		User user = userService.findById(userId);
-		
-		return ItemMapper.toDto(user.getItems());
+	public List<ItemDisplayDTO> getUserItems(String userId) {
+		userService.requireExistence(userId);
+		return itemRepository.findUserItems(userId);
 	}
 
 	public ItemDetailDTO addItem(ItemRequestDTO itemDTO, String userId) {

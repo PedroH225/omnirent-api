@@ -2,6 +2,7 @@ package br.com.omnirent.item;
 
 import java.util.List;
 
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,10 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.item.dto.ItemDetailDTO;
+import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.security.SecurityUtils;
 import lombok.AllArgsConstructor;
@@ -29,9 +32,14 @@ public class ItemController {
 		return itemService.getItemById(id);
 	}
 	
-	@GetMapping("/find/user")
-	public List<ItemDetailDTO> findUserItems() {
+	@GetMapping("/find/user/me")
+	public List<ItemDisplayDTO> findOwnerItems() {
 		return itemService.getUserItems(SecurityUtils.currentUserId());
+	}
+	
+	@GetMapping("/find/user/{id}")
+	public List<ItemDisplayDTO> findUserItems(@PathVariable String id) {
+		return itemService.getUserItems(id);
 	}
 	
 	@GetMapping("/enums")

@@ -1,13 +1,16 @@
 package br.com.omnirent.item;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemDetailDTO;
+import br.com.omnirent.item.dto.ItemDisplayDTO;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, String> {
@@ -27,4 +30,14 @@ public interface ItemRepository extends JpaRepository<Item, String> {
 			WHERE i.id = :id
 			""")
 	Optional<ItemDetailDTO> findItemDetailDTO(String id);
+	
+	@Query("""
+			SELECT new br.com.omnirent.item.dto.ItemDisplayDTO(i.id, i.name, i.itemData.basePrice,
+			i.itemData.itemCondition, i.itemStatus, sc.name, i.createdAt,
+			new br.com.omnirent.user.dto.UserResponseDTO(o.id, o.username))
+			FROM Item i
+			JOIN i.owner o JOIN i.subCategory sc
+			WHERE o.id = :id
+			""")
+	List<ItemDisplayDTO> findUserItems(@Param("id")String userId);
 }
