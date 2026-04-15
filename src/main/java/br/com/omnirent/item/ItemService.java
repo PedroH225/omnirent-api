@@ -12,6 +12,7 @@ import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
+import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
@@ -58,6 +59,15 @@ public class ItemService {
 		}
 		
 		return itemDetail.get();
+	}
+	
+	public ItemRentedContext getItemRentedContext(String id) {
+		Optional<ItemRentedContext> itemOpt = itemRepository.getItemRentedContext(id);
+		if (itemOpt.isEmpty()) {
+			throw new ItemNotFoundException();
+		}
+		
+		return itemOpt.get();
 	}
 
 	public List<ItemDisplayDTO> getUserItems(String userId) {

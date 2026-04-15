@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
@@ -40,4 +41,16 @@ public interface ItemRepository extends JpaRepository<Item, String> {
 			WHERE o.id = :id
 			""")
 	List<ItemDisplayDTO> findUserItems(@Param("id")String userId);
+	
+	@Query("""
+			SELECT new br.com.omnirent.item.context.ItemRentedContext(
+			new br.com.omnirent.item.context.ItemInfo(i.id, i.name, i.itemData.brand, 
+			i.itemData.model, i.itemData.description, i.itemData.basePrice, i.itemData.itemCondition),
+			new br.com.omnirent.address.context.AddressInfo(ad.id, ad.addressData.number, 
+			ad.addressData.complement, ad.addressData.district, ad.addressData.city, ad.addressData.state, ad.addressData.country, ad.addressData.zipCode),
+			o.id, o.name)
+			FROM Item i JOIN i.pickupAddress ad JOIN i.owner o
+			WHERE i.id = :id
+			""")
+	Optional<ItemRentedContext> getItemRentedContext(@Param("id")String itemId);
 }
