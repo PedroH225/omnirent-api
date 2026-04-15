@@ -106,12 +106,15 @@ public class ItemMapper {
 		}
 	}
 	
-	public ItemSnapshot fromItem(Item item, Rental rental) {
-		ItemSnapshot itemSnapshot = new ItemSnapshot(item);
-		
-		itemSnapshot.setRental(rental);
-		
-		return itemSnapshot;
+	public ItemSnapshot fromRentContext(ItemInfo itemInfo, Rental rental) {
+	    ItemSnapshot itemSnapshot = new ItemSnapshot(
+	        itemInfo.getItemName(), itemInfo.getBrand(), itemInfo.getModel(),
+	        itemInfo.getDescription(), itemInfo.getBasePrice(), itemInfo.getItemCondition()
+	    );
+
+	    itemSnapshot.setRental(rental);
+
+	    return itemSnapshot;
 	}
 	
 }
