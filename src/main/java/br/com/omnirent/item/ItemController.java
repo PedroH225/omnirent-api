@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.omnirent.common.enums.ItemEnums;
+import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
@@ -48,7 +49,7 @@ public class ItemController {
 	}
 	
 	@PostMapping
-	public ItemDetailDTO addItem(@RequestBody ItemRequestDTO itemDTO) {
+	public ItemCreatedDTO addItem(@RequestBody ItemRequestDTO itemDTO) {
 		return itemService.addItem(itemDTO, SecurityUtils.currentUserId());
 	}
 	

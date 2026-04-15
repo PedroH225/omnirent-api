@@ -13,10 +13,12 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.item.domain.Item;
+import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.security.SecurityUtils;
+import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
 import jakarta.transaction.Transactional;
@@ -35,6 +37,8 @@ public class ItemService {
 	private CategoryService categoryService;
 	
 	private ItemAuthorizationService authorizationService;
+	
+	private ItemMapper itemMapper;
 	
 	public Item findById(String id) {
 		Optional<Item> item = itemRepository.findById(id);
@@ -61,16 +65,16 @@ public class ItemService {
 		return itemRepository.findUserItems(userId);
 	}
 
-	public ItemDetailDTO addItem(ItemRequestDTO itemDTO, String userId) {
-		User user = userService.findById(userId);
+	public ItemCreatedDTO addItem(ItemRequestDTO itemDTO, String userId) {
+		userService.requireExistence(userId);
+		User user = userService.getUserReference(userId);
 		Address pickupAddress = addressService.findById(itemDTO.addressId());
 		SubCategory subCategory = categoryService.findSubById(itemDTO.subCategoryId());
 		
-		Item item = ItemMapper.fromDto(itemDTO, user, 
+		Item item = itemMapper.fromDto(itemDTO, user, userId, 
 				pickupAddress, subCategory,
 				ItemStatus.AVAILABLE);
-		
-		return ItemMapper.toDto(itemRepository.save(item));
+		return itemMapper.toCreatedDto(itemRepository.save(item));
 	}
 	
 	@Transactional
@@ -91,9 +95,9 @@ public class ItemService {
 			subCategory = categoryService.findSubById(itemDTO.subCategoryId());
 		}
 		
-		ItemMapper.updateItem(itemDTO, address, subCategory, updatedItem);
+		itemMapper.updateItem(itemDTO, address, subCategory, updatedItem);
 		
-		return ItemMapper.toDto(itemRepository.save(updatedItem));
+		return itemMapper.toDto(itemRepository.save(updatedItem));
 	}
 
 	@Transactional
@@ -104,7 +108,7 @@ public class ItemService {
 		
 		item.updateItemStatus(itemStatusStr);
 		
-		return ItemMapper.toDto(itemRepository.save(item));
+		return itemMapper.toDto(itemRepository.save(item));
 	}
 	
 }
