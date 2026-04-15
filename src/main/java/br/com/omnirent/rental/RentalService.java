@@ -2,6 +2,7 @@ package br.com.omnirent.rental;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,8 +17,9 @@ import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.domain.RentalAuthorizationService;
 import br.com.omnirent.rental.domain.RentalDateService;
 import br.com.omnirent.rental.domain.RentalPriceService;
+import br.com.omnirent.rental.dto.RentalDetailDTO;
+import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.rental.dto.RentalRequestDTO;
-import br.com.omnirent.rental.dto.RentalResponseDTO;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
 import jakarta.transaction.Transactional;
@@ -26,7 +28,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @Service
 public class RentalService {
-
+	
 	private RentalRepository rentalRepository;
 	
 	private ItemService itemService;
@@ -45,11 +47,16 @@ public class RentalService {
 		return rental.get();
 	}
 	
-	public RentalResponseDTO getRentalById(String id) {
-		return RentalMapper.toDto(findById(id));
+	public RentalDetailDTO getRentalById(String id) {
+		Optional<RentalDetailDTO> rOptional = rentalRepository.findRentalDetail(id);
+		if (rOptional.isEmpty()) {
+			throw new RentalNotFoundException();
+		}
+		
+		return rOptional.get();
 	}
 
-	public RentalResponseDTO addRent(RentalRequestDTO rentalRequestDTO, String userId) {
+	public RentalDetailDTO addRent(RentalRequestDTO rentalRequestDTO, String userId) {
 		User renter = userService.findById(userId);
 		Item item = itemService.findById(rentalRequestDTO.itemId());
 		User owner = item.getOwner();
