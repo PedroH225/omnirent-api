@@ -34,4 +34,14 @@ public class ItemData {
 	    this.itemCondition = ItemCondition.fromString(itemDTO.itemCondition());
 
 	}
+
+	public ItemData(String brand, String model, String description, BigDecimal basePrice, ItemCondition itemCondition) {
+		this.brand = brand;
+		this.model = model;
+		this.description = description;
+		this.basePrice = basePrice;
+		this.itemCondition = itemCondition;
+	}
+	
+	
 }
