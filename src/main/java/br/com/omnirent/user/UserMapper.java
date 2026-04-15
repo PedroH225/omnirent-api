@@ -11,13 +11,13 @@ import br.com.omnirent.user.dto.UserResponseDTO;
 
 @Component
 public class UserMapper {
-	public static List<UserResponseDTO> toDto(List<User> users) {
+	public List<UserResponseDTO> toDto(List<User> users) {
 		return users.stream()
 				.map(u -> toDto(u))
 				.collect(Collectors.toList());
 	}
 	
-	public static UserResponseDTO toDto(User user) {
+	public UserResponseDTO toDto(User user) {
 		UserResponseDTO userDTO = new UserResponseDTO(user);
 		return userDTO;
 	}
