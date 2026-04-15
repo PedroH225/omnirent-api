@@ -55,9 +55,9 @@ public class Item extends NamedEntity {
 	    setItemStatus(ItemStatus.fromString(status));
 	}
 	
-	public void assignOwner(User owner) {
+	public void assignOwner(User owner, String ownerId) {
 		this.owner = owner;
-		this.ownerId = owner.getId();
+		this.ownerId = ownerId;
 
 	}
 	
