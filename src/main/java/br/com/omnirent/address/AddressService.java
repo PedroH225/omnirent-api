@@ -19,10 +19,10 @@ import lombok.AllArgsConstructor;
 public class AddressService {
 
 	private AddressRepository addressRepository;
-	
-	private UserRepository userRepository;
-	
+		
 	private UserService userService;
+	
+	private AddressMapper mapper;
 	
 	public Address findById(String id) {
 		Optional<Address> address = addressRepository.findById(id);
@@ -39,13 +39,13 @@ public class AddressService {
 	}
 
 	public AddressResponseDTO addAddress(AddressRequestDTO addressDto, String userId) {	
-		User user = userRepository.getReferenceById(userId);
+		User user = userService.getUserReference(userId);
 				
-		Address address = AddressMapper.fromAddressDTO(addressDto);
+		Address address = mapper.fromAddressDTO(addressDto);
 		
 		address.assignUser(user);
 				
-		return AddressMapper.toDto(addressRepository.save(address));
+		return mapper.toDto(addressRepository.save(address));
 	}
 	
 	public AddressResponseDTO updateAddress(AddressRequestDTO addressDTO) {
@@ -53,7 +53,7 @@ public class AddressService {
 		
 		address.updateFields(addressDTO);
 		
-		return AddressMapper.toDto(addressRepository.save(address));
+		return mapper.toDto(addressRepository.save(address));
 	}
 	
 	public void deleteAddress(String addressId) {
