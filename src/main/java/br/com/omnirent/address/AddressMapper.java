@@ -53,9 +53,12 @@ public class AddressMapper {
 		return address;
 	}
 	
-	public AddressSnapshot fromAddress(Address address, Rental rental) {
-		AddressSnapshot addressSnapshot = new AddressSnapshot(address);
-		
+	public AddressSnapshot fromRentContext(AddressInfo address, Rental rental) {
+	    AddressSnapshot addressSnapshot = new AddressSnapshot(
+	            address.getStreet(), address.getNumber(),
+	            address.getComplement(), address.getDistrict(), address.getCity(),
+	            address.getState(), address.getCountry(), address.getZipCode(),
+	            rental);		
 		addressSnapshot.setRental(rental);
 		
 		return addressSnapshot;
