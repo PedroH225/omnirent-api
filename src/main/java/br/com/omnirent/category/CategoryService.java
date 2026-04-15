@@ -25,6 +25,8 @@ public class CategoryService {
 
 	private SubCategoryRepository subRepository;
 	
+	private CategoryMapper mapper;
+	
 	public Category findById(String id) {
 		Optional<Category> category = categoryRepository.findById(id);
 		
@@ -62,7 +64,7 @@ public class CategoryService {
 	public SubCategoryResDTO getSubCategoryById(String id) {
 		SubCategory subCategory = findSubById(id);
 		
-		return CategoryMapper.toSubDto(subCategory);
+		return mapper.toSubDto(subCategory);
  	}
 
 	public List<CategoryResponseDTO> findAll() {
@@ -95,7 +97,7 @@ public class CategoryService {
 	public List<SubCategoryResDTO> findSubsByCategory(String categoryName) {
 		List<SubCategory> subCategories = subRepository.findAllByCategoryName(categoryName);
 		
-		return CategoryMapper.toSubDto(subCategories);
+		return mapper.toSubDto(subCategories);
 	}
 	
 }
