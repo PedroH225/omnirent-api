@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import br.com.omnirent.address.domain.Address;
+import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.item.domain.Item;
@@ -15,14 +16,8 @@ import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.user.domain.User;
 
 public class ItemMapper {
-
-	public static List<ItemDetailDTO> toDto(List<Item> item) {
-		return item.stream()
-				.map(ItemDetailDTO::new)
-				.collect(Collectors.toList());
-	}
-	
 	public static ItemDetailDTO toDto(Item item) {
+		
 		return new ItemDetailDTO(item);
 	}
 
