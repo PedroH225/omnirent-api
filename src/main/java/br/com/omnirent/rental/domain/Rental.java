@@ -67,9 +67,9 @@ public class Rental extends BaseEntity {
 		this.ownerId = owner.getId();
 	}
 	
-	public void assignRenter(User renter) {
+	public void assignRenter(User renter, String renterId) {
 		this.renter = renter;
-		this.renterId = renter.getId();
+		this.renterId = renterId;
 	}
 	
 	public void updateStatus(String status) {
