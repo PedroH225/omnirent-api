@@ -5,11 +5,13 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import br.com.omnirent.address.context.AddressInfo;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.domain.AddressData;
 import br.com.omnirent.address.domain.AddressSnapshot;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
+import br.com.omnirent.address.dto.AddressSnapshotDTO;
 import br.com.omnirent.rental.domain.Rental;
 
 @Component
@@ -29,6 +31,15 @@ public class AddressMapper {
 	            addressData.getComplement(), addressData.getDistrict(), addressData.getCity(),
 	            addressData.getState(), addressData.getCountry(), addressData.getZipCode(),
 	            address.getCreatedAt(), address.getUpdatedAt()
+	    );
+	}
+	
+	public AddressSnapshotDTO toSnapDto(AddressSnapshot address) {
+		AddressData addressData = address.getAddressData();
+	    return new AddressSnapshotDTO(
+	            address.getId(), addressData.getStreet(), addressData.getNumber(),
+	            addressData.getComplement(), addressData.getDistrict(), addressData.getCity(),
+	            addressData.getState(), addressData.getCountry(), addressData.getZipCode()
 	    );
 	}
 	
