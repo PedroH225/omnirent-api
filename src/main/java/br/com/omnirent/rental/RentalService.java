@@ -8,15 +8,20 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.exception.domain.RentalNotFoundException;
+import br.com.omnirent.item.ItemRepository;
 import br.com.omnirent.item.ItemService;
+import br.com.omnirent.item.context.ItemInfo;
+import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.domain.RentalAuthorizationService;
 import br.com.omnirent.rental.domain.RentalDateService;
 import br.com.omnirent.rental.domain.RentalPriceService;
+import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.rental.dto.RentalRequestDTO;
@@ -37,6 +42,8 @@ public class RentalService {
 	
 	private RentalAuthorizationService authorizationService;
 	
+	private RentalMapper mapper;
+	
 	public Rental findById(String id) {
 		Optional<Rental> rental = rentalRepository.findById(id);
 		
@@ -56,54 +63,57 @@ public class RentalService {
 		return rOptional.get();
 	}
 
-	public RentalDetailDTO addRent(RentalRequestDTO rentalRequestDTO, String userId) {
-		User renter = userService.findById(userId);
-		Item item = itemService.findById(rentalRequestDTO.itemId());
-		User owner = item.getOwner();
+	public RentalCreatedDTO addRent(RentalRequestDTO rentalRequestDTO, String userId) {
+		userService.requireExistence(userId);
+		User renter = userService.getUserReference(userId);
+		
+		ItemRentedContext context = itemService.getItemRentedContext(rentalRequestDTO.itemId());
+				
+		ItemInfo itemInfo = context.getItemInfo();
 		
 		RentalStatus rentalStatus = RentalStatus.CREATED;
 		RentalPeriod rentalPeriod = RentalPeriod.fromString(rentalRequestDTO.rentalPeriod());
 		
-		BigDecimal finalPrice = RentalPriceService.calculateFinalPrice(item, rentalPeriod);
+		BigDecimal finalPrice = RentalPriceService.calculateFinalPrice(itemInfo.getBasePrice(), rentalPeriod);
 		
-		Rental rental = RentalMapper.create(renter, owner, item,
+		Rental rental = mapper.create(renter, userId, context,
 			    rentalPeriod, rentalStatus,
 			    finalPrice);
 		
-		return RentalMapper.toDto(rentalRepository.save(rental));
+		return mapper.toCreatedDto(rentalRepository.save(rental));
 	}
 
 	@Transactional
-	public RentalResponseDTO updateStatus(String rentId, String status) {
+	public RentalDisplayDTO updateStatus(String rentId, String status) {
 		Rental rent = findById(rentId);
 		
 		rent.updateStatus(status);
 		
-		return RentalMapper.toDto(rentalRepository.save(rent));
+		return new RentalDisplayDTO();
 	}
 
 	@Transactional
-	public RentalResponseDTO startPreparing(String rentId, String currentUserId) {
+	public RentalDisplayDTO startPreparing(String rentId, String currentUserId) {
 		Rental rental = findById(rentId);
 		
 		authorizationService.requireOwner(rental, currentUserId);
 
 		rental.startPreparing();
-		return RentalMapper.toDto(rentalRepository.save(rental));
+		return new RentalDisplayDTO();
 	}
 
 	@Transactional
-	public RentalResponseDTO ship(String rentId, String currentUserId) {
+	public RentalDisplayDTO ship(String rentId, String currentUserId) {
 		Rental rental = findById(rentId);
 		
 		authorizationService.requireOwner(rental, currentUserId);
 
 		rental.ship();				
-		return RentalMapper.toDto(rentalRepository.save(rental));
+		return new RentalDisplayDTO();
 	}
 
 	@Transactional
-	public RentalResponseDTO markInUse(String rentId, String userId) {
+	public RentalDisplayDTO markInUse(String rentId, String userId) {
 		Rental rental = findById(rentId);
 		rental.markInUse();
 		
@@ -116,67 +126,67 @@ public class RentalService {
 		
 		Rental updatedRental = RentalMapper.setDates(rental, startDate, endDateTime);
 		
-		return RentalMapper.toDto(rentalRepository.save(updatedRental));
+		return new RentalDisplayDTO();
 	}
 
 	@Transactional
-	public RentalResponseDTO requestReturn(String rentId, String userId) {
+	public RentalDisplayDTO requestReturn(String rentId, String userId) {
 		Rental rental = findById(rentId);
 		
 		authorizationService.requireRenter(rental, userId);
 
 		rental.requestReturn();				
-		return RentalMapper.toDto(rentalRepository.save(rental));
+		return new RentalDisplayDTO();
 	}
 	
 	@Transactional
-	public RentalResponseDTO markReturnShipped(String rentId, String userId) {
+	public RentalDisplayDTO markReturnShipped(String rentId, String userId) {
 		Rental rental = findById(rentId);
 		
 		authorizationService.requireRenter(rental, userId);
 
 		rental.markReturnShipped();		
-		return RentalMapper.toDto(rentalRepository.save(rental));
+		return new RentalDisplayDTO();
 	}
 	
 	@Transactional
-	public RentalResponseDTO markReturned(String rentId, String currentUserId) {
+	public RentalDisplayDTO markReturned(String rentId, String currentUserId) {
 		Rental rental = findById(rentId);
 		
 		authorizationService.requireOwner(rental, currentUserId);
 		
 		rental.markReturned();
-		return RentalMapper.toDto(rentalRepository.save(rental));
+		return new RentalDisplayDTO();
 	}
 
 	@Transactional
-	public RentalResponseDTO cancel(String rentId, String userId) {
+	public RentalDisplayDTO cancel(String rentId, String userId) {
 		Rental rental = findById(rentId);
 		
 		authorizationService.requireOne(rental, userId);
 		
 		rental.cancel();
-		return RentalMapper.toDto(rentalRepository.save(rental));
+		return new RentalDisplayDTO();
 	}
 
 	@Transactional
-	public RentalResponseDTO confirm(String rentId, String userId) {
+	public RentalDisplayDTO confirm(String rentId, String userId) {
 		Rental rental = findById(rentId);
 		
 		// TEMPORARY
 		authorizationService.requireOne(rental, userId);
 		
 		rental.confirm();
-		return RentalMapper.toDto(rentalRepository.save(rental));
+		return new RentalDisplayDTO();
 	}
 
-	public List<RentalResponseDTO> findUserRented(String userId) {
+	public List<RentalDisplayDTO> findUserRented(String userId) {
 		User user = userService.findById(userId);
-		return RentalMapper.toDto(user.getRented());
+		return new ArrayList<RentalDisplayDTO>();
 	}
 
-	public List<RentalResponseDTO> findUserRentals(String userId) {
+	public List<RentalDisplayDTO> findUserRentals(String userId) {
 		User user = userService.findById(userId);
-		return RentalMapper.toDto(user.getRentals());
+		return new ArrayList<RentalDisplayDTO>();
 	}
 }

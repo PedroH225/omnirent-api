@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.rental.dto.RentalRequestDTO;
@@ -39,7 +40,7 @@ public class RentalController {
 	}
 	
 	@PostMapping
-	public RentalDetailDTO addRent(@RequestBody RentalRequestDTO rentalRequestDTO) {
+	public RentalCreatedDTO addRent(@RequestBody RentalRequestDTO rentalRequestDTO) {
 		return rentalService.addRent(rentalRequestDTO, SecurityUtils.currentUserId());
 	}
 	
