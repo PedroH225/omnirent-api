@@ -36,28 +36,6 @@ public class AddressResponseDTO {
 	
 	@JsonIgnore
 	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-	
-	
-	
-	public AddressResponseDTO(Address address) {
-	    this.id = address.getId();
-	    
-	    AddressData addressData = address.getAddressData();
-	    
-	    this.street = addressData.getStreet();
-	    this.number = addressData.getNumber();
-	    this.complement = addressData.getComplement();
-	    this.district = addressData.getDistrict();
-	    this.city = addressData.getCity();
-	    this.state = addressData.getState();
-	    this.country = addressData.getCountry();
-	    this.zipCode = addressData.getZipCode();
-
-	    this.createdAt = dtf.format(address.getCreatedAt());
-	    this.updatedAt = dtf.format(address.getUpdatedAt());
-	}
-
-
 
 	public AddressResponseDTO(String id, String street, String number, String complement, String district, String city,
 			String state, String country, String zipCode, LocalDateTime createdAt, LocalDateTime updatedAt) {
