@@ -12,13 +12,6 @@ public class SubCategoryResDTO {
 	
 	private String category;
 
-	public SubCategoryResDTO(SubCategory subCategory) {
-		this.id = subCategory.getId();
-		this.name = subCategory.getName();
-		
-		this.category = subCategory.getCategory().getName();
-	}
-
 	public SubCategoryResDTO(String id, String name, String categoryName) {
 		this.id = id;
 		this.name = name;
