@@ -3,8 +3,10 @@ package br.com.omnirent.rental;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.core.NativeDetector.Context;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ import br.com.omnirent.rental.dto.RentalRequestDTO;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
 import jakarta.transaction.Transactional;
+import jdk.javadoc.internal.doclets.toolkit.taglets.SeeTaglet;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -183,14 +186,17 @@ public class RentalService {
 	}
 
 	@Transactional
-	public RentalDisplayDTO confirm(String rentId, String userId) {
-		Rental rental = findById(rentId);
+	public void confirm(String rentId, String userId) {
+		RentalStatusChangeContext context = getStatusChangeContext(rentId);
+		
+		RentalStatus currStatus = context.getRentalStatus();
+		Set<String> actors = Set.of(context.getOwnerId(), context.getRenterId());
 		
 		// TEMPORARY
-		authorizationService.requireOne(rental, userId);
+		authorizationService.requireOne(actors, userId);
+		currStatus.validateTransition(RentalStatus.CONFIRMED);
 		
-		rental.confirm();
-		return new RentalDisplayDTO();
+		rentalRepository.updateRentalStatus(rentId, RentalStatus.CONFIRMED);
 	}
 
 	public List<RentalDisplayDTO> findUserRented(String userId) {

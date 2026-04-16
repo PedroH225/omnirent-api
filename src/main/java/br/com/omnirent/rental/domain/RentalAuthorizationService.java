@@ -1,5 +1,7 @@
 package br.com.omnirent.rental.domain;
 
+import java.util.Set;
+
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.exception.common.ForbiddenException;
@@ -21,9 +23,8 @@ public class RentalAuthorizationService {
 		}
 	}
 	
-	public void requireOne(Rental rental, String currentUserId) {
-		if (!rental.getRenterId().equals(currentUserId) &&
-				!rental.getOwnerId().equals(currentUserId)) {
+	public void requireOne(Set<String> actors, String currentUserId) {
+		if (!actors.contains(currentUserId)) {
 			throw new ForbiddenException(DEFAULT_MESSAGE);
 		}
 	}
