@@ -32,7 +32,6 @@ import br.com.omnirent.rental.dto.RentalRequestDTO;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
 import jakarta.transaction.Transactional;
-import jdk.javadoc.internal.doclets.toolkit.taglets.SeeTaglet;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -217,9 +216,9 @@ public class RentalService {
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.CONFIRMED);
 	}
 
-	public List<RentalDisplayDTO> findUserRented(String userId) {
-		User user = userService.findById(userId);
-		return new ArrayList<RentalDisplayDTO>();
+	public List<RentalDisplayDTO> findUserRented(String renterId) {
+		userService.requireExistence(renterId);
+		return rentalRepository.findUserRented(renterId);
 	}
 
 	public List<RentalDisplayDTO> findUserRentals(String userId) {
