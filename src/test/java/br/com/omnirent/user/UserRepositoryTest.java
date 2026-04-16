@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,18 +34,15 @@ class UserRepositoryTest extends IntegrationTest {
 
 	@Autowired
     private UserRepository userRepository;
-	
-	private Integer count = 2;
-	
-	private List<User> generateUsers() {
+		
+	private static List<User> generateUsers() {
+		RandomStringUtils randomStringUtils = RandomStringUtils.secure();
 		List<User> tempList = new ArrayList<User>();
-        Integer globalVersion = globalConfigHolder.getGlobalTokenVersion();
 
 		for (int i = 0; i < 2; i++) {
-			String string = "test" + count;
-			String stringemail = "test" + count + "@example.com";
-			tempList.add(new User(string, string, stringemail, string, LocalDate.now(), 1, globalVersion));
-			count++;
+			String string = randomStringUtils.nextAlphabetic(10);
+			String email = string + "@email.com";
+			tempList.add(new User(string, string, email, string, LocalDate.now(), 1, 1));
 		}
 		return tempList;
 	}
