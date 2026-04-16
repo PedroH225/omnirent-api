@@ -119,13 +119,15 @@ public class RentalService {
 	}
 
 	@Transactional
-	public RentalDisplayDTO ship(String rentId, String currentUserId) {
-		Rental rental = findById(rentId);
+	public void ship(String rentId, String currentUserId) {
+		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
-		authorizationService.requireOwner(rental, currentUserId);
-
-		rental.ship();				
-		return new RentalDisplayDTO();
+		RentalStatus currStatus = context.getRentalStatus();
+		
+		authorizationService.requireOwner(context.getOwnerId(), currentUserId);
+		currStatus.validateTransition(RentalStatus.SHIPPED);
+		
+		rentalRepository.updateRentalStatus(rentId, RentalStatus.SHIPPED);
 	}
 
 	@Transactional

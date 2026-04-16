@@ -50,8 +50,8 @@ public class RentalController {
 	}
 	
 	@PatchMapping("/{rentId}/ship")
-	public RentalDisplayDTO ship(@PathVariable String rentId) {
-		return rentalService.ship(rentId, SecurityUtils.currentUserId());
+	public void ship(@PathVariable String rentId) {
+		rentalService.ship(rentId, SecurityUtils.currentUserId());
 	}
 	
 	@PatchMapping("/{rentId}/in-use")
