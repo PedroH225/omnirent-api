@@ -13,12 +13,14 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.testcontainers.shaded.org.checkerframework.checker.units.qual.g;
 
 import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.integration.IntegrationTest;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
+import br.com.omnirent.user.dto.UserDetailsDTO;
 
 @SpringBootTest
 class UserRepositoryTest extends IntegrationTest {
@@ -50,7 +52,7 @@ class UserRepositoryTest extends IntegrationTest {
         Integer globalVersion = globalConfigHolder.getGlobalTokenVersion();
         
         List<User> users = Arrays.asList(
-        		new User("PedroH", "pedro226", "pedro@example.com", "password123", LocalDate.now(), 1, globalVersion).activate(),
+        		new User("PedroH", "pedro226", "pedro@example.com", "password123", LocalDate.now(), 1, globalVersion),
         		new User("GuilhermeR", "guilherme123", "guilherme@gmail.com", "password123", LocalDate.now(), 1, globalVersion));
         
         List<User> savedUsers = userRepository.saveAll(users);
@@ -61,8 +63,27 @@ class UserRepositoryTest extends IntegrationTest {
 
         
         for (Optional<User> optUser : findSaved) {
-        	assertThat(optUser.isPresent());
+        	assertThat(optUser).isPresent();
             assertThat(optUser.get().getId()).isNotNull();
 		}        
     }
+    
+    @Test
+    void shouldFindDetailsDTO() {
+		User user = new User("testuser1", "testuser1", "test1@example.com", "password123", LocalDate.now(), 1, globalConfigHolder.getGlobalTokenVersion());
+        User saved = userRepository.save(user);
+
+    	Optional<UserDetailsDTO> userDetails1 = userRepository.findUserDetailsById(saved.getId());
+    	Optional<UserDetailsDTO> userDetails2 = userRepository.findUserDetailsById("123");
+
+    	assertThat(userDetails1).isPresent()
+    	.get()
+    	.extracting(UserDetailsDTO::getEmail)
+    	.isEqualTo(saved.getEmail());
+    	assertThat(userDetails2).isEmpty();
+    }
+    
+    
+    
+    
 }
