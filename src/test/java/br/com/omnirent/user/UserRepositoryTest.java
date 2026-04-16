@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.testcontainers.shaded.org.checkerframework.checker.units.qual.g;
 
 import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.integration.IntegrationTest;
@@ -24,24 +25,17 @@ class UserRepositoryTest extends IntegrationTest {
 	
     @Test
     void shouldSaveAndFindUser() {
-        User user = new User();
+        Integer globalVersion = globalConfigHolder.getGlobalTokenVersion();
         
-        AuthMetadata authMetadata = new AuthMetadata();
-        authMetadata.setTokenVersion(1);
-        authMetadata.setGlobalVersion(globalConfigHolder.getGlobalTokenVersion());
-        
-        user.setAuthMetadata(authMetadata);
-        user.setName("PedroH");
-        user.setUsername("pedro225");
-        user.setEmail("pedro@gmail.com");
-        user.setBirthDate(LocalDate.now());
-        user.setPassword("password123");
+        User user = new User("PedroH", "pedro225", "pedro@gmail.com", "password123",
+        		LocalDate.now(), 1, globalVersion);
         
         User saved = userRepository.save(user);
 
         User found = userRepository.findById(saved.getId()).orElse(null);
 
         assertThat(found).isNotNull();
+        assertThat(found.getId()).isNotNull();
         assertThat(found.getName()).isEqualTo("PedroH");
     }
 }
