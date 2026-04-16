@@ -15,6 +15,7 @@ import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
+import br.com.omnirent.rental.dto.RentalDisplayDTO;
 
 @Repository
 public interface RentalRepository extends JpaRepository<Rental, String> {
@@ -26,6 +27,15 @@ public interface RentalRepository extends JpaRepository<Rental, String> {
 			WHERE r.id = :id
 			""")
 	void updateRentalStatus(@Param("id")String rentalId, RentalStatus status);
+	
+	@Modifying
+	@Query("""
+			UPDATE Rental r
+			SET r.rentalStatus = :status, r.startDate = :startDate, r.endDate = :endDate
+			WHERE r.id = :id
+			""")
+	void updateRentalPeriodAndStatus
+	(@Param("id")String rentalId, RentalStatus status, LocalDateTime startDate, LocalDateTime endDate);
 
 	List<Rental> findByRentalStatusAndEndDateBefore
 	(RentalStatus rentalStatus, LocalDateTime endDate);
@@ -47,8 +57,17 @@ public interface RentalRepository extends JpaRepository<Rental, String> {
 	Optional<RentalDetailDTO> findRentalDetail(String id);
 	
 	@Query("""
+			SELECT new br.com.omnirent.rental.dto.RentalDisplayDTO(r.id, r.startDate, r.endDate,
+			r.finalPrice, r.rentalStatus, r.rentalPeriod, i.id, i.name, r.renterId,
+			rt.name, r.ownerId, o.name, r.createdAt)
+			FROM Rental r JOIN r.itemSnapshot i JOIN r.renter rt JOIN r.owner o
+			WHERE r.id = :id
+			""")
+	Optional<RentalDisplayDTO> findRentalDisplayDTO(@Param("id") String rentalId);
+	
+	@Query("""
 			SELECT new br.com.omnirent.rental.context.RentalStatusChangeContext
-			(r.id, r.ownerId, r.renterId, r.rentalStatus)
+			(r.id, r.ownerId, r.renterId, r.rentalStatus, r.rentalPeriod)
 			FROM Rental r
 			WHERE r.id = :id
 			""")
