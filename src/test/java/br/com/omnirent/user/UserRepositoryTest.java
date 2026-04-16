@@ -2,6 +2,8 @@ package br.com.omnirent.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.useRepresentation;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -124,5 +126,19 @@ class UserRepositoryTest extends IntegrationTest {
 		assertThat(find2).isEmpty();   
 	}
     
-    
+    @Test
+    void shouldFindByExistingUserByEmail() {
+    	List<User> res = userRepository.saveAll(generateUsers());
+    	    	
+    	Optional<User> find1 = userRepository.findExistingUserByEmail(res.get(1).getEmail());
+
+		assertThat(find1).isPresent();
+		assertThat(find1.get())
+	    .satisfies(u -> {
+	        assertThat(u.getId()).isNotNull();
+	        assertThat(u.getUsername()).isNotNull();
+	        assertThat(u.getEmail()).isNotNull();
+	        assertThat(u.getBirthDate()).isNotNull();
+	    });
+	}
 }
