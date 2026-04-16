@@ -109,15 +109,6 @@ public class RentalService {
 	}
 
 	@Transactional
-	public RentalDisplayDTO updateStatus(String rentId, String status) {
-		Rental rent = findById(rentId);
-		
-		rent.updateStatus(status);
-		
-		return new RentalDisplayDTO();
-	}
-
-	@Transactional
 	public void startPreparing(String rentId, String currentUserId) {
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
