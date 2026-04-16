@@ -35,6 +35,7 @@ public enum RentalStatus {
         IN_USE.allowedTransitions = Set.of(RETURN_REQUESTED, LATE);
         RETURN_REQUESTED.allowedTransitions = Set.of(RETURN_SHIPPED);
         RETURN_SHIPPED.allowedTransitions = Set.of(RETURNED);
+        RETURNED.allowedTransitions = Set.of();
         CANCELLED.allowedTransitions = Set.of();
         LATE.allowedTransitions = Set.of(IN_USE);
     }
