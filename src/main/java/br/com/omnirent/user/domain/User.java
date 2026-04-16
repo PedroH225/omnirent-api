@@ -143,4 +143,19 @@ public class User extends NamedEntity implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+	public User(String name, String username, String email, String password, LocalDate birthDate, Integer tokenVersion, Integer globalVersion) {
+		this.name = name;
+		this.username = username;
+		this.email = email;
+		this.password = password;
+		this.birthDate = birthDate;
+		
+		AuthMetadata authMetadata = new AuthMetadata();
+		authMetadata.setGlobalVersion(globalVersion);
+		authMetadata.setTokenVersion(tokenVersion);
+		this.authMetadata = authMetadata;
+	}
+    
+    
 }
