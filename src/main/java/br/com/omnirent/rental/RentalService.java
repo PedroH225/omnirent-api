@@ -190,13 +190,17 @@ public class RentalService {
 	}
 
 	@Transactional
-	public RentalDisplayDTO cancel(String rentId, String userId) {
-		Rental rental = findById(rentId);
+	public void cancel(String rentId, String userId) {
+		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
-		authorizationService.requireOne(rental, userId);
+		RentalStatus currStatus = context.getRentalStatus();
+		Set<String> actors = Set.of(context.getOwnerId(), context.getRenterId());
 		
-		rental.cancel();
-		return new RentalDisplayDTO();
+		authorizationService.requireOne(actors, userId);
+		
+		currStatus.validateTransition(RentalStatus.CANCELLED);
+		
+		rentalRepository.updateRentalStatus(rentId, RentalStatus.CANCELLED);
 	}
 
 	@Transactional

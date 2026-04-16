@@ -75,8 +75,8 @@ public class RentalController {
 	}
 	
 	@PatchMapping("/{rentId}/cancel")
-	public RentalDisplayDTO cancel(@PathVariable String rentId) {
-		return rentalService.cancel(rentId, SecurityUtils.currentUserId());
+	public void cancel(@PathVariable String rentId) {
+		rentalService.cancel(rentId, SecurityUtils.currentUserId());
 	}
 	
 	@PatchMapping("/{rentId}/confirm")
