@@ -3,14 +3,11 @@ package br.com.omnirent.security;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.security.auth.login.LoginException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,12 +15,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.exception.domain.EmailInUseException;
 import br.com.omnirent.exception.domain.FailedLoginException;
-import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
 import br.com.omnirent.user.UserRepository;
+import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 
 @Service
@@ -38,6 +36,9 @@ public class AuthenticationService implements UserDetailsService {
     private TokenService tokenService;
 
     private AuthenticationManager authenticationManager;
+    
+    @Autowired
+    private GlobalConfigHolder globalConfigHolder;
     
     private boolean verifyExistingEmail(String email) {
 		return userRepository.findExistingUserByEmail(email).isPresent();
@@ -83,6 +84,11 @@ public class AuthenticationService implements UserDetailsService {
     private User fromRegisterDTO(RegisterDTO registerDTO, String encryptedPassword) {
         User user = new User();
 
+        AuthMetadata authMetadata = new AuthMetadata();
+        authMetadata.setTokenVersion(1);
+        authMetadata.setGlobalVersion(globalConfigHolder.getGlobalTokenVersion());
+        
+        user.setAuthMetadata(authMetadata);
         user.setName(registerDTO.name());
         user.setUsername(registerDTO.username());
         user.setEmail(registerDTO.email());
