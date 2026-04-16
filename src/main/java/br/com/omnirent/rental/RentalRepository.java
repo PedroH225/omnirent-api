@@ -6,15 +6,26 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 
 @Repository
 public interface RentalRepository extends JpaRepository<Rental, String> {
+	
+	@Modifying
+	@Query("""
+			UPDATE Rental r
+			SET r.rentalStatus = :status
+			WHERE r.id = :id
+			""")
+	void updateRentalStatus(@Param("id")String rentalId, RentalStatus status);
 
 	List<Rental> findByRentalStatusAndEndDateBefore
 	(RentalStatus rentalStatus, LocalDateTime endDate);
@@ -34,4 +45,12 @@ public interface RentalRepository extends JpaRepository<Rental, String> {
 			WHERE r.id = :id 
 			""")
 	Optional<RentalDetailDTO> findRentalDetail(String id);
+	
+	@Query("""
+			SELECT new br.com.omnirent.rental.context.RentalStatusChangeContext
+			(r.id, r.ownerId, r.renterId, r.rentalStatus)
+			FROM Rental r
+			WHERE r.id = :id
+			""")
+	 Optional<RentalStatusChangeContext> getStatusChangeContext(@Param("id")String rentalId);
 }
