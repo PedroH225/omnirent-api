@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Repository;
 
+import br.com.omnirent.security.context.LoginContext;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
@@ -28,8 +29,14 @@ public interface UserRepository extends JpaRepository<User, String> {
 			SELECT new br.com.omnirent.user.dto.UserResponseDTO(u.id, u.username) FROM User u
 			""")
 	List<UserResponseDTO> findAllUser();
-	
-	Optional<UserDetails> findByEmail(String email);
+
+	@Query("""
+			SELECT new br.com.omnirent.security.context.LoginContext(u.id, u.email, u.password,
+			u.authMetadata.globalVersion, u.authMetadata.tokenVersion) 
+			FROM User u 
+			WHERE u.email = :email
+			""")
+	Optional<LoginContext> findByEmail(String email);
 	
 	Optional<User> findByEmailAndIdNot(String email, String id);
 	

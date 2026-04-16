@@ -18,8 +18,10 @@ import org.springframework.stereotype.Service;
 import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.exception.domain.EmailInUseException;
 import br.com.omnirent.exception.domain.FailedLoginException;
+import br.com.omnirent.security.context.LoginContext;
 import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
+import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
@@ -38,6 +40,9 @@ public class AuthenticationService implements UserDetailsService {
     private AuthenticationManager authenticationManager;
     
     @Autowired
+    private UserMapper mapper;
+    
+    @Autowired
     private GlobalConfigHolder globalConfigHolder;
     
     private boolean verifyExistingEmail(String email) {
@@ -46,14 +51,13 @@ public class AuthenticationService implements UserDetailsService {
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<UserDetails> user = userRepository.findByEmail(email);
+        Optional<LoginContext> optUser = userRepository.findByEmail(email);
         
-        if (user.isEmpty()) {
+        if (optUser.isEmpty()) {
 			throw new UsernameNotFoundException(email);
 		}
         
-        return user.get();
-
+        return mapper.toAuthUser(optUser.get());
     } 
 
     public Map<String, String> login(LoginDTO data){
