@@ -221,8 +221,8 @@ public class RentalService {
 		return rentalRepository.findUserRented(renterId);
 	}
 
-	public List<RentalDisplayDTO> findUserRentals(String userId) {
-		User user = userService.findById(userId);
-		return new ArrayList<RentalDisplayDTO>();
+	public List<RentalDisplayDTO> findUserRentals(String ownerId) {
+		userService.requireExistence(ownerId);
+		return rentalRepository.findUserRentals(ownerId);
 	}
 }

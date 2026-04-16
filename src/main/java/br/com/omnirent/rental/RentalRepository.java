@@ -75,6 +75,15 @@ public interface RentalRepository extends JpaRepository<Rental, String> {
 	List<RentalDisplayDTO> findUserRented(@Param("id") String renterId);
 	
 	@Query("""
+			SELECT new br.com.omnirent.rental.dto.RentalDisplayDTO(r.id, r.startDate, r.endDate,
+			r.finalPrice, r.rentalStatus, r.rentalPeriod, i.id, i.name, r.renterId,
+			rt.name, r.ownerId, o.name, r.createdAt)
+			FROM Rental r JOIN r.itemSnapshot i JOIN r.renter rt JOIN r.owner o
+			WHERE o.id = :id
+			""")
+	List<RentalDisplayDTO> findUserRentals(@Param("id") String ownerId);
+	
+	@Query("""
 			SELECT new br.com.omnirent.rental.context.RentalStatusChangeContext
 			(r.id, r.ownerId, r.renterId, r.rentalStatus, r.rentalPeriod)
 			FROM Rental r
