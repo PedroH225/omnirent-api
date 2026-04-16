@@ -123,7 +123,7 @@ public class RentalService {
 		
 		RentalStatus currStatus = context.getRentalStatus();
 		
-		authorizationService.requireOwner(context.getOwnerId(), currentUserId);
+		authorizationService.requireOne(Set.of(context.getOwnerId()), currentUserId);
 		currStatus.validateTransition(RentalStatus.PREPARING);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.PREPARING);
@@ -135,7 +135,7 @@ public class RentalService {
 		
 		RentalStatus currStatus = context.getRentalStatus();
 		
-		authorizationService.requireOwner(context.getOwnerId(), currentUserId);
+		authorizationService.requireOne(Set.of(context.getOwnerId()), currentUserId);
 		currStatus.validateTransition(RentalStatus.SHIPPED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.SHIPPED);
