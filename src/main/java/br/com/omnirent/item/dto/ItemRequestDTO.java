@@ -1,4 +1,4 @@
-package br.com.omnirent.item.domain;
+package br.com.omnirent.item.dto;
 
 import java.math.BigDecimal;
 

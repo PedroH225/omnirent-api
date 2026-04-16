@@ -1,4 +1,4 @@
-package br.com.omnirent.user;
+package br.com.omnirent.user.domain;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -9,11 +9,12 @@ import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import br.com.omnirent.address.Address;
+import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.common.NamedEntity;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.rental.domain.Rental;
+import br.com.omnirent.user.dto.UserRequestDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -24,9 +25,11 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "users")
 public class User extends NamedEntity implements UserDetails {
@@ -65,6 +68,18 @@ public class User extends NamedEntity implements UserDetails {
 		this.birthDate = userDTO.birthDate();
 		
 		return this;
+	}
+	
+	public User(String id, String email, String password, Integer tokenVersion, Integer globalVersion) {
+		this.id = id;
+		this.email = email;
+		this.password = password;
+		
+		AuthMetadata authMetadata = new AuthMetadata();
+        authMetadata.setTokenVersion(tokenVersion);
+        authMetadata.setGlobalVersion(globalVersion);
+        
+        this.authMetadata = authMetadata;
 	}
 	
 	public User deactivate() {
@@ -128,5 +143,4 @@ public class User extends NamedEntity implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-	
 }

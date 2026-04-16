@@ -11,13 +11,33 @@ import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
 
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.security.SecurityUtils;
+import br.com.omnirent.user.domain.AuthMetadata;
+import br.com.omnirent.user.domain.User;
+import br.com.omnirent.user.dto.UserDetailsDTO;
+import br.com.omnirent.user.dto.UserRequestDTO;
+import br.com.omnirent.user.dto.UserResponseDTO;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
 public class UserService {
+	
+	private UserMapper userMapper;
 
 	private UserRepository userRepository;
+	
+	public void requireExistence(String userId) {
+		if (!userRepository.verifyUser(userId)) {
+			throw new UserNotFoundException();
+		}
+	}
+	
+	public User getUserReference(String userId) {
+		User user = userRepository.getReferenceById(userId);
+		
+		return user;
+	}
 		
 	public User findById(String id) {
 		Optional<User> user = userRepository.findById(id);
@@ -30,27 +50,36 @@ public class UserService {
 	}
 	
 	public UserDetailsDTO getUserDetailsById(String id) {
-		return UserMapper.toDetailsDto(findById(id));
+		Optional<UserDetailsDTO> user = userRepository.findUserDetailsById(id);
+
+		if (user.isEmpty()) {
+			throw new UserNotFoundException();
+		}
+		
+		return user.get();
 	}
 
 	public List<UserResponseDTO> findAll() {
-		return UserMapper.toDto(userRepository.findAll());
+		return userRepository.findAllUser();
 	}
 
+	@Transactional
 	public UserDetailsDTO update(UserRequestDTO userDTO) {
 		User user = findById(SecurityUtils.currentUserId());
 				
 		User updatedUser = userRepository.save(user.update(userDTO));
 				
-		return UserMapper.toDetailsDto(updatedUser);
+		return userMapper.toDetailsDto(updatedUser);
 	}
 
+	@Transactional
 	public void deactivateUser(String userId) {
 		User user = findById(userId);
 		
 		userRepository.save(user.deactivate());
 	}
 
+	@Transactional
 	public void activateUser(String userId) {
 		User user = findById(userId);
 		

@@ -1,4 +1,4 @@
-package br.com.omnirent.rental.domain;
+package br.com.omnirent.rental.dto;
 
 public record RentalRequestDTO(
 		String itemId,

@@ -7,9 +7,7 @@ import br.com.omnirent.item.domain.Item;
 
 public class RentalPriceService {
 
-	public static BigDecimal calculateFinalPrice(Item item, RentalPeriod rentalPeriod) {
-		return item.getItemData()
-				.getBasePrice().
-				multiply(rentalPeriod.getMultiplier());
+	public static BigDecimal calculateFinalPrice(BigDecimal basePrice, RentalPeriod rentalPeriod) {
+		return basePrice.multiply(rentalPeriod.getMultiplier());
 	}
 }

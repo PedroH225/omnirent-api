@@ -5,9 +5,13 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.address.domain.Address;
+import br.com.omnirent.address.dto.AddressRequestDTO;
+import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.exception.domain.AddressNotFoundException;
-import br.com.omnirent.user.User;
+import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserService;
+import br.com.omnirent.user.domain.User;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -15,8 +19,10 @@ import lombok.AllArgsConstructor;
 public class AddressService {
 
 	private AddressRepository addressRepository;
-	
+		
 	private UserService userService;
+	
+	private AddressMapper mapper;
 	
 	public Address findById(String id) {
 		Optional<Address> address = addressRepository.findById(id);
@@ -29,19 +35,15 @@ public class AddressService {
 	}
 	
 	public List<AddressResponseDTO> getUserAddresses(String userId) {
-		List<Address> userAddresses = userService.findById(userId).getAddresses();
-		
-		return AddressMapper.toDto(userAddresses);
+		return addressRepository.findAddressByUser(userId);
 	}
 
-	public AddressResponseDTO addAddress(AddressRequestDTO addressDto, String userId) {
-		User user = userService.findById(userId);
-		
-		Address address = AddressMapper.fromAddressDTO(addressDto);
-		
-		address.assignUser(user);
+	public AddressResponseDTO addAddress(AddressRequestDTO addressDto, String userId) {	
+		userService.requireExistence(userId);
 				
-		return AddressMapper.toDto(addressRepository.save(address));
+		Address address = mapper.fromAddressDTO(addressDto, userId);
+		
+		return mapper.toDto(addressRepository.save(address));
 	}
 	
 	public AddressResponseDTO updateAddress(AddressRequestDTO addressDTO) {
@@ -49,7 +51,7 @@ public class AddressService {
 		
 		address.updateFields(addressDTO);
 		
-		return AddressMapper.toDto(addressRepository.save(address));
+		return mapper.toDto(addressRepository.save(address));
 	}
 	
 	public void deleteAddress(String addressId) {

@@ -2,6 +2,7 @@ package br.com.omnirent.item;
 
 import java.util.List;
 
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,11 +10,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.omnirent.common.enums.ItemEnums;
-import br.com.omnirent.item.domain.ItemRequestDTO;
-import br.com.omnirent.item.domain.ItemResponseDTO;
+import br.com.omnirent.item.dto.ItemCreatedDTO;
+import br.com.omnirent.item.dto.ItemDetailDTO;
+import br.com.omnirent.item.dto.ItemDisplayDTO;
+import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.security.SecurityUtils;
 import lombok.AllArgsConstructor;
 
@@ -25,13 +29,18 @@ public class ItemController {
 	private ItemService itemService;
 	
 	@GetMapping("/find/{id}")
-	public ItemResponseDTO findById(@PathVariable String id) {
+	public ItemDetailDTO findById(@PathVariable String id) {
 		return itemService.getItemById(id);
 	}
 	
-	@GetMapping("/find/user")
-	public List<ItemResponseDTO> findUserItems() {
+	@GetMapping("/find/user/me")
+	public List<ItemDisplayDTO> findOwnerItems() {
 		return itemService.getUserItems(SecurityUtils.currentUserId());
+	}
+	
+	@GetMapping("/find/user/{id}")
+	public List<ItemDisplayDTO> findUserItems(@PathVariable String id) {
+		return itemService.getUserItems(id);
 	}
 	
 	@GetMapping("/enums")
@@ -40,17 +49,17 @@ public class ItemController {
 	}
 	
 	@PostMapping
-	public ItemResponseDTO addItem(@RequestBody ItemRequestDTO itemDTO) {
+	public ItemCreatedDTO addItem(@RequestBody ItemRequestDTO itemDTO) {
 		return itemService.addItem(itemDTO, SecurityUtils.currentUserId());
 	}
 	
 	@PutMapping
-	public ItemResponseDTO updateItem(@RequestBody ItemRequestDTO itemDTO) {
+	public ItemDetailDTO updateItem(@RequestBody ItemRequestDTO itemDTO) {
 		return itemService.updateItem(itemDTO, SecurityUtils.currentUserId());
 	}
 	
 	@PatchMapping("/updateStatus/{itemId}/{itemStatus}")
-	public ItemResponseDTO updateStatus(@PathVariable String itemId, @PathVariable String itemStatus) {
+	public ItemDetailDTO updateStatus(@PathVariable String itemId, @PathVariable String itemStatus) {
 		return itemService.updateStatus(itemId, itemStatus, SecurityUtils.currentUserId());
 	}
 }

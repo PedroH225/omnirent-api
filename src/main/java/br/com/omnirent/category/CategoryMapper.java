@@ -3,25 +3,22 @@ package br.com.omnirent.category;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+
+import br.com.omnirent.category.domain.SubCategory;
+import br.com.omnirent.category.dto.SubCategoryResDTO;
+
+@Component
 public class CategoryMapper {
 
-	public static List<SubCategoryResDTO> toSubDto(List<SubCategory> subCategories) {
+	public List<SubCategoryResDTO> toSubDto(List<SubCategory> subCategories) {
 		return subCategories.stream()
-				.map(SubCategoryResDTO::new)
+				.map(sc -> toSubDto(sc))
 				.collect(Collectors.toList());
 	}
 	
-	public static List<CategoryResponseDTO> toDto(List<Category> categories) {
-		return categories.stream()
-				.map(CategoryResponseDTO::new)
-				.collect(Collectors.toList());
-	}
-	
-	public static CategoryResponseDTO toDto(Category category) {
-		return new CategoryResponseDTO(category);
-	}
-	
-	public static SubCategoryResDTO toSubDto(SubCategory subCategory) {
-		return new SubCategoryResDTO(subCategory);
+	public SubCategoryResDTO toSubDto(SubCategory subCategory) {
+		return new SubCategoryResDTO(subCategory.getId(), subCategory.getName(),
+				subCategory.getCategory().getName());
 	}
 }

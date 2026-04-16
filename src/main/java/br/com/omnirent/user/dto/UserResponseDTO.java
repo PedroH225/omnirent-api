@@ -1,5 +1,6 @@
-package br.com.omnirent.user;
+package br.com.omnirent.user.dto;
 
+import br.com.omnirent.user.domain.User;
 import lombok.Data;
 
 @Data
@@ -9,6 +10,11 @@ public class UserResponseDTO {
 	
 	public String username;
 
+	public UserResponseDTO(String id, String username) {
+		this.id = id;
+		this.username = username;
+	}
+	
 	public UserResponseDTO(User user) {
 		this.id = user.getId();
 		this.username = user.getDisplayUsername();

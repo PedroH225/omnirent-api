@@ -1,5 +1,10 @@
 package br.com.omnirent.item.domain;
 
+import java.math.BigDecimal;
+
+import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.rental.domain.Rental;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -32,10 +37,11 @@ public class ItemSnapshot {
 	@JoinColumn(name = "rental_id")
 	private Rental rental;
 
-	public ItemSnapshot(Item item) {
-		this.name = item.getName();
-		
-		this.itemData = item.getItemData();
+	public ItemSnapshot(String name, String brand, String model,
+		String description, BigDecimal basePrice, ItemCondition itemCondition) {
+		this.name = name;
+
+		this.itemData = new ItemData(brand, model, description, basePrice, itemCondition);
 	}
 	
 }

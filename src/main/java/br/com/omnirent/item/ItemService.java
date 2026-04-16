@@ -6,17 +6,22 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import br.com.omnirent.address.Address;
 import br.com.omnirent.address.AddressService;
+import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.CategoryService;
-import br.com.omnirent.category.SubCategory;
+import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
+import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
-import br.com.omnirent.item.domain.ItemRequestDTO;
-import br.com.omnirent.item.domain.ItemResponseDTO;
-import br.com.omnirent.user.User;
+import br.com.omnirent.item.dto.ItemCreatedDTO;
+import br.com.omnirent.item.dto.ItemDetailDTO;
+import br.com.omnirent.item.dto.ItemDisplayDTO;
+import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.security.SecurityUtils;
+import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserService;
+import br.com.omnirent.user.domain.User;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
@@ -34,6 +39,8 @@ public class ItemService {
 	
 	private ItemAuthorizationService authorizationService;
 	
+	private ItemMapper itemMapper;
+	
 	public Item findById(String id) {
 		Optional<Item> item = itemRepository.findById(id);
 		
@@ -44,30 +51,44 @@ public class ItemService {
 		return item.get();
 	}
 	
-	public ItemResponseDTO getItemById(String id) {
-		return ItemMapper.toDto(findById(id));
-	}
-
-	public List<ItemResponseDTO> getUserItems(String userId) {
-		User user = userService.findById(userId);
+	public ItemDetailDTO getItemById(String id) {
+		Optional<ItemDetailDTO> itemDetail = itemRepository.findItemDetailDTO(id);
 		
-		return ItemMapper.toDto(user.getItems());
+		if (itemDetail.isEmpty()) {
+			throw new ItemNotFoundException();
+		}
+		
+		return itemDetail.get();
+	}
+	
+	public ItemRentedContext getItemRentedContext(String id) {
+		Optional<ItemRentedContext> itemOpt = itemRepository.getItemRentedContext(id);
+		if (itemOpt.isEmpty()) {
+			throw new ItemNotFoundException();
+		}
+		
+		return itemOpt.get();
 	}
 
-	public ItemResponseDTO addItem(ItemRequestDTO itemDTO, String userId) {
-		User user = userService.findById(userId);
+	public List<ItemDisplayDTO> getUserItems(String userId) {
+		userService.requireExistence(userId);
+		return itemRepository.findUserItems(userId);
+	}
+
+	public ItemCreatedDTO addItem(ItemRequestDTO itemDTO, String userId) {
+		userService.requireExistence(userId);
+		User user = userService.getUserReference(userId);
 		Address pickupAddress = addressService.findById(itemDTO.addressId());
 		SubCategory subCategory = categoryService.findSubById(itemDTO.subCategoryId());
 		
-		Item item = ItemMapper.fromDto(itemDTO, user, 
+		Item item = itemMapper.fromDto(itemDTO, user, userId, 
 				pickupAddress, subCategory,
 				ItemStatus.AVAILABLE);
-		
-		return ItemMapper.toDto(itemRepository.save(item));
+		return itemMapper.toCreatedDto(itemRepository.save(item));
 	}
 	
 	@Transactional
-	public ItemResponseDTO updateItem(ItemRequestDTO itemDTO, String currentUserId) {
+	public ItemDetailDTO updateItem(ItemRequestDTO itemDTO, String currentUserId) {
 		Item updatedItem = findById(itemDTO.id());
 		
 		authorizationService.requireOwner(updatedItem, currentUserId);
@@ -84,20 +105,20 @@ public class ItemService {
 			subCategory = categoryService.findSubById(itemDTO.subCategoryId());
 		}
 		
-		ItemMapper.updateItem(itemDTO, address, subCategory, updatedItem);
+		itemMapper.updateItem(itemDTO, address, subCategory, updatedItem);
 		
-		return ItemMapper.toDto(itemRepository.save(updatedItem));
+		return itemMapper.toDto(itemRepository.save(updatedItem));
 	}
 
 	@Transactional
-	public ItemResponseDTO updateStatus(String itemId, String itemStatusStr, String currentUserId) {
+	public ItemDetailDTO updateStatus(String itemId, String itemStatusStr, String currentUserId) {
 		Item item = findById(itemId);
 		
 		authorizationService.requireOwner(item, currentUserId);
 		
 		item.updateItemStatus(itemStatusStr);
 		
-		return ItemMapper.toDto(itemRepository.save(item));
+		return itemMapper.toDto(itemRepository.save(item));
 	}
 	
 }

@@ -1,5 +1,6 @@
-package br.com.omnirent.address;
+package br.com.omnirent.address.domain;
 
+import br.com.omnirent.address.dto.AddressRequestDTO;
 import jakarta.persistence.Embeddable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,4 +36,18 @@ public class AddressData {
         this.country = address.country();
         this.zipCode = address.zipCode();
     }
+
+	public AddressData(String street, String number, String complement, String district, String city, String state,
+			String country, String zipCode) {
+		this.street = street;
+		this.number = number;
+		this.complement = complement;
+		this.district = district;
+		this.city = city;
+		this.state = state;
+		this.country = country;
+		this.zipCode = zipCode;
+	}
+    
+    
 }

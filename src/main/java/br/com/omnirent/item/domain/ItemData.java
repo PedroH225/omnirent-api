@@ -3,6 +3,7 @@ package br.com.omnirent.item.domain;
 import java.math.BigDecimal;
 
 import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.item.dto.ItemRequestDTO;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -33,4 +34,14 @@ public class ItemData {
 	    this.itemCondition = ItemCondition.fromString(itemDTO.itemCondition());
 
 	}
+
+	public ItemData(String brand, String model, String description, BigDecimal basePrice, ItemCondition itemCondition) {
+		this.brand = brand;
+		this.model = model;
+		this.description = description;
+		this.basePrice = basePrice;
+		this.itemCondition = itemCondition;
+	}
+	
+	
 }

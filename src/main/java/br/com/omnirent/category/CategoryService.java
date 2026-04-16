@@ -1,10 +1,18 @@
 package br.com.omnirent.category;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.category.domain.Category;
+import br.com.omnirent.category.domain.SubCategory;
+import br.com.omnirent.category.dto.CategoryResponseDTO;
+import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.exception.domain.CategoryNotFoundException;
 import br.com.omnirent.exception.domain.SubCategoryNotFoundException;
 import lombok.AllArgsConstructor;
@@ -16,6 +24,8 @@ public class CategoryService {
 	private CategoryRepository categoryRepository;
 
 	private SubCategoryRepository subRepository;
+	
+	private CategoryMapper mapper;
 	
 	public Category findById(String id) {
 		Optional<Category> category = categoryRepository.findById(id);
@@ -38,29 +48,56 @@ public class CategoryService {
 	}
 	
 	public CategoryResponseDTO getCategoryById(String id) {
-		Category category = findById(id);
+		Optional<CategoryResponseDTO> optCategory = categoryRepository.getCategoryById(id);
 		
-		return CategoryMapper.toDto(category);
+		List<SubCategoryResDTO> subCategories = subRepository.findSubByCategoryId(id);
+		
+		if (optCategory.isEmpty()) {
+			throw new RuntimeException();
+		}
+		CategoryResponseDTO category = optCategory.get();
+		category.setSubCategories(subCategories);
+		
+		return category;
  	}
 	
 	public SubCategoryResDTO getSubCategoryById(String id) {
 		SubCategory subCategory = findSubById(id);
 		
-		return CategoryMapper.toSubDto(subCategory);
+		return mapper.toSubDto(subCategory);
  	}
 
 	public List<CategoryResponseDTO> findAll() {
-		return CategoryMapper.toDto(categoryRepository.findAll());
+		List<CategoryResponseDTO> categories = categoryRepository.getAllCategories();
+		
+		List<SubCategoryResDTO> subCategories = findAllSub();
+		
+		Map<String, List<SubCategoryResDTO>> groupByCat = new HashMap<String, List<SubCategoryResDTO>>();
+		for (SubCategoryResDTO sub : subCategories) {
+	        String categoryName = sub.getCategory();
+
+	        groupByCat
+	            .computeIfAbsent(categoryName, k -> new ArrayList<>())
+	            .add(sub);
+	    }
+		
+		for (CategoryResponseDTO cat : categories) {
+	        List<SubCategoryResDTO> subs = groupByCat.get(cat.getName());
+
+	        cat.setSubCategories(subs != null ? subs : new ArrayList<>());
+	    }
+		
+		return categories;
 	}
 	
 	public List<SubCategoryResDTO> findAllSub() {
-		return CategoryMapper.toSubDto(subRepository.findAll());
+		return subRepository.findAllSubCat();
 	}
 
 	public List<SubCategoryResDTO> findSubsByCategory(String categoryName) {
 		List<SubCategory> subCategories = subRepository.findAllByCategoryName(categoryName);
 		
-		return CategoryMapper.toSubDto(subCategories);
+		return mapper.toSubDto(subCategories);
 	}
 	
 }

@@ -1,4 +1,4 @@
-package br.com.omnirent.address;
+package br.com.omnirent.address.domain;
 
 import jakarta.persistence.Embedded;
 import br.com.omnirent.rental.domain.Rental;
@@ -32,7 +32,14 @@ public class AddressSnapshot {
 	@JoinColumn(name = "rental_id")
 	private Rental rental;
 
-	public AddressSnapshot(Address address) {
-		this.addressData = address.getAddressData();
+	public AddressSnapshot(String street, String number,
+		    String complement, String district, String city,
+		    String state, String country, String zipCode,
+		    Rental rental) {
+		this.addressData = new AddressData(street, number, complement, district,
+				city, state, country, zipCode);
+		this.rental = rental;
 	}
+
+	
 }

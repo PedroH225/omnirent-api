@@ -1,16 +1,10 @@
 package br.com.omnirent.item.domain;
 
-import java.math.BigDecimal;
-import java.util.List;
-
-import br.com.omnirent.address.Address;
-import br.com.omnirent.category.SubCategory;
+import br.com.omnirent.address.domain.Address;
+import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.NamedEntity;
-import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
-import br.com.omnirent.rental.domain.Rental;
-import br.com.omnirent.user.User;
-import jakarta.persistence.CascadeType;
+import br.com.omnirent.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -19,8 +13,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -53,7 +45,7 @@ public class Item extends NamedEntity {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "pickup_address_id", insertable = false, updatable = false)
-	private Address pickupAdress;
+	private Address pickupAddress;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "owner_id", insertable = false, updatable = false)
@@ -63,9 +55,9 @@ public class Item extends NamedEntity {
 	    setItemStatus(ItemStatus.fromString(status));
 	}
 	
-	public void assignOwner(User owner) {
+	public void assignOwner(User owner, String ownerId) {
 		this.owner = owner;
-		this.ownerId = owner.getId();
+		this.ownerId = ownerId;
 
 	}
 	
@@ -75,7 +67,7 @@ public class Item extends NamedEntity {
 	}
 	
 	public void assignAddress(Address address) {
-		this.pickupAdress = address;
-		this.pickupAddressId = pickupAdress.getId();
+		this.pickupAddress = address;
+		this.pickupAddressId = pickupAddress.getId();
 	}
 }
