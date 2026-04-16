@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.useRepresentation;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -21,6 +22,7 @@ import br.com.omnirent.integration.IntegrationTest;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
+import br.com.omnirent.user.dto.UserResponseDTO;
 
 @SpringBootTest
 class UserRepositoryTest extends IntegrationTest {
@@ -30,6 +32,21 @@ class UserRepositoryTest extends IntegrationTest {
 
 	@Autowired
     private UserRepository userRepository;
+	
+	private Integer count = 2;
+	
+	private List<User> generateUsers() {
+		List<User> tempList = new ArrayList<User>();
+        Integer globalVersion = globalConfigHolder.getGlobalTokenVersion();
+
+		for (int i = 0; i < 2; i++) {
+			String string = "test" + count;
+			String stringemail = "test" + count + "@example.com";
+			tempList.add(new User(string, string, stringemail, string, LocalDate.now(), 1, globalVersion));
+			count++;
+		}
+		return tempList;
+	}
 	
     @Test
     void shouldSaveAndFindUser() {
