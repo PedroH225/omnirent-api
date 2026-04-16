@@ -1,8 +1,14 @@
 package br.com.omnirent.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.useRepresentation;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,5 +43,26 @@ class UserRepositoryTest extends IntegrationTest {
         assertThat(found).isNotNull();
         assertThat(found.getId()).isNotNull();
         assertThat(found.getName()).isEqualTo("PedroH");
+    }
+    
+    @Test
+    void shouldSaveAllAndFindAllUser() {
+        Integer globalVersion = globalConfigHolder.getGlobalTokenVersion();
+        
+        List<User> users = Arrays.asList(
+        		new User("PedroH", "pedro226", "pedro@example.com", "password123", LocalDate.now(), 1, globalVersion).activate(),
+        		new User("GuilhermeR", "guilherme123", "guilherme@gmail.com", "password123", LocalDate.now(), 1, globalVersion));
+        
+        List<User> savedUsers = userRepository.saveAll(users);
+
+        List<Optional<User>> findSaved = savedUsers.stream()
+        		.map(u -> userRepository.findById(u.getId()))
+        		.collect(Collectors.toList());
+
+        
+        for (Optional<User> optUser : findSaved) {
+        	assertThat(optUser.isPresent());
+            assertThat(optUser.get().getId()).isNotNull();
+		}        
     }
 }
