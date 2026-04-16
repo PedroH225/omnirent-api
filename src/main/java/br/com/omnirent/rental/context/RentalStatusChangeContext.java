@@ -1,5 +1,6 @@
 package br.com.omnirent.rental.context;
 
+import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,5 +16,7 @@ public class RentalStatusChangeContext {
 	private String renterId;
 	
 	private RentalStatus rentalStatus;
+	
+	private RentalPeriod rentalPeriod;
 	
 }

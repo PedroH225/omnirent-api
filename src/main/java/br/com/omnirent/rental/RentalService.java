@@ -58,7 +58,18 @@ public class RentalService {
 		
 		return rental.get();
 	}
-	
+
+
+	public RentalDisplayDTO findRentalDisplayDTO(String id) {
+		Optional<RentalDisplayDTO> optRental = rentalRepository.findRentalDisplayDTO(id);
+		
+		if (optRental.isEmpty()) {
+			throw new RentalNotFoundException();
+		}
+		
+		return optRental.get();
+	}
+		
 	public RentalDetailDTO getRentalById(String id) {
 		Optional<RentalDetailDTO> rOptional = rentalRepository.findRentalDetail(id);
 		if (rOptional.isEmpty()) {
@@ -132,19 +143,22 @@ public class RentalService {
 
 	@Transactional
 	public RentalDisplayDTO markInUse(String rentId, String userId) {
-		Rental rental = findById(rentId);
-		rental.markInUse();
+		RentalStatusChangeContext context = getStatusChangeContext(rentId);
+		
+		RentalStatus currStatus = context.getRentalStatus();
+		Set<String> actors = Set.of(context.getOwnerId(), context.getRenterId());
 		
 		// TEMPORARY
-		authorizationService.requireOne(rental, userId);
+		authorizationService.requireOne(actors, userId);
+		currStatus.validateTransition(RentalStatus.IN_USE);
 		
 		LocalDateTime startDate = LocalDateTime.now();
 		LocalDateTime endDateTime = RentalDateService.
-				calculateEndDate(startDate, rental.getRentalPeriod());
+				calculateEndDate(startDate, context.getRentalPeriod());
 		
-		Rental updatedRental = RentalMapper.setDates(rental, startDate, endDateTime);
+		rentalRepository.updateRentalPeriodAndStatus(rentId, RentalStatus.IN_USE, startDate, endDateTime);
 		
-		return new RentalDisplayDTO();
+		return findRentalDisplayDTO(rentId);
 	}
 
 	@Transactional
