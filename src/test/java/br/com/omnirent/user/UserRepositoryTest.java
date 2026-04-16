@@ -100,7 +100,19 @@ class UserRepositoryTest extends IntegrationTest {
     	assertThat(userDetails2).isEmpty();
     }
     
-    
+    @Test
+    void shouldFindAllUserResDTO() {
+    	userRepository.saveAll(generateUsers());
+    	
+		List<UserResponseDTO> usersResDto = userRepository.findAllUser();
+		
+		assertThat(usersResDto).isNotEmpty();
+		assertThat(usersResDto)
+	    .allSatisfy(user -> {
+	        assertThat(user.getId()).isNotNull();
+	        assertThat(user.getUsername()).isNotNull();
+	        });    
+	}
     
     
 }
