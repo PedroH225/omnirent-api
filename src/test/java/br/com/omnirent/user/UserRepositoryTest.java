@@ -113,5 +113,16 @@ class UserRepositoryTest extends IntegrationTest {
 	        });    
 	}
     
+    @Test
+    void shouldFindByEmailNotId() {
+    	List<User> res = userRepository.saveAll(generateUsers());
+    	    	
+    	Optional<User> find1 = userRepository.findByEmailAndIdNot(res.get(0).getEmail(), res.get(1).getId());
+    	Optional<User> find2 = userRepository.findByEmailAndIdNot(res.get(0).getEmail(), res.get(0).getId());
+
+		assertThat(find1).isPresent();
+		assertThat(find2).isEmpty();   
+	}
+    
     
 }
