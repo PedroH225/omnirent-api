@@ -39,12 +39,10 @@ public class AddressService {
 	}
 
 	public AddressResponseDTO addAddress(AddressRequestDTO addressDto, String userId) {	
-		User user = userService.getUserReference(userId);
+		userService.requireExistence(userId);
 				
-		Address address = mapper.fromAddressDTO(addressDto);
+		Address address = mapper.fromAddressDTO(addressDto, userId);
 		
-		address.assignUser(user);
-				
 		return mapper.toDto(addressRepository.save(address));
 	}
 	

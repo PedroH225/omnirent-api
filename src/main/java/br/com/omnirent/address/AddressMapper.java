@@ -43,10 +43,12 @@ public class AddressMapper {
 	    );
 	}
 	
-	public Address fromAddressDTO(AddressRequestDTO addressDTO) {
+	public Address fromAddressDTO(AddressRequestDTO addressDTO, String userId) {
 		Address address = new Address();
 		
 		AddressData addressData = new AddressData(addressDTO);
+		
+		address.setUserId(userId);
 		
 		address.setAddressData(addressData);
 		

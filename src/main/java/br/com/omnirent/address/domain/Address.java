@@ -30,11 +30,6 @@ public class Address extends BaseEntity {
 	@JoinColumn(name = "user_id", insertable = false, updatable = false)
 	private User user;
 	
-	public void assignUser(User user) {
-		this.user = user;
-		this.userId = user.getId();
-	}
-	
 	public void updateFields(AddressRequestDTO addressDTO) {
 	    this.addressData = new AddressData(addressDTO);
 	}
