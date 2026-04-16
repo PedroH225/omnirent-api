@@ -123,6 +123,13 @@ class UserRepositoryTest extends IntegrationTest {
     	Optional<User> find2 = userRepository.findByEmailAndIdNot(res.get(0).getEmail(), res.get(0).getId());
 
 		assertThat(find1).isPresent();
+		assertThat(find1.get())
+	    .satisfies(u -> {
+	        assertThat(u.getId()).isNotNull();
+	        assertThat(u.getUsername()).isNotNull();
+	        assertThat(u.getEmail()).isNotNull();
+	        assertThat(u.getBirthDate()).isNotNull();
+	    });
 		assertThat(find2).isEmpty();   
 	}
     
