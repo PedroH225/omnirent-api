@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.core.NativeDetector.Context;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.address.domain.Address;
@@ -17,6 +18,7 @@ import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
+import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.domain.RentalAuthorizationService;
 import br.com.omnirent.rental.domain.RentalDateService;
@@ -62,6 +64,15 @@ public class RentalService {
 		
 		return rOptional.get();
 	}
+	
+	private RentalStatusChangeContext getStatusChangeContext(String rentId) {
+		Optional<RentalStatusChangeContext> optContext = rentalRepository.getStatusChangeContext(rentId);
+		
+		if (optContext.isEmpty()) {
+			throw new RentalNotFoundException();
+		}
+		return optContext.get();
+	}
 
 	public RentalCreatedDTO addRent(RentalRequestDTO rentalRequestDTO, String userId) {
 		userService.requireExistence(userId);
@@ -93,13 +104,15 @@ public class RentalService {
 	}
 
 	@Transactional
-	public RentalDisplayDTO startPreparing(String rentId, String currentUserId) {
-		Rental rental = findById(rentId);
+	public void startPreparing(String rentId, String currentUserId) {
+		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
-		authorizationService.requireOwner(rental, currentUserId);
-
-		rental.startPreparing();
-		return new RentalDisplayDTO();
+		RentalStatus currStatus = context.getRentalStatus();
+		
+		authorizationService.requireOwner(context.getOwnerId(), currentUserId);
+		currStatus.validateTransition(RentalStatus.PREPARING);
+		
+		rentalRepository.updateRentalStatus(rentId, RentalStatus.PREPARING);
 	}
 
 	@Transactional

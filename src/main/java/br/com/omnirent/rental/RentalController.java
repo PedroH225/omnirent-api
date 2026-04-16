@@ -45,8 +45,8 @@ public class RentalController {
 	}
 	
 	@PatchMapping("/{rentId}/start-preparing")
-	public RentalDisplayDTO startPreparing(@PathVariable String rentId) {
-		return rentalService.startPreparing(rentId, SecurityUtils.currentUserId());
+	public void startPreparing(@PathVariable String rentId) {
+		rentalService.startPreparing(rentId, SecurityUtils.currentUserId());
 	}
 	
 	@PatchMapping("/{rentId}/ship")
@@ -80,8 +80,8 @@ public class RentalController {
 	}
 	
 	@PatchMapping("/{rentId}/confirm")
-	public RentalDisplayDTO confirm(@PathVariable String rentId) {
-		return rentalService.confirm(rentId, SecurityUtils.currentUserId());
+	public void confirm(@PathVariable String rentId) {
+		rentalService.confirm(rentId, SecurityUtils.currentUserId());
 	}
 	
 }
