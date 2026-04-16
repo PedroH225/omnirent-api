@@ -37,6 +37,14 @@ public interface RentalRepository extends JpaRepository<Rental, String> {
 	void updateRentalPeriodAndStatus
 	(@Param("id")String rentalId, RentalStatus status, LocalDateTime startDate, LocalDateTime endDate);
 
+	@Modifying
+	@Query("""
+			UPDATE Rental r
+			SET r.rentalStatus = :late
+			WHERE r.rentalStatus = :inUse AND r.endDate < CURRENT_TIMESTAMP
+			""")
+	void markLate(@Param("late")RentalStatus late, @Param("inUse")RentalStatus inUse);
+	
 	List<Rental> findByRentalStatusAndEndDateBefore
 	(RentalStatus rentalStatus, LocalDateTime endDate);
 	
