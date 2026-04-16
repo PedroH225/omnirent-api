@@ -1,11 +1,4 @@
--- MySQL Workbench Forward Engineering
-
-DROP SCHEMA IF EXISTS `omnirent_db`;
-
-CREATE SCHEMA IF NOT EXISTS `omnirent_db`;
-USE `omnirent_db`;
-
-CREATE TABLE IF NOT EXISTS `omnirent_db`.`global_configurations` (
+CREATE TABLE IF NOT EXISTS `global_configurations` (
   `id` INT NOT NULL,
   `global_token_version` INT NOT NULL,
   `last_updated` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -15,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `omnirent_db`.`global_configurations` (
 -- -----------------------------------------------------
 -- Table `users`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `omnirent_db`.`users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id` CHAR(36) NOT NULL,
   `name` VARCHAR(100) NOT NULL,
   `username` VARCHAR(50) NOT NULL,
