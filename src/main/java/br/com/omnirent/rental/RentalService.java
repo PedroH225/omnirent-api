@@ -162,33 +162,40 @@ public class RentalService {
 	}
 
 	@Transactional
-	public RentalDisplayDTO requestReturn(String rentId, String userId) {
-		Rental rental = findById(rentId);
+	public void requestReturn(String rentId, String userId) {
+		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
-		authorizationService.requireRenter(rental, userId);
-
-		rental.requestReturn();				
-		return new RentalDisplayDTO();
+		RentalStatus currStatus = context.getRentalStatus();
+		
+		authorizationService.requireOne(Set.of(context.getRenterId()), userId);
+		currStatus.validateTransition(RentalStatus.RETURN_REQUESTED);
+		
+		rentalRepository.updateRentalStatus(rentId, RentalStatus.RETURN_REQUESTED);
 	}
 	
 	@Transactional
-	public RentalDisplayDTO markReturnShipped(String rentId, String userId) {
-		Rental rental = findById(rentId);
+	public void markReturnShipped(String rentId, String userId) {
+		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
-		authorizationService.requireRenter(rental, userId);
-
-		rental.markReturnShipped();		
-		return new RentalDisplayDTO();
+		RentalStatus currStatus = context.getRentalStatus();
+		
+		authorizationService.requireOne(Set.of(context.getRenterId()), userId);
+		currStatus.validateTransition(RentalStatus.RETURN_SHIPPED);
+		
+		rentalRepository.updateRentalStatus(rentId, RentalStatus.RETURN_SHIPPED);
 	}
 	
 	@Transactional
-	public RentalDisplayDTO markReturned(String rentId, String currentUserId) {
-		Rental rental = findById(rentId);
+	public void markReturned(String rentId, String currentUserId) {
+		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
-		authorizationService.requireOwner(rental, currentUserId);
+		RentalStatus currStatus = context.getRentalStatus();
 		
-		rental.markReturned();
-		return new RentalDisplayDTO();
+		authorizationService.requireOne(Set.of(context.getOwnerId()), currentUserId);
+
+		currStatus.validateTransition(RentalStatus.RETURNED);
+		
+		rentalRepository.updateRentalStatus(rentId, RentalStatus.RETURNED);
 	}
 
 	@Transactional

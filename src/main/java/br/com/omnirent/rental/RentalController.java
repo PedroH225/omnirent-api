@@ -60,18 +60,18 @@ public class RentalController {
 	}
 	
 	@PatchMapping("/{rentId}/request-return")
-	public RentalDisplayDTO requestReturn(@PathVariable String rentId) {
-		return rentalService.requestReturn(rentId, SecurityUtils.currentUserId());
+	public void requestReturn(@PathVariable String rentId) {
+		rentalService.requestReturn(rentId, SecurityUtils.currentUserId());
 	}
 	
 	@PatchMapping("/{rentId}/return-shipped")
-	public RentalDisplayDTO markReturnShipped(@PathVariable String rentId) {
-		return rentalService.markReturnShipped(rentId, SecurityUtils.currentUserId());
+	public void markReturnShipped(@PathVariable String rentId) {
+		rentalService.markReturnShipped(rentId, SecurityUtils.currentUserId());
 	}
 	
 	@PatchMapping("/{rentId}/returned")
-	public RentalDisplayDTO markReturned(@PathVariable String rentId) {
-		return rentalService.markReturned(rentId, SecurityUtils.currentUserId());
+	public void markReturned(@PathVariable String rentId) {
+		rentalService.markReturned(rentId, SecurityUtils.currentUserId());
 	}
 	
 	@PatchMapping("/{rentId}/cancel")
