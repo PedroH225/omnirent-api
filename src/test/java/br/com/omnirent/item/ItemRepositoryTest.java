@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,13 +24,13 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.integration.IntegrationTest;
+import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.User;
-import br.com.omnirent.user.dto.UserResponseDTO;
 
 @SpringBootTest
 @TestInstance(Lifecycle.PER_CLASS)
@@ -179,4 +178,43 @@ public class ItemRepositoryTest extends IntegrationTest {
 		.extracting(item -> item.getOwner().getId())
 		.containsOnly(owner.getId());
 	}
+	
+	@Test
+	void shouldGetItemRentedContext() {
+	    Optional<ItemRentedContext> optContext = itemRepository.getItemRentedContext(item.getId());
+
+	    assertThat(optContext).isPresent();
+	    assertThat(optContext.get())
+	        .satisfies(context -> {
+	            assertThat(context.getOwnerId()).isEqualTo(owner.getId());
+	            assertThat(context.getOwnerName()).isEqualTo(owner.getName());
+	        
+	            assertThat(context.getItemInfo()).isNotNull();
+	            assertThat(context.getItemInfo())
+	                .satisfies(itemInfo -> {
+	                    assertThat(itemInfo.getId()).isEqualTo(item.getId());
+	                    assertThat(itemInfo.getItemName()).isEqualTo(item.getName());
+	                    assertThat(itemInfo.getBrand()).isEqualTo(item.getItemData().getBrand());
+	                    assertThat(itemInfo.getModel()).isEqualTo(item.getItemData().getModel());
+	                    assertThat(itemInfo.getDescription()).isEqualTo(item.getItemData().getDescription());
+	                    assertThat(itemInfo.getBasePrice()).isEqualByComparingTo(item.getItemData().getBasePrice());
+	                    assertThat(itemInfo.getItemCondition()).isEqualTo(item.getItemData().getItemCondition());
+	                });
+
+	            assertThat(context.getAddressInfo()).isNotNull();
+	            assertThat(context.getAddressInfo())
+	                .satisfies(addressInfo -> {
+	                    assertThat(addressInfo.getId()).isEqualTo(ownerAddress.getId());
+	                    assertThat(addressInfo.getStreet()).isEqualTo(ownerAddress.getAddressData().getStreet());
+	                    assertThat(addressInfo.getNumber()).isEqualTo(ownerAddress.getAddressData().getNumber());
+	                    assertThat(addressInfo.getComplement()).isEqualTo(ownerAddress.getAddressData().getComplement());
+	                    assertThat(addressInfo.getDistrict()).isEqualTo(ownerAddress.getAddressData().getDistrict());
+	                    assertThat(addressInfo.getCity()).isEqualTo(ownerAddress.getAddressData().getCity());
+	                    assertThat(addressInfo.getState()).isEqualTo(ownerAddress.getAddressData().getState());
+	                    assertThat(addressInfo.getCountry()).isEqualTo(ownerAddress.getAddressData().getCountry());
+	                    assertThat(addressInfo.getZipCode()).isEqualTo(ownerAddress.getAddressData().getZipCode());
+	                });
+	        });
+	}
+	
 }
