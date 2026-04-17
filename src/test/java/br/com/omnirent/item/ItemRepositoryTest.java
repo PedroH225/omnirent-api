@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -26,8 +28,10 @@ import br.com.omnirent.integration.IntegrationTest;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.dto.ItemDetailDTO;
+import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.User;
+import br.com.omnirent.user.dto.UserResponseDTO;
 
 @SpringBootTest
 @TestInstance(Lifecycle.PER_CLASS)
@@ -56,6 +60,7 @@ public class ItemRepositoryTest extends IntegrationTest {
 	private SubCategory drill;
 	
 	private Item item;
+	private Item item2;
 	
 	@BeforeAll
 	void setUp() {
@@ -93,7 +98,22 @@ public class ItemRepositoryTest extends IntegrationTest {
         item.setOwnerId(owner.getId());
         item.setSubCategoryId(drill.getId());
         item.setPickupAddressId(ownerAddress.getId());
+        
+        ItemData itemData2 = new ItemData(
+        	    "Makita", "HP1640", "Corded hammer drill suitable for masonry and wood",
+        	    new BigDecimal("249.90"), ItemCondition.USED
+        	);
+        item2 = new Item();
+
+        item2.setItemStatus(ItemStatus.AVAILABLE);
+        item2.setItemData(itemData2);
+        item2.setName("Makita HP1640 Hammer Drill");
+        item2.setOwnerId(owner.getId());
+        item2.setSubCategoryId(drill.getId());
+        item2.setPickupAddressId(ownerAddress.getId());
+        	
         item = itemRepository.save(item);
+        item2 = itemRepository.save(item2);
 	}
 	
 	@Test
@@ -133,4 +153,30 @@ public class ItemRepositoryTest extends IntegrationTest {
 	    });
 	}
 	
+	@Test
+	void shouldFindUserItems() {
+		List<ItemDisplayDTO> userItems = itemRepository.findUserItems(owner.getId());
+		
+		assertThat(userItems).hasSize(2)
+		.allSatisfy(i -> {
+	        assertThat(i.getId()).isNotNull();
+	        assertThat(i.getName()).isNotNull();
+	        assertThat(i.getSubCategoryName()).isNotNull();
+	        assertThat(i.getItemCondition()).isNotNull();
+	    });;
+	    
+		assertThat(userItems)
+	    .extracting(ItemDisplayDTO::getName)
+	    .containsExactlyInAnyOrder(
+	        item.getName(),
+	        item2.getName());
+		
+		assertThat(userItems)
+	    .extracting(ItemDisplayDTO::getSubCategoryName)
+	    .containsOnly(drill.getName());
+		
+		assertThat(userItems)
+		.extracting(item -> item.getOwner().getId())
+		.containsOnly(owner.getId());
+	}
 }
