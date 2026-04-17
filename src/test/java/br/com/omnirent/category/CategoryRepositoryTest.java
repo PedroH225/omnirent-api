@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.category.dto.CategoryResponseDTO;
+import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.integration.IntegrationTest;
 
 @SpringBootTest
@@ -26,7 +27,7 @@ public class CategoryRepositoryTest extends IntegrationTest {
 	private CategoryRepository categoryRepository;
 	
 	@Autowired
-	private SubCategoryRepository subCategoryRepository;
+	private SubCategoryRepository subRepository;
 	
 	private Category electronics;
     private Category sports;
@@ -48,17 +49,17 @@ public class CategoryRepositoryTest extends IntegrationTest {
         notebook = new SubCategory();
         notebook.setName("PC Gamer");
         notebook.setCategory(electronics);
-        notebook = subCategoryRepository.save(notebook);
+        notebook = subRepository.save(notebook);
 
         mouse = new SubCategory();
         mouse.setName("Mouse");
         mouse.setCategory(electronics);
-        mouse = subCategoryRepository.save(mouse);
+        mouse = subRepository.save(mouse);
 
         ball = new SubCategory();
         ball.setName("Ball");
         ball.setCategory(sports);
-        ball = subCategoryRepository.save(ball);
+        ball = subRepository.save(ball);
     }
 
 	@Test
@@ -78,5 +79,13 @@ public class CategoryRepositoryTest extends IntegrationTest {
 		List<CategoryResponseDTO> findCategories = categoryRepository.getAllCategories();
 
 		assertThat(findCategories).isNotEmpty();
+	}
+	
+	@Test
+	void shouldFindSubCategoryById() {
+		List<SubCategoryResDTO> findSubCategory = subRepository.findSubByCategoryId(electronics.getId());
+		
+		assertThat(findSubCategory).isNotEmpty();
+		assertThat(findSubCategory.get(0).getCategory()).isEqualTo(electronics.getName());
 	}
 }
