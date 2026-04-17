@@ -1,7 +1,10 @@
 package br.com.omnirent.item;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -22,6 +25,7 @@ import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.integration.IntegrationTest;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
+import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.User;
 
@@ -93,8 +97,40 @@ public class ItemRepositoryTest extends IntegrationTest {
 	}
 	
 	@Test
-	void shouldTest() {
+	void shouldFindItemDetailDTO() {
+		Optional<ItemDetailDTO> optItem = itemRepository.findItemDetailDTO(item.getId());
 		
+		assertThat(optItem).isPresent();
+		assertThat(optItem.get().getId()).isNotNull();
+		assertThat(optItem.get())
+	    .satisfies(i -> {
+	        // Item
+	        assertThat(i.getId()).isEqualTo(item.getId());
+	        assertThat(i.getName()).isEqualTo(item.getName());
+	        assertThat(i.getItemStatus()).isEqualTo(ItemStatus.AVAILABLE.toString());
+
+	        // ItemData
+	        assertThat(i.getBrand()).isEqualTo(item.getItemData().getBrand());
+	        assertThat(i.getModel()).isEqualTo(item.getItemData().getModel());
+	        assertThat(i.getDescription()).isEqualTo(item.getItemData().getDescription());
+	        assertThat(i.getBasePrice()).isEqualByComparingTo(item.getItemData().getBasePrice());
+	        assertThat(i.getItemCondition()).isEqualTo(ItemCondition.NEW.toString());
+
+	        // SubCategory + Category
+	        assertThat(i.getSubCategory().getName()).isEqualTo(drill.getName());
+	        assertThat(i.getSubCategory().getCategory()).isEqualTo(tools.getName());
+
+	        // Address
+	        assertThat(i.getPickupAddress().getCity()).isEqualTo(ownerAddress.getAddressData().getCity());
+	        assertThat(i.getPickupAddress().getStreet()).isEqualTo(ownerAddress.getAddressData().getStreet());
+
+	        // Owner
+	        assertThat(i.getOwner().getUsername()).isEqualTo(owner.getName());
+
+	        // Timestamps
+	        assertThat(i.getCreatedAt()).isNotNull();
+	        assertThat(i.getUpdatedAt()).isNotNull();
+	    });
 	}
 	
 }
