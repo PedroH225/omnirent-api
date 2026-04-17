@@ -79,15 +79,35 @@ class UserRepositoryTest extends IntegrationTest {
         
         List<User> savedUsers = userRepository.saveAll(users);
 
-        List<Optional<User>> findSaved = savedUsers.stream()
+        List<Optional<User>> optSaved = savedUsers.stream()
         		.map(u -> userRepository.findById(u.getId()))
         		.collect(Collectors.toList());
 
+        List<User> findSaved = Arrays.asList(optSaved.get(0).get(), optSaved.get(1).get());
         
-        for (Optional<User> optUser : findSaved) {
-        	assertThat(optUser).isPresent();
-            assertThat(optUser.get().getId()).isNotNull();
-		}        
+        assertThat(findSaved).isNotNull();
+        assertThat(findSaved).allSatisfy(u -> {
+        	assertThat(u.getId()).isNotNull();
+        	assertThat(u.getCreatedAt()).isNotNull();
+        	assertThat(u.getUpdatedAt()).isNotNull();
+        });
+        
+        for (int i = 0; i < findSaved.size(); i++) {
+			User u = findSaved.get(i);
+			User target = users.get(i);
+			
+			assertThat(u.getName()).isEqualTo(target.getName());
+		    assertThat(u.getUsername()).isEqualTo(target.getUsername());
+		    assertThat(u.getEmail()).isEqualTo(target.getEmail());
+		    assertThat(u.getPassword()).isEqualTo(target.getPassword());
+		    assertThat(u.getBirthDate()).isEqualTo(target.getBirthDate());
+
+		    assertThat(u.getAuthMetadata().getTokenVersion())
+		        .isEqualTo(target.getAuthMetadata().getTokenVersion());
+
+		    assertThat(u.getAuthMetadata().getGlobalVersion())
+		        .isEqualTo(target.getAuthMetadata().getGlobalVersion());
+		}
     }
     
     @Test
