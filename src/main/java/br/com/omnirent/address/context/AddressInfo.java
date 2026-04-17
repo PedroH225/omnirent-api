@@ -23,8 +23,9 @@ public class AddressInfo {
 
 	private String zipCode;
 
-	public AddressInfo(String street, String number, String complement, String district, String city, String state,
+	public AddressInfo(String id, String street, String number, String complement, String district, String city, String state,
 			String country, String zipCode) {
+		this.id = id;
 		this.street = street;
 		this.number = number;
 		this.complement = complement;

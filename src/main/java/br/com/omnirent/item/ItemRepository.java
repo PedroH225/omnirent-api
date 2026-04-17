@@ -46,7 +46,7 @@ public interface ItemRepository extends JpaRepository<Item, String> {
 			SELECT new br.com.omnirent.item.context.ItemRentedContext(
 			new br.com.omnirent.item.context.ItemInfo(i.id, i.name, i.itemData.brand, 
 			i.itemData.model, i.itemData.description, i.itemData.basePrice, i.itemData.itemCondition),
-			new br.com.omnirent.address.context.AddressInfo(ad.id, ad.addressData.number, 
+			new br.com.omnirent.address.context.AddressInfo(ad.id, ad.addressData.street, ad.addressData.number, 
 			ad.addressData.complement, ad.addressData.district, ad.addressData.city, ad.addressData.state, ad.addressData.country, ad.addressData.zipCode),
 			o.id, o.name)
 			FROM Item i JOIN i.pickupAddress ad JOIN i.owner o
