@@ -88,4 +88,11 @@ public class CategoryRepositoryTest extends IntegrationTest {
 		assertThat(findSubCategory).isNotEmpty();
 		assertThat(findSubCategory.get(0).getCategory()).isEqualTo(electronics.getName());
 	}
+	
+	@Test
+	void shouldFindAllSubCategories() {
+		List<SubCategoryResDTO> findSubCategory = subRepository.findAllSubCat();
+		
+		assertThat(findSubCategory).isNotEmpty();
+	}
 }
