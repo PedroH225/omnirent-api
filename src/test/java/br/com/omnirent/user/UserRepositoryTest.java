@@ -1,29 +1,21 @@
 package br.com.omnirent.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.useRepresentation;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.testcontainers.shaded.org.checkerframework.checker.units.qual.g;
 
 import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.integration.IntegrationTest;
-import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
@@ -61,8 +53,20 @@ class UserRepositoryTest extends IntegrationTest {
         User found = userRepository.findById(saved.getId()).orElse(null);
 
         assertThat(found).isNotNull();
-        assertThat(found.getId()).isNotNull();
-        assertThat(found.getName()).isEqualTo("PedroH");
+        assertThat(found).satisfies(u -> {
+        	assertThat(u.getId()).isNotNull();
+        	assertThat(u.getCreatedAt()).isNotNull();
+        	assertThat(u.getUpdatedAt()).isNotNull();
+        });
+        assertThat(found).satisfies(u -> {
+        	assertThat(u.getName()).isEqualTo(user.getName());
+        	assertThat(u.getUsername()).isEqualTo(user.getUsername());
+        	assertThat(u.getEmail()).isEqualTo(user.getEmail());
+        	assertThat(u.getPassword()).isEqualTo(user.getPassword());
+        	assertThat(u.getBirthDate()).isEqualTo(user.getBirthDate());
+        	assertThat(u.getAuthMetadata().getTokenVersion()).isEqualByComparingTo(user.getAuthMetadata().getTokenVersion());
+        	assertThat(u.getAuthMetadata().getGlobalVersion()).isEqualByComparingTo(user.getAuthMetadata().getGlobalVersion());
+        });
     }
     
     @Test
