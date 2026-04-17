@@ -2,10 +2,14 @@ package br.com.omnirent.category;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -15,6 +19,7 @@ import br.com.omnirent.category.dto.CategoryResponseDTO;
 import br.com.omnirent.integration.IntegrationTest;
 
 @SpringBootTest
+@TestInstance(Lifecycle.PER_CLASS)
 public class CategoryRepositoryTest extends IntegrationTest {
 
 	@Autowired
@@ -30,7 +35,7 @@ public class CategoryRepositoryTest extends IntegrationTest {
     private SubCategory mouse;
     private SubCategory ball;
 
-    @BeforeEach
+    @BeforeAll
     void setUp() {
         electronics = new Category();
         electronics.setName("Electronics");
@@ -66,5 +71,12 @@ public class CategoryRepositoryTest extends IntegrationTest {
 			assertThat(c.getId()).isEqualTo(electronics.getId());
 			assertThat(c.getName()).isEqualTo(electronics.getName());
 		});
+	}
+	
+	@Test
+	void shouldFindAllCategory() {
+		List<CategoryResponseDTO> findCategories = categoryRepository.getAllCategories();
+
+		assertThat(findCategories).isNotEmpty();
 	}
 }
