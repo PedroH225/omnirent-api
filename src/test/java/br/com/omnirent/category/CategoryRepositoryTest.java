@@ -1,0 +1,70 @@
+package br.com.omnirent.category;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import br.com.omnirent.category.domain.Category;
+import br.com.omnirent.category.domain.SubCategory;
+import br.com.omnirent.category.dto.CategoryResponseDTO;
+import br.com.omnirent.integration.IntegrationTest;
+
+@SpringBootTest
+public class CategoryRepositoryTest extends IntegrationTest {
+
+	@Autowired
+	private CategoryRepository categoryRepository;
+	
+	@Autowired
+	private SubCategoryRepository subCategoryRepository;
+	
+	private Category electronics;
+    private Category sports;
+	
+	private SubCategory notebook;
+    private SubCategory mouse;
+    private SubCategory ball;
+
+    @BeforeEach
+    void setUp() {
+        electronics = new Category();
+        electronics.setName("Electronics");
+        electronics = categoryRepository.save(electronics);
+
+        sports = new Category();
+        sports.setName("Sports");
+        sports = categoryRepository.save(sports);
+
+        notebook = new SubCategory();
+        notebook.setName("PC Gamer");
+        notebook.setCategory(electronics);
+        notebook = subCategoryRepository.save(notebook);
+
+        mouse = new SubCategory();
+        mouse.setName("Mouse");
+        mouse.setCategory(electronics);
+        mouse = subCategoryRepository.save(mouse);
+
+        ball = new SubCategory();
+        ball.setName("Ball");
+        ball.setCategory(sports);
+        ball = subCategoryRepository.save(ball);
+    }
+
+	@Test
+	void shouldFindCategoryById() {
+		Optional<CategoryResponseDTO> findCategory = categoryRepository.getCategoryById(electronics.getId());
+		
+		assertThat(findCategory).isPresent();
+		assertThat(findCategory.get())
+		.satisfies(c -> {
+			assertThat(c.getId()).isEqualTo(electronics.getId());
+			assertThat(c.getName()).isEqualTo(electronics.getName());
+		});
+	}
+}
