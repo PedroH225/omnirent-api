@@ -219,5 +219,42 @@ public class RentalRepositoryTest extends IntegrationTest {
 
 	    assertThat(result).isEmpty();
 	}
+	
+	@Test
+	void shouldFindUserRented() {
+	    List<RentalDisplayDTO> result = rentalRepository.findUserRented(renter.getId());
+
+	    assertThat(result).isNotEmpty();
+	    assertThat(result).hasSize(1);
+
+	    RentalDisplayDTO dto = result.get(0);
+
+	    ItemSnapshot itemSnp = rental.getItemSnapshot();
+
+	    assertThat(dto.getId()).isEqualTo(rental.getId());
+	    assertThat(dto.getStartDate()).isEqualTo(rental.getStartDate().format(dtf));
+	    assertThat(dto.getEndDate()).isEqualTo(rental.getEndDate().format(dtf));
+	    assertThat(dto.getFinalPrice()).isEqualByComparingTo(rental.getFinalPrice());
+	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus().toString());
+	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod().toString());
+
+	    assertThat(dto.getItemId()).isEqualTo(itemSnp.getId());
+	    assertThat(dto.getItemName()).isEqualTo(itemSnp.getName());
+
+	    assertThat(dto.getRenterId()).isEqualTo(renter.getId());
+	    assertThat(dto.getRenterName()).isEqualTo(renter.getName());
+
+	    assertThat(dto.getOwnerId()).isEqualTo(owner.getId());
+	    assertThat(dto.getOwnerName()).isEqualTo(owner.getName());
+
+	    assertThat(dto.getCreatedAt()).isEqualTo(rental.getCreatedAt().format(dtf));
+	}
+
+	@Test
+	void shouldReturnEmptyListWhenUserHasNoRented() {
+	    List<RentalDisplayDTO> result = rentalRepository.findUserRented(owner.getId());
+
+	    assertThat(result).isEmpty();
+	}
 }
 
