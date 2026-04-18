@@ -40,7 +40,7 @@ public class RentalDisplayDTO {
 	private String createdAt;
 	
 	@JsonIgnore
-	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
 	public RentalDisplayDTO(String id, LocalDateTime startDate, LocalDateTime endDate, BigDecimal finalPrice, RentalStatus rentalStatus,
 			RentalPeriod rentalPeriod, String itemId, String itemName, String renterId, String renterName, String ownerId,
