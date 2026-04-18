@@ -19,7 +19,7 @@ public final class ItemTestFactory {
             User owner, Address address, SubCategory subCategory,
             String price, ItemCondition condition
     ) {
-    	String itemStr = Sequence.nextString("itemdata-");
+    	String itemStr = Sequence.nextString("itemdata");
         ItemData data = new ItemData(
         	itemStr, itemStr, itemStr,
             new BigDecimal(price), condition

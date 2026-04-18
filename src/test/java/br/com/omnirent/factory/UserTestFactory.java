@@ -10,7 +10,7 @@ public final class UserTestFactory {
     private UserTestFactory() {}
 
     public static User owner() {
-    	String owner = Sequence.nextString("owner-");
+    	String owner = Sequence.nextString("owner");
         return new User(
         	owner, owner, owner + "@email.com",
         	owner, LocalDate.now(), 1, 1
@@ -18,7 +18,7 @@ public final class UserTestFactory {
     }
     
     public static User user() {
-    	String owner = Sequence.nextString("user-");
+    	String owner = Sequence.nextString("user");
         return new User(
         	owner, owner, owner + "@email.com",
         	owner, LocalDate.now(), 1, 1
