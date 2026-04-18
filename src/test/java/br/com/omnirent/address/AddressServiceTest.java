@@ -2,6 +2,7 @@ package br.com.omnirent.address;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.shouldHaveThrown;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
+import br.com.omnirent.exception.domain.AddressNotFoundException;
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
@@ -137,4 +139,18 @@ public class AddressServiceTest {
 		verifyNoMoreInteractions(addressRepository, mapper);
 	}
 
+	@Test
+	void shouldThrowWhenUpdatingInvalidAddress() {
+		AddressRequestDTO addressDto = AddressTestFactory.toRequestDTO(userAddress);
+		
+		when(addressRepository.findById(addressDto.id()))
+	    .thenReturn(Optional.empty());
+		
+		assertThatThrownBy(() -> addressService.updateAddress(addressDto))
+		.isInstanceOf(AddressNotFoundException.class);
+		
+		verify(addressRepository).findById(addressDto.id());
+		verifyNoMoreInteractions(addressRepository, mapper);
+
+	}
 }
