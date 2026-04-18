@@ -69,58 +69,18 @@ public class ItemRepositoryTest extends IntegrationTest {
 	private Item item;
 	private Item item2;
 	
-	@BeforeAll
+	@BeforeEach
 	void setUp() {
-		owner = new User("owner", "owner", "owner@email.com", "owner", LocalDate.now(), 1, 1);
-		owner = userRepository.save(owner);
-		
-		AddressData addressData = new AddressData(
-			    "Rua Azul", "450", "Apto 12",
-			    "Centro", "Campinas", "SP",
-			    "Brazil", "13000-000"
-			);		
-		ownerAddress = new Address();
-		ownerAddress.setAddressData(addressData);
-		ownerAddress.setUserId(owner.getId());
-		ownerAddress = addressRepository.save(ownerAddress);
-		
-		tools = new Category();
-        tools.setName("Tools");
-        tools = categoryRepository.save(tools);
+		owner = userRepository.save(UserTestFactory.owner());
+		ownerAddress = addressRepository.save(AddressTestFactory.forUser(owner));
+        tools = categoryRepository.save(CategoryTestFactory.create("Tools"));
+        drill = subRepository.save(SubCategoryTestFactory.create("Drill", tools));
         
-        drill = new SubCategory();
-        drill.setName("Drill");
-        drill.setCategory(tools);
-        drill = subRepository.save(drill);
+        item = itemRepository.save(ItemTestFactory.create(owner, ownerAddress, drill,
+        		"200", ItemCondition.NEW));
         
-        ItemData itemData = new ItemData(
-        	    "Bosch", "GSB 13 RE", "Corded drill for home and professional use",
-        	    new BigDecimal("199.90"), ItemCondition.NEW
-        	);
-        item = new Item();
-        
-        item.setItemStatus(ItemStatus.AVAILABLE);
-        item.setItemData(itemData);
-        item.setName("Bosch GSB 13 RE Corded Drill");
-        item.setOwnerId(owner.getId());
-        item.setSubCategoryId(drill.getId());
-        item.setPickupAddressId(ownerAddress.getId());
-        
-        ItemData itemData2 = new ItemData(
-        	    "Makita", "HP1640", "Corded hammer drill suitable for masonry and wood",
-        	    new BigDecimal("249.90"), ItemCondition.USED
-        	);
-        item2 = new Item();
-
-        item2.setItemStatus(ItemStatus.AVAILABLE);
-        item2.setItemData(itemData2);
-        item2.setName("Makita HP1640 Hammer Drill");
-        item2.setOwnerId(owner.getId());
-        item2.setSubCategoryId(drill.getId());
-        item2.setPickupAddressId(ownerAddress.getId());
-        	
-        item = itemRepository.save(item);
-        item2 = itemRepository.save(item2);
+        item2 = itemRepository.save(ItemTestFactory.create(owner, ownerAddress, drill,
+        		"100", ItemCondition.USED));
 	}
 	
 	@Test

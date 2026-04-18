@@ -30,38 +30,30 @@ public class UserRepositoryTest extends IntegrationTest {
 
 	@Autowired
     private UserRepository userRepository;
-		
-	private static List<User> generateUsers() {
-		RandomStringUtils randomStringUtils = RandomStringUtils.secure();
-		List<User> tempList = new ArrayList<User>();
+	
+	private User user1;
+	private User user2;
 
-		for (int i = 0; i < 2; i++) {
-			String string = randomStringUtils.nextAlphabetic(10);
-			String email = string + "@email.com";
-			tempList.add(new User(string, string, email, string, LocalDate.now(), 1, 1));
-		}
-		return tempList;
+	@BeforeEach
+	void setUp() {
+		user1 = userRepository.save(UserTestFactory.user());
+	    user2 = userRepository.save(UserTestFactory.user());
 	}
     
     @Test
     void shouldFindDetailsDTO() {
-		User user = new User("testuser1", "testuser1", "test1@example.com", "password123", LocalDate.now(), 1, globalConfigHolder.getGlobalTokenVersion());
-        User saved = userRepository.save(user);
-
-    	Optional<UserDetailsDTO> userDetails1 = userRepository.findUserDetailsById(saved.getId());
+    	Optional<UserDetailsDTO> userDetails1 = userRepository.findUserDetailsById(user1.getId());
     	Optional<UserDetailsDTO> userDetails2 = userRepository.findUserDetailsById("123");
 
     	assertThat(userDetails1).isPresent()
     	.get()
     	.extracting(UserDetailsDTO::getEmail)
-    	.isEqualTo(saved.getEmail());
+    	.isEqualTo(user1.getEmail());
     	assertThat(userDetails2).isEmpty();
     }
     
     @Test
     void shouldFindAllUserResDTO() {
-    	userRepository.saveAll(generateUsers());
-    	
 		List<UserResponseDTO> usersResDto = userRepository.findAllUser();
 		
 		assertThat(usersResDto).isNotEmpty();
@@ -73,11 +65,9 @@ public class UserRepositoryTest extends IntegrationTest {
 	}
     
     @Test
-    void shouldFindByEmailNotId() {
-    	List<User> res = userRepository.saveAll(generateUsers());
-    	    	
-    	Optional<User> find1 = userRepository.findByEmailAndIdNot(res.get(0).getEmail(), res.get(1).getId());
-    	Optional<User> find2 = userRepository.findByEmailAndIdNot(res.get(0).getEmail(), res.get(0).getId());
+    void shouldFindByEmailNotId() {    	    	
+    	Optional<User> find1 = userRepository.findByEmailAndIdNot(user1.getEmail(), user2.getId());
+    	Optional<User> find2 = userRepository.findByEmailAndIdNot(user1.getEmail(), user1.getId());
 
 		assertThat(find1).isPresent();
 		assertThat(find1.get())
@@ -92,12 +82,10 @@ public class UserRepositoryTest extends IntegrationTest {
     
     @Test
     void shouldFindByExistingUserByEmail() {
-    	List<User> res = userRepository.saveAll(generateUsers());
-    	    	
-    	Optional<User> find1 = userRepository.findExistingUserByEmail(res.get(1).getEmail());
+    	Optional<User> find = userRepository.findExistingUserByEmail(user1.getEmail());
 
-		assertThat(find1).isPresent();
-		assertThat(find1.get())
+		assertThat(find).isPresent();
+		assertThat(find.get())
 	    .satisfies(u -> {
 	        assertThat(u.getId()).isNotNull();
 	        assertThat(u.getUsername()).isNotNull();

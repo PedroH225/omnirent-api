@@ -41,30 +41,15 @@ public class CategoryRepositoryTest extends IntegrationTest {
     private SubCategory mouse;
     private SubCategory ball;
 
-    @BeforeAll
+    @BeforeEach
     void setUp() {
-        electronics = new Category();
-        electronics.setName("Electronics");
-        electronics = categoryRepository.save(electronics);
+        electronics = categoryRepository.save(CategoryTestFactory.create("Eletronics"));
 
-        sports = new Category();
-        sports.setName("Sports");
-        sports = categoryRepository.save(sports);
+        sports = categoryRepository.save(CategoryTestFactory.create("Sports"));
 
-        notebook = new SubCategory();
-        notebook.setName("PC Gamer");
-        notebook.setCategory(electronics);
-        notebook = subRepository.save(notebook);
-
-        mouse = new SubCategory();
-        mouse.setName("Mouse");
-        mouse.setCategory(electronics);
-        mouse = subRepository.save(mouse);
-
-        ball = new SubCategory();
-        ball.setName("Ball");
-        ball.setCategory(sports);
-        ball = subRepository.save(ball);
+        notebook = subRepository.save(SubCategoryTestFactory.create("Notebook", electronics));
+        mouse = subRepository.save(SubCategoryTestFactory.create("Mouse", electronics));
+        ball = subRepository.save(SubCategoryTestFactory.create("Ball", electronics));
     }
 
 	@Test

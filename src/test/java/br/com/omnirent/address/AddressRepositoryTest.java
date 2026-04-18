@@ -34,27 +34,17 @@ public class AddressRepositoryTest extends IntegrationTest {
 	@Autowired
     private UserRepository userRepository;
 	
+	private User user;
+	private Address userAddress;
+	
+	@BeforeEach
+	void setUp() {
+		user = userRepository.save(UserTestFactory.user());
+		userAddress = addressRepository.save(AddressTestFactory.forUser(user));
+	}
+	
 	@Test
     void shouldFindAddressByUserId() {
-		User user = new User("addressUser", "addressUser", "addressUser@email.com", "addressUser", LocalDate.now(), 1, 1);
-        user = userRepository.save(user);
-
-        AddressData addressData = new AddressData();
-        addressData.setStreet("Rua Azul");
-        addressData.setNumber("450");
-        addressData.setComplement("Apto 12");
-        addressData.setDistrict("Centro");
-        addressData.setCity("Campinas");
-        addressData.setState("SP");
-        addressData.setCountry("Brazil");
-        addressData.setZipCode("13000-000");
-
-        Address address = new Address();
-        address.setUserId(user.getId());
-        address.setAddressData(addressData);
-
-        addressRepository.save(address);
-
         List<AddressResponseDTO> find =
                 addressRepository.findAddressByUser(user.getId());
 
