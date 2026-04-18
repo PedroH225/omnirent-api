@@ -1,5 +1,6 @@
 package br.com.omnirent.factory;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import br.com.omnirent.address.domain.Address;
@@ -21,6 +22,7 @@ public final class RentalTestFactory {
 		ItemSnapshot itemSnapshot = new ItemSnapshot(item.getName(), item.getItemData().getBrand(),
 				item.getItemData().getModel(), item.getItemData().getDescription(),
 				item.getItemData().getBasePrice(), item.getItemData().getItemCondition());
+		itemSnapshot.setRental(rental);
 		AddressSnapshot addressSnapshot = new AddressSnapshot(address.getAddressData().getStreet(),
 				address.getAddressData().getNumber(), address.getAddressData().getComplement(),
 				address.getAddressData().getDistrict(), address.getAddressData().getCity(),
@@ -29,10 +31,14 @@ public final class RentalTestFactory {
 		
 		rental.setItemSnapshot(itemSnapshot);
 		rental.setAddressSnapshot(addressSnapshot);
-		rental.setCreatedAt(LocalDateTime.now());
+		rental.setStartDate(LocalDateTime.now());
 		rental.setEndDate(LocalDateTime.now());
 		rental.setRentalStatus(status);
 		rental.setRentalPeriod(period);
+		rental.setFinalPrice(new BigDecimal(finalPrice));
+		
+		rental.setOwnerId(owner.getId());
+		rental.setRenterId(renter.getId());
 		
 		return rental;
 	}
