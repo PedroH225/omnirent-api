@@ -38,6 +38,7 @@ public enum RentalStatus {
         RETURNED.allowedTransitions = Set.of();
         CANCELLED.allowedTransitions = Set.of();
         LATE.allowedTransitions = Set.of(IN_USE);
+        ACTIVE.allowedTransitions = Set.of();
     }
     
 	public static RentalStatus fromString(String text) {
@@ -48,6 +49,10 @@ public enum RentalStatus {
         }
         throw new IllegalEnumerationException(RentalStatus.class, text);
     }
+	
+	public Set<RentalStatus> getAllowedTransitions() {
+		return allowedTransitions;
+	}
 	
 	public void validateTransition(RentalStatus target) {
 		if (!allowedTransitions.contains(target)) {
