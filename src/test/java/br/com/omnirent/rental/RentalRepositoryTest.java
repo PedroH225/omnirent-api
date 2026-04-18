@@ -39,6 +39,7 @@ import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.item.dto.ItemSnapshotDTO;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
+import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserResponseDTO;
@@ -81,7 +82,7 @@ public class RentalRepositoryTest extends IntegrationTest {
 	
 	private Rental rental;
 	
-	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm");
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 	
 	@BeforeEach
 	void setUp() {
@@ -151,4 +152,34 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(adrsSnpDto.getCountry()).isEqualTo(adrsData.getCountry());
 	    assertThat(adrsSnpDto.getZipCode()).isEqualTo(adrsData.getZipCode());
 	}
+
+	@Test
+	void shouldFindRentalDisplayDTO() {
+	    Optional<RentalDisplayDTO> result = rentalRepository.findRentalDisplayDTO(rental.getId());
+
+	    assertThat(result).isPresent();
+
+	    RentalDisplayDTO dto = result.get();
+	    
+	    ItemSnapshot itemSnp = rental.getItemSnapshot();
+
+	    assertThat(dto.getId()).isEqualTo(rental.getId());
+	    assertThat(dto.getStartDate()).isEqualTo(dtf.format(rental.getStartDate()));
+	    assertThat(dto.getEndDate()).isEqualTo(dtf.format(rental.getEndDate()));
+	    assertThat(dto.getFinalPrice()).isEqualByComparingTo(rental.getFinalPrice());
+	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus().toString());
+	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod().toString());
+
+	    assertThat(dto.getItemId()).isEqualTo(itemSnp.getId());
+	    assertThat(dto.getItemName()).isEqualTo(itemSnp.getName());
+
+	    assertThat(dto.getRenterId()).isEqualTo(renter.getId());
+	    assertThat(dto.getRenterName()).isEqualTo(renter.getName());
+
+	    assertThat(dto.getOwnerId()).isEqualTo(owner.getId());
+	    assertThat(dto.getOwnerName()).isEqualTo(owner.getName());
+
+	    assertThat(dto.getCreatedAt()).isEqualTo(dtf.format(rental.getCreatedAt()));
+	}
 }
+
