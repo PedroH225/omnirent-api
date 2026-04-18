@@ -17,7 +17,7 @@ public final class RentalTestFactory {
 	private RentalTestFactory() {}
 	
 	public static Rental create(Item item, User owner, User renter, Address address,
-			String finalPrice, RentalStatus status, RentalPeriod period) {
+			String finalPrice, RentalStatus status, RentalPeriod period, LocalDateTime startDate, LocalDateTime endDate) {
 		Rental rental = new Rental();
 		ItemSnapshot itemSnapshot = new ItemSnapshot(item.getName(), item.getItemData().getBrand(),
 				item.getItemData().getModel(), item.getItemData().getDescription(),
@@ -31,8 +31,8 @@ public final class RentalTestFactory {
 		
 		rental.setItemSnapshot(itemSnapshot);
 		rental.setAddressSnapshot(addressSnapshot);
-		rental.setStartDate(LocalDateTime.now());
-		rental.setEndDate(LocalDateTime.now());
+		rental.setStartDate(startDate);
+		rental.setEndDate(endDate);
 		rental.setRentalStatus(status);
 		rental.setRentalPeriod(period);
 		rental.setFinalPrice(new BigDecimal(finalPrice));
