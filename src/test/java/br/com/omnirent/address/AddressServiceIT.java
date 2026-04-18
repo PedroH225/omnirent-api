@@ -1,6 +1,7 @@
 package br.com.omnirent.address;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.domain.AddressData;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
+import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringIntegrationTest;
@@ -69,5 +71,13 @@ public class AddressServiceIT extends SpringIntegrationTest {
 	    assertThat(data.getState()).isEqualTo(addressRequestDTO.state());
 	    assertThat(data.getCountry()).isEqualTo(addressRequestDTO.country());
 	    assertThat(data.getZipCode()).isEqualTo(addressRequestDTO.zipCode());
+	}
+	
+	@Test
+	void shouldThrowWhenInvalidUser() {
+		AddressRequestDTO addressRequestDTO = AddressTestFactory.toRequestDTO(userAddress);
+		
+		assertThatThrownBy(() -> addressService.addAddress(addressRequestDTO, "123"))
+		.isInstanceOf(UserNotFoundException.class);
 	}
 }
