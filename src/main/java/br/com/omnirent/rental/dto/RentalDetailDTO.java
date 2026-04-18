@@ -46,7 +46,7 @@ public class RentalDetailDTO {
 	private AddressSnapshotDTO addressSnapshot;
 	
 	@JsonIgnore
-	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm");
+	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 	
 	public RentalDetailDTO(String id, LocalDateTime startDate, LocalDateTime endDate, BigDecimal finalPrice, RentalStatus rentalStatus,
 			RentalPeriod rentalPeriod, UserResponseDTO renter, UserResponseDTO owner, ItemSnapshotDTO itemSnapshot,
