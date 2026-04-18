@@ -1,6 +1,7 @@
 package br.com.omnirent.address;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -16,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import br.com.omnirent.address.domain.Address;
+import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
@@ -74,5 +76,28 @@ public class AddressServiceTest {
 
 	    verify(addressRepository).findAddressByUser(userId);
 	    verifyNoMoreInteractions(addressRepository);
+	}
+	
+	@Test
+	void shouldAddAddress() {
+	    AddressRequestDTO addressDTO = AddressTestFactory.toRequestDTO(userAddress);
+	    String userId = user.getId();
+
+	    AddressResponseDTO responseDTO = AddressTestFactory.toAddressDto(userAddress);
+
+	    doNothing().when(userService).requireExistence(userId);
+	    when(mapper.fromAddressDTO(addressDTO, userId)).thenReturn(userAddress);
+	    when(addressRepository.save(userAddress)).thenReturn(userAddress);
+	    when(mapper.toDto(userAddress)).thenReturn(responseDTO);
+
+	    AddressResponseDTO result = addressService.addAddress(addressDTO, userId);
+
+	    assertThat(result).isEqualTo(responseDTO);
+
+	    verify(userService).requireExistence(userId);
+	    verify(mapper).fromAddressDTO(addressDTO, userId);
+	    verify(addressRepository).save(userAddress);
+	    verify(mapper).toDto(userAddress);
+	    verifyNoMoreInteractions(userService, mapper, addressRepository);
 	}
 }
