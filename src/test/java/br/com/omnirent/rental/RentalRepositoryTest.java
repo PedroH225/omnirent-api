@@ -300,5 +300,15 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(result).isEmpty();
 	}
 
+	@Test
+	void shouldMarkLateRentals() {
+		assertThat(rental2.getRentalStatus()).isEqualTo(RentalStatus.IN_USE);
+		
+		rentalRepository.markLate(RentalStatus.LATE, RentalStatus.IN_USE);
+		Optional<RentalDisplayDTO> lateRental = rentalRepository.findRentalDisplayDTO(rental2.getId());
+	
+		assertThat(lateRental).isPresent();
+		assertThat(lateRental.get().getRentalStatus()).isEqualTo(RentalStatus.LATE.toString());
+	}
 }
 
