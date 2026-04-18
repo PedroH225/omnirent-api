@@ -310,5 +310,16 @@ public class RentalRepositoryTest extends IntegrationTest {
 		assertThat(lateRental).isPresent();
 		assertThat(lateRental.get().getRentalStatus()).isEqualTo(RentalStatus.LATE.toString());
 	}
+	
+	@Test
+	void shouldUpdateRentalStatus() {
+		assertThat(rental.getRentalStatus()).isEqualTo(RentalStatus.ACTIVE);
+		
+		rentalRepository.updateRentalStatus(rental.getId(), RentalStatus.IN_USE);
+		Optional<RentalDisplayDTO> updatedRental = rentalRepository.findRentalDisplayDTO(rental.getId());
+	
+		assertThat(updatedRental).isPresent();
+		assertThat(updatedRental.get().getRentalStatus()).isEqualTo(RentalStatus.IN_USE.toString());
+	}
 }
 
