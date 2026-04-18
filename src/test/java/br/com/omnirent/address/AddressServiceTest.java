@@ -53,4 +53,26 @@ public class AddressServiceTest {
 
 		user2 = UserTestFactory.persistedUser();
 	}
+	
+	@Test
+	void shouldReturnUserAddresses() {
+	    String userId = user.getId();
+
+	    AddressResponseDTO dto1 = AddressTestFactory.toAddressDto(userAddress);
+	    
+	    AddressResponseDTO dto2 = AddressTestFactory.toAddressDto(userAddress2);
+
+	    List<AddressResponseDTO> expected = List.of(dto1, dto2);
+
+	    when(addressRepository.findAddressByUser(userId))
+	            .thenReturn(expected);
+
+	    List<AddressResponseDTO> result =
+	            addressService.getUserAddresses(userId);
+
+	    assertThat(result).isEqualTo(expected);
+
+	    verify(addressRepository).findAddressByUser(userId);
+	    verifyNoMoreInteractions(addressRepository);
+	}
 }
