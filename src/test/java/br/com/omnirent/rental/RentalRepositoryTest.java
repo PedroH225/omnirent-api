@@ -38,6 +38,7 @@ import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.item.dto.ItemSnapshotDTO;
+import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
@@ -253,6 +254,29 @@ public class RentalRepositoryTest extends IntegrationTest {
 	@Test
 	void shouldReturnEmptyListWhenUserHasNoRented() {
 	    List<RentalDisplayDTO> result = rentalRepository.findUserRented(owner.getId());
+
+	    assertThat(result).isEmpty();
+	}
+
+	@Test
+	void shouldGetStatusChangeContext() {
+	    Optional<RentalStatusChangeContext> result = rentalRepository.getStatusChangeContext(rental.getId());
+
+	    assertThat(result).isPresent();
+
+	    RentalStatusChangeContext context = result.get();
+
+	    assertThat(context.getId()).isEqualTo(rental.getId());
+	    assertThat(context.getOwnerId()).isEqualTo(owner.getId());
+	    assertThat(context.getRenterId()).isEqualTo(renter.getId());
+	    assertThat(context.getRentalStatus()).isEqualTo(rental.getRentalStatus());
+	    assertThat(context.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
+	}
+
+	@Test
+	void shouldReturnEmptyWhenStatusChangeContextDoesNotExist() {
+	    Optional<RentalStatusChangeContext> result =
+	            rentalRepository.getStatusChangeContext("non-existent-rental-id");
 
 	    assertThat(result).isEmpty();
 	}
