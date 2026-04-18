@@ -2,7 +2,9 @@ package br.com.omnirent.rental;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAmount;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,6 +85,7 @@ public class RentalRepositoryTest extends IntegrationTest {
 	private Item item2;
 	
 	private Rental rental;
+	private Rental rental2;
 	
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 	
@@ -102,7 +105,14 @@ public class RentalRepositoryTest extends IntegrationTest {
         		"100", ItemCondition.USED));
         
         rental = rentalRepository.save(RentalTestFactory.create(item, owner, renter, ownerAddress,
-        		"300", RentalStatus.ACTIVE, RentalPeriod.MONTHLY));
+        		"300", RentalStatus.ACTIVE, RentalPeriod.MONTHLY, LocalDateTime.now(), LocalDateTime.now()));
+        
+        LocalDateTime lateStartDate = LocalDateTime.now().minusDays(2);
+        LocalDateTime lateEndDate = LocalDateTime.now().minusDays(2);
+        
+        rental2 = rentalRepository.save(RentalTestFactory.create(item2, owner, renter, ownerAddress,
+        		"300", RentalStatus.IN_USE, RentalPeriod.MONTHLY, lateStartDate, lateEndDate));
+	
 	}
 	
 	@Test
@@ -161,7 +171,10 @@ public class RentalRepositoryTest extends IntegrationTest {
 
 	    assertThat(result).isPresent();
 
-	    RentalDisplayDTO dto = result.get();
+	    RentalDisplayDTO dto = result.stream()
+	            .filter(r -> r.getId().equals(rental.getId()))
+	            .findFirst()
+	            .orElseThrow();
 	    
 	    ItemSnapshot itemSnp = rental.getItemSnapshot();
 
@@ -189,9 +202,12 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    List<RentalDisplayDTO> result = rentalRepository.findUserRentals(owner.getId());
 
 	    assertThat(result).isNotEmpty();
-	    assertThat(result).hasSize(1);
+	    assertThat(result).hasSize(2);
 
-	    RentalDisplayDTO dto = result.get(0);
+	    RentalDisplayDTO dto = result.stream()
+	            .filter(r -> r.getId().equals(rental.getId()))
+	            .findFirst()
+	            .orElseThrow();
 
 	    ItemSnapshot itemSnp = rental.getItemSnapshot();
 
@@ -226,9 +242,12 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    List<RentalDisplayDTO> result = rentalRepository.findUserRented(renter.getId());
 
 	    assertThat(result).isNotEmpty();
-	    assertThat(result).hasSize(1);
+	    assertThat(result).hasSize(2);
 
-	    RentalDisplayDTO dto = result.get(0);
+	    RentalDisplayDTO dto = result.stream()
+	            .filter(r -> r.getId().equals(rental.getId()))
+	            .findFirst()
+	            .orElseThrow();
 
 	    ItemSnapshot itemSnp = rental.getItemSnapshot();
 
@@ -280,5 +299,6 @@ public class RentalRepositoryTest extends IntegrationTest {
 
 	    assertThat(result).isEmpty();
 	}
+
 }
 
