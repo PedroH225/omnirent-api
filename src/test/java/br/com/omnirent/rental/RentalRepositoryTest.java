@@ -47,6 +47,9 @@ import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserResponseDTO;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 import jakarta.transaction.Transactional;
 
 @Transactional
@@ -73,6 +76,9 @@ public class RentalRepositoryTest extends IntegrationTest {
 	@Autowired
 	private CategoryRepository categoryRepository;
 	
+	@Autowired
+	private EntityManager entityManager;
+	
 	private User owner;
 	private User renter;
 	
@@ -90,7 +96,7 @@ public class RentalRepositoryTest extends IntegrationTest {
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 	
 	@BeforeEach
-	void setUp() {
+	void setUp() {	
 		owner = userRepository.save(UserTestFactory.owner());
 		renter = userRepository.save(UserTestFactory.user());
 		
@@ -320,6 +326,27 @@ public class RentalRepositoryTest extends IntegrationTest {
 	
 		assertThat(updatedRental).isPresent();
 		assertThat(updatedRental.get().getRentalStatus()).isEqualTo(RentalStatus.IN_USE.toString());
+	}
+	
+	@Test
+	void shouldUpdateRentalStatusAndPeriod() {
+		assertThat(rental.getRentalStatus()).isEqualTo(RentalStatus.ACTIVE);
+		LocalDateTime startDate = LocalDateTime.now().withNano(0);
+		LocalDateTime endDate = LocalDateTime.now().withNano(0);
+		
+		rentalRepository.updateRentalPeriodAndStatus(rental.getId(), RentalStatus.IN_USE,
+				startDate, endDate);
+	
+		entityManager.flush();
+		entityManager.clear();
+		
+		Optional<Rental> optRental = rentalRepository.findById(rental.getId());
+		assertThat(optRental).isPresent();
+		
+		Rental updatedRental = optRental.get();
+		assertThat(updatedRental.getRentalStatus()).isEqualTo(RentalStatus.IN_USE);
+	    assertThat(updatedRental.getStartDate()).isEqualTo(startDate);
+	    assertThat(updatedRental.getEndDate()).isEqualTo(endDate);
 	}
 }
 
