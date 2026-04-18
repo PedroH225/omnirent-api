@@ -2,22 +2,30 @@ package br.com.omnirent.address;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
 import java.util.List;
 
-import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.context.annotation.Import;
 
 import br.com.omnirent.address.domain.Address;
-import br.com.omnirent.address.domain.AddressData;
 import br.com.omnirent.address.dto.AddressResponseDTO;
+import br.com.omnirent.config.CacheTestConfig;
+import br.com.omnirent.factory.AddressTestFactory;
+import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.IntegrationTest;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.User;
+import jakarta.transaction.Transactional;
 
-@SpringBootTest
+
+@Transactional
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(CacheTestConfig.class)
 public class AddressRepositoryTest extends IntegrationTest {
 
 	@Autowired

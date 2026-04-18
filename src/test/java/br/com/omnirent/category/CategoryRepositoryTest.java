@@ -2,27 +2,32 @@ package br.com.omnirent.category;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.category.dto.CategoryResponseDTO;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
+import br.com.omnirent.config.CacheTestConfig;
+import br.com.omnirent.factory.CategoryTestFactory;
+import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.integration.IntegrationTest;
+import jakarta.transaction.Transactional;
 
-@SpringBootTest
-@TestInstance(Lifecycle.PER_CLASS)
+@Transactional
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(CacheTestConfig.class)
 public class CategoryRepositoryTest extends IntegrationTest {
-
 	@Autowired
 	private CategoryRepository categoryRepository;
 	

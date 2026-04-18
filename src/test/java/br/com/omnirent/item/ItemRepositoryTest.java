@@ -2,38 +2,46 @@ package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import br.com.omnirent.address.AddressRepository;
 import br.com.omnirent.address.domain.Address;
-import br.com.omnirent.address.domain.AddressData;
 import br.com.omnirent.category.CategoryRepository;
 import br.com.omnirent.category.SubCategoryRepository;
 import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.config.CacheTestConfig;
+import br.com.omnirent.factory.AddressTestFactory;
+import br.com.omnirent.factory.CategoryTestFactory;
+import br.com.omnirent.factory.ItemTestFactory;
+import br.com.omnirent.factory.SubCategoryTestFactory;
+import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.IntegrationTest;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
-import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.User;
+import jakarta.transaction.Transactional;
 
-@SpringBootTest
-@TestInstance(Lifecycle.PER_CLASS)
+@Transactional
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(CacheTestConfig.class)
 public class ItemRepositoryTest extends IntegrationTest {
 
 	@Autowired

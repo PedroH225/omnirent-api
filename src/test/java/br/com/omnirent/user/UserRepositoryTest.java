@@ -2,29 +2,31 @@ package br.com.omnirent.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
+import br.com.omnirent.config.CacheTestConfig;
 import br.com.omnirent.config.GlobalConfigHolder;
+import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.IntegrationTest;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
+import jakarta.transaction.Transactional;
 
-@SpringBootTest
-class UserRepositoryTest extends IntegrationTest {
-	
-	@Autowired
-	GlobalConfigHolder globalConfigHolder;
+@Transactional
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(CacheTestConfig.class)
+public class UserRepositoryTest extends IntegrationTest {
 
 	@Autowired
     private UserRepository userRepository;
