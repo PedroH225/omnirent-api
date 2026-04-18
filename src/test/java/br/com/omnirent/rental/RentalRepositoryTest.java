@@ -322,10 +322,14 @@ public class RentalRepositoryTest extends IntegrationTest {
 		assertThat(rental.getRentalStatus()).isEqualTo(RentalStatus.ACTIVE);
 		
 		rentalRepository.updateRentalStatus(rental.getId(), RentalStatus.IN_USE);
-		Optional<RentalDisplayDTO> updatedRental = rentalRepository.findRentalDisplayDTO(rental.getId());
+		
+		entityManager.flush();
+		entityManager.clear();
+		
+		Optional<Rental> updatedRental = rentalRepository.findById(rental.getId());
 	
 		assertThat(updatedRental).isPresent();
-		assertThat(updatedRental.get().getRentalStatus()).isEqualTo(RentalStatus.IN_USE.toString());
+		assertThat(updatedRental.get().getRentalStatus()).isEqualTo(RentalStatus.IN_USE);
 	}
 	
 	@Test
@@ -347,6 +351,6 @@ public class RentalRepositoryTest extends IntegrationTest {
 		assertThat(updatedRental.getRentalStatus()).isEqualTo(RentalStatus.IN_USE);
 	    assertThat(updatedRental.getStartDate()).isEqualTo(startDate);
 	    assertThat(updatedRental.getEndDate()).isEqualTo(endDate);
-	}
+	}	
 }
 
