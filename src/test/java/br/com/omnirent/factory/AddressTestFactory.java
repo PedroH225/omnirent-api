@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.domain.AddressData;
+import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.utils.Sequence;
@@ -51,4 +52,20 @@ public final class AddressTestFactory {
 			    address.getUpdatedAt()
 			);
 	}
+    
+    public static AddressRequestDTO toRequestDTO(Address address) {
+        AddressData ad = address.getAddressData();
+
+        return new AddressRequestDTO(
+            address.getId(),
+            ad.getStreet(),
+            ad.getNumber(),
+            ad.getComplement(),
+            ad.getDistrict(),
+            ad.getCity(),
+            ad.getState(),
+            ad.getCountry(),
+            ad.getZipCode()
+        );
+    }
 }
