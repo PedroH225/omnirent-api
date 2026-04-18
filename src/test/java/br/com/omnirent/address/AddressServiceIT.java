@@ -1,10 +1,17 @@
 package br.com.omnirent.address;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import br.com.omnirent.address.domain.Address;
+import br.com.omnirent.address.domain.AddressData;
+import br.com.omnirent.address.dto.AddressRequestDTO;
+import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringIntegrationTest;
@@ -35,7 +42,32 @@ public class AddressServiceIT extends SpringIntegrationTest {
 	}
  	
 	@Test
-	void test() {
+	void shouldAddAddress() {
+		AddressRequestDTO addressRequestDTO = AddressTestFactory.toRequestDTO(userAddress);
 		
+		AddressResponseDTO response = addressService.addAddress(addressRequestDTO, user.getId());
+		
+		assertThat(response).isNotNull();
+		assertThat(response.getId()).isNotNull();
+		
+		Optional<Address> optPersisted = addressRepository.findById(response.getId());
+
+		assertThat(optPersisted).isPresent();
+		
+		Address persisted = optPersisted.get();
+	    assertThat(persisted.getUserId()).isEqualTo(user.getId());
+	    assertThat(persisted.getCreatedAt()).isNotNull();
+	    assertThat(persisted.getUpdatedAt()).isNotNull();
+
+	    AddressData data = persisted.getAddressData();
+
+	    assertThat(data.getStreet()).isEqualTo(addressRequestDTO.street());
+	    assertThat(data.getNumber()).isEqualTo(addressRequestDTO.number());
+	    assertThat(data.getComplement()).isEqualTo(addressRequestDTO.complement());
+	    assertThat(data.getDistrict()).isEqualTo(addressRequestDTO.district());
+	    assertThat(data.getCity()).isEqualTo(addressRequestDTO.city());
+	    assertThat(data.getState()).isEqualTo(addressRequestDTO.state());
+	    assertThat(data.getCountry()).isEqualTo(addressRequestDTO.country());
+	    assertThat(data.getZipCode()).isEqualTo(addressRequestDTO.zipCode());
 	}
 }
