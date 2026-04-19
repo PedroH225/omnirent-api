@@ -134,7 +134,13 @@ public class AddressServiceIT extends SpringIntegrationTest {
 		addressService.deleteAddress(userAddress.getId());
 		
 		Optional<Address> optFindAddress = addressRepository.findById(userAddress.getId());
-		
+
 		assertThat(optFindAddress).isNotPresent();
+	}
+	
+	@Test
+	void shouldThrowWhenDeletingNonexistentAddress() {
+	    assertThatThrownBy(() -> addressService.deleteAddress("invalid-id"))
+	        .isInstanceOf(AddressNotFoundException.class);
 	}
 }
