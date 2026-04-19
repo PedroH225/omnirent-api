@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testcontainers.shaded.com.github.dockerjava.core.dockerfile.DockerfileStatement.Add;
 
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.domain.AddressData;
@@ -126,5 +127,14 @@ public class AddressServiceIT extends SpringIntegrationTest {
 
 		assertThatThrownBy(() -> addressService.updateAddress(addressRequestDTO))
 		.isInstanceOf(AddressNotFoundException.class);
+	}
+	
+	@Test
+	void shouldDeleteAddress() {
+		addressService.deleteAddress(userAddress.getId());
+		
+		Optional<Address> optFindAddress = addressRepository.findById(userAddress.getId());
+		
+		assertThat(optFindAddress).isNotPresent();
 	}
 }
