@@ -68,4 +68,20 @@ public final class AddressTestFactory {
             ad.getZipCode()
         );
     }
+    
+    public static AddressRequestDTO updatedRequestDTO(Address address) {
+        return new AddressRequestDTO(
+            address.getId(),
+            "Nova Rua",
+            "999",
+            "Casa 5",
+            "Novo Bairro",
+            "Sorocaba",
+            "RS",
+            "Canada",
+            "18001-000"
+        );
+    }
+    
+
 }
