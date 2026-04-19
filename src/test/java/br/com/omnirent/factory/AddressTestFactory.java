@@ -69,6 +69,22 @@ public final class AddressTestFactory {
         );
     }
     
+    public static AddressRequestDTO toInvalidRequestDTO(Address address) {
+        AddressData ad = address.getAddressData();
+
+        return new AddressRequestDTO(
+            "invalid-id",
+            ad.getStreet(),
+            ad.getNumber(),
+            ad.getComplement(),
+            ad.getDistrict(),
+            ad.getCity(),
+            ad.getState(),
+            ad.getCountry(),
+            ad.getZipCode()
+        );
+    }
+    
     public static AddressRequestDTO updatedRequestDTO(Address address) {
         return new AddressRequestDTO(
             address.getId(),
