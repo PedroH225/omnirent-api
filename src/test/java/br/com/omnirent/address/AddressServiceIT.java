@@ -14,6 +14,7 @@ import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.domain.AddressData;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
+import br.com.omnirent.exception.domain.AddressNotFoundException;
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
@@ -117,5 +118,13 @@ public class AddressServiceIT extends SpringIntegrationTest {
 	    assertThat(data.getState()).isNotEqualTo(beforeData.getState());
 	    assertThat(data.getCountry()).isNotEqualTo(beforeData.getCountry());
 	    assertThat(data.getZipCode()).isNotEqualTo(beforeData.getZipCode());
+	}
+	
+	@Test
+	void shouldThrowWhenInvalidAddress() {
+		AddressRequestDTO addressRequestDTO = AddressTestFactory.toInvalidRequestDTO(userAddress);
+
+		assertThatThrownBy(() -> addressService.updateAddress(addressRequestDTO))
+		.isInstanceOf(AddressNotFoundException.class);
 	}
 }
