@@ -83,5 +83,29 @@ public final class AddressTestFactory {
         );
     }
     
+    public static Address makeCopy(Address source) {
+        Address copy = new Address();
 
+        copy.setId(source.getId());
+        copy.setUserId(source.getUserId());
+        copy.setCreatedAt(source.getCreatedAt());
+        copy.setUpdatedAt(source.getUpdatedAt());
+
+        AddressData data = source.getAddressData();
+        if (data != null) {
+            AddressData dataCopy = new AddressData(
+                data.getStreet(),
+                data.getNumber(),
+                data.getComplement(),
+                data.getDistrict(),
+                data.getCity(),
+                data.getState(),
+                data.getCountry(),
+                data.getZipCode()
+            );
+            copy.setAddressData(dataCopy);
+        }
+
+        return copy;
+    }
 }
