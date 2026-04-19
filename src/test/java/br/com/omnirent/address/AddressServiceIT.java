@@ -3,6 +3,7 @@ package br.com.omnirent.address;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -79,5 +80,42 @@ public class AddressServiceIT extends SpringIntegrationTest {
 		
 		assertThatThrownBy(() -> addressService.addAddress(addressRequestDTO, "123"))
 		.isInstanceOf(UserNotFoundException.class);
+	}
+	
+	@Test
+	void shouldUpdateAddress() {
+	    Address addressBefore = AddressTestFactory.makeCopy(userAddress);
+	    AddressRequestDTO requestDTO = AddressTestFactory.updatedRequestDTO(userAddress);
+
+	    AddressResponseDTO response = addressService.updateAddress(requestDTO);
+
+	    Optional<Address> optPersisted = addressRepository.findById(response.getId());
+	    assertThat(optPersisted).isPresent();
+
+	    Address persisted = optPersisted.get();
+	    assertThat(persisted.getUserId()).isEqualTo(user.getId());
+	    assertThat(persisted.getCreatedAt()).isEqualTo(addressBefore.getCreatedAt());
+	    assertThat(persisted.getUpdatedAt()).isNotNull();
+
+	    AddressData data = persisted.getAddressData();
+	    AddressData beforeData = addressBefore.getAddressData();
+
+	    assertThat(data.getStreet()).isEqualTo(requestDTO.street());
+	    assertThat(data.getNumber()).isEqualTo(requestDTO.number());
+	    assertThat(data.getComplement()).isEqualTo(requestDTO.complement());
+	    assertThat(data.getDistrict()).isEqualTo(requestDTO.district());
+	    assertThat(data.getCity()).isEqualTo(requestDTO.city());
+	    assertThat(data.getState()).isEqualTo(requestDTO.state());
+	    assertThat(data.getCountry()).isEqualTo(requestDTO.country());
+	    assertThat(data.getZipCode()).isEqualTo(requestDTO.zipCode());
+
+	    assertThat(data.getStreet()).isNotEqualTo(beforeData.getStreet());
+	    assertThat(data.getNumber()).isNotEqualTo(beforeData.getNumber());
+	    assertThat(data.getComplement()).isNotEqualTo(beforeData.getComplement());
+	    assertThat(data.getDistrict()).isNotEqualTo(beforeData.getDistrict());
+	    assertThat(data.getCity()).isNotEqualTo(beforeData.getCity());
+	    assertThat(data.getState()).isNotEqualTo(beforeData.getState());
+	    assertThat(data.getCountry()).isNotEqualTo(beforeData.getCountry());
+	    assertThat(data.getZipCode()).isNotEqualTo(beforeData.getZipCode());
 	}
 }
