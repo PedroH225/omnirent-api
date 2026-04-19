@@ -13,7 +13,8 @@ public abstract class IntegrationTest {
             new MySQLContainer("mysql:8.0.36")
                     .withDatabaseName("test_db")
                     .withUsername("test")
-                    .withPassword("test");
+                    .withPassword("test")
+                    .withReuse(true);
 	
 	static {
         mysql.start();
