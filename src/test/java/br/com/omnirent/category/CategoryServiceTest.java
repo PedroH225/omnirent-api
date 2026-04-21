@@ -2,15 +2,11 @@ package br.com.omnirent.category;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.catchReflectiveOperationException;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -134,6 +130,24 @@ public class CategoryServiceTest {
     	
     	verify(subRepository).findById(invalidId);
     	verifyNoInteractions(mapper);
+    	verifyNoMoreInteractions(subRepository);
+    }
+    
+    @Test
+    void shouldFindAllSubCategories() {
+    	SubCategoryResDTO dto1 = SubCategoryTestFactory.toSubDto(ball);
+    	SubCategoryResDTO dto2 = SubCategoryTestFactory.toSubDto(notebook);
+    	SubCategoryResDTO dto3 = SubCategoryTestFactory.toSubDto(mouse);
+
+    	List<SubCategoryResDTO> expected = List.of(dto1, dto2, dto3);
+    	
+    	when(subRepository.findAllSubCat()).thenReturn(expected);
+    	
+    	List<SubCategoryResDTO> result = categoryService.findAllSub();
+    	
+    	assertThat(result).isEqualTo(expected);
+    	
+    	verify(subRepository).findAllSubCat();
     	verifyNoMoreInteractions(subRepository);
     }
 }
