@@ -26,6 +26,7 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.category.dto.CategoryResponseDTO;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.exception.domain.CategoryNotFoundException;
+import br.com.omnirent.exception.domain.SubCategoryNotFoundException;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 
@@ -120,5 +121,19 @@ public class CategoryServiceTest {
     	verify(subRepository).findById(subCatId);
     	verify(mapper).toSubDto(notebook);
     	verifyNoMoreInteractions(subRepository, mapper);
+    }
+    
+    @Test
+    void shouldThrowWhenSubCategoryNotFound() {
+    	String invalidId = "invalid-id";
+    	    
+    	when(subRepository.findById(invalidId)).thenReturn(Optional.empty());
+    	    	
+    	assertThatThrownBy(() -> categoryService.getSubCategoryById(invalidId))
+    	.isInstanceOf(SubCategoryNotFoundException.class);
+    	
+    	verify(subRepository).findById(invalidId);
+    	verifyNoInteractions(mapper);
+    	verifyNoMoreInteractions(subRepository);
     }
 }
