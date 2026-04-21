@@ -2,6 +2,7 @@ package br.com.omnirent.factory;
 
 import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
+import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.utils.Sequence;
 
 public final class SubCategoryTestFactory {
@@ -19,5 +20,11 @@ public final class SubCategoryTestFactory {
     	SubCategory subCategory = create(name, category);
     	subCategory.setId(Sequence.nextString("subCategoryId"));
     	return subCategory;
+    }
+    
+    public static SubCategoryResDTO toSubDto(SubCategory subCategory) {
+    	return new SubCategoryResDTO(
+    			subCategory.getId(), subCategory.getName(),
+    			subCategory.getCategory().getName());
     }
 }
