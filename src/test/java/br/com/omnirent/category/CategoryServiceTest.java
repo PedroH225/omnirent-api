@@ -1,5 +1,13 @@
 package br.com.omnirent.category;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,6 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
+import br.com.omnirent.category.dto.CategoryResponseDTO;
+import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 
@@ -46,9 +56,28 @@ public class CategoryServiceTest {
     }
     
     @Test
-    void test() {
-    	System.out.println("ball id: " + ball.getId());
-    	System.out.println("eletronicsid: " +  electronics.getId());
-    	System.out.println("categoryservicetest working");
+    void shouldGetCategoryByIdWithSubCategories() {
+    	String electronicsId = electronics.getId();
+    	
+    	Optional<CategoryResponseDTO> optCategory = Optional.of(CategoryTestFactory.toCategoryResDTO(electronics));
+    	
+    	SubCategoryResDTO dto1 = SubCategoryTestFactory.toSubDto(mouse);
+    	SubCategoryResDTO dto2 = SubCategoryTestFactory.toSubDto(notebook);
+
+    	List<SubCategoryResDTO> expected = List.of(dto1, dto2);
+    	
+    	when(categoryRepository.getCategoryById(electronicsId)).thenReturn(optCategory);
+    	when(subRepository.findSubByCategoryId(electronicsId)).thenReturn(expected);
+    	
+    	CategoryResponseDTO result = categoryService.getCategoryById(electronicsId);
+    	
+    	assertThat(result).isNotNull();
+    	assertThat(result.getId()).isEqualTo(electronicsId);
+    	assertThat(result.getName()).isEqualTo(electronics.getName());
+    	assertThat(result.getSubCategories()).isEqualTo(expected);
+    	
+    	verify(categoryRepository).getCategoryById(electronicsId);
+    	verify(subRepository).findSubByCategoryId(electronicsId);
+    	verifyNoMoreInteractions(subRepository, categoryRepository);
     }
 }
