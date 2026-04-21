@@ -150,4 +150,23 @@ public class CategoryServiceTest {
     	verify(subRepository).findAllSubCat();
     	verifyNoMoreInteractions(subRepository);
     }
+    
+    @Test
+    void shouldFindAllSubByCategoryNAme() {
+    	String categoryName = electronics.getName();
+    	List<SubCategory> subCategories = List.of(notebook, mouse);
+    	
+    	List<SubCategoryResDTO> expected = SubCategoryTestFactory.toSubDto(subCategories);
+    	
+    	when(subRepository.findAllByCategoryName(categoryName)).thenReturn(subCategories);
+    	when(mapper.toSubDto(subCategories)).thenReturn(expected);
+    	
+    	List<SubCategoryResDTO> result = categoryService.findSubsByCategory(categoryName);
+    	
+        assertThat(result).isEqualTo(expected);
+        
+    	verify(subRepository).findAllByCategoryName(categoryName);
+    	verify(mapper).toSubDto(subCategories);
+    	verifyNoMoreInteractions(subRepository, mapper);
+    }
 }
