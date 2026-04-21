@@ -3,6 +3,7 @@ package br.com.omnirent.category;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchReflectiveOperationException;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -99,5 +100,25 @@ public class CategoryServiceTest {
     	verify(categoryRepository).getCategoryById(invalidId);
     	verifyNoInteractions(subRepository);
     	verifyNoMoreInteractions(categoryRepository);
+    }
+    
+    @Test
+    void shouldGetSubCategoryById() {
+    	String subCatId = notebook.getId();
+    	
+    	SubCategoryResDTO subCatDTO = SubCategoryTestFactory.toSubDto(notebook);
+    	
+    	when(subRepository.findById(subCatId)).thenReturn(Optional.of(notebook));
+    	when(mapper.toSubDto(notebook)).thenReturn(subCatDTO);
+    	
+    	SubCategoryResDTO result = categoryService.getSubCategoryById(subCatId);
+    	
+    	assertThat(result).isNotNull();
+    	assertThat(result.getId()).isEqualTo(subCatId);
+    	assertThat(result.getName()).isEqualTo(notebook.getName());
+    	
+    	verify(subRepository).findById(subCatId);
+    	verify(mapper).toSubDto(notebook);
+    	verifyNoMoreInteractions(subRepository, mapper);
     }
 }
