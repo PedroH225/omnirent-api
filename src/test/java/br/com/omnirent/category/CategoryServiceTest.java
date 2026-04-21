@@ -1,10 +1,15 @@
 package br.com.omnirent.category;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchReflectiveOperationException;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +24,7 @@ import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.category.dto.CategoryResponseDTO;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
+import br.com.omnirent.exception.domain.CategoryNotFoundException;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 
@@ -79,5 +85,19 @@ public class CategoryServiceTest {
     	verify(categoryRepository).getCategoryById(electronicsId);
     	verify(subRepository).findSubByCategoryId(electronicsId);
     	verifyNoMoreInteractions(subRepository, categoryRepository);
+    }
+    
+    @Test
+    void shouldThrowWhenCategoryNotFound() {
+    	String invalidId = "invalid-id";
+    	    
+    	when(categoryRepository.getCategoryById(invalidId)).thenReturn(Optional.empty());
+    	    	
+    	assertThatThrownBy(() -> categoryService.getCategoryById(invalidId))
+    	.isInstanceOf(CategoryNotFoundException.class);
+    	
+    	verify(categoryRepository).getCategoryById(invalidId);
+    	verifyNoInteractions(subRepository);
+    	verifyNoMoreInteractions(categoryRepository);
     }
 }
