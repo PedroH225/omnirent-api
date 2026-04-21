@@ -48,13 +48,13 @@ public class CategoryService {
 	
 	public CategoryResponseDTO getCategoryById(String id) {
 		Optional<CategoryResponseDTO> optCategory = categoryRepository.getCategoryById(id);
-		
-		List<SubCategoryResDTO> subCategories = subRepository.findSubByCategoryId(id);
-		
+				
 		if (optCategory.isEmpty()) {
 			throw new CategoryNotFoundException();
 		}
+		
 		CategoryResponseDTO category = optCategory.get();
+		List<SubCategoryResDTO> subCategories = subRepository.findSubByCategoryId(id);
 		category.setSubCategories(subCategories);
 		
 		return category;
