@@ -18,7 +18,11 @@ public class CategoryResponseDTO {
 		this.id = id;
 		this.name = name;
 	}
-	
-	
+
+	public CategoryResponseDTO(String id, String name, List<SubCategoryResDTO> subCategories) {
+		this.id = id;
+		this.name = name;
+		this.subCategories = subCategories;
+	}
 	
 }
