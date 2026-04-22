@@ -188,4 +188,19 @@ public class UserServiceTest {
 		
 		assertThat(userCaptor.getValue().getUserStatus()).isEqualTo(UserStatus.ACTIVE);
 	}
+	
+	@Test
+	void shouldThrowWhenUserNotFounOnActivate() {
+		String invalidId = "invalid-id";
+		
+		when(currentUserProvider.currentUserId()).thenReturn(invalidId);
+		when(userRepository.findById(invalidId)).thenReturn(Optional.empty());
+		
+		assertThatThrownBy(() -> userService.activateUser())
+		.isInstanceOf(UserNotFoundException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(userRepository).findById(invalidId);
+		verifyNoMoreInteractions(userRepository, currentUserProvider);
+	}
 }
