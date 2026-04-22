@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -65,7 +66,7 @@ public class UserServiceTest {
 		
 		verify(currentUserProvider).currentUserId();
 		verify(userRepository).findUserDetailsById(userId);
-		verifyNoMoreInteractions(userRepository);
+		verifyNoMoreInteractions(userRepository, currentUserProvider);
 	}
 	
 	@Test
@@ -78,8 +79,9 @@ public class UserServiceTest {
 		assertThatThrownBy(() -> userService.getUserDetailsById())
 		.isInstanceOf(UserNotFoundException.class);
 		
+		verify(currentUserProvider).currentUserId();
 		verify(userRepository).findUserDetailsById(invalidId);
-		verifyNoMoreInteractions(userRepository);
+		verifyNoMoreInteractions(userRepository, currentUserProvider);
 	}
 	
 	@Test
@@ -123,5 +125,22 @@ public class UserServiceTest {
 	    assertThat(saved.getEmail()).isEqualTo(result.getEmail());
 	    assertThat(saved.getName()).isEqualTo(result.getName());
 	    assertThat(saved.getUsername()).isEqualTo(result.getUsername());
+	}
+	
+	@Test
+	void shouldThrowWhenUserNotFoundOnUpdate() {
+		String invalidId = "invalid-id";
+		
+		UserRequestDTO request = UserTestFactory.requestDto();
+		when(currentUserProvider.currentUserId()).thenReturn(invalidId);
+		when(userRepository.findById(invalidId)).thenReturn(Optional.empty());
+		
+		assertThatThrownBy(() -> userService.update(request))
+		.isInstanceOf(UserNotFoundException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(userRepository).findById(invalidId);
+		verifyNoInteractions(mapper);
+		verifyNoMoreInteractions(userRepository, currentUserProvider);
 	}
 }
