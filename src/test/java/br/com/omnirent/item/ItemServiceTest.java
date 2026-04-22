@@ -221,4 +221,22 @@ public class ItemServiceTest {
 		verifyNoMoreInteractions(currentUserProvider, userService, addressService,
 				categoryService, itemMapper, itemRepository);
 	}
+	
+	@Test
+	void shouldThrowWhenUserNotFoundOnAddItem() {
+		String invalidId = "invalidId";
+		
+		ItemRequestDTO request = ItemTestFactory.newItemRequest("200", "NEW", drill.getId(), ownerAddress.getId());
+		
+		when(currentUserProvider.currentUserId()).thenReturn(invalidId);
+		doThrow(UserNotFoundException.class).when(userService).requireExistence(invalidId);
+		
+		assertThatThrownBy(() -> itemService.addItem(request))
+		.isInstanceOf(UserNotFoundException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(userService).requireExistence(invalidId);
+		verifyNoInteractions(addressService, categoryService, itemMapper, itemRepository);
+		verifyNoMoreInteractions(userService, currentUserProvider);
+	}
 }
