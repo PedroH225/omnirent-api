@@ -51,14 +51,7 @@ public class UserServiceTest {
 		
 		UserDetailsDTO result = userService.getUserDetailsById(userId);
 		
-		assertThat(result).isNotNull();
-
-		assertThat(result.getId()).isEqualTo(expected.getId());
-		assertThat(result.getName()).isEqualTo(expected.getName());
-		assertThat(result.getUsername()).isEqualTo(expected.getUsername());
-		assertThat(result.getEmail()).isEqualTo(expected.getEmail());
-		assertThat(result.getBirthDate()).isEqualTo(expected.getBirthDate());
-		assertThat(result.getUserStatus()).isEqualTo(expected.getUserStatus());
+		assertThat(result).isEqualTo(expected);
 		
 		verify(userRepository).findUserDetailsById(userId);
 		verifyNoMoreInteractions(userRepository);
