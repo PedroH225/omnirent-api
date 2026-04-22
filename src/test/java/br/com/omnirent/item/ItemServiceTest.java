@@ -131,4 +131,17 @@ public class ItemServiceTest {
 		verify(itemRepository).getItemRentedContext(itemId);
 		verifyNoMoreInteractions(itemRepository);
 	}
+	
+	@Test
+	void shouldThrowWhenItemRentedContextNotFound() {
+		String invalidId = "invalidId";
+		
+		when(itemRepository.getItemRentedContext(invalidId)).thenReturn(Optional.empty());
+		
+		assertThatThrownBy(() -> itemService.getItemRentedContext(invalidId))
+			.isInstanceOf(ItemNotFoundException.class);
+				
+		verify(itemRepository).getItemRentedContext(invalidId);
+		verifyNoMoreInteractions(itemRepository);
+	}
 }
