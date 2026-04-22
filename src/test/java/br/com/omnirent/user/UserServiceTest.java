@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.UserTestFactory;
+import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 
@@ -32,6 +33,9 @@ public class UserServiceTest {
 	
 	@Mock
 	private UserMapper mapper;
+	
+	@Mock
+	private CurrentUserProvider currentUserProvider;
 	
 	private User user1;
 	private User user2;
@@ -49,9 +53,10 @@ public class UserServiceTest {
 		String userId = user1.getId();
 		UserDetailsDTO expected = UserTestFactory.toUserDetails(user1);
 		
+		when(currentUserProvider.currentUserId()).thenReturn(userId);
 		when(userRepository.findUserDetailsById(userId)).thenReturn(Optional.of(expected));
 		
-		UserDetailsDTO result = userService.getUserDetailsById(userId);
+		UserDetailsDTO result = userService.getUserDetailsById();
 		
 		assertThat(result).isEqualTo(expected);
 		
@@ -63,9 +68,10 @@ public class UserServiceTest {
 	void shouldThrowWhenUserNotFound() {
 		String invalidId = "invalid-id";
 		
+		when(currentUserProvider.currentUserId()).thenReturn(invalidId);
 		when(userRepository.findUserDetailsById(invalidId)).thenReturn(Optional.empty());
 		
-		assertThatThrownBy(() -> userService.getUserDetailsById(invalidId))
+		assertThatThrownBy(() -> userService.getUserDetailsById())
 		.isInstanceOf(UserNotFoundException.class);
 		
 		verify(userRepository).findUserDetailsById(invalidId);
