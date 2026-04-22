@@ -1,5 +1,13 @@
 package br.com.omnirent.item;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +27,7 @@ import br.com.omnirent.factory.ItemTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.item.domain.Item;
+import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -75,12 +84,17 @@ public class ItemServiceTest {
 	}
 	
 	@Test
-	void test() {
-		System.out.println("ownerId: " + owner.getId());
-		System.out.println("ownerAddress: " + ownerAddress.getId());
-		System.out.println("toolsId:" + tools.getId());
-		System.out.println("drillId: " + drill.getId());
-		System.out.println("item1Id: " + item.getId());
-		System.out.println("item2Id: " + item2.getId());
+	void shouldGetItemDetailById() {
+		String itemId = item.getId();
+		ItemDetailDTO itemDetailDTO = ItemTestFactory.toItemDetailsDto(item, drill, ownerAddress, owner);
+	
+		when(itemRepository.findItemDetailDTO(itemId)).thenReturn(Optional.of(itemDetailDTO));
+		
+		ItemDetailDTO result = itemService.getItemById(itemId);
+		
+		assertThat(result).isEqualTo(itemDetailDTO);
+		
+		verify(itemRepository).findItemDetailDTO(itemId);
+		verifyNoMoreInteractions(itemRepository);
 	}
 }
