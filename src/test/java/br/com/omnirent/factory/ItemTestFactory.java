@@ -1,6 +1,7 @@
 package br.com.omnirent.factory;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.domain.SubCategory;
@@ -33,5 +34,14 @@ public final class ItemTestFactory {
         item.setSubCategoryId(subCategory.getId());
         item.setPickupAddressId(address.getId());
         return item;
+    }
+    
+    public static Item createPersisted(User owner, Address address, SubCategory subCategory,
+            String price, ItemCondition condition) {
+    	Item item = create(owner, address, subCategory, price, condition);
+    	item.setId(Sequence.nextString("itemId"));
+    	item.setCreatedAt(LocalDateTime.now());
+    	item.setUpdatedAt(LocalDateTime.now());
+    	return item;
     }
 }
