@@ -1,6 +1,7 @@
 package br.com.omnirent.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import br.com.omnirent.common.enums.UserStatus;
+import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
@@ -54,6 +56,19 @@ public class UserServiceTest {
 		assertThat(result).isEqualTo(expected);
 		
 		verify(userRepository).findUserDetailsById(userId);
+		verifyNoMoreInteractions(userRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenUserNotFound() {
+		String invalidId = "invalid-id";
+		
+		when(userRepository.findUserDetailsById(invalidId)).thenReturn(Optional.empty());
+		
+		assertThatThrownBy(() -> userService.getUserDetailsById(invalidId))
+		.isInstanceOf(UserNotFoundException.class);
+		
+		verify(userRepository).findUserDetailsById(invalidId);
 		verifyNoMoreInteractions(userRepository);
 	}
 }
