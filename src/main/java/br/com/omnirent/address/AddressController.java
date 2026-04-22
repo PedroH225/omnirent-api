@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
-import br.com.omnirent.security.SecurityUtils;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -31,12 +30,12 @@ public class AddressController {
 	
 	@GetMapping("/user")
 	public List<AddressResponseDTO> findUserAdresses() {
-		return addressService.getUserAddresses(SecurityUtils.currentUserId());
+		return addressService.getUserAddresses();
 	}
 	
 	@PostMapping
 	public AddressResponseDTO addAddress(@RequestBody AddressRequestDTO addressDto) {
-		return addressService.addAddress(addressDto, SecurityUtils.currentUserId());
+		return addressService.addAddress(addressDto);
 	}
 	
 	@PutMapping

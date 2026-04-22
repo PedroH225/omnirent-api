@@ -4,13 +4,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
 
 import br.com.omnirent.exception.domain.UserNotFoundException;
-import br.com.omnirent.security.SecurityUtils;
+import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
@@ -26,6 +24,8 @@ public class UserService {
 	private UserMapper userMapper;
 
 	private UserRepository userRepository;
+	
+	private CurrentUserProvider currentUserProvider;
 	
 	public void requireExistence(String userId) {
 		if (!userRepository.verifyUser(userId)) {
@@ -49,8 +49,9 @@ public class UserService {
 		return user.get();
 	}
 	
-	public UserDetailsDTO getUserDetailsById(String id) {
-		Optional<UserDetailsDTO> user = userRepository.findUserDetailsById(id);
+	public UserDetailsDTO getUserDetailsById() {
+		String userId = currentUserProvider.currentUserId();
+		Optional<UserDetailsDTO> user = userRepository.findUserDetailsById(userId);
 
 		if (user.isEmpty()) {
 			throw new UserNotFoundException();
@@ -65,7 +66,8 @@ public class UserService {
 
 	@Transactional
 	public UserDetailsDTO update(UserRequestDTO userDTO) {
-		User user = findById(SecurityUtils.currentUserId());
+		String userId = currentUserProvider.currentUserId();
+		User user = findById(userId);
 				
 		User updatedUser = userRepository.save(user.update(userDTO));
 				
@@ -73,14 +75,16 @@ public class UserService {
 	}
 
 	@Transactional
-	public void deactivateUser(String userId) {
+	public void deactivateUser() {
+		String userId = currentUserProvider.currentUserId();
 		User user = findById(userId);
 		
 		userRepository.save(user.deactivate());
 	}
 
 	@Transactional
-	public void activateUser(String userId) {
+	public void activateUser() {
+		String userId = currentUserProvider.currentUserId();
 		User user = findById(userId);
 		
 		userRepository.save(user.activate());		

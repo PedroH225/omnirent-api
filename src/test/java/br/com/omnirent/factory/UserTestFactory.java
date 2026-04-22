@@ -3,7 +3,11 @@ package br.com.omnirent.factory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.springframework.security.core.userdetails.UserDetails;
+
+import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.user.domain.User;
+import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.utils.Sequence;
 
 public final class UserTestFactory {
@@ -32,5 +36,10 @@ public final class UserTestFactory {
     	user.setUpdatedAt(LocalDateTime.now());
     	user.setId(Sequence.nextString("userId"));
     	return user;
+    }
+    
+    public static UserDetailsDTO toUserDetails(User user) {
+    	return new UserDetailsDTO(user.getId(), user.getName(), user.getUsername(),
+    			user.getEmail(), user.getBirthDate(), user.getUserStatus());
     }
 }
