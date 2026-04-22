@@ -2,15 +2,12 @@ package br.com.omnirent.address;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.shouldHaveThrown;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.sql.Savepoint;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +25,7 @@ import br.com.omnirent.exception.domain.AddressNotFoundException;
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
+import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
 
@@ -46,6 +44,9 @@ public class AddressServiceTest {
 	@Mock
 	private AddressMapper mapper;
 
+	@Mock
+	private CurrentUserProvider currentUserProvider;
+	
 	private User user;
 
 	private User user2;
@@ -72,10 +73,11 @@ public class AddressServiceTest {
 		AddressResponseDTO dto2 = AddressTestFactory.toAddressDto(userAddress2);
 
 		List<AddressResponseDTO> expected = List.of(dto1, dto2);
-
+		
+		when(currentUserProvider.currentUserId()).thenReturn(userId);
 		when(addressRepository.findAddressByUser(userId)).thenReturn(expected);
 
-		List<AddressResponseDTO> result = addressService.getUserAddresses(userId);
+		List<AddressResponseDTO> result = addressService.getUserAddresses();
 
 		assertThat(result).isEqualTo(expected);
 
@@ -90,12 +92,13 @@ public class AddressServiceTest {
 
 		AddressResponseDTO responseDTO = AddressTestFactory.toAddressDto(userAddress);
 
+		when(currentUserProvider.currentUserId()).thenReturn(userId);
 		doNothing().when(userService).requireExistence(userId);
 		when(mapper.fromAddressDTO(addressDTO, userId)).thenReturn(userAddress);
 		when(addressRepository.save(userAddress)).thenReturn(userAddress);
 		when(mapper.toDto(userAddress)).thenReturn(responseDTO);
 
-		AddressResponseDTO result = addressService.addAddress(addressDTO, userId);
+		AddressResponseDTO result = addressService.addAddress(addressDTO);
 
 		assertThat(result).isEqualTo(responseDTO);
 
@@ -111,9 +114,10 @@ public class AddressServiceTest {
 		AddressRequestDTO addressDTO = AddressTestFactory.toRequestDTO(userAddress);
 		String userId = "invalid-id";
 
+		when(currentUserProvider.currentUserId()).thenReturn(userId);
 		doThrow(new UserNotFoundException()).when(userService).requireExistence(userId);
 
-		assertThatThrownBy(() -> addressService.addAddress(addressDTO, userId))
+		assertThatThrownBy(() -> addressService.addAddress(addressDTO))
 				.isInstanceOf(UserNotFoundException.class);
 
 		verify(userService).requireExistence(userId);

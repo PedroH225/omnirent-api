@@ -3,13 +3,11 @@ package br.com.omnirent.address;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testcontainers.shaded.com.github.dockerjava.core.dockerfile.DockerfileStatement.Add;
 
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.domain.AddressData;
@@ -35,7 +33,7 @@ public class AddressServiceIT extends SpringIntegrationTest {
 	
 	@Autowired
 	private AddressService addressService;
-	
+		
 	private User user;
 	
 	private Address userAddress;
@@ -50,7 +48,7 @@ public class AddressServiceIT extends SpringIntegrationTest {
 	void shouldAddAddress() {
 		AddressRequestDTO addressRequestDTO = AddressTestFactory.toRequestDTO(userAddress);
 		
-		AddressResponseDTO response = addressService.addAddress(addressRequestDTO, user.getId());
+		AddressResponseDTO response = addressService.addAddress(addressRequestDTO);
 		
 		assertThat(response).isNotNull();
 		assertThat(response.getId()).isNotNull();
@@ -80,7 +78,7 @@ public class AddressServiceIT extends SpringIntegrationTest {
 	void shouldThrowWhenInvalidUser() {
 		AddressRequestDTO addressRequestDTO = AddressTestFactory.toRequestDTO(userAddress);
 		
-		assertThatThrownBy(() -> addressService.addAddress(addressRequestDTO, "123"))
+		assertThatThrownBy(() -> addressService.addAddress(addressRequestDTO))
 		.isInstanceOf(UserNotFoundException.class);
 	}
 	
