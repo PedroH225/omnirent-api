@@ -1,6 +1,7 @@
 package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -21,6 +22,7 @@ import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
@@ -95,6 +97,19 @@ public class ItemServiceTest {
 		assertThat(result).isEqualTo(itemDetailDTO);
 		
 		verify(itemRepository).findItemDetailDTO(itemId);
+		verifyNoMoreInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenItemNotFound() {
+		String invalidId = "invalidId";
+	
+		when(itemRepository.findItemDetailDTO(invalidId)).thenReturn(Optional.empty());
+		
+		assertThatThrownBy(() -> itemService.getItemById(invalidId))
+			.isInstanceOf(ItemNotFoundException.class);
+				
+		verify(itemRepository).findItemDetailDTO(invalidId);
 		verifyNoMoreInteractions(itemRepository);
 	}
 }
