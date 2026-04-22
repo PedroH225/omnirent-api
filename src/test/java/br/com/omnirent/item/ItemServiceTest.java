@@ -2,7 +2,6 @@ package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -20,13 +19,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import br.com.omnirent.address.AddressService;
-import br.com.omnirent.address.context.AddressInfo;
 import br.com.omnirent.address.domain.Address;
-import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
@@ -34,15 +32,15 @@ import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
-import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
+import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
+import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
-import br.com.omnirent.user.dto.UserResponseDTO;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemServiceTest {
@@ -186,5 +184,41 @@ public class ItemServiceTest {
 		verify(userService).requireExistence(invalidId);
 		verifyNoInteractions(itemRepository);
 		verifyNoMoreInteractions(currentUserProvider, userService);
+	}
+	
+	@Test
+	void shouldAddItem() {
+		String ownerId = owner.getId();
+		
+		ItemRequestDTO request = ItemTestFactory.newItemRequest("200", "NEW", drill.getId(), ownerAddress.getId());
+		
+		Item mappedItem = ItemTestFactory.fromNewItemRequestDTO(request, drill, ownerAddress, owner);
+		Item persistedItem = ItemTestFactory.toPersisted(mappedItem);
+		ItemCreatedDTO expected = ItemTestFactory.toItemCreatedDTO(persistedItem);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(ownerId);
+		when(userService.getUserReference(ownerId)).thenReturn(owner);
+		when(addressService.findById(ownerAddress.getId())).thenReturn(ownerAddress);
+		when(categoryService.findSubById(drill.getId())).thenReturn(drill);
+		
+		when(itemMapper.fromDto(request, owner, ownerId, ownerAddress,
+				drill, ItemStatus.AVAILABLE)).thenReturn(mappedItem);
+		when(itemRepository.save(mappedItem)).thenReturn(persistedItem);
+		when(itemMapper.toCreatedDto(persistedItem)).thenReturn(expected);
+		
+		ItemCreatedDTO result = itemService.addItem(request);
+		
+		assertThat(result).isEqualTo(expected);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(userService).requireExistence(ownerId);
+		verify(userService).getUserReference(ownerId);
+		verify(addressService).findById(ownerAddress.getId());
+		verify(categoryService).findSubById(drill.getId());
+		verify(itemMapper).fromDto(request, owner, ownerId, ownerAddress, drill, ItemStatus.AVAILABLE);
+		verify(itemRepository).save(mappedItem);
+		verify(itemMapper).toCreatedDto(persistedItem);
+		verifyNoMoreInteractions(currentUserProvider, userService, addressService,
+				categoryService, itemMapper, itemRepository);
 	}
 }
