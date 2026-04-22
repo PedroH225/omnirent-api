@@ -143,4 +143,26 @@ public class UserServiceTest {
 		verifyNoInteractions(mapper);
 		verifyNoMoreInteractions(userRepository, currentUserProvider);
 	}
+	
+	@Test
+	void shouldDeactivateUser() {
+		String userId = user1.getId();
+		
+		when(currentUserProvider.currentUserId()).thenReturn(userId);
+		when(userRepository.findById(userId)).thenReturn(Optional.of(user1));
+		when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+		
+		assertThat(user1.getUserStatus()).isEqualTo(UserStatus.ACTIVE);
+		
+		userService.deactivateUser();
+		
+		ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(userRepository).findById(userId);
+		verify(userRepository).save(userCaptor.capture());
+		verifyNoMoreInteractions(userRepository, currentUserProvider);
+		
+		assertThat(userCaptor.getValue().getUserStatus()).isEqualTo(UserStatus.INACTIVE);
+	}
 }
