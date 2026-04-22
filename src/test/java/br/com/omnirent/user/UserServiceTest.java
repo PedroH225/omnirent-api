@@ -190,13 +190,28 @@ public class UserServiceTest {
 	}
 	
 	@Test
-	void shouldThrowWhenUserNotFounOnActivate() {
+	void shouldThrowWhenUserNotFoundOnActivate() {
 		String invalidId = "invalid-id";
 		
 		when(currentUserProvider.currentUserId()).thenReturn(invalidId);
 		when(userRepository.findById(invalidId)).thenReturn(Optional.empty());
 		
 		assertThatThrownBy(() -> userService.activateUser())
+		.isInstanceOf(UserNotFoundException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(userRepository).findById(invalidId);
+		verifyNoMoreInteractions(userRepository, currentUserProvider);
+	}
+	
+	@Test
+	void shouldThrowWhenUserNotFoundOnDeactivate() {
+		String invalidId = "invalid-id";
+		
+		when(currentUserProvider.currentUserId()).thenReturn(invalidId);
+		when(userRepository.findById(invalidId)).thenReturn(Optional.empty());
+		
+		assertThatThrownBy(() -> userService.deactivateUser())
 		.isInstanceOf(UserNotFoundException.class);
 		
 		verify(currentUserProvider).currentUserId();
