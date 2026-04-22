@@ -165,4 +165,27 @@ public class UserServiceTest {
 		
 		assertThat(userCaptor.getValue().getUserStatus()).isEqualTo(UserStatus.INACTIVE);
 	}
+	
+	@Test
+	void shouldActivateUser() {
+		String userId = user1.getId();
+		user1.setUserStatus(UserStatus.INACTIVE);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(userId);
+		when(userRepository.findById(userId)).thenReturn(Optional.of(user1));
+		when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+		
+		assertThat(user1.getUserStatus()).isEqualTo(UserStatus.INACTIVE);
+		
+		userService.activateUser();
+		
+		ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(userRepository).findById(userId);
+		verify(userRepository).save(userCaptor.capture());
+		verifyNoMoreInteractions(userRepository, currentUserProvider);
+		
+		assertThat(userCaptor.getValue().getUserStatus()).isEqualTo(UserStatus.ACTIVE);
+	}
 }
