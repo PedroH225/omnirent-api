@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,10 @@ import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringIntegrationTest;
+import br.com.omnirent.security.domain.AuthenticatedUser;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.User;
+import br.com.omnirent.utils.SecurityTestUtils;
 import jakarta.transaction.Transactional;
 
 @Transactional
@@ -42,6 +45,13 @@ public class AddressServiceIT extends SpringIntegrationTest {
 	void setUp() {
 		user = userRepository.save(UserTestFactory.user());
 		userAddress = addressRepository.save(AddressTestFactory.forUser(user));
+
+		SecurityTestUtils.setAuthenticatedUser(user.getId());
+	}
+	
+	@AfterEach
+	void clearContext() {
+		SecurityTestUtils.clear();
 	}
  	
 	@Test
@@ -78,6 +88,7 @@ public class AddressServiceIT extends SpringIntegrationTest {
 	void shouldThrowWhenInvalidUser() {
 		AddressRequestDTO addressRequestDTO = AddressTestFactory.toRequestDTO(userAddress);
 		
+		SecurityTestUtils.setAuthenticatedUser("invalid-id");
 		assertThatThrownBy(() -> addressService.addAddress(addressRequestDTO))
 		.isInstanceOf(UserNotFoundException.class);
 	}
