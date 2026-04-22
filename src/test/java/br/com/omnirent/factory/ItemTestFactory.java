@@ -4,13 +4,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+import br.com.omnirent.address.context.AddressInfo;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.domain.AddressData;
-import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.category.domain.SubCategory;
-import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.item.context.ItemInfo;
+import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.dto.ItemDetailDTO;
@@ -70,6 +71,29 @@ public final class ItemTestFactory {
                         owner.getId(), owner.getUsername()
                 ),
                 item.getCreatedAt(), item.getUpdatedAt()
+        );
+    }
+    
+    public static ItemRentedContext toItemRentedContext(Item item,
+            Address address, User owner) {
+        ItemData itemData = item.getItemData();
+        AddressData addressData = address.getAddressData();
+
+        ItemInfo itemInfo = new ItemInfo(
+                item.getId(), item.getName(), itemData.getBrand(),
+                itemData.getModel(), itemData.getDescription(), itemData.getBasePrice(),
+                itemData.getItemCondition()
+        );
+        
+        AddressInfo addressInfo = new AddressInfo(
+                address.getId(), addressData.getStreet(), addressData.getNumber(),
+                addressData.getComplement(), addressData.getDistrict(), addressData.getCity(),
+                addressData.getState(), addressData.getCountry(), addressData.getZipCode()
+        );
+
+        return new ItemRentedContext(
+                itemInfo, addressInfo, owner.getId(),
+                owner.getUsername()
         );
     }
 }
