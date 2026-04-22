@@ -2,13 +2,14 @@ package br.com.omnirent.security;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
 import br.com.omnirent.security.domain.AuthenticatedUser;
-import br.com.omnirent.user.domain.User;
 
-public class SecurityUtils {
+@Component
+public class CurrentUserProvider {
 
-    public static String currentUserId() {
+    public String currentUserId() {
         Authentication authentication =
             SecurityContextHolder.getContext().getAuthentication();
 
