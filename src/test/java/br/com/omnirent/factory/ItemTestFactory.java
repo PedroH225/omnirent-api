@@ -7,15 +7,19 @@ import java.util.ArrayList;
 import br.com.omnirent.address.context.AddressInfo;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.domain.AddressData;
+import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.category.domain.SubCategory;
+import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
+import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
+import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserResponseDTO;
 import br.com.omnirent.utils.Sequence;
@@ -111,4 +115,19 @@ public final class ItemTestFactory {
                 )
         );
     }
+    
+    public static ItemRequestDTO newItemRequest(String basePrice, String itemCondition,
+    		String subCategoryId, String addressId) {
+    	String item = Sequence.nextString("item");
+    	
+    
+        return new ItemRequestDTO(
+                null, item, item,
+                item, item, new BigDecimal(basePrice),
+                itemCondition, subCategoryId,
+                addressId
+        );
+    }
+    
+
 }
