@@ -2,6 +2,7 @@ package br.com.omnirent.factory;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.domain.SubCategory;
@@ -42,6 +43,10 @@ public final class ItemTestFactory {
     	item.setId(Sequence.nextString("itemId"));
     	item.setCreatedAt(LocalDateTime.now());
     	item.setUpdatedAt(LocalDateTime.now());
+    	if (owner.getItems() == null) {
+			owner.setItems(new ArrayList<Item>());
+		}
+    	owner.getItems().add(item);
     	return item;
     }
 }
