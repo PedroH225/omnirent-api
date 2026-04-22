@@ -129,5 +129,28 @@ public final class ItemTestFactory {
         );
     }
     
+    public static Item fromNewItemRequestDTO(ItemRequestDTO dto,
+            SubCategory subCategory, Address address, User owner) {
 
+        ItemData itemData = new ItemData(
+                dto.brand(), dto.model(), dto.description(),
+                dto.basePrice(), ItemCondition.valueOf(dto.itemCondition())
+        );
+
+        Item item = new Item();
+        item.setName(dto.name());
+        item.setItemData(itemData);
+        item.setItemStatus(ItemStatus.AVAILABLE);
+        item.setSubCategory(subCategory);
+        item.setPickupAddress(address);
+        item.setOwner(owner);
+
+        return item;
+    }
+    
+    public static Item toPersisted(Item item) {
+    	item.setId(Sequence.nextString("item-id"));
+    	return item;
+    }
+   
 }
