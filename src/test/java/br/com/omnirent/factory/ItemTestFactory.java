@@ -152,5 +152,16 @@ public final class ItemTestFactory {
     	item.setId(Sequence.nextString("item-id"));
     	return item;
     }
-   
+    
+    public static ItemCreatedDTO toItemCreatedDTO(Item item) {
+        ItemData itemData = item.getItemData();
+
+        return new ItemCreatedDTO(
+                item.getId(), item.getName(), itemData.getBrand(),
+                itemData.getModel(), itemData.getDescription(), itemData.getBasePrice(),
+                itemData.getItemCondition(), item.getItemStatus(),
+                SubCategoryTestFactory.toSubDto(item.getSubCategory()),
+                AddressTestFactory.toAddressDto(item.getPickupAddress())
+        );
+    }
 }
