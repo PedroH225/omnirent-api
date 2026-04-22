@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -49,13 +48,13 @@ public class CategoryService {
 	
 	public CategoryResponseDTO getCategoryById(String id) {
 		Optional<CategoryResponseDTO> optCategory = categoryRepository.getCategoryById(id);
-		
-		List<SubCategoryResDTO> subCategories = subRepository.findSubByCategoryId(id);
-		
+				
 		if (optCategory.isEmpty()) {
-			throw new RuntimeException();
+			throw new CategoryNotFoundException();
 		}
+		
 		CategoryResponseDTO category = optCategory.get();
+		List<SubCategoryResDTO> subCategories = subRepository.findSubByCategoryId(id);
 		category.setSubCategories(subCategories);
 		
 		return category;
