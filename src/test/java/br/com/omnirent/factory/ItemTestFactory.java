@@ -15,6 +15,7 @@ import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.dto.ItemDetailDTO;
+import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserResponseDTO;
 import br.com.omnirent.utils.Sequence;
@@ -94,6 +95,20 @@ public final class ItemTestFactory {
         return new ItemRentedContext(
                 itemInfo, addressInfo, owner.getId(),
                 owner.getUsername()
+        );
+    }
+    
+    public static ItemDisplayDTO toItemDisplayDTO(Item item,
+            SubCategory subCategory, User owner) {
+        ItemData itemData = item.getItemData();
+
+        return new ItemDisplayDTO(
+                item.getId(), item.getName(), itemData.getBasePrice(),
+                itemData.getItemCondition(), item.getItemStatus(), subCategory.getName(),
+                item.getCreatedAt(),
+                new UserResponseDTO(
+                        owner.getId(), owner.getUsername()
+                )
         );
     }
 }
