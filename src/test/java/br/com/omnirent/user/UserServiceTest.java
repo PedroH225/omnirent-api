@@ -2,6 +2,7 @@ package br.com.omnirent.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,6 +23,7 @@ import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
+import br.com.omnirent.user.dto.UserRequestDTO;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -60,6 +63,7 @@ public class UserServiceTest {
 		
 		assertThat(result).isEqualTo(expected);
 		
+		verify(currentUserProvider).currentUserId();
 		verify(userRepository).findUserDetailsById(userId);
 		verifyNoMoreInteractions(userRepository);
 	}
@@ -76,5 +80,48 @@ public class UserServiceTest {
 		
 		verify(userRepository).findUserDetailsById(invalidId);
 		verifyNoMoreInteractions(userRepository);
+	}
+	
+	@Test
+	void shouldUpdateUser() {
+		String userId = user1.getId();
+		
+		UserRequestDTO request = UserTestFactory.requestDto();
+		
+		User expected = UserTestFactory.fromRequestDto(request, user1);
+		UserDetailsDTO expectedDto = UserTestFactory.toUserDetails(expected);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(userId);
+		when(userRepository.findById(userId)).thenReturn(Optional.of(user1));
+	    when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+	    when(mapper.toDetailsDto(any(User.class)))
+	    .thenAnswer(invocation -> {
+	        User u = invocation.getArgument(0, User.class);
+	        return UserTestFactory.toUserDetails(u);
+	    });
+	   
+	    UserDetailsDTO result = userService.update(request);
+
+	    ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+
+	    verify(currentUserProvider).currentUserId();
+	    verify(userRepository).findById(userId);
+	    verify(userRepository).save(userCaptor.capture());
+	    verify(mapper).toDetailsDto(userCaptor.getValue());
+	    verifyNoMoreInteractions(userRepository, mapper, currentUserProvider);
+
+	    User saved = userCaptor.getValue();
+
+	    assertThat(result).isEqualTo(expectedDto);
+
+	    assertThat(saved).isNotNull();
+	    assertThat(saved.getId()).isEqualTo(user1.getId());
+	    assertThat(saved.getEmail()).isEqualTo(request.email());
+	    assertThat(saved.getName()).isEqualTo(request.name());
+	    assertThat(saved.getUsername()).isEqualTo(request.username());
+
+	    assertThat(saved.getEmail()).isEqualTo(result.getEmail());
+	    assertThat(saved.getName()).isEqualTo(result.getName());
+	    assertThat(saved.getUsername()).isEqualTo(result.getUsername());
 	}
 }
