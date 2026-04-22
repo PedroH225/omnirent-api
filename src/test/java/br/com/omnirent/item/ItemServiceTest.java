@@ -2,10 +2,12 @@ package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +35,7 @@ import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemDetailDTO;
+import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -143,5 +146,26 @@ public class ItemServiceTest {
 				
 		verify(itemRepository).getItemRentedContext(invalidId);
 		verifyNoMoreInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldGetUserItems() {
+		String userId = owner.getId();
+		
+		ItemDisplayDTO dto1 = ItemTestFactory.toItemDisplayDTO(item, drill, owner);
+		ItemDisplayDTO dto2 = ItemTestFactory.toItemDisplayDTO(item2, drill, owner);
+		List<ItemDisplayDTO> expected = List.of(dto1, dto2);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(userId);
+		when(itemRepository.findUserItems(userId)).thenReturn(expected);
+
+		List<ItemDisplayDTO> result = itemService.getUserItems();
+		
+		assertThat(result).isEqualTo(expected);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(userService).requireExistence(userId);
+		verify(itemRepository).findUserItems(userId);
+		verifyNoMoreInteractions(itemRepository, currentUserProvider, userService);
 	}
 }
