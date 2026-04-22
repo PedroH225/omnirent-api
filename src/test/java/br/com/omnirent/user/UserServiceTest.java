@@ -1,5 +1,12 @@
 package br.com.omnirent.user;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,8 +14,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.user.domain.User;
+import br.com.omnirent.user.dto.UserDetailsDTO;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -28,14 +37,30 @@ public class UserServiceTest {
 	@BeforeEach
 	void setUp() {
 		user1 = UserTestFactory.persistedUser();
+		user1.setUserStatus(UserStatus.ACTIVE);
 	    user2 = UserTestFactory.persistedUser();
+	    user2.setUserStatus(UserStatus.ACTIVE);
 	}
 	
 	@Test
-	void test() {
-		System.out.println("userservicetest");
-		System.out.println("user1: " + user1.getId());
-		System.out.println("user2: " + user2.getId());
+	void shouldGetUserDetails() {
+		String userId = user1.getId();
+		UserDetailsDTO expected = UserTestFactory.toUserDetails(user1);
+		
+		when(userRepository.findUserDetailsById(userId)).thenReturn(Optional.of(expected));
+		
+		UserDetailsDTO result = userService.getUserDetailsById(userId);
+		
+		assertThat(result).isNotNull();
 
+		assertThat(result.getId()).isEqualTo(expected.getId());
+		assertThat(result.getName()).isEqualTo(expected.getName());
+		assertThat(result.getUsername()).isEqualTo(expected.getUsername());
+		assertThat(result.getEmail()).isEqualTo(expected.getEmail());
+		assertThat(result.getBirthDate()).isEqualTo(expected.getBirthDate());
+		assertThat(result.getUserStatus()).isEqualTo(expected.getUserStatus());
+		
+		verify(userRepository).findUserDetailsById(userId);
+		verifyNoMoreInteractions(userRepository);
 	}
 }
