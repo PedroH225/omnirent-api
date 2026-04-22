@@ -9,8 +9,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.user.domain.User;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(exclude = "dtf")
 public class UserDetailsDTO {
 	
 	private String id;
