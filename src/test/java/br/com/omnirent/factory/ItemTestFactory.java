@@ -5,12 +5,17 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import br.com.omnirent.address.domain.Address;
+import br.com.omnirent.address.domain.AddressData;
+import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.category.domain.SubCategory;
+import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
+import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.user.domain.User;
+import br.com.omnirent.user.dto.UserResponseDTO;
 import br.com.omnirent.utils.Sequence;
 
 public final class ItemTestFactory {
@@ -48,5 +53,23 @@ public final class ItemTestFactory {
 		}
     	owner.getItems().add(item);
     	return item;
+    }
+    
+    public static ItemDetailDTO toItemDetailsDto(Item item, SubCategory subCategory,
+            Address pickupAddress, User owner) {
+
+        ItemData itemData = item.getItemData();
+
+        return new ItemDetailDTO(
+                item.getId(), item.getName(), itemData.getBrand(),
+                itemData.getModel(), itemData.getDescription(), itemData.getBasePrice(),
+                itemData.getItemCondition(), item.getItemStatus(),
+                SubCategoryTestFactory.toSubDto(subCategory),
+                AddressTestFactory.toAddressDto(pickupAddress),
+                new UserResponseDTO(
+                        owner.getId(), owner.getUsername()
+                ),
+                item.getCreatedAt(), item.getUpdatedAt()
+        );
     }
 }
