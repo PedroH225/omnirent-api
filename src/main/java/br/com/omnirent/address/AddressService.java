@@ -9,6 +9,7 @@ import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.exception.domain.AddressNotFoundException;
+import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -24,6 +25,8 @@ public class AddressService {
 	
 	private AddressMapper mapper;
 	
+	private CurrentUserProvider currentUserProvider;
+	
 	public Address findById(String id) {
 		Optional<Address> address = addressRepository.findById(id);
 		
@@ -34,11 +37,14 @@ public class AddressService {
 		return address.get();
 	}
 	
-	public List<AddressResponseDTO> getUserAddresses(String userId) {
+	public List<AddressResponseDTO> getUserAddresses() {
+		String userId = currentUserProvider.currentUserId();
+
 		return addressRepository.findAddressByUser(userId);
 	}
 
-	public AddressResponseDTO addAddress(AddressRequestDTO addressDto, String userId) {	
+	public AddressResponseDTO addAddress(AddressRequestDTO addressDto) {	
+		String userId = currentUserProvider.currentUserId();
 		userService.requireExistence(userId);
 				
 		Address address = mapper.fromAddressDTO(addressDto, userId);
