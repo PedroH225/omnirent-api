@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,7 +57,10 @@ public class CategoryServiceTest {
 
         notebook = SubCategoryTestFactory.createPersisted("Notebook", electronics);
         mouse = SubCategoryTestFactory.createPersisted("Mouse", electronics);
-        ball = SubCategoryTestFactory.createPersisted("Ball", electronics);
+        ball = SubCategoryTestFactory.createPersisted("Ball", sports);
+        
+        electronics.setSubCategories(List.of(notebook, mouse));
+        sports.setSubCategories(List.of(ball));
     }
     
     @Test
@@ -168,5 +172,42 @@ public class CategoryServiceTest {
     	verify(subRepository).findAllByCategoryName(categoryName);
     	verify(mapper).toSubDto(subCategories);
     	verifyNoMoreInteractions(subRepository, mapper);
+    }
+    
+    @Test
+    void shouldFindAllCategoriesWithSubCategories() {
+    	CategoryResponseDTO electronicsDTO = CategoryTestFactory.toCategoryResDTO(electronics);
+    	CategoryResponseDTO sportsDTO = CategoryTestFactory.toCategoryResDTO(sports);
+    	List<CategoryResponseDTO> allCategories = List.of(electronicsDTO, sportsDTO);
+
+    	SubCategoryResDTO dto1 = SubCategoryTestFactory.toSubDto(ball);
+    	SubCategoryResDTO dto2 = SubCategoryTestFactory.toSubDto(notebook);
+    	SubCategoryResDTO dto3 = SubCategoryTestFactory.toSubDto(mouse);
+
+    	List<SubCategoryResDTO> allSubCategories = List.of(dto1, dto2, dto3);
+
+    	List<CategoryResponseDTO> expected = 
+    			CategoryTestFactory.toCategoryResDTO(List.of(electronics, sports));
+    	
+    	when(categoryRepository.getAllCategories()).thenReturn(allCategories);
+    	when(subRepository.findAllSubCat()).thenReturn(allSubCategories);
+    	
+    	List<CategoryResponseDTO> result = categoryService.findAll();
+    	
+    	result.forEach(cat ->
+        cat.getSubCategories().sort(Comparator.comparing(SubCategoryResDTO::getName))
+	    );
+	
+	    expected.forEach(cat ->
+	        cat.getSubCategories().sort(Comparator.comparing(SubCategoryResDTO::getName))
+	    );
+
+	    assertThat(result)
+            .usingRecursiveFieldByFieldElementComparator()
+            .containsExactlyInAnyOrderElementsOf(expected);
+	    
+	    verify(categoryRepository).getAllCategories();
+	    verify(subRepository).findAllSubCat();
+	    verifyNoMoreInteractions(categoryRepository, subRepository);
     }
 }
