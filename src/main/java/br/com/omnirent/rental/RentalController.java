@@ -14,7 +14,6 @@ import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.rental.dto.RentalRequestDTO;
-import br.com.omnirent.security.SecurityUtils;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -31,57 +30,57 @@ public class RentalController {
 	
 	@GetMapping("/find/rented")
 	public List<RentalDisplayDTO> findUserRented() {
-		return rentalService.findUserRented(SecurityUtils.currentUserId());
+		return rentalService.findUserRented();
 	}
 	
 	@GetMapping("/find/userRentals")
 	public List<RentalDisplayDTO> findUserRentals() {
-		return rentalService.findUserRentals(SecurityUtils.currentUserId());
+		return rentalService.findUserRentals();
 	}
 	
 	@PostMapping
 	public RentalCreatedDTO addRent(@RequestBody RentalRequestDTO rentalRequestDTO) {
-		return rentalService.addRent(rentalRequestDTO, SecurityUtils.currentUserId());
+		return rentalService.addRent(rentalRequestDTO);
 	}
 	
 	@PatchMapping("/{rentId}/start-preparing")
 	public void startPreparing(@PathVariable String rentId) {
-		rentalService.startPreparing(rentId, SecurityUtils.currentUserId());
+		rentalService.startPreparing(rentId);
 	}
 	
 	@PatchMapping("/{rentId}/ship")
 	public void ship(@PathVariable String rentId) {
-		rentalService.ship(rentId, SecurityUtils.currentUserId());
+		rentalService.ship(rentId);
 	}
 	
 	@PatchMapping("/{rentId}/in-use")
 	public RentalDisplayDTO markInUse(@PathVariable String rentId) {
-		return rentalService.markInUse(rentId, SecurityUtils.currentUserId());
+		return rentalService.markInUse(rentId);
 	}
 	
 	@PatchMapping("/{rentId}/request-return")
 	public void requestReturn(@PathVariable String rentId) {
-		rentalService.requestReturn(rentId, SecurityUtils.currentUserId());
+		rentalService.requestReturn(rentId);
 	}
 	
 	@PatchMapping("/{rentId}/return-shipped")
 	public void markReturnShipped(@PathVariable String rentId) {
-		rentalService.markReturnShipped(rentId, SecurityUtils.currentUserId());
+		rentalService.markReturnShipped(rentId);
 	}
 	
 	@PatchMapping("/{rentId}/returned")
 	public void markReturned(@PathVariable String rentId) {
-		rentalService.markReturned(rentId, SecurityUtils.currentUserId());
+		rentalService.markReturned(rentId);
 	}
 	
 	@PatchMapping("/{rentId}/cancel")
 	public void cancel(@PathVariable String rentId) {
-		rentalService.cancel(rentId, SecurityUtils.currentUserId());
+		rentalService.cancel(rentId);
 	}
 	
 	@PatchMapping("/{rentId}/confirm")
 	public void confirm(@PathVariable String rentId) {
-		rentalService.confirm(rentId, SecurityUtils.currentUserId());
+		rentalService.confirm(rentId);
 	}
 	
 }

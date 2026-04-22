@@ -29,6 +29,7 @@ import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.rental.dto.RentalRequestDTO;
+import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
 import jakarta.transaction.Transactional;
@@ -47,6 +48,8 @@ public class RentalService {
 	private RentalAuthorizationService authorizationService;
 	
 	private RentalMapper mapper;
+	
+	private CurrentUserProvider currentUserProvider;
 	
 	public Rental findById(String id) {
 		Optional<Rental> rental = rentalRepository.findById(id);
@@ -87,7 +90,8 @@ public class RentalService {
 		return optContext.get();
 	}
 
-	public RentalCreatedDTO addRent(RentalRequestDTO rentalRequestDTO, String userId) {
+	public RentalCreatedDTO addRent(RentalRequestDTO rentalRequestDTO) {
+		String userId = currentUserProvider.currentUserId();
 		userService.requireExistence(userId);
 		User renter = userService.getUserReference(userId);
 		
@@ -108,7 +112,8 @@ public class RentalService {
 	}
 
 	@Transactional
-	public void startPreparing(String rentId, String currentUserId) {
+	public void startPreparing(String rentId) {
+		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
 		RentalStatus currStatus = context.getRentalStatus();
@@ -120,7 +125,8 @@ public class RentalService {
 	}
 
 	@Transactional
-	public void ship(String rentId, String currentUserId) {
+	public void ship(String rentId) {
+		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
 		RentalStatus currStatus = context.getRentalStatus();
@@ -132,14 +138,16 @@ public class RentalService {
 	}
 
 	@Transactional
-	public RentalDisplayDTO markInUse(String rentId, String userId) {
+	public RentalDisplayDTO markInUse(String rentId) {
+		String currentUserId = currentUserProvider.currentUserId();
+
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
 		RentalStatus currStatus = context.getRentalStatus();
 		Set<String> actors = Set.of(context.getOwnerId(), context.getRenterId());
 		
 		// TEMPORARY
-		authorizationService.requireOne(actors, userId);
+		authorizationService.requireOne(actors, currentUserId);
 		currStatus.validateTransition(RentalStatus.IN_USE);
 		
 		LocalDateTime startDate = LocalDateTime.now();
@@ -152,31 +160,34 @@ public class RentalService {
 	}
 
 	@Transactional
-	public void requestReturn(String rentId, String userId) {
+	public void requestReturn(String rentId) {
+		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
 		RentalStatus currStatus = context.getRentalStatus();
 		
-		authorizationService.requireOne(Set.of(context.getRenterId()), userId);
+		authorizationService.requireOne(Set.of(context.getRenterId()), currentUserId);
 		currStatus.validateTransition(RentalStatus.RETURN_REQUESTED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.RETURN_REQUESTED);
 	}
 	
 	@Transactional
-	public void markReturnShipped(String rentId, String userId) {
+	public void markReturnShipped(String rentId) {
+		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
 		RentalStatus currStatus = context.getRentalStatus();
 		
-		authorizationService.requireOne(Set.of(context.getRenterId()), userId);
+		authorizationService.requireOne(Set.of(context.getRenterId()), currentUserId);
 		currStatus.validateTransition(RentalStatus.RETURN_SHIPPED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.RETURN_SHIPPED);
 	}
 	
 	@Transactional
-	public void markReturned(String rentId, String currentUserId) {
+	public void markReturned(String rentId) {
+		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
 		RentalStatus currStatus = context.getRentalStatus();
@@ -189,13 +200,14 @@ public class RentalService {
 	}
 
 	@Transactional
-	public void cancel(String rentId, String userId) {
+	public void cancel(String rentId) {
+		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
 		RentalStatus currStatus = context.getRentalStatus();
 		Set<String> actors = Set.of(context.getOwnerId(), context.getRenterId());
 		
-		authorizationService.requireOne(actors, userId);
+		authorizationService.requireOne(actors, currentUserId);
 		
 		currStatus.validateTransition(RentalStatus.CANCELLED);
 		
@@ -203,25 +215,28 @@ public class RentalService {
 	}
 
 	@Transactional
-	public void confirm(String rentId, String userId) {
+	public void confirm(String rentId) {
+		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
 		RentalStatus currStatus = context.getRentalStatus();
 		Set<String> actors = Set.of(context.getOwnerId(), context.getRenterId());
 		
 		// TEMPORARY
-		authorizationService.requireOne(actors, userId);
+		authorizationService.requireOne(actors, currentUserId);
 		currStatus.validateTransition(RentalStatus.CONFIRMED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.CONFIRMED);
 	}
 
-	public List<RentalDisplayDTO> findUserRented(String renterId) {
+	public List<RentalDisplayDTO> findUserRented() {
+		String renterId = currentUserProvider.currentUserId();
 		userService.requireExistence(renterId);
 		return rentalRepository.findUserRented(renterId);
 	}
 
-	public List<RentalDisplayDTO> findUserRentals(String ownerId) {
+	public List<RentalDisplayDTO> findUserRentals() {
+		String ownerId = currentUserProvider.currentUserId();
 		userService.requireExistence(ownerId);
 		return rentalRepository.findUserRentals(ownerId);
 	}
