@@ -142,8 +142,11 @@ public final class ItemTestFactory {
         item.setItemData(itemData);
         item.setItemStatus(ItemStatus.AVAILABLE);
         item.setSubCategory(subCategory);
+        item.setSubCategoryId(subCategory.getId());
         item.setPickupAddress(address);
+        item.setPickupAddressId(address.getId());
         item.setOwner(owner);
+        item.setOwnerId(owner.getId());
 
         return item;
     }
