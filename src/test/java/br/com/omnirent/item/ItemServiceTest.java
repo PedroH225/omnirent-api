@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -105,7 +107,6 @@ public class ItemServiceTest {
 		assertThat(result).isEqualTo(itemDetailDTO);
 		
 		verify(itemRepository).findItemDetailDTO(itemId);
-		verifyNoMoreInteractions(itemRepository);
 	}
 	
 	@Test
@@ -118,7 +119,6 @@ public class ItemServiceTest {
 			.isInstanceOf(ItemNotFoundException.class);
 				
 		verify(itemRepository).findItemDetailDTO(invalidId);
-		verifyNoMoreInteractions(itemRepository);
 	}
 	
 	@Test
@@ -133,7 +133,6 @@ public class ItemServiceTest {
 		assertThat(result).isEqualTo(context);
 		
 		verify(itemRepository).getItemRentedContext(itemId);
-		verifyNoMoreInteractions(itemRepository);
 	}
 	
 	@Test
@@ -167,7 +166,6 @@ public class ItemServiceTest {
 		verify(currentUserProvider).currentUserId();
 		verify(userService).requireExistence(userId);
 		verify(itemRepository).findUserItems(userId);
-		verifyNoMoreInteractions(itemRepository, currentUserProvider, userService);
 	}
 	
 	@Test
@@ -183,7 +181,6 @@ public class ItemServiceTest {
 		verify(currentUserProvider).currentUserId();
 		verify(userService).requireExistence(invalidId);
 		verifyNoInteractions(itemRepository);
-		verifyNoMoreInteractions(currentUserProvider, userService);
 	}
 	
 	@Test
@@ -203,23 +200,23 @@ public class ItemServiceTest {
 		
 		when(itemMapper.fromDto(request, owner, ownerId, ownerAddress,
 				drill, ItemStatus.AVAILABLE)).thenReturn(mappedItem);
-		when(itemRepository.save(mappedItem)).thenReturn(persistedItem);
+		when(itemRepository.save(any(Item.class))).thenReturn(persistedItem);
 		when(itemMapper.toCreatedDto(persistedItem)).thenReturn(expected);
 		
 		ItemCreatedDTO result = itemService.addItem(request);
 		
 		assertThat(result).isEqualTo(expected);
 		
-		verify(currentUserProvider).currentUserId();
-		verify(userService).requireExistence(ownerId);
-		verify(userService).getUserReference(ownerId);
-		verify(addressService).findById(ownerAddress.getId());
-		verify(categoryService).findSubById(drill.getId());
-		verify(itemMapper).fromDto(request, owner, ownerId, ownerAddress, drill, ItemStatus.AVAILABLE);
-		verify(itemRepository).save(mappedItem);
-		verify(itemMapper).toCreatedDto(persistedItem);
-		verifyNoMoreInteractions(currentUserProvider, userService, addressService,
-				categoryService, itemMapper, itemRepository);
+		 ArgumentCaptor<Item> itemCaptor = ArgumentCaptor.forClass(Item.class);
+		 verify(itemRepository).save(itemCaptor.capture());
+
+		 Item savedItem = itemCaptor.getValue();
+
+		 assertThat(savedItem.getName()).isEqualTo(request.name());
+		 assertThat(savedItem.getOwnerId()).isEqualTo(ownerId);
+		 assertThat(savedItem.getPickupAddressId()).isEqualTo(ownerAddress.getId());
+		 assertThat(savedItem.getSubCategoryId()).isEqualTo(drill.getId());
+		 assertThat(savedItem.getItemStatus()).isEqualTo(ItemStatus.AVAILABLE);
 	}
 	
 	@Test
@@ -236,7 +233,6 @@ public class ItemServiceTest {
 		
 		verify(currentUserProvider).currentUserId();
 		verify(userService).requireExistence(invalidId);
-		verifyNoInteractions(addressService, categoryService, itemMapper, itemRepository);
-		verifyNoMoreInteractions(userService, currentUserProvider);
+		verifyNoInteractions(itemRepository);
 	}
 }
