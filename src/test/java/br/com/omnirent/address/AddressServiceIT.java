@@ -3,13 +3,12 @@ package br.com.omnirent.address;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testcontainers.shaded.com.github.dockerjava.core.dockerfile.DockerfileStatement.Add;
 
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.domain.AddressData;
@@ -20,8 +19,10 @@ import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringIntegrationTest;
+import br.com.omnirent.security.domain.AuthenticatedUser;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.User;
+import br.com.omnirent.utils.SecurityTestUtils;
 import jakarta.transaction.Transactional;
 
 @Transactional
@@ -35,7 +36,7 @@ public class AddressServiceIT extends SpringIntegrationTest {
 	
 	@Autowired
 	private AddressService addressService;
-	
+		
 	private User user;
 	
 	private Address userAddress;
@@ -44,13 +45,20 @@ public class AddressServiceIT extends SpringIntegrationTest {
 	void setUp() {
 		user = userRepository.save(UserTestFactory.user());
 		userAddress = addressRepository.save(AddressTestFactory.forUser(user));
+
+		SecurityTestUtils.setAuthenticatedUser(user.getId());
+	}
+	
+	@AfterEach
+	void clearContext() {
+		SecurityTestUtils.clear();
 	}
  	
 	@Test
 	void shouldAddAddress() {
 		AddressRequestDTO addressRequestDTO = AddressTestFactory.toRequestDTO(userAddress);
 		
-		AddressResponseDTO response = addressService.addAddress(addressRequestDTO, user.getId());
+		AddressResponseDTO response = addressService.addAddress(addressRequestDTO);
 		
 		assertThat(response).isNotNull();
 		assertThat(response.getId()).isNotNull();
@@ -80,7 +88,8 @@ public class AddressServiceIT extends SpringIntegrationTest {
 	void shouldThrowWhenInvalidUser() {
 		AddressRequestDTO addressRequestDTO = AddressTestFactory.toRequestDTO(userAddress);
 		
-		assertThatThrownBy(() -> addressService.addAddress(addressRequestDTO, "123"))
+		SecurityTestUtils.setAuthenticatedUser("invalid-id");
+		assertThatThrownBy(() -> addressService.addAddress(addressRequestDTO))
 		.isInstanceOf(UserNotFoundException.class);
 	}
 	
