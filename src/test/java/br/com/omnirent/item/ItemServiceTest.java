@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.client.HttpClientErrorException.Forbidden;
 
 import br.com.omnirent.address.AddressService;
 import br.com.omnirent.address.domain.Address;
@@ -26,6 +27,7 @@ import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.exception.common.ForbiddenException;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
@@ -71,9 +73,12 @@ public class ItemServiceTest {
 	private ItemMapper itemMapper;
 	
 	private User owner;
-	
+	private User owner2;
+
 	private Address ownerAddress;
 	private Address ownerAddress2;
+	
+	private Address owner2Address;
 
 	private Category tools;
 	private SubCategory drill;
@@ -85,9 +90,12 @@ public class ItemServiceTest {
 	@BeforeEach
 	void setUp() {
 		owner = UserTestFactory.persistedOwner();
-		
+		owner2 = UserTestFactory.persistedOwner();
+
 		ownerAddress = AddressTestFactory.forPersistedUser(owner);
 		ownerAddress2 = AddressTestFactory.forPersistedUser(owner);
+
+		owner2Address = AddressTestFactory.forPersistedUser(owner2);
 
         tools = CategoryTestFactory.createPersisted("Tools");
         drill = SubCategoryTestFactory.createPersisted("Drill", tools);
@@ -283,5 +291,28 @@ public class ItemServiceTest {
 	    verify(addressService).findById(ownerAddress2.getId());
 	    verify(categoryService).findSubById(hammer.getId());
 	    verify(itemRepository).save(item);
+	}
+	
+	@Test
+	void shouldThrowWhenUserIsNotOwnerOnUpdateItem() {
+		String invalidUserId = owner2.getId();
+
+	    ItemRequestDTO request = ItemTestFactory.createItemRequest(
+	            item.getId(), "250", "USED", hammer.getId(), ownerAddress2.getId()
+	    );
+
+	    when(currentUserProvider.currentUserId()).thenReturn(invalidUserId);
+	    when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+	    doThrow(ForbiddenException.class).when(authorizationService).requireOwner(item, invalidUserId);
+
+	    assertThatThrownBy(() -> itemService.updateItem(request))
+	    .isInstanceOf(ForbiddenException.class);
+	    
+	    verify(currentUserProvider).currentUserId();
+	    verify(itemRepository).findById(item.getId());
+	    verify(authorizationService).requireOwner(item, invalidUserId);
+
+	    verifyNoInteractions(addressService, categoryService, itemMapper);
+	    verifyNoMoreInteractions(currentUserProvider, itemRepository, authorizationService);
 	}
 }
