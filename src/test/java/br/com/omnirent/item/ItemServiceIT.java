@@ -1,19 +1,23 @@
 package br.com.omnirent.item;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.ObjectInputFilter.Config;
+import java.util.Optional;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import br.com.omnirent.address.AddressRepository;
-import br.com.omnirent.address.AddressService;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.CategoryRepository;
-import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.SubCategoryRepository;
 import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
@@ -21,9 +25,9 @@ import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringIntegrationTest;
 import br.com.omnirent.item.domain.Item;
-import br.com.omnirent.security.CurrentUserProvider;
+import br.com.omnirent.item.dto.ItemCreatedDTO;
+import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.user.UserRepository;
-import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.utils.SecurityTestUtils;
 import jakarta.transaction.Transactional;
@@ -94,23 +98,38 @@ public class ItemServiceIT extends SpringIntegrationTest {
 	}
 	
 	@Test
-	void test() {
-		System.out.println("owner id: " + owner.getId());
-		System.out.println("owner2 id: " + owner2.getId());
+	void shouldAddItem() {
+		ItemCondition condition = ItemCondition.NEW;
+	    ItemRequestDTO request = ItemTestFactory.createItemRequest(
+	        null, "200", "NEW", notebook.getId(), ownerAddress.getId()
+	    );
 
-		System.out.println("ownerAddress id: " + ownerAddress.getId());
-		System.out.println("ownerAddress2 id: " + ownerAddress2.getId());
-		System.out.println("owner2Address id: " + owner2Address.getId());
+	    ItemCreatedDTO result = itemService.addItem(request);
 
-		System.out.println("electronics id: " + electronics.getId());
-		System.out.println("sports id: " + sports.getId());
+	    assertThat(result).isNotNull();
+	    assertThat(result.getId()).isNotNull();
 
-		System.out.println("notebook subCategory id: " + notebook.getId());
-		System.out.println("mouse subCategory id: " + mouse.getId());
-		System.out.println("ball subCategory id: " + ball.getId());
+	    assertThat(result.getBasePrice()).isEqualByComparingTo("200");
+	    assertThat(result.getItemCondition()).isEqualTo(condition.toString());
 
-		System.out.println("item id: " + item.getId());
-		System.out.println("item2 id: " + item2.getId());
+	    assertThat(result.getSubCategory()).isNotNull();
+	    assertThat(result.getSubCategory().getId()).isEqualTo(notebook.getId());
+
+	    assertThat(result.getPickupAddress()).isNotNull();
+	    assertThat(result.getPickupAddress().getId()).isEqualTo(ownerAddress.getId());
+
+	    Optional<Item> optPersisted = itemRepository.findById(result.getId());
+	    assertThat(optPersisted).isPresent();
+	    Item persisted = optPersisted.get();
+	    
+	    assertThat(persisted.getId()).isEqualTo(result.getId());
+	    assertThat(persisted.getOwnerId()).isEqualTo(owner.getId());
+	    assertThat(persisted.getPickupAddressId()).isEqualTo(ownerAddress.getId());
+	    assertThat(persisted.getSubCategoryId()).isEqualTo(notebook.getId());
+
+	    assertThat(persisted.getItemData().getBasePrice())
+	        .isEqualByComparingTo("200");
+	    assertThat(persisted.getItemData().getItemCondition())
+	        .isEqualTo(condition);
 	}
-	
 }
