@@ -344,4 +344,24 @@ public class ItemServiceTest {
 	    verify(authorizationService).requireOwner(item, ownerId);
 	    verifyNoMoreInteractions(itemRepository, currentUserProvider, authorizationService);
 	}
+	
+	@Test
+	void shouldThrowWhenUserIsNotOwnerOnUpdateItemStatus() {
+		String invalidUserId = owner2.getId();
+		String newStatus = "INACTIVE";
+		
+		when(currentUserProvider.currentUserId()).thenReturn(invalidUserId);
+	    when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+	    doThrow(ForbiddenException.class).when(authorizationService).requireOwner(item, invalidUserId);
+	    
+	    assertThatThrownBy(() -> itemService.updateStatus(item.getId(), newStatus))
+	    .isInstanceOf(ForbiddenException.class);
+	    
+	    verify(currentUserProvider).currentUserId();
+	    verify(itemRepository).findById(item.getId());
+	    verify(authorizationService).requireOwner(item, invalidUserId);
+
+	    verifyNoInteractions(itemMapper);
+	    verifyNoMoreInteractions(currentUserProvider, itemRepository, authorizationService);
+	}
 }
