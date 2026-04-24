@@ -2,13 +2,12 @@ package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +15,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -75,20 +73,26 @@ public class ItemServiceTest {
 	private User owner;
 	
 	private Address ownerAddress;
-	
+	private Address ownerAddress2;
+
 	private Category tools;
 	private SubCategory drill;
-	
+	private SubCategory hammer;
+
 	private Item item;
 	private Item item2;
 	
 	@BeforeEach
 	void setUp() {
 		owner = UserTestFactory.persistedOwner();
+		
 		ownerAddress = AddressTestFactory.forPersistedUser(owner);
+		ownerAddress2 = AddressTestFactory.forPersistedUser(owner);
+
         tools = CategoryTestFactory.createPersisted("Tools");
         drill = SubCategoryTestFactory.createPersisted("Drill", tools);
-        
+        hammer = SubCategoryTestFactory.createPersisted("Hammer", tools);
+
         item = ItemTestFactory.createPersisted(owner, ownerAddress, drill,
         		"200", ItemCondition.NEW);
         
@@ -252,5 +256,32 @@ public class ItemServiceTest {
 	    verify(currentUserProvider).currentUserId();
 	    verify(itemRepository).save(item);
 	    verifyNoInteractions(addressService, categoryService);
+	}
+	
+	@Test
+	void shouldUpdateItemWithSubCategoryAndAddress() {
+		String ownerId = owner.getId();
+
+	    ItemRequestDTO request = ItemTestFactory.createItemRequest(
+	            item.getId(), "250", "USED", hammer.getId(), ownerAddress2.getId()
+	    );
+
+	    ItemDetailDTO expected = ItemTestFactory.toItemDetailsDto(item, hammer, ownerAddress2, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(ownerId);
+	    when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+	    when(addressService.findById(ownerAddress2.getId())).thenReturn(ownerAddress2);
+	    when(categoryService.findSubById(hammer.getId())).thenReturn(hammer);
+	    when(itemRepository.save(item)).thenReturn(item);
+	    when(itemMapper.toDto(item)).thenReturn(expected);
+
+	    ItemDetailDTO result = itemService.updateItem(request);
+
+	    assertThat(result).isEqualTo(expected);
+
+	    verify(currentUserProvider).currentUserId();
+	    verify(addressService).findById(ownerAddress2.getId());
+	    verify(categoryService).findSubById(hammer.getId());
+	    verify(itemRepository).save(item);
 	}
 }
