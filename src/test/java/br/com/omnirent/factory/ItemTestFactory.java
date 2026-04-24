@@ -116,13 +116,13 @@ public final class ItemTestFactory {
         );
     }
     
-    public static ItemRequestDTO newItemRequest(String basePrice, String itemCondition,
+    public static ItemRequestDTO createItemRequest(String itemId, String basePrice, String itemCondition,
     		String subCategoryId, String addressId) {
     	String item = Sequence.nextString("item");
     	
     
         return new ItemRequestDTO(
-                null, item, item,
+                itemId, item, item,
                 item, item, new BigDecimal(basePrice),
                 itemCondition, subCategoryId,
                 addressId
@@ -153,6 +153,8 @@ public final class ItemTestFactory {
     
     public static Item toPersisted(Item item) {
     	item.setId(Sequence.nextString("item-id"));
+    	item.setCreatedAt(LocalDateTime.now());
+    	item.setUpdatedAt(LocalDateTime.now());
     	return item;
     }
     
