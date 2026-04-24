@@ -15,10 +15,10 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.HttpClientErrorException.Forbidden;
 
 import br.com.omnirent.address.AddressService;
 import br.com.omnirent.address.domain.Address;
@@ -314,5 +314,34 @@ public class ItemServiceTest {
 
 	    verifyNoInteractions(addressService, categoryService, itemMapper);
 	    verifyNoMoreInteractions(currentUserProvider, itemRepository, authorizationService);
+	}
+	
+	@Test
+	void shouldUpdateItemStatus() {
+		String ownerId = owner.getId();
+		String newStatus = "INACTIVE";
+		
+	    ItemDetailDTO expected = ItemTestFactory.toItemDetailsDto(item, hammer, ownerAddress2, owner);
+		expected.setItemStatus(newStatus);
+	    
+		when(currentUserProvider.currentUserId()).thenReturn(ownerId);
+	    when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+	    when(itemRepository.save(any(Item.class)))
+	    .thenAnswer(invocation -> invocation.getArgument(0, Item.class));
+	    when(itemMapper.toDto(item)).thenReturn(expected);
+	    
+	    ItemDetailDTO result = itemService.updateStatus(item.getId(), newStatus);
+	    
+	    assertThat(result).isEqualTo(expected);
+	    
+	    ArgumentCaptor<Item> itemCaptor = ArgumentCaptor.forClass(Item.class);
+	    verify(itemRepository).save(itemCaptor.capture());
+	    
+	    Item updatedItem = itemCaptor.getValue();
+	    assertThat(updatedItem.getItemStatus()).isEqualTo(ItemStatus.fromString(newStatus));
+	    
+	    verify(currentUserProvider).currentUserId();
+	    verify(authorizationService).requireOwner(item, ownerId);
+	    verifyNoMoreInteractions(itemRepository, currentUserProvider, authorizationService);
 	}
 }
