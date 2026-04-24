@@ -208,16 +208,9 @@ public class ItemServiceTest {
 		
 		assertThat(result).isEqualTo(expected);
 		
-		 ArgumentCaptor<Item> itemCaptor = ArgumentCaptor.forClass(Item.class);
-		 verify(itemRepository).save(itemCaptor.capture());
-
-		 Item savedItem = itemCaptor.getValue();
-
-		 assertThat(savedItem.getName()).isEqualTo(request.name());
-		 assertThat(savedItem.getOwnerId()).isEqualTo(ownerId);
-		 assertThat(savedItem.getPickupAddressId()).isEqualTo(ownerAddress.getId());
-		 assertThat(savedItem.getSubCategoryId()).isEqualTo(drill.getId());
-		 assertThat(savedItem.getItemStatus()).isEqualTo(ItemStatus.AVAILABLE);
+	    verify(currentUserProvider).currentUserId();
+		verify(userService).requireExistence(ownerId);
+		verify(itemRepository).save(mappedItem);
 	}
 	
 	@Test
