@@ -2,6 +2,7 @@ package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -187,7 +188,7 @@ public class ItemServiceTest {
 	void shouldAddItem() {
 		String ownerId = owner.getId();
 		
-		ItemRequestDTO request = ItemTestFactory.newItemRequest("200", "NEW", drill.getId(), ownerAddress.getId());
+		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", "NEW", drill.getId(), ownerAddress.getId());
 		
 		Item mappedItem = ItemTestFactory.fromNewItemRequestDTO(request, drill, ownerAddress, owner);
 		Item persistedItem = ItemTestFactory.toPersisted(mappedItem);
@@ -223,7 +224,7 @@ public class ItemServiceTest {
 	void shouldThrowWhenUserNotFoundOnAddItem() {
 		String invalidId = "invalidId";
 		
-		ItemRequestDTO request = ItemTestFactory.newItemRequest("200", "NEW", drill.getId(), ownerAddress.getId());
+		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", "NEW", drill.getId(), ownerAddress.getId());
 		
 		when(currentUserProvider.currentUserId()).thenReturn(invalidId);
 		doThrow(UserNotFoundException.class).when(userService).requireExistence(invalidId);
@@ -234,5 +235,29 @@ public class ItemServiceTest {
 		verify(currentUserProvider).currentUserId();
 		verify(userService).requireExistence(invalidId);
 		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldUpdateItemWithoutChangingAddressOrSubCategory() {
+	    String ownerId = owner.getId();
+
+	    ItemRequestDTO request = ItemTestFactory.createItemRequest(
+	            item.getId(), "250", "USED", drill.getId(), ownerAddress.getId()
+	    );
+
+	    ItemDetailDTO expected = ItemTestFactory.toItemDetailsDto(item, drill, ownerAddress, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(ownerId);
+	    when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+	    when(itemRepository.save(item)).thenReturn(item);
+	    when(itemMapper.toDto(item)).thenReturn(expected);
+
+	    ItemDetailDTO result = itemService.updateItem(request);
+
+	    assertThat(result).isEqualTo(expected);
+
+	    verify(currentUserProvider).currentUserId();
+	    verify(itemRepository).save(item);
+	    verifyNoInteractions(addressService, categoryService);
 	}
 }
