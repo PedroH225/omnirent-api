@@ -11,8 +11,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
+import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
@@ -68,6 +70,13 @@ public interface ItemRepository extends JpaRepository<Item, String> {
 			""")
 	Optional<UpdateItemContext> getUpdateContext(@Param("id")String itemId);
 	
+	@Query("""
+			SELECT new br.com.omnirent.item.context.UpdateItemStatusContext(
+			i.id, i.itemStatus, i.ownerId)
+			FROM Item i WHERE i.id = :id
+			""")
+	Optional<UpdateItemStatusContext> getUpdateStatusContext(@Param("id")String itemId);
+	
 	@Modifying
 	@Query("""
 			UPDATE Item i
@@ -85,4 +94,6 @@ public interface ItemRepository extends JpaRepository<Item, String> {
 			@Param("model") String model, @Param("description") String description, @Param("basePrice") BigDecimal basePrice,
 			@Param("itemCondition") ItemCondition itemCondition
 	);
+	
+
 }
