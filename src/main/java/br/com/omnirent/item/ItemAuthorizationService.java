@@ -14,8 +14,8 @@ public class ItemAuthorizationService {
 
 	private final String BLOCKED_MESSAGE = "Item is blocked by the system.";
 
-	public void requireOwner(String itemId, String currentUserId) {
-		if (!itemId.equals(currentUserId)) {
+	public void requireOwner(String ownerId, String currentUserId) {
+		if (!ownerId.equals(currentUserId)) {
 			throw new ForbiddenException(DEFAULT_MESSAGE);
 		}
 	}
