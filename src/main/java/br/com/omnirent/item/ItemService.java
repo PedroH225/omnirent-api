@@ -10,14 +10,18 @@ import br.com.omnirent.address.AddressService;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.SubCategory;
+import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.exception.common.ConflictException;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -70,6 +74,15 @@ public class ItemService {
 		
 		return itemOpt.get();
 	}
+	
+	private UpdateItemContext getUpdateContext(String id) {
+		Optional<UpdateItemContext> itemOpt = itemRepository.getUpdateContext(id);
+		if (itemOpt.isEmpty()) {
+			throw new ItemNotFoundException();
+		}
+		
+		return itemOpt.get();
+	}
 
 	public List<ItemDisplayDTO> getUserItems() {
 		String userId = currentUserProvider.currentUserId();
@@ -92,27 +105,21 @@ public class ItemService {
 	}
 	
 	@Transactional
-	public ItemDetailDTO updateItem(ItemRequestDTO itemDTO) {
+	public void updateItem(UpdateItemRequestDTO request) {
 		String currentUserId = currentUserProvider.currentUserId();
-		Item updatedItem = findById(itemDTO.id());
+		UpdateItemContext context = getUpdateContext(request.id());
 		
-		authorizationService.requireOwner(updatedItem, currentUserId);
-
-		Address address = null;
-		if (StringUtils.isNotBlank(itemDTO.addressId()) && 
-				!updatedItem.getPickupAddressId().equals(itemDTO.addressId())) {
-			address = addressService.findById(itemDTO.addressId());
+		authorizationService.requireOwner(context.getOwnerId(), currentUserId);
+		
+		int updated = itemRepository.updateItem(
+			context.getItemInfo().getId(), request.name(), request.brand(),
+			request.model(), request.description(), request.basePrice(),
+			ItemCondition.fromString(request.itemCondition())
+		);
+		
+		if (updated == 0) {
+			throw new ConflictException("Unexpected error updating item.");
 		}
-		
-		SubCategory subCategory = null;
-		if (StringUtils.isNotBlank(itemDTO.subCategoryId()) && 
-				!updatedItem.getSubCategoryId().equals(itemDTO.subCategoryId())) {
-			subCategory = categoryService.findSubById(itemDTO.subCategoryId());
-		}
-		
-		itemMapper.updateItem(itemDTO, address, subCategory, updatedItem);
-		
-		return itemMapper.toDto(itemRepository.save(updatedItem));
 	}
 
 	@Transactional
