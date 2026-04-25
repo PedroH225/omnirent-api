@@ -56,8 +56,8 @@ public class ItemController {
 		itemService.updateItem(itemDTO);
 	}
 	
-	@PatchMapping("/updateStatus/{itemId}/{itemStatus}")
-	public ItemDetailDTO updateStatus(@PathVariable String itemId, @PathVariable String itemStatus) {
-		return itemService.updateStatus(itemId, itemStatus);
+	@PatchMapping("/updateStatus/{itemId}")
+	public void updateStatus(@PathVariable String itemId) {
+		itemService.updateStatus(itemId);
 	}
 }

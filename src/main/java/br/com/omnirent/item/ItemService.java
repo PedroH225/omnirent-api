@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.NativeDetector.Context;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.address.AddressService;
@@ -13,9 +14,11 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.common.ConflictException;
+import br.com.omnirent.exception.common.ForbiddenException;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
+import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
@@ -83,6 +86,16 @@ public class ItemService {
 		
 		return itemOpt.get();
 	}
+	
+	private UpdateItemStatusContext getUpdateStatusContext(String id) {
+		Optional<UpdateItemStatusContext> itemOpt =
+				itemRepository.getUpdateStatusContext(id);
+		if (itemOpt.isEmpty()) {
+			throw new ItemNotFoundException();
+		}
+		
+		return itemOpt.get();
+	}
 
 	public List<ItemDisplayDTO> getUserItems() {
 		String userId = currentUserProvider.currentUserId();
@@ -121,15 +134,23 @@ public class ItemService {
 	}
 
 	@Transactional
-	public ItemDetailDTO updateStatus(String itemId, String itemStatusStr) {
+	public void updateStatus(String itemId) {
 		String currentUserId = currentUserProvider.currentUserId();
-		Item item = findById(itemId);
+		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
+		ItemStatus currentStatus = context.currentStatus();
 		
-		authorizationService.requireOwner(item, currentUserId);
+		authorizationService.requireNotBlocked(currentStatus);
+		authorizationService.requireOwner(context.ownerId(), currentUserId);
 		
-		item.updateItemStatus(itemStatusStr);
+		ItemStatus newStatus = 
+				currentStatus == ItemStatus.AVAILABLE ?
+				ItemStatus.UNAVAILABLE : ItemStatus.AVAILABLE;
 		
-		return itemMapper.toDto(itemRepository.save(item));
+		int updated = itemRepository.updateStatus(itemId, currentStatus, newStatus);
+		
+		if (updated == 0) {
+			throw new ConflictException("Item was modified before update.");
+		}
 	}
 	
 }
