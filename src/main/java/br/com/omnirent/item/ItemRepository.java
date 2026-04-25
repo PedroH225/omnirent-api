@@ -67,5 +67,22 @@ public interface ItemRepository extends JpaRepository<Item, String> {
 			WHERE i.id = :id AND i.itemStatus = AVAILABLE
 			""")
 	Optional<UpdateItemContext> getUpdateContext(@Param("id")String itemId);
-
+	
+	@Modifying
+	@Query("""
+			UPDATE Item i
+			SET i.name = :itemName,
+			    i.itemData.brand = :brand,
+			    i.itemData.model = :model,
+			    i.itemData.description = :description,
+			    i.itemData.basePrice = :basePrice,
+			    i.itemData.itemCondition = :itemCondition,
+			    i.updatedAt = CURRENT_TIMESTAMP
+			WHERE i.id = :id
+			""")
+	int updateItem(
+			@Param("id") String id, @Param("itemName") String itemName, @Param("brand") String brand,
+			@Param("model") String model, @Param("description") String description, @Param("basePrice") BigDecimal basePrice,
+			@Param("itemCondition") ItemCondition itemCondition
+	);
 }
