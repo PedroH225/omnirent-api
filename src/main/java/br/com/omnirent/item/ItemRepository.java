@@ -95,5 +95,10 @@ public interface ItemRepository extends JpaRepository<Item, String> {
 			@Param("itemCondition") ItemCondition itemCondition
 	);
 	
-
+	@Modifying
+	@Query("""
+			UPDATE Item i SET i.itemStatus = :status, updatedAt = CURRENT_TIMESTAMP 
+			WHERE i.id = :id AND i.itemStatus = :current
+			""")
+	int updateStatus(@Param("id")String itemId, @Param("current")ItemStatus currentStatus, @Param("status")ItemStatus status);
 }
