@@ -62,6 +62,9 @@ public class RentalRepositoryTest extends IntegrationTest {
 	private RentalRepository rentalRepository;
 	
 	@Autowired
+	private RentalQueryRepository queryRepository;
+	
+	@Autowired
 	private ItemRepository itemRepository;
 	
 	@Autowired
@@ -123,7 +126,7 @@ public class RentalRepositoryTest extends IntegrationTest {
 	
 	@Test
 	void shouldFindRentalDetail() {
-	    Optional<RentalDetailDTO> result = rentalRepository.findRentalDetail(rental.getId());
+	    Optional<RentalDetailDTO> result = queryRepository.findRentalDetail(rental.getId());
 
 	    assertThat(result).isPresent();
 
@@ -173,7 +176,7 @@ public class RentalRepositoryTest extends IntegrationTest {
 
 	@Test
 	void shouldFindRentalDisplayDTO() {
-	    Optional<RentalDisplayDTO> result = rentalRepository.findRentalDisplayDTO(rental.getId());
+	    Optional<RentalDisplayDTO> result = queryRepository.findRentalDisplayDTO(rental.getId());
 
 	    assertThat(result).isPresent();
 
@@ -205,7 +208,7 @@ public class RentalRepositoryTest extends IntegrationTest {
 
 	@Test
 	void shouldFindUserRentals() {
-	    List<RentalDisplayDTO> result = rentalRepository.findUserRentals(owner.getId());
+	    List<RentalDisplayDTO> result = queryRepository.findUserRentals(owner.getId());
 
 	    assertThat(result).isNotEmpty();
 	    assertThat(result).hasSize(2);
@@ -238,14 +241,14 @@ public class RentalRepositoryTest extends IntegrationTest {
 
 	@Test
 	void shouldReturnEmptyListWhenUserHasNoRentals() {
-	    List<RentalDisplayDTO> result = rentalRepository.findUserRentals(renter.getId());
+	    List<RentalDisplayDTO> result = queryRepository.findUserRentals(renter.getId());
 
 	    assertThat(result).isEmpty();
 	}
 	
 	@Test
 	void shouldFindUserRented() {
-	    List<RentalDisplayDTO> result = rentalRepository.findUserRented(renter.getId());
+	    List<RentalDisplayDTO> result = queryRepository.findUserRented(renter.getId());
 
 	    assertThat(result).isNotEmpty();
 	    assertThat(result).hasSize(2);
@@ -278,14 +281,14 @@ public class RentalRepositoryTest extends IntegrationTest {
 
 	@Test
 	void shouldReturnEmptyListWhenUserHasNoRented() {
-	    List<RentalDisplayDTO> result = rentalRepository.findUserRented(owner.getId());
+	    List<RentalDisplayDTO> result = queryRepository.findUserRented(owner.getId());
 
 	    assertThat(result).isEmpty();
 	}
 
 	@Test
 	void shouldGetStatusChangeContext() {
-	    Optional<RentalStatusChangeContext> result = rentalRepository.getStatusChangeContext(rental.getId());
+	    Optional<RentalStatusChangeContext> result = queryRepository.getStatusChangeContext(rental.getId());
 
 	    assertThat(result).isPresent();
 
@@ -301,7 +304,7 @@ public class RentalRepositoryTest extends IntegrationTest {
 	@Test
 	void shouldReturnEmptyWhenStatusChangeContextDoesNotExist() {
 	    Optional<RentalStatusChangeContext> result =
-	            rentalRepository.getStatusChangeContext("non-existent-rental-id");
+	    		queryRepository.getStatusChangeContext("non-existent-rental-id");
 
 	    assertThat(result).isEmpty();
 	}

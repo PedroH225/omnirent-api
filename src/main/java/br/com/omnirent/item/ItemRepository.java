@@ -1,56 +1,54 @@
 package br.com.omnirent.item;
 
-import java.util.List;
-import java.util.Optional;
+import java.math.BigDecimal;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.item.domain.Item;
-import br.com.omnirent.item.dto.ItemDetailDTO;
-import br.com.omnirent.item.dto.ItemDisplayDTO;
 
 @Repository
-public interface ItemRepository extends JpaRepository<Item, String> {
+public interface ItemRepository extends JpaRepository<Item, String> {	
+	@Modifying
+	@Query("""
+			UPDATE Item i
+			SET i.name = :itemName, i.itemData.brand = :brand, 
+				i.itemData.model = :model, i.itemData.description = :description,
+				i.itemData.basePrice = :basePrice, i.itemData.itemCondition = :itemCondition,
+			    i.updatedAt = CURRENT_TIMESTAMP
+			WHERE i.id = :id AND i.itemStatus = :status
+			""")
+	int updateItem(
+			@Param("id") String id, @Param("status")ItemStatus status, @Param("itemName") String itemName, @Param("brand") String brand,
+			@Param("model") String model, @Param("description") String description, @Param("basePrice") BigDecimal basePrice,
+			@Param("itemCondition") ItemCondition itemCondition
+	);
+	
+	@Modifying
+	@Query("""
+			UPDATE Item i SET i.itemStatus = :status, updatedAt = CURRENT_TIMESTAMP 
+			WHERE i.id = :id AND i.itemStatus = :current
+			""")
+	int updateStatus(@Param("id")String itemId, @Param("current")ItemStatus currentStatus, @Param("status")ItemStatus status);
 
+	@Modifying
 	@Query("""
-			SELECT new br.com.omnirent.item.dto.ItemDetailDTO(i.id, i.name, i.itemData.brand,
-			i.itemData.model, i.itemData.description, i.itemData.basePrice,
-			i.itemData.itemCondition, i.itemStatus,
-			new br.com.omnirent.category.dto.SubCategoryResDTO(sc.id, sc.name, c.name),
-			new br.com.omnirent.address.dto.AddressResponseDTO(a.id, ad.street, ad.number,
-			ad.complement, ad.district, ad.city, ad.state, ad.country, ad.zipCode, a.createdAt, a.updatedAt),
-			new br.com.omnirent.user.dto.UserResponseDTO(o.id, o.username),
-			i.createdAt, i.updatedAt)
-			FROM Item i 
-			JOIN i.owner o JOIN i.subCategory sc JOIN sc.category c JOIN i.pickupAddress a 
-			JOIN a.addressData ad
-			WHERE i.id = :id
+			UPDATE Item i SET i.pickupAddressId = :addressId, updatedAt = CURRENT_TIMESTAMP
+			WHERE i.id = :id AND i.itemStatus = :status AND i.pickupAddressId = :currentAddressId
 			""")
-	Optional<ItemDetailDTO> findItemDetailDTO(String id);
-	
+	int updatePickupAddress(@Param("id")String itemId, @Param("addressId")String addressId,
+			@Param("currentAddressId")String currentAddress, @Param("status")ItemStatus status);
+	@Modifying
 	@Query("""
-			SELECT new br.com.omnirent.item.dto.ItemDisplayDTO(i.id, i.name, i.itemData.basePrice,
-			i.itemData.itemCondition, i.itemStatus, sc.name, i.createdAt,
-			new br.com.omnirent.user.dto.UserResponseDTO(o.id, o.username))
-			FROM Item i
-			JOIN i.owner o JOIN i.subCategory sc
-			WHERE o.id = :id
+			UPDATE Item i SET i.subCategoryId = :subCategoryId, updatedAt = CURRENT_TIMESTAMP
+			WHERE i.id = :id AND i.itemStatus = :status AND i.subCategoryId = :currentSubCategoryId
 			""")
-	List<ItemDisplayDTO> findUserItems(@Param("id")String userId);
-	
-	@Query("""
-			SELECT new br.com.omnirent.item.context.ItemRentedContext(
-			new br.com.omnirent.item.context.ItemInfo(i.id, i.name, i.itemData.brand, 
-			i.itemData.model, i.itemData.description, i.itemData.basePrice, i.itemData.itemCondition),
-			new br.com.omnirent.address.context.AddressInfo(ad.id, ad.addressData.street, ad.addressData.number, 
-			ad.addressData.complement, ad.addressData.district, ad.addressData.city, ad.addressData.state, ad.addressData.country, ad.addressData.zipCode),
-			o.id, o.name)
-			FROM Item i JOIN i.pickupAddress ad JOIN i.owner o
-			WHERE i.id = :id
-			""")
-	Optional<ItemRentedContext> getItemRentedContext(@Param("id")String itemId);
+	int updateItemSubCategory(@Param("id")String itemId, @Param("subCategoryId")String subCategoryId,
+			@Param("currentSubCategoryId")String currentSubCategory, @Param("status")ItemStatus status);
+
 }

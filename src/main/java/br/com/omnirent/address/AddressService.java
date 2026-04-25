@@ -10,9 +10,7 @@ import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.exception.domain.AddressNotFoundException;
 import br.com.omnirent.security.CurrentUserProvider;
-import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserService;
-import br.com.omnirent.user.domain.User;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -35,6 +33,14 @@ public class AddressService {
 		}
 		
 		return address.get();
+	}
+	
+	public Address getValidReference(String addressId, String userId) {
+		boolean found = addressRepository.verifyAddress(addressId, userId);
+		if (!found) {
+			throw new AddressNotFoundException();
+		}
+		return addressRepository.getReferenceById(addressId);
 	}
 	
 	public List<AddressResponseDTO> getUserAddresses() {
