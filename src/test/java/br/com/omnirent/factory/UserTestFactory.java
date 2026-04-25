@@ -42,6 +42,13 @@ public final class UserTestFactory {
     	return user;
     }
     
+    public static User persistedOwner() {
+    	User user = user();
+    	user.setCreatedAt(LocalDateTime.now());
+    	user.setUpdatedAt(LocalDateTime.now());
+    	user.setId(Sequence.nextString("ownerId"));
+    	return user;
+    }
     public static UserDetailsDTO toUserDetails(User user) {
     	return new UserDetailsDTO(user.getId(), user.getName(), user.getUsername(),
     			user.getEmail(), user.getBirthDate(), user.getUserStatus());
