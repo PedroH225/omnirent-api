@@ -236,13 +236,12 @@ public class ItemServiceTest {
 		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", "NEW", drill.getId(), ownerAddress.getId());
 		
 		when(currentUserProvider.currentUserId()).thenReturn(invalidId);
-		doThrow(UserNotFoundException.class).when(userService).requireExistence(invalidId);
+		doThrow(UserNotFoundException.class).when(userService).getValidReference(invalidId);
 		
 		assertThatThrownBy(() -> itemService.addItem(request))
 		.isInstanceOf(UserNotFoundException.class);
 		
 		verify(currentUserProvider).currentUserId();
-		verify(userService).requireExistence(invalidId);
 		verifyNoInteractions(itemRepository);
 	}
 	
