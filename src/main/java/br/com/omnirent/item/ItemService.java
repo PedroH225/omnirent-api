@@ -15,6 +15,7 @@ import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.common.ConflictException;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
+import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -103,6 +104,11 @@ public class ItemService {
 				.orElseThrow(ItemNotFoundException::new);
 	}
 
+	private ChangeItemSubCategoryContext getChangeItemSubCategoryContext(String id) {
+		return queryRepository.getChangeSubCategoryContext(id)
+				.orElseThrow(ItemNotFoundException::new);
+	}
+	
 	public List<ItemDisplayDTO> getUserItems() {
 		String userId = currentUserProvider.currentUserId();
 		userService.requireExistence(userId);
@@ -156,6 +162,29 @@ public class ItemService {
 	    
 	    int updated = itemRepository.updatePickupAddress(
 	        itemId, validatedNewAddressId, context.currentAddressId(), context.status());
+
+	    if (updated == 0) {
+	        throw new ConflictException("Item was modified before update.");
+	    }
+	}
+	
+	@Transactional
+	public void changeSubCategory(String itemId, String newSubCategory) {
+	    String currentUserId = currentUserProvider.currentUserId();
+	    ChangeItemSubCategoryContext context = getChangeItemSubCategoryContext(itemId);
+
+	    authorizationService.requireNotBlocked(context.status());
+	    authorizationService.requireOwner(context.ownerId(), currentUserId);
+	    
+	    if (context.currentSubCategoryId().equals(newSubCategory)) {
+	        return;
+	    }
+	    
+	    String validatedNewSubCatId = categoryService
+	        .getValidSubReference(newSubCategory).getId();
+	    
+	    int updated = itemRepository.updateItemSubCategory(
+	        itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status());
 
 	    if (updated == 0) {
 	        throw new ConflictException("Item was modified before update.");
