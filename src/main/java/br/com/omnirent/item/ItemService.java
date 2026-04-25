@@ -1,23 +1,28 @@
 package br.com.omnirent.item;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.address.AddressService;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.SubCategory;
+import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
+import br.com.omnirent.exception.domain.OptimisticLockException;
+import br.com.omnirent.item.context.ChangeItemAddressContext;
+import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.item.context.UpdateItemContext;
+import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -29,6 +34,8 @@ import lombok.AllArgsConstructor;
 public class ItemService {
 
 	private ItemRepository itemRepository;
+	
+	private ItemQueryRepository queryRepository;
 	
 	private UserService userService;
 	
@@ -42,89 +49,139 @@ public class ItemService {
 	
 	private ItemMapper itemMapper;
 	
-	public Item findById(String id) {
-		Optional<Item> item = itemRepository.findById(id);
-		
-		if (item.isEmpty()) {
-			throw new ItemNotFoundException();
-		}
-		
-		return item.get();
-	}
+
 	
 	public ItemDetailDTO getItemById(String id) {
-		Optional<ItemDetailDTO> itemDetail = itemRepository.findItemDetailDTO(id);
-		
-		if (itemDetail.isEmpty()) {
-			throw new ItemNotFoundException();
-		}
-		
-		return itemDetail.get();
+		return queryRepository.findItemDetailDTO(id)
+				.orElseThrow(ItemNotFoundException::new);
 	}
 	
 	public ItemRentedContext getItemRentedContext(String id) {
-		Optional<ItemRentedContext> itemOpt = itemRepository.getItemRentedContext(id);
-		if (itemOpt.isEmpty()) {
-			throw new ItemNotFoundException();
-		}
-		
-		return itemOpt.get();
+		return queryRepository.getItemRentedContext(id)
+				.orElseThrow(ItemNotFoundException::new);
+	}
+	
+	private UpdateItemContext getUpdateContext(String id) {
+		return queryRepository.getUpdateContext(id)
+				.orElseThrow(ItemNotFoundException::new);
+	}
+	
+	private UpdateItemStatusContext getUpdateStatusContext(String id) {
+		return queryRepository.getUpdateStatusContext(id)
+				.orElseThrow(ItemNotFoundException::new);
+	}
+	
+	private ChangeItemAddressContext getChangeItemAddressContext(String id) {
+		return queryRepository.getChangeAddressContext(id)
+				.orElseThrow(ItemNotFoundException::new);
 	}
 
+	private ChangeItemSubCategoryContext getChangeItemSubCategoryContext(String id) {
+		return queryRepository.getChangeSubCategoryContext(id)
+				.orElseThrow(ItemNotFoundException::new);
+	}
+	
 	public List<ItemDisplayDTO> getUserItems() {
 		String userId = currentUserProvider.currentUserId();
 		userService.requireExistence(userId);
-		return itemRepository.findUserItems(userId);
+		return queryRepository.findUserItems(userId);
 	}
 
 	public ItemCreatedDTO addItem(ItemRequestDTO itemDTO) {
-		String userId = currentUserProvider.currentUserId();
-		userService.requireExistence(userId);
-		User user = userService.getUserReference(userId);
+		String currentUserId = currentUserProvider.currentUserId();
 		
-		Address pickupAddress = addressService.findById(itemDTO.addressId());
-		SubCategory subCategory = categoryService.findSubById(itemDTO.subCategoryId());
+		User user = userService.getValidReference(currentUserId);
+		Address pickupAddress = addressService.getValidReference(itemDTO.addressId(), currentUserId);
+		SubCategory subCategory = categoryService.getValidSubReference(itemDTO.subCategoryId());
 		
-		Item item = itemMapper.fromDto(itemDTO, user, userId, 
-				pickupAddress, subCategory,
-				ItemStatus.AVAILABLE);
+		Item item = itemMapper.fromDto(itemDTO, user.getId(), pickupAddress.getId(),
+				subCategory.getId(), ItemStatus.AVAILABLE);
 		return itemMapper.toCreatedDto(itemRepository.save(item));
 	}
 	
 	@Transactional
-	public ItemDetailDTO updateItem(ItemRequestDTO itemDTO) {
+	public void updateItem(UpdateItemRequestDTO request) {
 		String currentUserId = currentUserProvider.currentUserId();
-		Item updatedItem = findById(itemDTO.id());
+		UpdateItemContext context = getUpdateContext(request.id());
 		
-		authorizationService.requireOwner(updatedItem, currentUserId);
+	    authorizationService.requireNotBlocked(context.status());
+		authorizationService.requireOwner(context.ownerId(), currentUserId);
+		
+		int updated = itemRepository.updateItem(
+			context.itemInfo().getId(), context.status(), request.name(), request.brand(),
+			request.model(), request.description(), request.basePrice(),
+			ItemCondition.fromString(request.itemCondition())
+		);
+		
+		if (updated == 0) {
+			throw new OptimisticLockException();
+		}
+	}
+	
+	@Transactional
+	public void changePickupAddress(String itemId, String newAddressId) {
+	    String currentUserId = currentUserProvider.currentUserId();
+	    ChangeItemAddressContext context = getChangeItemAddressContext(itemId);
 
-		Address address = null;
-		if (StringUtils.isNotBlank(itemDTO.addressId()) && 
-				!updatedItem.getPickupAddressId().equals(itemDTO.addressId())) {
-			address = addressService.findById(itemDTO.addressId());
-		}
-		
-		SubCategory subCategory = null;
-		if (StringUtils.isNotBlank(itemDTO.subCategoryId()) && 
-				!updatedItem.getSubCategoryId().equals(itemDTO.subCategoryId())) {
-			subCategory = categoryService.findSubById(itemDTO.subCategoryId());
-		}
-		
-		itemMapper.updateItem(itemDTO, address, subCategory, updatedItem);
-		
-		return itemMapper.toDto(itemRepository.save(updatedItem));
+	    authorizationService.requireNotBlocked(context.status());
+	    authorizationService.requireOwner(context.ownerId(), currentUserId);
+	    
+	    if (context.currentAddressId().equals(newAddressId)) {
+	        return;
+	    }
+	    
+	    String validatedNewAddressId = addressService
+	        .getValidReference(newAddressId, currentUserId).getId();
+	    
+	    int updated = itemRepository.updatePickupAddress(
+	        itemId, validatedNewAddressId, context.currentAddressId(), context.status());
+
+	    if (updated == 0) {
+			throw new OptimisticLockException();
+	    }
+	}
+	
+	@Transactional
+	public void changeSubCategory(String itemId, String newSubCategory) {
+	    String currentUserId = currentUserProvider.currentUserId();
+	    ChangeItemSubCategoryContext context = getChangeItemSubCategoryContext(itemId);
+
+	    authorizationService.requireNotBlocked(context.status());
+	    authorizationService.requireOwner(context.ownerId(), currentUserId);
+	    
+	    if (context.currentSubCategoryId().equals(newSubCategory)) {
+	        return;
+	    }
+	    
+	    String validatedNewSubCatId = categoryService
+	        .getValidSubReference(newSubCategory).getId();
+	    
+	    int updated = itemRepository.updateItemSubCategory(
+	        itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status());
+
+	    if (updated == 0) {
+			throw new OptimisticLockException();
+	    }
 	}
 
 	@Transactional
-	public ItemDetailDTO updateStatus(String itemId, String itemStatusStr) {
+	public void updateStatus(String itemId) {
 		String currentUserId = currentUserProvider.currentUserId();
-		Item item = findById(itemId);
+		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
+		ItemStatus currentStatus = context.currentStatus();
 		
-		authorizationService.requireOwner(item, currentUserId);
+		authorizationService.requireNotBlocked(currentStatus);
+		authorizationService.requireOwner(context.ownerId(), currentUserId);
 		
-		item.updateItemStatus(itemStatusStr);
+		ItemStatus newStatus = 
+				currentStatus == ItemStatus.AVAILABLE ?
+				ItemStatus.UNAVAILABLE : ItemStatus.AVAILABLE;
 		
-		return itemMapper.toDto(itemRepository.save(item));
+		int updated = itemRepository.updateStatus(itemId, currentStatus, newStatus);
+		
+		if (updated == 0) {
+			throw new OptimisticLockException();
+		}
 	}
 	
 }

@@ -51,15 +51,11 @@ public class ItemMapper {
 	
 	public ItemCreatedDTO toCreatedDto(Item item) {
 		ItemData itemData = item.getItemData();
-		SubCategoryResDTO subCategoryDto = categoryMapper.toSubDto(item.getSubCategory());
-		AddressResponseDTO addressDto = addressMapper.toDto(item.getPickupAddress());
 
 		return new ItemCreatedDTO(
 		        item.getId(), item.getName(), itemData.getBrand(),
 		        itemData.getModel(), itemData.getDescription(), itemData.getBasePrice(),
-		        itemData.getItemCondition(), item.getItemStatus(), subCategoryDto,
-		        addressDto
-		);
+		        itemData.getItemCondition(), item.getItemStatus());
 	}
 	
 	public ItemSnapshotDTO toSnapshotDTO(ItemSnapshot itemSnapshot) {
@@ -72,38 +68,22 @@ public class ItemMapper {
 			);
 	}
 
-	public Item fromDto(ItemRequestDTO itemDTO, User owner, String ownerId, Address pickUpAddress,
-			SubCategory subCategory, ItemStatus itemStatus) {
+	public Item fromDto(ItemRequestDTO itemDTO, String ownerId, String pickupAddressId,
+			String subCategoryId, ItemStatus itemStatus) {
 		Item item = new Item();
 		
 		item.setName(itemDTO.name());
 		ItemData itemData = new ItemData(itemDTO);
 		
-		item.assignOwner(owner, ownerId);
-		item.assignAddress(pickUpAddress);
-		item.assignSubCategory(subCategory);
+		item.setOwnerId(ownerId);
+		item.setPickupAddressId(pickupAddressId);
+		item.setSubCategoryId(subCategoryId);
 		
 		item.setItemStatus(itemStatus);
 		
 		item.setItemData(itemData);
 		
 		return item;
-	}
-	
-	public void updateItem(ItemRequestDTO itemDTO, Address address, SubCategory subCategory, Item item) {		
-		item.setName(itemDTO.name());
-		
-		ItemData itemData = new ItemData(itemDTO);
-		
-		item.setItemData(itemData);
-		
-		if (address != null) {
-			item.assignAddress(address);
-		}
-		
-		if (subCategory != null) {
-			item.assignSubCategory(subCategory);
-		}
 	}
 	
 	public ItemSnapshot fromRentContext(ItemInfo itemInfo, Rental rental) {

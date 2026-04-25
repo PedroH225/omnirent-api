@@ -16,6 +16,7 @@ import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -51,12 +52,22 @@ public class ItemController {
 	}
 	
 	@PutMapping
-	public ItemDetailDTO updateItem(@RequestBody ItemRequestDTO itemDTO) {
-		return itemService.updateItem(itemDTO);
+	public void updateItem(@RequestBody UpdateItemRequestDTO itemDTO) {
+		itemService.updateItem(itemDTO);
 	}
 	
-	@PatchMapping("/updateStatus/{itemId}/{itemStatus}")
-	public ItemDetailDTO updateStatus(@PathVariable String itemId, @PathVariable String itemStatus) {
-		return itemService.updateStatus(itemId, itemStatus);
+	@PatchMapping("/changeAddress/{id}/{addressId}")
+	public void updateItemAddress(@PathVariable String id, @PathVariable String addressId) {
+		itemService.changePickupAddress(id, addressId);;
+	}
+	
+	@PatchMapping("/changeSubCategory/{id}/{subCategoryId}")
+	public void updateItemSubCategory(@PathVariable String id, @PathVariable String subCategoryId) {
+		itemService.changeSubCategory(id, subCategoryId);;
+	}
+	
+	@PatchMapping("/updateStatus/{itemId}")
+	public void updateStatus(@PathVariable String itemId) {
+		itemService.updateStatus(itemId);
 	}
 }

@@ -5,8 +5,6 @@ import br.com.omnirent.exception.domain.IllegalEnumerationException;
 public enum ItemStatus {
     AVAILABLE("Available"),
     UNAVAILABLE("Unavailable"),
-    RENTED("Rented"),
-    INACTIVE("Inactive"),
     BLOCKED("Blocked");
 
     private String itemStatus;
