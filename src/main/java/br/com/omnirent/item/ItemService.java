@@ -3,8 +3,6 @@ package br.com.omnirent.item;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.NativeDetector.Context;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.address.AddressService;
@@ -14,7 +12,6 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.common.ConflictException;
-import br.com.omnirent.exception.common.ForbiddenException;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
@@ -36,6 +33,8 @@ import lombok.AllArgsConstructor;
 public class ItemService {
 
 	private ItemRepository itemRepository;
+	
+	private ItemQueryRepository queryRepository;
 	
 	private UserService userService;
 	
@@ -60,7 +59,7 @@ public class ItemService {
 	}
 	
 	public ItemDetailDTO getItemById(String id) {
-		Optional<ItemDetailDTO> itemDetail = itemRepository.findItemDetailDTO(id);
+		Optional<ItemDetailDTO> itemDetail = queryRepository.findItemDetailDTO(id);
 		
 		if (itemDetail.isEmpty()) {
 			throw new ItemNotFoundException();
@@ -70,7 +69,7 @@ public class ItemService {
 	}
 	
 	public ItemRentedContext getItemRentedContext(String id) {
-		Optional<ItemRentedContext> itemOpt = itemRepository.getItemRentedContext(id);
+		Optional<ItemRentedContext> itemOpt = queryRepository.getItemRentedContext(id);
 		if (itemOpt.isEmpty()) {
 			throw new ItemNotFoundException();
 		}
@@ -79,7 +78,7 @@ public class ItemService {
 	}
 	
 	private UpdateItemContext getUpdateContext(String id) {
-		Optional<UpdateItemContext> itemOpt = itemRepository.getUpdateContext(id);
+		Optional<UpdateItemContext> itemOpt = queryRepository.getUpdateContext(id);
 		if (itemOpt.isEmpty()) {
 			throw new ItemNotFoundException();
 		}
@@ -89,7 +88,7 @@ public class ItemService {
 	
 	private UpdateItemStatusContext getUpdateStatusContext(String id) {
 		Optional<UpdateItemStatusContext> itemOpt =
-				itemRepository.getUpdateStatusContext(id);
+				queryRepository.getUpdateStatusContext(id);
 		if (itemOpt.isEmpty()) {
 			throw new ItemNotFoundException();
 		}
@@ -100,7 +99,7 @@ public class ItemService {
 	public List<ItemDisplayDTO> getUserItems() {
 		String userId = currentUserProvider.currentUserId();
 		userService.requireExistence(userId);
-		return itemRepository.findUserItems(userId);
+		return queryRepository.findUserItems(userId);
 	}
 
 	public ItemCreatedDTO addItem(ItemRequestDTO itemDTO) {

@@ -48,6 +48,9 @@ public class ItemRepositoryTest extends IntegrationTest {
 	private ItemRepository itemRepository;
 	
 	@Autowired
+	private ItemQueryRepository queryRepository;
+	
+	@Autowired
 	private UserRepository userRepository;
 	
 	@Autowired
@@ -85,7 +88,7 @@ public class ItemRepositoryTest extends IntegrationTest {
 	
 	@Test
 	void shouldFindItemDetailDTO() {
-		Optional<ItemDetailDTO> optItem = itemRepository.findItemDetailDTO(item.getId());
+		Optional<ItemDetailDTO> optItem = queryRepository.findItemDetailDTO(item.getId());
 		
 		assertThat(optItem).isPresent();
 		assertThat(optItem.get().getId()).isNotNull();
@@ -122,7 +125,7 @@ public class ItemRepositoryTest extends IntegrationTest {
 	
 	@Test
 	void shouldFindUserItems() {
-		List<ItemDisplayDTO> userItems = itemRepository.findUserItems(owner.getId());
+		List<ItemDisplayDTO> userItems = queryRepository.findUserItems(owner.getId());
 		
 		assertThat(userItems).hasSize(2)
 		.allSatisfy(i -> {
@@ -149,7 +152,7 @@ public class ItemRepositoryTest extends IntegrationTest {
 	
 	@Test
 	void shouldGetItemRentedContext() {
-	    Optional<ItemRentedContext> optContext = itemRepository.getItemRentedContext(item.getId());
+	    Optional<ItemRentedContext> optContext = queryRepository.getItemRentedContext(item.getId());
 
 	    assertThat(optContext).isPresent();
 	    assertThat(optContext.get())
