@@ -27,14 +27,10 @@ public class ItemCreatedDTO {
 	private String itemCondition;
 	
 	private String itemStatus;
-	
-	private SubCategoryResDTO subCategory;
-	
-	private AddressResponseDTO pickupAddress;
-	
+			
 	public ItemCreatedDTO(String id, String name, String brand, String model, String description,
-			BigDecimal basePrice, ItemCondition itemCondition, ItemStatus itemStatus, SubCategoryResDTO subCategory,
-			AddressResponseDTO pickupAddress) {
+			BigDecimal basePrice, ItemCondition itemCondition,
+			ItemStatus itemStatus) {
 		this.id = id;
 		this.name = name;
 		this.brand = brand;
@@ -43,7 +39,5 @@ public class ItemCreatedDTO {
 		this.basePrice = basePrice;
 		this.itemCondition = itemCondition.toString();
 		this.itemStatus = itemStatus.toString();
-		this.subCategory = subCategory;
-		this.pickupAddress = pickupAddress;
 	}
 }
