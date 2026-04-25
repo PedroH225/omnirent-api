@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
+import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -71,4 +72,12 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 			FROM Item i WHERE i.id = :id
 			""")
 	Optional<UpdateItemStatusContext> getUpdateStatusContext(@Param("id")String itemId);
+	
+	@Query("""
+			SELECT new br.com.omnirent.item.context.ChangeItemAddressContext(
+			i.id, i.ownerId, i.pickupAddressId, i.itemStatus)
+			FROM Item i
+			WHERE i.id = :id
+			""")
+	Optional<ChangeItemAddressContext> getChangeAddressContext(@Param("id")String id);
 }
