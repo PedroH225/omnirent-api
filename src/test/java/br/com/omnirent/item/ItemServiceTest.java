@@ -53,6 +53,9 @@ public class ItemServiceTest {
 	
 	@Mock
 	private ItemRepository itemRepository;
+	
+	@Mock
+	private ItemQueryRepository queryRepository;
 
 	@Mock
 	private UserService userService;
@@ -113,25 +116,25 @@ public class ItemServiceTest {
 		String itemId = item.getId();
 		ItemDetailDTO itemDetailDTO = ItemTestFactory.toItemDetailsDto(item, drill, ownerAddress, owner);
 	
-		when(itemRepository.findItemDetailDTO(itemId)).thenReturn(Optional.of(itemDetailDTO));
+		when(queryRepository.findItemDetailDTO(itemId)).thenReturn(Optional.of(itemDetailDTO));
 		
 		ItemDetailDTO result = itemService.getItemById(itemId);
 		
 		assertThat(result).isEqualTo(itemDetailDTO);
 		
-		verify(itemRepository).findItemDetailDTO(itemId);
+		verify(queryRepository).findItemDetailDTO(itemId);
 	}
 	
 	@Test
 	void shouldThrowWhenItemNotFound() {
 		String invalidId = "invalidId";
 	
-		when(itemRepository.findItemDetailDTO(invalidId)).thenReturn(Optional.empty());
+		when(queryRepository.findItemDetailDTO(invalidId)).thenReturn(Optional.empty());
 		
 		assertThatThrownBy(() -> itemService.getItemById(invalidId))
 			.isInstanceOf(ItemNotFoundException.class);
 				
-		verify(itemRepository).findItemDetailDTO(invalidId);
+		verify(queryRepository).findItemDetailDTO(invalidId);
 	}
 	
 	@Test
@@ -139,13 +142,13 @@ public class ItemServiceTest {
 		String itemId = item.getId();
 		ItemRentedContext context = ItemTestFactory.toItemRentedContext(item, ownerAddress, owner);
 	
-		when(itemRepository.getItemRentedContext(itemId)).thenReturn(Optional.of(context));
+		when(queryRepository.getItemRentedContext(itemId)).thenReturn(Optional.of(context));
 		
 		ItemRentedContext result = itemService.getItemRentedContext(itemId);
 		
 		assertThat(result).isEqualTo(context);
 		
-		verify(itemRepository).getItemRentedContext(itemId);
+		verify(queryRepository).getItemRentedContext(itemId);
 	}
 	
 	@Test
@@ -170,7 +173,7 @@ public class ItemServiceTest {
 		List<ItemDisplayDTO> expected = List.of(dto1, dto2);
 		
 		when(currentUserProvider.currentUserId()).thenReturn(userId);
-		when(itemRepository.findUserItems(userId)).thenReturn(expected);
+		when(queryRepository.findUserItems(userId)).thenReturn(expected);
 
 		List<ItemDisplayDTO> result = itemService.getUserItems();
 		
@@ -178,7 +181,7 @@ public class ItemServiceTest {
 		
 		verify(currentUserProvider).currentUserId();
 		verify(userService).requireExistence(userId);
-		verify(itemRepository).findUserItems(userId);
+		verify(queryRepository).findUserItems(userId);
 	}
 	
 	@Test
