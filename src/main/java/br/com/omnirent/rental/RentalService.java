@@ -41,6 +41,8 @@ public class RentalService {
 	
 	private RentalRepository rentalRepository;
 	
+	private RentalQueryRepository queryRepository;
+	
 	private ItemService itemService;
 	
 	private UserService userService;
@@ -63,7 +65,7 @@ public class RentalService {
 
 
 	public RentalDisplayDTO findRentalDisplayDTO(String id) {
-		Optional<RentalDisplayDTO> optRental = rentalRepository.findRentalDisplayDTO(id);
+		Optional<RentalDisplayDTO> optRental = queryRepository.findRentalDisplayDTO(id);
 		
 		if (optRental.isEmpty()) {
 			throw new RentalNotFoundException();
@@ -73,7 +75,7 @@ public class RentalService {
 	}
 		
 	public RentalDetailDTO getRentalById(String id) {
-		Optional<RentalDetailDTO> rOptional = rentalRepository.findRentalDetail(id);
+		Optional<RentalDetailDTO> rOptional = queryRepository.findRentalDetail(id);
 		if (rOptional.isEmpty()) {
 			throw new RentalNotFoundException();
 		}
@@ -82,7 +84,7 @@ public class RentalService {
 	}
 	
 	private RentalStatusChangeContext getStatusChangeContext(String rentId) {
-		Optional<RentalStatusChangeContext> optContext = rentalRepository.getStatusChangeContext(rentId);
+		Optional<RentalStatusChangeContext> optContext = queryRepository.getStatusChangeContext(rentId);
 		
 		if (optContext.isEmpty()) {
 			throw new RentalNotFoundException();
@@ -232,12 +234,12 @@ public class RentalService {
 	public List<RentalDisplayDTO> findUserRented() {
 		String renterId = currentUserProvider.currentUserId();
 		userService.requireExistence(renterId);
-		return rentalRepository.findUserRented(renterId);
+		return queryRepository.findUserRented(renterId);
 	}
 
 	public List<RentalDisplayDTO> findUserRentals() {
 		String ownerId = currentUserProvider.currentUserId();
 		userService.requireExistence(ownerId);
-		return rentalRepository.findUserRentals(ownerId);
+		return queryRepository.findUserRentals(ownerId);
 	}
 }
