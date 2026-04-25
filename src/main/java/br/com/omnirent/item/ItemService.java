@@ -52,51 +52,28 @@ public class ItemService {
 	private ItemMapper itemMapper;
 	
 	public Item findById(String id) {
-		Optional<Item> item = itemRepository.findById(id);
-		
-		if (item.isEmpty()) {
-			throw new ItemNotFoundException();
-		}
-		
-		return item.get();
+		return itemRepository.findById(id)
+				.orElseThrow(ItemNotFoundException::new);
 	}
 	
 	public ItemDetailDTO getItemById(String id) {
-		Optional<ItemDetailDTO> itemDetail = queryRepository.findItemDetailDTO(id);
-		
-		if (itemDetail.isEmpty()) {
-			throw new ItemNotFoundException();
-		}
-		
-		return itemDetail.get();
+		return queryRepository.findItemDetailDTO(id)
+				.orElseThrow(ItemNotFoundException::new);
 	}
 	
 	public ItemRentedContext getItemRentedContext(String id) {
-		Optional<ItemRentedContext> itemOpt = queryRepository.getItemRentedContext(id);
-		if (itemOpt.isEmpty()) {
-			throw new ItemNotFoundException();
-		}
-		
-		return itemOpt.get();
+		return queryRepository.getItemRentedContext(id)
+				.orElseThrow(ItemNotFoundException::new);
 	}
 	
 	private UpdateItemContext getUpdateContext(String id) {
-		Optional<UpdateItemContext> itemOpt = queryRepository.getUpdateContext(id);
-		if (itemOpt.isEmpty()) {
-			throw new ItemNotFoundException();
-		}
-		
-		return itemOpt.get();
+		return queryRepository.getUpdateContext(id)
+				.orElseThrow(ItemNotFoundException::new);
 	}
 	
 	private UpdateItemStatusContext getUpdateStatusContext(String id) {
-		Optional<UpdateItemStatusContext> itemOpt =
-				queryRepository.getUpdateStatusContext(id);
-		if (itemOpt.isEmpty()) {
-			throw new ItemNotFoundException();
-		}
-		
-		return itemOpt.get();
+		return queryRepository.getUpdateStatusContext(id)
+				.orElseThrow(ItemNotFoundException::new);
 	}
 	
 	private ChangeItemAddressContext getChangeItemAddressContext(String id) {
