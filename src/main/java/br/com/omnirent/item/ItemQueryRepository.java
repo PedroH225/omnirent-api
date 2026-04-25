@@ -61,9 +61,9 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 			SELECT new br.com.omnirent.item.context.UpdateItemContext(
 			new br.com.omnirent.item.context.ItemInfo(i.id, i.name, i.itemData.brand, 
 			i.itemData.model, i.itemData.description, i.itemData.basePrice, i.itemData.itemCondition),
-			i.ownerId)
+			i.ownerId, i.itemStatus)
 			FROM Item i
-			WHERE i.id = :id AND i.itemStatus = AVAILABLE
+			WHERE i.id = :id
 			""")
 	Optional<UpdateItemContext> getUpdateContext(@Param("id")String itemId);
 	

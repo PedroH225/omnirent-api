@@ -1,12 +1,8 @@
 package br.com.omnirent.item.context;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import br.com.omnirent.common.enums.ItemStatus;
 
-@Data
-@AllArgsConstructor
-public class UpdateItemContext {
-	private ItemInfo itemInfo;
-	
-	private String ownerId;
-}
+public record UpdateItemContext(
+		ItemInfo itemInfo,
+		String ownerId,
+		ItemStatus status) {}

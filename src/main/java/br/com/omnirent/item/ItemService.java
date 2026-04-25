@@ -51,10 +51,7 @@ public class ItemService {
 	
 	private ItemMapper itemMapper;
 	
-	public Item findById(String id) {
-		return itemRepository.findById(id)
-				.orElseThrow(ItemNotFoundException::new);
-	}
+
 	
 	public ItemDetailDTO getItemById(String id) {
 		return queryRepository.findItemDetailDTO(id)
@@ -109,16 +106,17 @@ public class ItemService {
 		String currentUserId = currentUserProvider.currentUserId();
 		UpdateItemContext context = getUpdateContext(request.id());
 		
-		authorizationService.requireOwner(context.getOwnerId(), currentUserId);
+	    authorizationService.requireNotBlocked(context.status());
+		authorizationService.requireOwner(context.ownerId(), currentUserId);
 		
 		int updated = itemRepository.updateItem(
-			context.getItemInfo().getId(), request.name(), request.brand(),
+			context.itemInfo().getId(), context.status(), request.name(), request.brand(),
 			request.model(), request.description(), request.basePrice(),
 			ItemCondition.fromString(request.itemCondition())
 		);
 		
 		if (updated == 0) {
-			throw new ConflictException("Unexpected error updating item.");
+			throw new ConflictException("Item was modified before update.");
 		}
 	}
 	

@@ -21,10 +21,10 @@ public interface ItemRepository extends JpaRepository<Item, String> {
 				i.itemData.model = :model, i.itemData.description = :description,
 				i.itemData.basePrice = :basePrice, i.itemData.itemCondition = :itemCondition,
 			    i.updatedAt = CURRENT_TIMESTAMP
-			WHERE i.id = :id
+			WHERE i.id = :id AND i.itemStatus = :status
 			""")
 	int updateItem(
-			@Param("id") String id, @Param("itemName") String itemName, @Param("brand") String brand,
+			@Param("id") String id, @Param("status")ItemStatus status, @Param("itemName") String itemName, @Param("brand") String brand,
 			@Param("model") String model, @Param("description") String description, @Param("basePrice") BigDecimal basePrice,
 			@Param("itemCondition") ItemCondition itemCondition
 	);
