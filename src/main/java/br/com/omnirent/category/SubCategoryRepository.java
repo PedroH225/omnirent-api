@@ -13,7 +13,13 @@ import br.com.omnirent.category.dto.SubCategoryResDTO;
 
 @Repository
 public interface SubCategoryRepository extends JpaRepository<SubCategory, String> {
-	List<SubCategory> findAllByCategoryName(String categoryName);
+	
+	@Query("""
+			SELECT new br.com.omnirent.category.dto.SubCategoryResDTO(sc.id, sc.name, c.name)
+			FROM SubCategory sc JOIN sc.category c
+			WHERE c.name = :name
+			""")
+	List<SubCategoryResDTO> findAllSubByCategoryName(@Param("name")String categoryName);
 	
 	@Query("""
 			SELECT new br.com.omnirent.category.dto.SubCategoryResDTO(sc.id, sc.name, c.name)

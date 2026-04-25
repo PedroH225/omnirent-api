@@ -82,9 +82,7 @@ public class CategoryService {
 	}
 
 	public List<SubCategoryResDTO> findSubsByCategory(String categoryName) {
-		List<SubCategory> subCategories = subRepository.findAllByCategoryName(categoryName);
-		
-		return mapper.toSubDto(subCategories);
+		return subRepository.findAllSubByCategoryName(categoryName);
 	}
 	
 }
