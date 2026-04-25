@@ -26,26 +26,6 @@ public class CategoryService {
 	
 	private CategoryMapper mapper;
 	
-	public Category findById(String id) {
-		Optional<Category> category = categoryRepository.findById(id);
-		
-		if (category.isEmpty()) {
-			throw new CategoryNotFoundException();
-		}
-		
-		return category.get();
-	}
-	
-	public SubCategory findSubById(String id) {
-		Optional<SubCategory> subCategory = subRepository.findById(id);
-		
-		if (subCategory.isEmpty()) {
-			throw new SubCategoryNotFoundException();
-		}
-		
-		return subCategory.get();
-	}
-	
 	public CategoryResponseDTO getCategoryById(String id) {
 		Optional<CategoryResponseDTO> optCategory = categoryRepository.getCategoryById(id);
 				
@@ -69,10 +49,9 @@ public class CategoryService {
 	}
 
 	
-	public SubCategoryResDTO getSubCategoryById(String id) {
-		SubCategory subCategory = findSubById(id);
-		
-		return mapper.toSubDto(subCategory);
+	public SubCategoryResDTO getSubCategoryById(String id) {		
+		return subRepository.findSubById(id)
+				.orElseThrow(SubCategoryNotFoundException::new);
  	}
 	
 	public List<CategoryResponseDTO> findAll() {
@@ -103,9 +82,7 @@ public class CategoryService {
 	}
 
 	public List<SubCategoryResDTO> findSubsByCategory(String categoryName) {
-		List<SubCategory> subCategories = subRepository.findAllByCategoryName(categoryName);
-		
-		return mapper.toSubDto(subCategories);
+		return subRepository.findAllSubByCategoryName(categoryName);
 	}
 	
 }
