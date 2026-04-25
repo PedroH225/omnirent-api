@@ -60,12 +60,21 @@ public class CategoryService {
 		return category;
  	}
 	
+	public SubCategory getValidSubReference(String subCategoryId) {
+		boolean found = subRepository.verifySubCategory(subCategoryId);
+		if (!found) {
+			throw new SubCategoryNotFoundException();
+		}
+		return subRepository.getReferenceById(subCategoryId);
+	}
+
+	
 	public SubCategoryResDTO getSubCategoryById(String id) {
 		SubCategory subCategory = findSubById(id);
 		
 		return mapper.toSubDto(subCategory);
  	}
-
+	
 	public List<CategoryResponseDTO> findAll() {
 		List<CategoryResponseDTO> categories = categoryRepository.getAllCategories();
 		
