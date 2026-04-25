@@ -164,9 +164,6 @@ public final class ItemTestFactory {
         return new ItemCreatedDTO(
                 item.getId(), item.getName(), itemData.getBrand(),
                 itemData.getModel(), itemData.getDescription(), itemData.getBasePrice(),
-                itemData.getItemCondition(), item.getItemStatus(),
-                SubCategoryTestFactory.toSubDto(item.getSubCategory()),
-                AddressTestFactory.toAddressDto(item.getPickupAddress())
-        );
+                itemData.getItemCondition(), item.getItemStatus());
     }
 }
