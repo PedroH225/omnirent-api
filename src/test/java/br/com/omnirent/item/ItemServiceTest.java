@@ -155,12 +155,12 @@ public class ItemServiceTest {
 	void shouldThrowWhenItemRentedContextNotFound() {
 		String invalidId = "invalidId";
 		
-		when(itemRepository.getItemRentedContext(invalidId)).thenReturn(Optional.empty());
+		when(queryRepository.getItemRentedContext(invalidId)).thenReturn(Optional.empty());
 		
 		assertThatThrownBy(() -> itemService.getItemRentedContext(invalidId))
 			.isInstanceOf(ItemNotFoundException.class);
 				
-		verify(itemRepository).getItemRentedContext(invalidId);
+		verify(queryRepository).getItemRentedContext(invalidId);
 		verifyNoMoreInteractions(itemRepository);
 	}
 	
@@ -306,14 +306,14 @@ public class ItemServiceTest {
 
 	    when(currentUserProvider.currentUserId()).thenReturn(invalidUserId);
 	    when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
-	    doThrow(ForbiddenException.class).when(authorizationService).requireOwner(item, invalidUserId);
+	    doThrow(ForbiddenException.class).when(authorizationService).requireOwner(invalidUserId, invalidUserId);
 
 	    assertThatThrownBy(() -> itemService.updateItem(request))
 	    .isInstanceOf(ForbiddenException.class);
 	    
 	    verify(currentUserProvider).currentUserId();
 	    verify(itemRepository).findById(item.getId());
-	    verify(authorizationService).requireOwner(item, invalidUserId);
+	    verify(authorizationService).requireOwner(invalidUserId, invalidUserId);
 
 	    verifyNoInteractions(addressService, categoryService, itemMapper);
 	    verifyNoMoreInteractions(currentUserProvider, itemRepository, authorizationService);
@@ -344,7 +344,7 @@ public class ItemServiceTest {
 	    assertThat(updatedItem.getItemStatus()).isEqualTo(ItemStatus.fromString(newStatus));
 	    
 	    verify(currentUserProvider).currentUserId();
-	    verify(authorizationService).requireOwner(item, ownerId);
+	    verify(authorizationService).requireOwner(ownerId, ownerId);
 	    verifyNoMoreInteractions(itemRepository, currentUserProvider, authorizationService);
 	}
 	
@@ -355,14 +355,14 @@ public class ItemServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(invalidUserId);
 	    when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
-	    doThrow(ForbiddenException.class).when(authorizationService).requireOwner(item, invalidUserId);
+	    doThrow(ForbiddenException.class).when(authorizationService).requireOwner(invalidUserId, invalidUserId);
 	    
 	    assertThatThrownBy(() -> itemService.updateStatus(item.getId(), newStatus))
 	    .isInstanceOf(ForbiddenException.class);
 	    
 	    verify(currentUserProvider).currentUserId();
 	    verify(itemRepository).findById(item.getId());
-	    verify(authorizationService).requireOwner(item, invalidUserId);
+	    verify(authorizationService).requireOwner(invalidUserId, invalidUserId);
 
 	    verifyNoInteractions(itemMapper);
 	    verifyNoMoreInteractions(currentUserProvider, itemRepository, authorizationService);
