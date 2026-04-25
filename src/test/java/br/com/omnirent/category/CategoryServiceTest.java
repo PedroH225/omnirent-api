@@ -109,31 +109,27 @@ public class CategoryServiceTest {
     	
     	SubCategoryResDTO subCatDTO = SubCategoryTestFactory.toSubDto(notebook);
     	
-    	when(subRepository.findById(subCatId)).thenReturn(Optional.of(notebook));
-    	when(mapper.toSubDto(notebook)).thenReturn(subCatDTO);
+    	when(subRepository.findSubById(subCatId)).thenReturn(Optional.of(subCatDTO));
     	
     	SubCategoryResDTO result = categoryService.getSubCategoryById(subCatId);
     	
-    	assertThat(result).isNotNull();
     	assertThat(result.getId()).isEqualTo(subCatId);
     	assertThat(result.getName()).isEqualTo(notebook.getName());
     	
-    	verify(subRepository).findById(subCatId);
-    	verify(mapper).toSubDto(notebook);
-    	verifyNoMoreInteractions(subRepository, mapper);
+    	verify(subRepository).findSubById(subCatId);
+    	verifyNoMoreInteractions(subRepository);
     }
     
     @Test
     void shouldThrowWhenSubCategoryNotFound() {
     	String invalidId = "invalid-id";
     	    
-    	when(subRepository.findById(invalidId)).thenReturn(Optional.empty());
+    	when(subRepository.findSubById(invalidId)).thenReturn(Optional.empty());
     	    	
     	assertThatThrownBy(() -> categoryService.getSubCategoryById(invalidId))
     	.isInstanceOf(SubCategoryNotFoundException.class);
     	
-    	verify(subRepository).findById(invalidId);
-    	verifyNoInteractions(mapper);
+    	verify(subRepository).findSubById(invalidId);
     	verifyNoMoreInteractions(subRepository);
     }
     
@@ -156,22 +152,20 @@ public class CategoryServiceTest {
     }
     
     @Test
-    void shouldFindAllSubByCategoryNAme() {
+    void shouldFindAllSubByCategoryName() {
     	String categoryName = electronics.getName();
     	List<SubCategory> subCategories = List.of(notebook, mouse);
     	
     	List<SubCategoryResDTO> expected = SubCategoryTestFactory.toSubDto(subCategories);
     	
-    	when(subRepository.findAllByCategoryName(categoryName)).thenReturn(subCategories);
-    	when(mapper.toSubDto(subCategories)).thenReturn(expected);
+    	when(subRepository.findAllSubByCategoryName(categoryName)).thenReturn(expected);
     	
     	List<SubCategoryResDTO> result = categoryService.findSubsByCategory(categoryName);
     	
         assertThat(result).isEqualTo(expected);
         
-    	verify(subRepository).findAllByCategoryName(categoryName);
-    	verify(mapper).toSubDto(subCategories);
-    	verifyNoMoreInteractions(subRepository, mapper);
+    	verify(subRepository).findAllSubByCategoryName(categoryName);
+    	verifyNoMoreInteractions(subRepository);
     }
     
     @Test

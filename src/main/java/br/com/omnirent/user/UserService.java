@@ -38,6 +38,11 @@ public class UserService {
 		
 		return user;
 	}
+	
+	public User getValidReference(String userId) {
+		requireExistence(userId);
+		return getUserReference(userId);
+	}
 		
 	public User findById(String id) {
 		Optional<User> user = userRepository.findById(id);
