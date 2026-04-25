@@ -28,6 +28,7 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.common.ForbiddenException;
+import br.com.omnirent.exception.domain.AddressNotFoundException;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
@@ -240,6 +241,23 @@ public class ItemServiceTest {
 		
 		assertThatThrownBy(() -> itemService.addItem(request))
 		.isInstanceOf(UserNotFoundException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenAddressNotFoundOnAddItem() {
+		String invalidOwnerId = owner.getId();
+		String invalidAddressId = "invalidId";
+
+		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", "NEW", drill.getId(), invalidAddressId);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(invalidOwnerId);
+		doThrow(AddressNotFoundException.class).when(addressService).getValidReference(invalidAddressId, invalidOwnerId);
+		
+		assertThatThrownBy(() -> itemService.addItem(request))
+		.isInstanceOf(AddressNotFoundException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verifyNoInteractions(itemRepository);
