@@ -3,6 +3,7 @@ package br.com.omnirent.item;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.core.NativeDetector.Context;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.address.AddressService;
@@ -13,6 +14,7 @@ import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.common.ConflictException;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
+import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -95,6 +97,11 @@ public class ItemService {
 		
 		return itemOpt.get();
 	}
+	
+	private ChangeItemAddressContext getChangeItemAddressContext(String id) {
+		return queryRepository.getChangeAddressContext(id)
+				.orElseThrow(ItemNotFoundException::new);
+	}
 
 	public List<ItemDisplayDTO> getUserItems() {
 		String userId = currentUserProvider.currentUserId();
@@ -130,6 +137,29 @@ public class ItemService {
 		if (updated == 0) {
 			throw new ConflictException("Unexpected error updating item.");
 		}
+	}
+	
+	@Transactional
+	public void changePickupAddress(String itemId, String newAddressId) {
+	    String currentUserId = currentUserProvider.currentUserId();
+	    ChangeItemAddressContext context = getChangeItemAddressContext(itemId);
+
+	    authorizationService.requireNotBlocked(context.status());
+	    authorizationService.requireOwner(context.ownerId(), currentUserId);
+	    
+	    if (context.currentAddressId().equals(newAddressId)) {
+	        return;
+	    }
+	    
+	    String validatedNewAddressId = addressService
+	        .getValidReference(newAddressId, currentUserId).getId();
+	    
+	    int updated = itemRepository.updatePickupAddress(
+	        itemId, validatedNewAddressId, context.currentAddressId(), context.status());
+
+	    if (updated == 0) {
+	        throw new ConflictException("Item was modified before update.");
+	    }
 	}
 
 	@Transactional

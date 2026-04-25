@@ -56,6 +56,11 @@ public class ItemController {
 		itemService.updateItem(itemDTO);
 	}
 	
+	@PatchMapping("/changeAddress/{id}/{addressId}")
+	public void updateItemAddress(@PathVariable String id, @PathVariable String addressId) {
+		itemService.changePickupAddress(id, addressId);;
+	}
+	
 	@PatchMapping("/updateStatus/{itemId}")
 	public void updateStatus(@PathVariable String itemId) {
 		itemService.updateStatus(itemId);
