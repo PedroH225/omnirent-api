@@ -1,9 +1,7 @@
 package br.com.omnirent.item;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.core.NativeDetector.Context;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.address.AddressService;
@@ -12,8 +10,8 @@ import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
-import br.com.omnirent.exception.common.ConflictException;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
+import br.com.omnirent.exception.domain.OptimisticLockException;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemRentedContext;
@@ -116,7 +114,7 @@ public class ItemService {
 		);
 		
 		if (updated == 0) {
-			throw new ConflictException("Item was modified before update.");
+			throw new OptimisticLockException();
 		}
 	}
 	
@@ -139,7 +137,7 @@ public class ItemService {
 	        itemId, validatedNewAddressId, context.currentAddressId(), context.status());
 
 	    if (updated == 0) {
-	        throw new ConflictException("Item was modified before update.");
+			throw new OptimisticLockException();
 	    }
 	}
 	
@@ -162,7 +160,7 @@ public class ItemService {
 	        itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status());
 
 	    if (updated == 0) {
-	        throw new ConflictException("Item was modified before update.");
+			throw new OptimisticLockException();
 	    }
 	}
 
@@ -182,7 +180,7 @@ public class ItemService {
 		int updated = itemRepository.updateStatus(itemId, currentStatus, newStatus);
 		
 		if (updated == 0) {
-			throw new ConflictException("Item was modified before update.");
+			throw new OptimisticLockException();
 		}
 	}
 	
