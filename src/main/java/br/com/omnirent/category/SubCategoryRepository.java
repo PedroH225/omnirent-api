@@ -28,6 +28,13 @@ public interface SubCategoryRepository extends JpaRepository<SubCategory, String
 			""")
 	List<SubCategoryResDTO> findAllSubCat();
 	
+	@Query("""
+			SELECT new br.com.omnirent.category.dto.SubCategoryResDTO(sc.id, sc.name, c.name)
+			FROM SubCategory sc JOIN sc.category c
+			WHERE sc.id = :id
+			""")
+	Optional<SubCategoryResDTO> findSubById(@Param("id")String id);
+	
 	@Query("SELECT COUNT(sc) > 0 FROM SubCategory sc WHERE sc.id = :id")
 	boolean verifySubCategory(@Param("id")String subCategoryId);
 
