@@ -1,14 +1,18 @@
 package br.com.omnirent.item;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
@@ -53,4 +57,15 @@ public interface ItemRepository extends JpaRepository<Item, String> {
 			WHERE i.id = :id
 			""")
 	Optional<ItemRentedContext> getItemRentedContext(@Param("id")String itemId);
+
+	@Query("""
+			SELECT new br.com.omnirent.item.context.UpdateItemContext(
+			new br.com.omnirent.item.context.ItemInfo(i.id, i.name, i.itemData.brand, 
+			i.itemData.model, i.itemData.description, i.itemData.basePrice, i.itemData.itemCondition),
+			i.ownerId)
+			FROM Item i
+			WHERE i.id = :id AND i.itemStatus = AVAILABLE
+			""")
+	Optional<UpdateItemContext> getUpdateContext(@Param("id")String itemId);
+
 }
