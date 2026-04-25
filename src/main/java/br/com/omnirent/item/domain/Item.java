@@ -54,20 +54,4 @@ public class Item extends NamedEntity {
 	public void updateItemStatus(String status) {
 	    setItemStatus(ItemStatus.fromString(status));
 	}
-	
-	public void assignOwner(User owner, String ownerId) {
-		this.owner = owner;
-		this.ownerId = ownerId;
-
-	}
-	
-	public void assignSubCategory(SubCategory subCategory) {
-		this.subCategory = subCategory;
-		this.subCategoryId = subCategory.getId();
-	}
-	
-	public void assignAddress(Address address) {
-		this.pickupAddress = address;
-		this.pickupAddressId = pickupAddress.getId();
-	}
 }

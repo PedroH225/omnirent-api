@@ -91,16 +91,14 @@ public class ItemService {
 	}
 
 	public ItemCreatedDTO addItem(ItemRequestDTO itemDTO) {
-		String userId = currentUserProvider.currentUserId();
-		userService.requireExistence(userId);
-		User user = userService.getUserReference(userId);
+		String currentUserId = currentUserProvider.currentUserId();
 		
-		Address pickupAddress = addressService.findById(itemDTO.addressId());
-		SubCategory subCategory = categoryService.findSubById(itemDTO.subCategoryId());
+		User user = userService.getValidReference(currentUserId);
+		Address pickupAddress = addressService.getValidReference(itemDTO.addressId(), currentUserId);
+		SubCategory subCategory = categoryService.getValidSubReference(itemDTO.subCategoryId());
 		
-		Item item = itemMapper.fromDto(itemDTO, user, userId, 
-				pickupAddress, subCategory,
-				ItemStatus.AVAILABLE);
+		Item item = itemMapper.fromDto(itemDTO, user.getId(), pickupAddress.getId(),
+				subCategory.getId(), ItemStatus.AVAILABLE);
 		return itemMapper.toCreatedDto(itemRepository.save(item));
 	}
 	

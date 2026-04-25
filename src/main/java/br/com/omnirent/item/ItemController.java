@@ -16,6 +16,7 @@ import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -51,8 +52,8 @@ public class ItemController {
 	}
 	
 	@PutMapping
-	public ItemDetailDTO updateItem(@RequestBody ItemRequestDTO itemDTO) {
-		return itemService.updateItem(itemDTO);
+	public void updateItem(@RequestBody UpdateItemRequestDTO itemDTO) {
+		itemService.updateItem(itemDTO);
 	}
 	
 	@PatchMapping("/updateStatus/{itemId}/{itemStatus}")
