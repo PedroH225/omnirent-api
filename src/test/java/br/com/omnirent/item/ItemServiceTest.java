@@ -19,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.NativeDetector.Context;
 
 import br.com.omnirent.address.AddressService;
 import br.com.omnirent.address.domain.Address;
@@ -38,11 +39,13 @@ import br.com.omnirent.factory.ItemTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -281,4 +284,30 @@ public class ItemServiceTest {
 		verifyNoInteractions(itemRepository);
 	}
 	
+	@Test
+	void shouldUpdateItem() {
+		String currentUserId = owner.getId();
+		
+		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", "USED");
+		UpdateItemContext context = ItemTestFactory.updateItemContext(item, currentUserId);
+
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateContext(item.getId())).thenReturn(Optional.of(context));
+		when(itemRepository.updateItem(
+			    context.itemInfo().getId(), context.status(), request.name(),
+			    request.brand(), request.model(), request.description(),
+			    request.basePrice(), ItemCondition.fromString(request.itemCondition())
+			)).thenReturn(1); 
+		
+		itemService.updateItem(request);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updateItem(
+			    context.itemInfo().getId(), context.status(), request.name(),
+			    request.brand(), request.model(), request.description(),
+			    request.basePrice(), ItemCondition.fromString(request.itemCondition()));
+		verifyNoMoreInteractions(itemRepository, authorizationService, currentUserProvider);
+	}
 }
