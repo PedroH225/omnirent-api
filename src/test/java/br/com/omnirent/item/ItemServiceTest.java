@@ -2,7 +2,6 @@ package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -15,11 +14,9 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.NativeDetector.Context;
 
 import br.com.omnirent.address.AddressService;
 import br.com.omnirent.address.domain.Address;
@@ -309,5 +306,26 @@ public class ItemServiceTest {
 			    request.brand(), request.model(), request.description(),
 			    request.basePrice(), ItemCondition.fromString(request.itemCondition()));
 		verifyNoMoreInteractions(itemRepository, authorizationService, currentUserProvider);
+	}
+	
+	@Test
+	void shouldThrowWhenItemIsBlocked() {
+		String currentUserId = owner.getId();
+		
+		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", "USED");
+		UpdateItemContext context = ItemTestFactory.updateItemContext(item, currentUserId);
+
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateContext(item.getId())).thenReturn(Optional.of(context));
+		doThrow(ForbiddenException.class).when(authorizationService).requireNotBlocked(context.status());
+		
+		assertThatThrownBy(() -> itemService.updateItem(request))
+		.isInstanceOf(ForbiddenException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(queryRepository).getUpdateContext(item.getId());
+		verify(authorizationService).requireNotBlocked(context.status());
+		verifyNoMoreInteractions(queryRepository, authorizationService, currentUserProvider);
+		verifyNoInteractions(itemRepository);
 	}
 }
