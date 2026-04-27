@@ -28,6 +28,7 @@ import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.common.ForbiddenException;
 import br.com.omnirent.exception.domain.AddressNotFoundException;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
+import br.com.omnirent.exception.domain.OptimisticLockException;
 import br.com.omnirent.exception.domain.SubCategoryNotFoundException;
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
@@ -350,5 +351,33 @@ public class ItemServiceTest {
 		verify(authorizationService).requireOwner(actualOwner, currentUserId);
 		verifyNoMoreInteractions(queryRepository, authorizationService, currentUserProvider);
 		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenConcurrentUpdate() {
+		String currentUserId = owner.getId();
+		
+		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", "USED");
+		UpdateItemContext context = ItemTestFactory.updateItemContext(item, currentUserId);
+
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateContext(item.getId())).thenReturn(Optional.of(context));
+		when(itemRepository.updateItem(
+			    context.itemInfo().getId(), context.status(), request.name(),
+			    request.brand(), request.model(), request.description(),
+			    request.basePrice(), ItemCondition.fromString(request.itemCondition())
+			)).thenReturn(0); 
+		
+		assertThatThrownBy(() -> itemService.updateItem(request))
+		.isInstanceOf(OptimisticLockException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updateItem(
+			    context.itemInfo().getId(), context.status(), request.name(),
+			    request.brand(), request.model(), request.description(),
+			    request.basePrice(), ItemCondition.fromString(request.itemCondition()));
+		verifyNoMoreInteractions(itemRepository, authorizationService, currentUserProvider);
 	}
 }
