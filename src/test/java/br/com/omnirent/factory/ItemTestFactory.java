@@ -1,5 +1,6 @@
 package br.com.omnirent.factory;
 
+import java.io.ObjectInputFilter.Status;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,12 +15,14 @@ import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserResponseDTO;
 import br.com.omnirent.utils.Sequence;
@@ -127,6 +130,32 @@ public final class ItemTestFactory {
                 itemCondition, subCategoryId,
                 addressId
         );
+    }
+    
+    public static UpdateItemRequestDTO updateItemRequest(String itemId, String basePrice, String itemCondition) {
+    	String item = Sequence.nextString("item");
+    	
+        return new UpdateItemRequestDTO(
+                itemId, item, item,
+                item, item, new BigDecimal(basePrice),
+                itemCondition
+        );
+    }
+    
+    public static UpdateItemContext updateItemContext(Item item, String ownerId) {
+        ItemData data = item.getItemData();
+
+        ItemInfo itemInfo = new ItemInfo(
+            item.getId(),
+            item.getName(),
+            data.getBrand(),
+            data.getModel(),
+            data.getDescription(),
+            data.getBasePrice(),
+            data.getItemCondition()
+        );
+
+        return new UpdateItemContext(itemInfo, ownerId, item.getItemStatus());
     }
     
     public static Item fromNewItemRequestDTO(ItemRequestDTO dto,
