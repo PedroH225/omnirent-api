@@ -773,7 +773,23 @@ public class ItemServiceTest {
 			.isInstanceOf(ItemNotFoundException.class);
 
 		verify(currentUserProvider).currentUserId();
-		verify(queryRepository).getUpdateStatusContext(itemId);
+		verifyNoInteractions(authorizationService, itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenChangeAddressContextNotFound() {
+		String currentUserId = owner.getId();
+		String itemId = "invalid-id";
+		String newAddressId = ownerAddress2.getId();
+
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeAddressContext(itemId))
+			.thenReturn(Optional.empty());
+
+		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
+			.isInstanceOf(ItemNotFoundException.class);
+
+		verify(currentUserProvider).currentUserId();
 		verifyNoInteractions(authorizationService, itemRepository);
 	}
 
