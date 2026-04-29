@@ -672,4 +672,30 @@ public class ItemServiceTest {
 		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
 		verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE);
 	}
+	
+	@Test
+	void shouldUpdateItemStatusFromUnavailableToAvailable() {
+		String currentUserId = owner.getId();
+		
+		Item unavailableItem = ItemTestFactory.createPersisted(
+				owner, ownerAddress, drill, "200", ItemCondition.NEW);
+		unavailableItem.setItemStatus(ItemStatus.UNAVAILABLE);
+		
+		String itemId = unavailableItem.getId();
+
+		UpdateItemStatusContext context =
+				ItemTestFactory.toUpdateItemStatusContext(unavailableItem);
+
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
+		when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.AVAILABLE))
+			.thenReturn(1);
+
+		itemService.updateStatus(itemId);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.currentStatus());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.AVAILABLE);
+	}
 }
