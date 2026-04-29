@@ -540,4 +540,30 @@ public class ItemServiceTest {
 		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
 		verify(itemRepository).updateItemSubCategory(itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status());
 	}
+	
+	@Test
+	void shouldThrowWhenConcurrentChangeSubCategory() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newSubCategoryId = hammer.getId();	
+		String validatedNewSubCatId = hammer.getId();
+
+		ChangeItemSubCategoryContext context = ItemTestFactory.toChangeSubCategoryContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeSubCategoryContext(itemId)).thenReturn(Optional.of(context));
+		when(categoryService.getValidSubReference(newSubCategoryId)).thenReturn(hammer);
+		when(itemRepository.updateItemSubCategory(
+		        itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status()))
+		.thenReturn(0);
+		
+		assertThatThrownBy(() -> itemService.changeSubCategory(itemId, newSubCategoryId))
+		.isInstanceOf(OptimisticLockException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updateItemSubCategory(
+		        itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status());
+	}
 }
