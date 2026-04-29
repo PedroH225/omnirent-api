@@ -683,8 +683,7 @@ public class ItemServiceTest {
 		
 		String itemId = unavailableItem.getId();
 
-		UpdateItemStatusContext context =
-				ItemTestFactory.toUpdateItemStatusContext(unavailableItem);
+		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(unavailableItem);
 
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
 		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
@@ -704,8 +703,7 @@ public class ItemServiceTest {
 		String currentUserId = owner.getId();
 		String itemId = item.getId();
 
-		UpdateItemStatusContext context =
-				ItemTestFactory.toUpdateItemStatusContext(item);
+		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item);
 		
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
 		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
@@ -719,6 +717,27 @@ public class ItemServiceTest {
 		verify(authorizationService).requireNotBlocked(context.currentStatus());
 		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
 		verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE);
+	}
+	
+	@Test
+	void shouldThrowWhenUserIsNotOwnerOnUpdateStatus() {
+		String currentUserId = owner2.getId();
+		String itemId = item.getId();
+
+		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
+		doThrow(ForbiddenException.class)
+			.when(authorizationService).requireOwner(context.ownerId(), currentUserId);
+
+		assertThatThrownBy(() -> itemService.updateStatus(itemId))
+			.isInstanceOf(ForbiddenException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.currentStatus());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verifyNoInteractions(itemRepository);
 	}
 
 }
