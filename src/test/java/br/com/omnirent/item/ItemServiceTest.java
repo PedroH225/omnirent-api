@@ -493,4 +493,26 @@ public class ItemServiceTest {
 		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
 		verifyNoInteractions(itemRepository);
 	}
+	
+	@Test
+	void shouldThrowWhenItemIsBlockedOnChangeAddress() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newAddressId = ownerAddress2.getId();	
+
+		ChangeItemAddressContext context = ItemTestFactory.toChangeAddressContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeAddressContext(itemId)).thenReturn(Optional.of(context));
+		doThrow(ForbiddenException.class)
+		.when(authorizationService).requireNotBlocked(context.status());
+
+		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
+		.isInstanceOf(ForbiddenException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verifyNoMoreInteractions(authorizationService);
+		verifyNoInteractions(itemRepository);
+	}
 }
