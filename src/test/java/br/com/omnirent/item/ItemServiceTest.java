@@ -407,6 +407,31 @@ public class ItemServiceTest {
 	}
 	
 	@Test
+	void shouldThrowWhenConcurrentChangeAddress() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newAddressId = ownerAddress2.getId();	
+		String validatedAddressId = ownerAddress2.getId();
+
+		ChangeItemAddressContext context = ItemTestFactory.toChangeAddressContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeAddressContext(itemId)).thenReturn(Optional.of(context));
+		when(addressService.getValidReference(newAddressId, currentUserId)).thenReturn(ownerAddress2);
+		when(itemRepository.updatePickupAddress(
+			itemId, validatedAddressId, context.currentAddressId(), context.status()))
+		.thenReturn(0);
+		
+		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
+		.isInstanceOf(OptimisticLockException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updatePickupAddress(itemId, validatedAddressId, context.currentAddressId(), context.status());
+	}
+	
+	@Test
 	void shouldDoNothingWhenItemAddressEqualsNewAddress() {
 		String currentUserId = owner.getId();
 		String itemId = item.getId();
