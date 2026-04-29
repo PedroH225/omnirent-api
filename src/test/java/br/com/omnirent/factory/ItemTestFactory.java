@@ -1,6 +1,5 @@
 package br.com.omnirent.factory;
 
-import java.io.ObjectInputFilter.Status;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -8,11 +7,10 @@ import java.util.ArrayList;
 import br.com.omnirent.address.context.AddressInfo;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.domain.AddressData;
-import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.category.domain.SubCategory;
-import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
@@ -194,5 +192,10 @@ public final class ItemTestFactory {
                 item.getId(), item.getName(), itemData.getBrand(),
                 itemData.getModel(), itemData.getDescription(), itemData.getBasePrice(),
                 itemData.getItemCondition(), item.getItemStatus());
+    }
+    
+    public static ChangeItemAddressContext toChangeAddressContext(Item item) {
+    	return new ChangeItemAddressContext(item.getId(), item.getOwnerId(),
+    			item.getPickupAddressId(), item.getItemStatus());
     }
 }
