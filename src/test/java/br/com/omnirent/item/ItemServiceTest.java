@@ -36,6 +36,7 @@ import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
+import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.domain.Item;
@@ -379,5 +380,29 @@ public class ItemServiceTest {
 			    request.brand(), request.model(), request.description(),
 			    request.basePrice(), ItemCondition.fromString(request.itemCondition()));
 		verifyNoMoreInteractions(itemRepository, authorizationService, currentUserProvider);
+	}
+	
+	@Test
+	void shouldChangeItemAddress() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newAddressId = ownerAddress2.getId();	
+		String validatedAddressId = ownerAddress2.getId();
+
+		ChangeItemAddressContext context = ItemTestFactory.toChangeAddressContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeAddressContext(itemId)).thenReturn(Optional.of(context));
+		when(addressService.getValidReference(newAddressId, currentUserId)).thenReturn(ownerAddress2);
+		when(itemRepository.updatePickupAddress(
+			itemId, validatedAddressId, context.currentAddressId(), context.status()))
+		.thenReturn(1);
+		
+		itemService.changePickupAddress(itemId, newAddressId);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updatePickupAddress(itemId, validatedAddressId, context.currentAddressId(), context.status());
 	}
 }
