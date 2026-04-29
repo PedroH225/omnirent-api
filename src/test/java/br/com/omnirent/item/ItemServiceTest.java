@@ -629,4 +629,26 @@ public class ItemServiceTest {
 		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
 		verifyNoInteractions(itemRepository);
 	}
+	
+	@Test
+	void shouldThrowWhenItemIsBlockedOnChangeSubCategory() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newSubCategoryId = hammer.getId();	
+
+		ChangeItemSubCategoryContext context = ItemTestFactory.toChangeSubCategoryContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeSubCategoryContext(itemId)).thenReturn(Optional.of(context));
+		doThrow(ForbiddenException.class)
+		.when(authorizationService).requireNotBlocked(context.status());
+
+		assertThatThrownBy(() -> itemService.changeSubCategory(itemId, newSubCategoryId))
+		.isInstanceOf(ForbiddenException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verifyNoMoreInteractions(authorizationService);
+		verifyNoInteractions(itemRepository);
+	}
 }
