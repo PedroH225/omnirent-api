@@ -566,4 +566,23 @@ public class ItemServiceTest {
 		verify(itemRepository).updateItemSubCategory(
 		        itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status());
 	}
+	
+	@Test
+	void shouldDoNothingWhenItemSubCategoryEqualsNewSubCategory() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newSubCategoryId = drill.getId();	
+
+		ChangeItemSubCategoryContext context = ItemTestFactory.toChangeSubCategoryContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeSubCategoryContext(itemId)).thenReturn(Optional.of(context));
+
+		itemService.changeSubCategory(itemId, newSubCategoryId);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verifyNoInteractions(itemRepository);
+	}
 }
