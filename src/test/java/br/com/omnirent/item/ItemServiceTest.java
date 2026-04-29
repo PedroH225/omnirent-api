@@ -37,6 +37,7 @@ import br.com.omnirent.factory.ItemTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
+import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.domain.Item;
@@ -514,5 +515,29 @@ public class ItemServiceTest {
 		verify(authorizationService).requireNotBlocked(context.status());
 		verifyNoMoreInteractions(authorizationService);
 		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldChangeItemSubCategory() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newSubCategoryId = hammer.getId();	
+		String validatedNewSubCatId = hammer.getId();
+
+		ChangeItemSubCategoryContext context = ItemTestFactory.toChangeSubCategoryContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeSubCategoryContext(itemId)).thenReturn(Optional.of(context));
+		when(categoryService.getValidSubReference(newSubCategoryId)).thenReturn(hammer);
+		when(itemRepository.updateItemSubCategory(
+		        itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status()))
+		.thenReturn(1);
+		
+		itemService.changeSubCategory(itemId, newSubCategoryId);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updateItemSubCategory(itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status());
 	}
 }
