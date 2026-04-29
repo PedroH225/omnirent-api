@@ -760,5 +760,21 @@ public class ItemServiceTest {
 		verifyNoMoreInteractions(authorizationService);
 		verifyNoInteractions(itemRepository);
 	}
+	
+	@Test
+	void shouldThrowWhenUpdateStatusContextNotFound() {
+		String itemId = "invalid-id";
+
+		when(currentUserProvider.currentUserId()).thenReturn(owner.getId());
+		when(queryRepository.getUpdateStatusContext(itemId))
+			.thenReturn(Optional.empty());
+
+		assertThatThrownBy(() -> itemService.updateStatus(itemId))
+			.isInstanceOf(ItemNotFoundException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verify(queryRepository).getUpdateStatusContext(itemId);
+		verifyNoInteractions(authorizationService, itemRepository);
+	}
 
 }
