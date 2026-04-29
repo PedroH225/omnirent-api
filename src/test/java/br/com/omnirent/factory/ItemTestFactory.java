@@ -15,6 +15,7 @@ import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
+import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
@@ -203,5 +204,10 @@ public final class ItemTestFactory {
     public static ChangeItemSubCategoryContext toChangeSubCategoryContext(Item item) {
     	return new ChangeItemSubCategoryContext(item.getId(), item.getOwnerId(),
     			item.getSubCategoryId(), item.getItemStatus());
+    }
+    
+    public static UpdateItemStatusContext toUpdateItemStatusContext(Item item) {
+    	return new UpdateItemStatusContext(item.getId(), item.getItemStatus(),
+    			item.getOwnerId());
     }
 }
