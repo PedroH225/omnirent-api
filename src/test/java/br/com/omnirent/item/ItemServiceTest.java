@@ -425,4 +425,26 @@ public class ItemServiceTest {
 		verifyNoMoreInteractions(itemRepository, authorizationService);
 		verifyNoInteractions(addressService);
 	}
+	
+	@Test
+	void shouldThrowWhenAddressNotFound() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newAddressId = owner2Address.getId();	
+
+		ChangeItemAddressContext context = ItemTestFactory.toChangeAddressContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeAddressContext(itemId)).thenReturn(Optional.of(context));
+		doThrow(AddressNotFoundException.class)
+		.when(addressService).getValidReference(newAddressId, currentUserId);
+		
+		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
+		.isInstanceOf(AddressNotFoundException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verifyNoMoreInteractions(itemRepository, authorizationService);
+	}
 }
