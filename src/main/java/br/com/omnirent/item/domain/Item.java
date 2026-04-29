@@ -28,7 +28,7 @@ public class Item extends NamedEntity {
 	private ItemData itemData;
 	
 	@Enumerated(EnumType.STRING)
-	public ItemStatus itemStatus;
+	private ItemStatus itemStatus;
 	
 	@Column(name = "owner_id")
 	private String ownerId;
