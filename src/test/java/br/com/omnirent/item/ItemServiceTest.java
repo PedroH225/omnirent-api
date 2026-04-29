@@ -739,5 +739,26 @@ public class ItemServiceTest {
 		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
 		verifyNoInteractions(itemRepository);
 	}
+	
+	@Test
+	void shouldThrowWhenItemIsBlockedOnUpdateStatus() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+
+		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
+		doThrow(ForbiddenException.class)
+			.when(authorizationService).requireNotBlocked(context.currentStatus());
+
+		assertThatThrownBy(() -> itemService.updateStatus(itemId))
+			.isInstanceOf(ForbiddenException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.currentStatus());
+		verifyNoMoreInteractions(authorizationService);
+		verifyNoInteractions(itemRepository);
+	}
 
 }
