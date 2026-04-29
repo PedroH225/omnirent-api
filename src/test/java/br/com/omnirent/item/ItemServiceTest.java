@@ -585,4 +585,26 @@ public class ItemServiceTest {
 		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
 		verifyNoInteractions(itemRepository);
 	}
+	
+	@Test
+	void shouldThrowWhenSubCategoryNotFound() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newSubCategoryId = "invalid-id";	
+
+		ChangeItemSubCategoryContext context = ItemTestFactory.toChangeSubCategoryContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeSubCategoryContext(itemId)).thenReturn(Optional.of(context));
+		doThrow(SubCategoryNotFoundException.class)
+		.when(categoryService).getValidSubReference(newSubCategoryId);
+		
+		assertThatThrownBy(() -> itemService.changeSubCategory(itemId, newSubCategoryId))
+		.isInstanceOf(SubCategoryNotFoundException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verifyNoInteractions(itemRepository);
+	}
 }
