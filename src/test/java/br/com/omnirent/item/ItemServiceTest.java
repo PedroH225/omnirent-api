@@ -792,5 +792,22 @@ public class ItemServiceTest {
 		verify(currentUserProvider).currentUserId();
 		verifyNoInteractions(authorizationService, itemRepository);
 	}
+	
+	@Test
+	void shouldThrowWhenChangeSubCategoryContextNotFound() {
+		String currentUserId = owner.getId();
+		String itemId = "invalid-id";
+		String newSubCategoryId = hammer.getId();
+
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeSubCategoryContext(itemId))
+			.thenReturn(Optional.empty());
+
+		assertThatThrownBy(() -> itemService.changeSubCategory(itemId, newSubCategoryId))
+			.isInstanceOf(ItemNotFoundException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verifyNoInteractions(authorizationService, itemRepository);
+	}
 
 }
