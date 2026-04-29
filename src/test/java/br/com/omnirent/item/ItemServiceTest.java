@@ -40,6 +40,7 @@ import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
+import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
@@ -650,5 +651,25 @@ public class ItemServiceTest {
 		verify(authorizationService).requireNotBlocked(context.status());
 		verifyNoMoreInteractions(authorizationService);
 		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldUpdateItemStatusFromAvailableToUnavailable() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		
+		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
+		when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE))
+			.thenReturn(1);
+		
+		itemService.updateStatus(itemId);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.currentStatus());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE);
 	}
 }
