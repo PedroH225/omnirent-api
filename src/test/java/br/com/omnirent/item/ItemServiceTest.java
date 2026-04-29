@@ -698,4 +698,27 @@ public class ItemServiceTest {
 		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
 		verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.AVAILABLE);
 	}
+	
+	@Test
+	void shouldThrowWhenConcurrentUpdateStatus() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+
+		UpdateItemStatusContext context =
+				ItemTestFactory.toUpdateItemStatusContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
+		when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE))
+			.thenReturn(0);
+		
+		assertThatThrownBy(() -> itemService.updateStatus(itemId))
+			.isInstanceOf(OptimisticLockException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.currentStatus());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE);
+	}
+
 }
