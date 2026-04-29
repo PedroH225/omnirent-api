@@ -11,6 +11,7 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
+import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
@@ -197,5 +198,10 @@ public final class ItemTestFactory {
     public static ChangeItemAddressContext toChangeAddressContext(Item item) {
     	return new ChangeItemAddressContext(item.getId(), item.getOwnerId(),
     			item.getPickupAddressId(), item.getItemStatus());
+    }
+    
+    public static ChangeItemSubCategoryContext toChangeSubCategoryContext(Item item) {
+    	return new ChangeItemSubCategoryContext(item.getId(), item.getOwnerId(),
+    			item.getSubCategoryId(), item.getItemStatus());
     }
 }
