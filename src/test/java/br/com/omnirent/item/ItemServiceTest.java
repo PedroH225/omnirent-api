@@ -405,4 +405,24 @@ public class ItemServiceTest {
 		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
 		verify(itemRepository).updatePickupAddress(itemId, validatedAddressId, context.currentAddressId(), context.status());
 	}
+	
+	@Test
+	void shouldDoNothingWhenItemAddressEqualsNewAddress() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newAddressId = ownerAddress.getId();	
+
+		ChangeItemAddressContext context = ItemTestFactory.toChangeAddressContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeAddressContext(itemId)).thenReturn(Optional.of(context));
+
+		itemService.changePickupAddress(itemId, newAddressId);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verifyNoMoreInteractions(itemRepository, authorizationService);
+		verifyNoInteractions(addressService);
+	}
 }
