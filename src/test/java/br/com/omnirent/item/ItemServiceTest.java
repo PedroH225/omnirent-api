@@ -2,7 +2,6 @@ package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -15,7 +14,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,19 +26,27 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.common.ForbiddenException;
+import br.com.omnirent.exception.domain.AddressNotFoundException;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
+import br.com.omnirent.exception.domain.OptimisticLockException;
+import br.com.omnirent.exception.domain.SubCategoryNotFoundException;
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
+import br.com.omnirent.item.context.ChangeItemAddressContext;
+import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.item.context.UpdateItemContext;
+import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -53,6 +59,9 @@ public class ItemServiceTest {
 	
 	@Mock
 	private ItemRepository itemRepository;
+	
+	@Mock
+	private ItemQueryRepository queryRepository;
 
 	@Mock
 	private UserService userService;
@@ -113,25 +122,25 @@ public class ItemServiceTest {
 		String itemId = item.getId();
 		ItemDetailDTO itemDetailDTO = ItemTestFactory.toItemDetailsDto(item, drill, ownerAddress, owner);
 	
-		when(itemRepository.findItemDetailDTO(itemId)).thenReturn(Optional.of(itemDetailDTO));
+		when(queryRepository.findItemDetailDTO(itemId)).thenReturn(Optional.of(itemDetailDTO));
 		
 		ItemDetailDTO result = itemService.getItemById(itemId);
 		
 		assertThat(result).isEqualTo(itemDetailDTO);
 		
-		verify(itemRepository).findItemDetailDTO(itemId);
+		verify(queryRepository).findItemDetailDTO(itemId);
 	}
 	
 	@Test
 	void shouldThrowWhenItemNotFound() {
 		String invalidId = "invalidId";
 	
-		when(itemRepository.findItemDetailDTO(invalidId)).thenReturn(Optional.empty());
+		when(queryRepository.findItemDetailDTO(invalidId)).thenReturn(Optional.empty());
 		
 		assertThatThrownBy(() -> itemService.getItemById(invalidId))
 			.isInstanceOf(ItemNotFoundException.class);
 				
-		verify(itemRepository).findItemDetailDTO(invalidId);
+		verify(queryRepository).findItemDetailDTO(invalidId);
 	}
 	
 	@Test
@@ -139,25 +148,25 @@ public class ItemServiceTest {
 		String itemId = item.getId();
 		ItemRentedContext context = ItemTestFactory.toItemRentedContext(item, ownerAddress, owner);
 	
-		when(itemRepository.getItemRentedContext(itemId)).thenReturn(Optional.of(context));
+		when(queryRepository.getItemRentedContext(itemId)).thenReturn(Optional.of(context));
 		
 		ItemRentedContext result = itemService.getItemRentedContext(itemId);
 		
 		assertThat(result).isEqualTo(context);
 		
-		verify(itemRepository).getItemRentedContext(itemId);
+		verify(queryRepository).getItemRentedContext(itemId);
 	}
 	
 	@Test
 	void shouldThrowWhenItemRentedContextNotFound() {
 		String invalidId = "invalidId";
 		
-		when(itemRepository.getItemRentedContext(invalidId)).thenReturn(Optional.empty());
+		when(queryRepository.getItemRentedContext(invalidId)).thenReturn(Optional.empty());
 		
 		assertThatThrownBy(() -> itemService.getItemRentedContext(invalidId))
 			.isInstanceOf(ItemNotFoundException.class);
 				
-		verify(itemRepository).getItemRentedContext(invalidId);
+		verify(queryRepository).getItemRentedContext(invalidId);
 		verifyNoMoreInteractions(itemRepository);
 	}
 	
@@ -170,7 +179,7 @@ public class ItemServiceTest {
 		List<ItemDisplayDTO> expected = List.of(dto1, dto2);
 		
 		when(currentUserProvider.currentUserId()).thenReturn(userId);
-		when(itemRepository.findUserItems(userId)).thenReturn(expected);
+		when(queryRepository.findUserItems(userId)).thenReturn(expected);
 
 		List<ItemDisplayDTO> result = itemService.getUserItems();
 		
@@ -178,7 +187,7 @@ public class ItemServiceTest {
 		
 		verify(currentUserProvider).currentUserId();
 		verify(userService).requireExistence(userId);
-		verify(itemRepository).findUserItems(userId);
+		verify(queryRepository).findUserItems(userId);
 	}
 	
 	@Test
@@ -199,21 +208,23 @@ public class ItemServiceTest {
 	@Test
 	void shouldAddItem() {
 		String ownerId = owner.getId();
+		String addressId = ownerAddress.getId();
+		String categoryId = drill.getId();
 		
-		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", "NEW", drill.getId(), ownerAddress.getId());
+		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", "NEW", categoryId, addressId);
 		
 		Item mappedItem = ItemTestFactory.fromNewItemRequestDTO(request, drill, ownerAddress, owner);
 		Item persistedItem = ItemTestFactory.toPersisted(mappedItem);
 		ItemCreatedDTO expected = ItemTestFactory.toItemCreatedDTO(persistedItem);
 		
 		when(currentUserProvider.currentUserId()).thenReturn(ownerId);
-		when(userService.getUserReference(ownerId)).thenReturn(owner);
-		when(addressService.findById(ownerAddress.getId())).thenReturn(ownerAddress);
-		when(categoryService.findSubById(drill.getId())).thenReturn(drill);
+		when(userService.getValidReference(ownerId)).thenReturn(owner);
+		when(addressService.getValidReference(addressId, ownerId)).thenReturn(ownerAddress);
+		when(categoryService.getValidSubReference(categoryId)).thenReturn(drill);
 		
-		when(itemMapper.fromDto(request, owner, ownerId, ownerAddress,
-				drill, ItemStatus.AVAILABLE)).thenReturn(mappedItem);
-		when(itemRepository.save(any(Item.class))).thenReturn(persistedItem);
+		when(itemMapper.fromDto(request, ownerId, addressId, categoryId, ItemStatus.AVAILABLE))
+		.thenReturn(mappedItem);
+		when(itemRepository.save(mappedItem)).thenReturn(persistedItem);
 		when(itemMapper.toCreatedDto(persistedItem)).thenReturn(expected);
 		
 		ItemCreatedDTO result = itemService.addItem(request);
@@ -221,7 +232,6 @@ public class ItemServiceTest {
 		assertThat(result).isEqualTo(expected);
 		
 	    verify(currentUserProvider).currentUserId();
-		verify(userService).requireExistence(ownerId);
 		verify(itemRepository).save(mappedItem);
 	}
 	
@@ -232,136 +242,572 @@ public class ItemServiceTest {
 		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", "NEW", drill.getId(), ownerAddress.getId());
 		
 		when(currentUserProvider.currentUserId()).thenReturn(invalidId);
-		doThrow(UserNotFoundException.class).when(userService).requireExistence(invalidId);
+		doThrow(UserNotFoundException.class).when(userService).getValidReference(invalidId);
 		
 		assertThatThrownBy(() -> itemService.addItem(request))
 		.isInstanceOf(UserNotFoundException.class);
 		
 		verify(currentUserProvider).currentUserId();
-		verify(userService).requireExistence(invalidId);
 		verifyNoInteractions(itemRepository);
 	}
 	
 	@Test
-	void shouldUpdateItemWithoutChangingAddressOrSubCategory() {
-	    String ownerId = owner.getId();
+	void shouldThrowWhenAddressNotFoundOnAddItem() {
+		String invalidOwnerId = owner.getId();
+		String invalidAddressId = "invalidId";
 
-	    ItemRequestDTO request = ItemTestFactory.createItemRequest(
-	            item.getId(), "250", "USED", drill.getId(), ownerAddress.getId()
-	    );
-
-	    ItemDetailDTO expected = ItemTestFactory.toItemDetailsDto(item, drill, ownerAddress, owner);
-
-	    when(currentUserProvider.currentUserId()).thenReturn(ownerId);
-	    when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
-	    when(itemRepository.save(item)).thenReturn(item);
-	    when(itemMapper.toDto(item)).thenReturn(expected);
-
-	    ItemDetailDTO result = itemService.updateItem(request);
-
-	    assertThat(result).isEqualTo(expected);
-
-	    verify(currentUserProvider).currentUserId();
-	    verify(itemRepository).save(item);
-	    verifyNoInteractions(addressService, categoryService);
+		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", "NEW", drill.getId(), invalidAddressId);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(invalidOwnerId);
+		doThrow(AddressNotFoundException.class).when(addressService).getValidReference(invalidAddressId, invalidOwnerId);
+		
+		assertThatThrownBy(() -> itemService.addItem(request))
+		.isInstanceOf(AddressNotFoundException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verifyNoInteractions(itemRepository);
 	}
 	
 	@Test
-	void shouldUpdateItemWithSubCategoryAndAddress() {
+	void shouldThrowWhenSubCategoryNotFoundOnAddItem() {
 		String ownerId = owner.getId();
+		String invalidId = "invalidId";
+		
+		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", "NEW", invalidId, ownerAddress.getId());
+		
+		when(currentUserProvider.currentUserId()).thenReturn(ownerId);
+		doThrow(SubCategoryNotFoundException.class).when(categoryService).getValidSubReference(invalidId);
+		
+		assertThatThrownBy(() -> itemService.addItem(request))
+		.isInstanceOf(SubCategoryNotFoundException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldUpdateItem() {
+		String currentUserId = owner.getId();
+		
+		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", "USED");
+		UpdateItemContext context = ItemTestFactory.updateItemContext(item, currentUserId);
 
-	    ItemRequestDTO request = ItemTestFactory.createItemRequest(
-	            item.getId(), "250", "USED", hammer.getId(), ownerAddress2.getId()
-	    );
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateContext(item.getId())).thenReturn(Optional.of(context));
+		when(itemRepository.updateItem(
+			    context.itemInfo().getId(), context.status(), request.name(),
+			    request.brand(), request.model(), request.description(),
+			    request.basePrice(), ItemCondition.fromString(request.itemCondition())
+			)).thenReturn(1); 
+		
+		itemService.updateItem(request);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updateItem(
+			    context.itemInfo().getId(), context.status(), request.name(),
+			    request.brand(), request.model(), request.description(),
+			    request.basePrice(), ItemCondition.fromString(request.itemCondition()));
+		verifyNoMoreInteractions(itemRepository, authorizationService, currentUserProvider);
+	}
+	
+	@Test
+	void shouldThrowWhenItemIsBlockedOnUpdateItem() {
+		String currentUserId = owner.getId();
+		
+		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", "USED");
+		UpdateItemContext context = ItemTestFactory.updateItemContext(item, currentUserId);
 
-	    ItemDetailDTO expected = ItemTestFactory.toItemDetailsDto(item, hammer, ownerAddress2, owner);
-
-	    when(currentUserProvider.currentUserId()).thenReturn(ownerId);
-	    when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
-	    when(addressService.findById(ownerAddress2.getId())).thenReturn(ownerAddress2);
-	    when(categoryService.findSubById(hammer.getId())).thenReturn(hammer);
-	    when(itemRepository.save(item)).thenReturn(item);
-	    when(itemMapper.toDto(item)).thenReturn(expected);
-
-	    ItemDetailDTO result = itemService.updateItem(request);
-
-	    assertThat(result).isEqualTo(expected);
-
-	    verify(currentUserProvider).currentUserId();
-	    verify(addressService).findById(ownerAddress2.getId());
-	    verify(categoryService).findSubById(hammer.getId());
-	    verify(itemRepository).save(item);
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateContext(item.getId())).thenReturn(Optional.of(context));
+		doThrow(ForbiddenException.class).when(authorizationService).requireNotBlocked(context.status());
+		
+		assertThatThrownBy(() -> itemService.updateItem(request))
+		.isInstanceOf(ForbiddenException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(queryRepository).getUpdateContext(item.getId());
+		verify(authorizationService).requireNotBlocked(context.status());
+		verifyNoMoreInteractions(queryRepository, authorizationService, currentUserProvider);
+		verifyNoInteractions(itemRepository);
 	}
 	
 	@Test
 	void shouldThrowWhenUserIsNotOwnerOnUpdateItem() {
-		String invalidUserId = owner2.getId();
+		String currentUserId = owner2.getId();
+		String actualOwner = owner.getId();
+		
+		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", "USED");
+		UpdateItemContext context = ItemTestFactory.updateItemContext(item, actualOwner);
 
-	    ItemRequestDTO request = ItemTestFactory.createItemRequest(
-	            item.getId(), "250", "USED", hammer.getId(), ownerAddress2.getId()
-	    );
-
-	    when(currentUserProvider.currentUserId()).thenReturn(invalidUserId);
-	    when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
-	    doThrow(ForbiddenException.class).when(authorizationService).requireOwner(item, invalidUserId);
-
-	    assertThatThrownBy(() -> itemService.updateItem(request))
-	    .isInstanceOf(ForbiddenException.class);
-	    
-	    verify(currentUserProvider).currentUserId();
-	    verify(itemRepository).findById(item.getId());
-	    verify(authorizationService).requireOwner(item, invalidUserId);
-
-	    verifyNoInteractions(addressService, categoryService, itemMapper);
-	    verifyNoMoreInteractions(currentUserProvider, itemRepository, authorizationService);
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateContext(item.getId())).thenReturn(Optional.of(context));
+		doThrow(ForbiddenException.class).when(authorizationService).requireOwner(actualOwner, currentUserId);
+		
+		assertThatThrownBy(() -> itemService.updateItem(request))
+		.isInstanceOf(ForbiddenException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(queryRepository).getUpdateContext(item.getId());
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(actualOwner, currentUserId);
+		verifyNoMoreInteractions(queryRepository, authorizationService, currentUserProvider);
+		verifyNoInteractions(itemRepository);
 	}
 	
 	@Test
-	void shouldUpdateItemStatus() {
-		String ownerId = owner.getId();
-		String newStatus = "INACTIVE";
+	void shouldThrowWhenConcurrentUpdate() {
+		String currentUserId = owner.getId();
 		
-	    ItemDetailDTO expected = ItemTestFactory.toItemDetailsDto(item, hammer, ownerAddress2, owner);
-		expected.setItemStatus(newStatus);
-	    
-		when(currentUserProvider.currentUserId()).thenReturn(ownerId);
-	    when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
-	    when(itemRepository.save(any(Item.class)))
-	    .thenAnswer(invocation -> invocation.getArgument(0, Item.class));
-	    when(itemMapper.toDto(item)).thenReturn(expected);
-	    
-	    ItemDetailDTO result = itemService.updateStatus(item.getId(), newStatus);
-	    
-	    assertThat(result).isEqualTo(expected);
-	    
-	    ArgumentCaptor<Item> itemCaptor = ArgumentCaptor.forClass(Item.class);
-	    verify(itemRepository).save(itemCaptor.capture());
-	    
-	    Item updatedItem = itemCaptor.getValue();
-	    assertThat(updatedItem.getItemStatus()).isEqualTo(ItemStatus.fromString(newStatus));
-	    
-	    verify(currentUserProvider).currentUserId();
-	    verify(authorizationService).requireOwner(item, ownerId);
-	    verifyNoMoreInteractions(itemRepository, currentUserProvider, authorizationService);
+		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", "USED");
+		UpdateItemContext context = ItemTestFactory.updateItemContext(item, currentUserId);
+
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateContext(item.getId())).thenReturn(Optional.of(context));
+		when(itemRepository.updateItem(
+			    context.itemInfo().getId(), context.status(), request.name(),
+			    request.brand(), request.model(), request.description(),
+			    request.basePrice(), ItemCondition.fromString(request.itemCondition())
+			)).thenReturn(0); 
+		
+		assertThatThrownBy(() -> itemService.updateItem(request))
+		.isInstanceOf(OptimisticLockException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updateItem(
+			    context.itemInfo().getId(), context.status(), request.name(),
+			    request.brand(), request.model(), request.description(),
+			    request.basePrice(), ItemCondition.fromString(request.itemCondition()));
+		verifyNoMoreInteractions(itemRepository, authorizationService, currentUserProvider);
 	}
 	
 	@Test
-	void shouldThrowWhenUserIsNotOwnerOnUpdateItemStatus() {
-		String invalidUserId = owner2.getId();
-		String newStatus = "INACTIVE";
-		
-		when(currentUserProvider.currentUserId()).thenReturn(invalidUserId);
-	    when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
-	    doThrow(ForbiddenException.class).when(authorizationService).requireOwner(item, invalidUserId);
-	    
-	    assertThatThrownBy(() -> itemService.updateStatus(item.getId(), newStatus))
-	    .isInstanceOf(ForbiddenException.class);
-	    
-	    verify(currentUserProvider).currentUserId();
-	    verify(itemRepository).findById(item.getId());
-	    verify(authorizationService).requireOwner(item, invalidUserId);
+	void shouldChangeItemAddress() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newAddressId = ownerAddress2.getId();	
+		String validatedAddressId = ownerAddress2.getId();
 
-	    verifyNoInteractions(itemMapper);
-	    verifyNoMoreInteractions(currentUserProvider, itemRepository, authorizationService);
+		ChangeItemAddressContext context = ItemTestFactory.toChangeAddressContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeAddressContext(itemId)).thenReturn(Optional.of(context));
+		when(addressService.getValidReference(newAddressId, currentUserId)).thenReturn(ownerAddress2);
+		when(itemRepository.updatePickupAddress(
+			itemId, validatedAddressId, context.currentAddressId(), context.status()))
+		.thenReturn(1);
+		
+		itemService.changePickupAddress(itemId, newAddressId);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updatePickupAddress(itemId, validatedAddressId, context.currentAddressId(), context.status());
 	}
+	
+	@Test
+	void shouldThrowWhenConcurrentChangeAddress() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newAddressId = ownerAddress2.getId();	
+		String validatedAddressId = ownerAddress2.getId();
+
+		ChangeItemAddressContext context = ItemTestFactory.toChangeAddressContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeAddressContext(itemId)).thenReturn(Optional.of(context));
+		when(addressService.getValidReference(newAddressId, currentUserId)).thenReturn(ownerAddress2);
+		when(itemRepository.updatePickupAddress(
+			itemId, validatedAddressId, context.currentAddressId(), context.status()))
+		.thenReturn(0);
+		
+		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
+		.isInstanceOf(OptimisticLockException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updatePickupAddress(itemId, validatedAddressId, context.currentAddressId(), context.status());
+	}
+	
+	@Test
+	void shouldDoNothingWhenItemAddressEqualsNewAddress() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newAddressId = ownerAddress.getId();	
+
+		ChangeItemAddressContext context = ItemTestFactory.toChangeAddressContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeAddressContext(itemId)).thenReturn(Optional.of(context));
+
+		itemService.changePickupAddress(itemId, newAddressId);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenAddressNotFound() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newAddressId = owner2Address.getId();	
+
+		ChangeItemAddressContext context = ItemTestFactory.toChangeAddressContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeAddressContext(itemId)).thenReturn(Optional.of(context));
+		doThrow(AddressNotFoundException.class)
+		.when(addressService).getValidReference(newAddressId, currentUserId);
+		
+		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
+		.isInstanceOf(AddressNotFoundException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenUserIsNotOwnerOnChangeAddress() {
+		String currentUserId = owner2.getId();
+		String itemId = item.getId();
+		String newAddressId = ownerAddress2.getId();	
+
+		ChangeItemAddressContext context = ItemTestFactory.toChangeAddressContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeAddressContext(itemId)).thenReturn(Optional.of(context));
+		doThrow(ForbiddenException.class)
+		.when(authorizationService).requireOwner(context.ownerId(), currentUserId);
+
+		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
+		.isInstanceOf(ForbiddenException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenItemIsBlockedOnChangeAddress() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newAddressId = ownerAddress2.getId();	
+
+		ChangeItemAddressContext context = ItemTestFactory.toChangeAddressContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeAddressContext(itemId)).thenReturn(Optional.of(context));
+		doThrow(ForbiddenException.class)
+		.when(authorizationService).requireNotBlocked(context.status());
+
+		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
+		.isInstanceOf(ForbiddenException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verifyNoMoreInteractions(authorizationService);
+		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldChangeItemSubCategory() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newSubCategoryId = hammer.getId();	
+		String validatedNewSubCatId = hammer.getId();
+
+		ChangeItemSubCategoryContext context = ItemTestFactory.toChangeSubCategoryContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeSubCategoryContext(itemId)).thenReturn(Optional.of(context));
+		when(categoryService.getValidSubReference(newSubCategoryId)).thenReturn(hammer);
+		when(itemRepository.updateItemSubCategory(
+		        itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status()))
+		.thenReturn(1);
+		
+		itemService.changeSubCategory(itemId, newSubCategoryId);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updateItemSubCategory(itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status());
+	}
+	
+	@Test
+	void shouldThrowWhenConcurrentChangeSubCategory() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newSubCategoryId = hammer.getId();	
+		String validatedNewSubCatId = hammer.getId();
+
+		ChangeItemSubCategoryContext context = ItemTestFactory.toChangeSubCategoryContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeSubCategoryContext(itemId)).thenReturn(Optional.of(context));
+		when(categoryService.getValidSubReference(newSubCategoryId)).thenReturn(hammer);
+		when(itemRepository.updateItemSubCategory(
+		        itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status()))
+		.thenReturn(0);
+		
+		assertThatThrownBy(() -> itemService.changeSubCategory(itemId, newSubCategoryId))
+		.isInstanceOf(OptimisticLockException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updateItemSubCategory(
+		        itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status());
+	}
+	
+	@Test
+	void shouldDoNothingWhenItemSubCategoryEqualsNewSubCategory() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newSubCategoryId = drill.getId();	
+
+		ChangeItemSubCategoryContext context = ItemTestFactory.toChangeSubCategoryContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeSubCategoryContext(itemId)).thenReturn(Optional.of(context));
+
+		itemService.changeSubCategory(itemId, newSubCategoryId);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenSubCategoryNotFound() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newSubCategoryId = "invalid-id";	
+
+		ChangeItemSubCategoryContext context = ItemTestFactory.toChangeSubCategoryContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeSubCategoryContext(itemId)).thenReturn(Optional.of(context));
+		doThrow(SubCategoryNotFoundException.class)
+		.when(categoryService).getValidSubReference(newSubCategoryId);
+		
+		assertThatThrownBy(() -> itemService.changeSubCategory(itemId, newSubCategoryId))
+		.isInstanceOf(SubCategoryNotFoundException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenUserIsNotOwnerOnChangeSubCategory() {
+		String currentUserId = owner2.getId();
+		String itemId = item.getId();
+		String newSubCategoryId = hammer.getId();	
+
+		ChangeItemSubCategoryContext context = ItemTestFactory.toChangeSubCategoryContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeSubCategoryContext(itemId)).thenReturn(Optional.of(context));
+		doThrow(ForbiddenException.class)
+		.when(authorizationService).requireOwner(context.ownerId(), currentUserId);
+
+		assertThatThrownBy(() -> itemService.changeSubCategory(itemId, newSubCategoryId))
+		.isInstanceOf(ForbiddenException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenItemIsBlockedOnChangeSubCategory() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		String newSubCategoryId = hammer.getId();	
+
+		ChangeItemSubCategoryContext context = ItemTestFactory.toChangeSubCategoryContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeSubCategoryContext(itemId)).thenReturn(Optional.of(context));
+		doThrow(ForbiddenException.class)
+		.when(authorizationService).requireNotBlocked(context.status());
+
+		assertThatThrownBy(() -> itemService.changeSubCategory(itemId, newSubCategoryId))
+		.isInstanceOf(ForbiddenException.class);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.status());
+		verifyNoMoreInteractions(authorizationService);
+		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldUpdateItemStatusFromAvailableToUnavailable() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+		
+		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
+		when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE))
+			.thenReturn(1);
+		
+		itemService.updateStatus(itemId);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.currentStatus());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE);
+	}
+	
+	@Test
+	void shouldUpdateItemStatusFromUnavailableToAvailable() {
+		String currentUserId = owner.getId();
+		
+		Item unavailableItem = ItemTestFactory.createPersisted(
+				owner, ownerAddress, drill, "200", ItemCondition.NEW);
+		unavailableItem.setItemStatus(ItemStatus.UNAVAILABLE);
+		
+		String itemId = unavailableItem.getId();
+
+		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(unavailableItem);
+
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
+		when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.AVAILABLE))
+			.thenReturn(1);
+
+		itemService.updateStatus(itemId);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.currentStatus());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.AVAILABLE);
+	}
+	
+	@Test
+	void shouldThrowWhenConcurrentUpdateStatus() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+
+		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
+		when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE))
+			.thenReturn(0);
+		
+		assertThatThrownBy(() -> itemService.updateStatus(itemId))
+			.isInstanceOf(OptimisticLockException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.currentStatus());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE);
+	}
+	
+	@Test
+	void shouldThrowWhenUserIsNotOwnerOnUpdateStatus() {
+		String currentUserId = owner2.getId();
+		String itemId = item.getId();
+
+		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
+		doThrow(ForbiddenException.class)
+			.when(authorizationService).requireOwner(context.ownerId(), currentUserId);
+
+		assertThatThrownBy(() -> itemService.updateStatus(itemId))
+			.isInstanceOf(ForbiddenException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.currentStatus());
+		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
+		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenItemIsBlockedOnUpdateStatus() {
+		String currentUserId = owner.getId();
+		String itemId = item.getId();
+
+		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
+		doThrow(ForbiddenException.class)
+			.when(authorizationService).requireNotBlocked(context.currentStatus());
+
+		assertThatThrownBy(() -> itemService.updateStatus(itemId))
+			.isInstanceOf(ForbiddenException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireNotBlocked(context.currentStatus());
+		verifyNoMoreInteractions(authorizationService);
+		verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenUpdateStatusContextNotFound() {
+		String itemId = "invalid-id";
+
+		when(currentUserProvider.currentUserId()).thenReturn(owner.getId());
+		when(queryRepository.getUpdateStatusContext(itemId))
+			.thenReturn(Optional.empty());
+
+		assertThatThrownBy(() -> itemService.updateStatus(itemId))
+			.isInstanceOf(ItemNotFoundException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verifyNoInteractions(authorizationService, itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenChangeAddressContextNotFound() {
+		String currentUserId = owner.getId();
+		String itemId = "invalid-id";
+		String newAddressId = ownerAddress2.getId();
+
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeAddressContext(itemId))
+			.thenReturn(Optional.empty());
+
+		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
+			.isInstanceOf(ItemNotFoundException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verifyNoInteractions(authorizationService, itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenChangeSubCategoryContextNotFound() {
+		String currentUserId = owner.getId();
+		String itemId = "invalid-id";
+		String newSubCategoryId = hammer.getId();
+
+		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+		when(queryRepository.getChangeSubCategoryContext(itemId))
+			.thenReturn(Optional.empty());
+
+		assertThatThrownBy(() -> itemService.changeSubCategory(itemId, newSubCategoryId))
+			.isInstanceOf(ItemNotFoundException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verifyNoInteractions(authorizationService, itemRepository);
+	}
+
 }

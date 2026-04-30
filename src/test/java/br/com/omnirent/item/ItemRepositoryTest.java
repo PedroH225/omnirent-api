@@ -7,12 +7,9 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
 import br.com.omnirent.address.AddressRepository;
@@ -30,7 +27,11 @@ import br.com.omnirent.factory.ItemTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.IntegrationTest;
+import br.com.omnirent.item.context.ChangeItemAddressContext;
+import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.item.context.UpdateItemContext;
+import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
@@ -188,4 +189,67 @@ public class ItemRepositoryTest extends IntegrationTest {
 	        });
 	}
 	
+	@Test
+	void shouldGetUpdateItemContext() {
+		Optional<UpdateItemContext> optContext = queryRepository.getUpdateContext(item.getId());
+		
+		assertThat(optContext).isPresent();
+	    assertThat(optContext.get())
+	        .satisfies(context -> {
+	        	assertThat(context.ownerId()).isEqualTo(item.getOwnerId());
+	        	assertThat(context.status()).isEqualTo(item.getItemStatus());
+	        	
+	        	assertThat(context.itemInfo()).isNotNull();
+	        	assertThat(context.itemInfo())
+	        	.satisfies(itemInfo -> {
+	        		assertThat(itemInfo.getId()).isEqualTo(item.getId());
+                    assertThat(itemInfo.getItemName()).isEqualTo(item.getName());
+                    assertThat(itemInfo.getBrand()).isEqualTo(item.getItemData().getBrand());
+                    assertThat(itemInfo.getModel()).isEqualTo(item.getItemData().getModel());
+                    assertThat(itemInfo.getDescription()).isEqualTo(item.getItemData().getDescription());
+                    assertThat(itemInfo.getBasePrice()).isEqualByComparingTo(item.getItemData().getBasePrice());
+                    assertThat(itemInfo.getItemCondition()).isEqualTo(item.getItemData().getItemCondition());
+	        	});
+	        });
+	}
+	
+	@Test
+	void shouldGetChangeItemAddressContext() {
+		Optional<ChangeItemAddressContext> optContext = queryRepository.getChangeAddressContext(item.getId());
+		
+		assertThat(optContext).isPresent();
+	    assertThat(optContext.get())
+	    .satisfies(context -> {
+	    	assertThat(context.id()).isEqualTo(item.getId());
+	    	assertThat(context.ownerId()).isEqualTo(item.getOwnerId());
+	    	assertThat(context.currentAddressId()).isEqualTo(item.getPickupAddressId());
+	    	assertThat(context.status()).isEqualTo(item.getItemStatus());
+	    });
+	}
+	
+	@Test
+	void shouldGetChangeItemSubCategoryContext() {
+		Optional<ChangeItemSubCategoryContext> optContext = queryRepository.getChangeSubCategoryContext(item.getId());
+		
+		assertThat(optContext).isPresent();
+	    assertThat(optContext.get())
+	    .satisfies(context -> {
+	    	assertThat(context.id()).isEqualTo(item.getId());
+	    	assertThat(context.ownerId()).isEqualTo(item.getOwnerId());
+	    	assertThat(context.currentSubCategoryId()).isEqualTo(item.getSubCategoryId());
+	    	assertThat(context.status()).isEqualTo(item.getItemStatus());
+	    });
+	}
+	
+	@Test
+	void shouldGetUpdateItemStatusContext() {
+		Optional<UpdateItemStatusContext> optContext = queryRepository.getUpdateStatusContext(item.getId());
+		assertThat(optContext).isPresent();
+	    assertThat(optContext.get())
+	    .satisfies(context -> {
+	    	assertThat(context.id()).isEqualTo(item.getId());
+	    	assertThat(context.ownerId()).isEqualTo(item.getOwnerId());
+	    	assertThat(context.currentStatus()).isEqualTo(item.getItemStatus());
+	    });
+	}
 }
