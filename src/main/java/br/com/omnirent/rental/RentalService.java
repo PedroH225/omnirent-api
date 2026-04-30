@@ -2,24 +2,18 @@ package br.com.omnirent.rental;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.core.NativeDetector.Context;
 import org.springframework.stereotype.Service;
 
-import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.exception.domain.RentalNotFoundException;
-import br.com.omnirent.item.ItemRepository;
 import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
-import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.domain.RentalAuthorizationService;
@@ -94,8 +88,7 @@ public class RentalService {
 
 	public RentalCreatedDTO addRent(RentalRequestDTO rentalRequestDTO) {
 		String userId = currentUserProvider.currentUserId();
-		userService.requireExistence(userId);
-		User renter = userService.getUserReference(userId);
+		User renter = userService.getValidReference(userId);
 		
 		ItemRentedContext context = itemService.getItemRentedContext(rentalRequestDTO.itemId());
 				
