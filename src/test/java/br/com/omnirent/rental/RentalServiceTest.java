@@ -294,4 +294,25 @@ public class RentalServiceTest {
 		verify(authorizationService).requireOne(allowedActors, currentUser);
 		verify(rentalRepository).updateRentalStatus(rentalId, targetStatus);
 	}
+	
+	@Test
+	void shouldMarkReturnShipped() {
+		String currentUser = renter.getId();
+
+		String rentalId = rental.getId();
+		rental.setRentalStatus(RentalStatus.RETURN_REQUESTED);
+		RentalStatus targetStatus = RentalStatus.RETURN_SHIPPED;
+		Set<String> allowedActors = Set.of(rental.getRenterId());
+
+		RentalStatusChangeContext context = RentalTestFactory.toRentalStatusChangeContext(rental);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUser);
+		when(queryRepository.getStatusChangeContext(rentalId)).thenReturn(Optional.of(context));
+		
+		rentalService.markReturnShipped(rentalId);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireOne(allowedActors, currentUser);
+		verify(rentalRepository).updateRentalStatus(rentalId, targetStatus);
+	}
 }
