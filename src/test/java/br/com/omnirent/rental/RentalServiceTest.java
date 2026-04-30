@@ -1,5 +1,11 @@
 package br.com.omnirent.rental;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +29,7 @@ import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.domain.RentalAuthorizationService;
+import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -90,19 +97,19 @@ public class RentalServiceTest {
 	}
 	
 	@Test
-	void test() {
-		System.out.println("ownerId = " + owner.getId());
-		System.out.println("renterId = " + renter.getId());
-
-		System.out.println("ownerAddressId = " + ownerAddress.getId());
-		System.out.println("ownerAddress2Id = " + ownerAddress2.getId());
-
-		System.out.println("toolsId = " + tools.getId());
-		System.out.println("drillId = " + drill.getId());
-
-		System.out.println("itemId = " + item.getId());
-		System.out.println("item2Id = " + item2.getId());
-
-		System.out.println("rentalId = " + rental.getId());
+	void shouldFindUserRentedItems() {
+		String renterId = renter.getId();
+		
+		List<RentalDisplayDTO> expected = List.of(RentalTestFactory.toRentalDisplayDTO(rental));
+		
+		when(currentUserProvider.currentUserId()).thenReturn(renterId);
+		when(queryRepository.findUserRented(renterId)).thenReturn(expected);
+		
+		List<RentalDisplayDTO> result = rentalService.findUserRented();
+		
+		assertThat(result).isEqualTo(expected);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(userService).requireExistence(renterId);
 	}
 }
