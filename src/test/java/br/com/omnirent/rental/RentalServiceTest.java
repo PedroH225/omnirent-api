@@ -9,7 +9,10 @@ import static org.mockito.Mockito.when;
 
 import java.awt.MultipleGradientPaint.ColorSpaceType;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +40,7 @@ import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.domain.RentalAuthorizationService;
 import br.com.omnirent.rental.domain.RentalPriceService;
@@ -206,5 +210,25 @@ public class RentalServiceTest {
 		verify(currentUserProvider).currentUserId();
 		verify(userService).getValidReference(renterId);
 		verify(rentalRepository).save(mappedRental);
+	}
+	
+	@Test
+	void shouldConfirm() {
+		String currentUser = owner.getId();
+
+		String rentalId = rental.getId();
+		RentalStatus targetStatus = RentalStatus.CONFIRMED;
+		Set<String> allowedActors = Set.of(rental.getOwnerId(), rental.getRenterId());
+		
+		RentalStatusChangeContext context = RentalTestFactory.toRentalStatusChangeContext(rental);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUser);
+		when(queryRepository.getStatusChangeContext(rentalId)).thenReturn(Optional.of(context));
+		
+		rentalService.confirm(rentalId);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireOne(allowedActors, currentUser);
+		verify(rentalRepository).updateRentalStatus(rentalId, targetStatus);
 	}
 }
