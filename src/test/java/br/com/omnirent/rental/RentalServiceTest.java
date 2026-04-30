@@ -7,6 +7,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.awt.MultipleGradientPaint.ColorSpaceType;
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.NativeDetector.Context;
 
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.domain.Category;
@@ -30,10 +33,16 @@ import br.com.omnirent.factory.RentalTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.item.ItemService;
+import br.com.omnirent.item.context.ItemInfo;
+import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
+import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.domain.RentalAuthorizationService;
+import br.com.omnirent.rental.domain.RentalPriceService;
+import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
+import br.com.omnirent.rental.dto.RentalRequestDTO;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -164,5 +173,38 @@ public class RentalServiceTest {
 	    verify(currentUserProvider).currentUserId();
 	    verify(userService).requireExistence(invalidId);
 	    verifyNoInteractions(queryRepository);
+	}
+	
+	@Test
+	void shouldAddRental() {
+		String renterId = renter.getId();
+		String itemId = item2.getId();
+		RentalPeriod period = RentalPeriod.MONTHLY;
+		
+		RentalRequestDTO request = RentalTestFactory.newRentalRequest(itemId, period.name());
+		ItemRentedContext context = ItemTestFactory.toItemRentedContext(item2, item2.getPickupAddress(), owner);
+		
+		BigDecimal basePrice = context.getItemInfo().getBasePrice();
+		BigDecimal finalPrice = basePrice.multiply(period.getMultiplier());
+		
+		Rental mappedRental = RentalTestFactory.create(renter, renterId, context, period, RentalStatus.CREATED, finalPrice);
+		Rental persistedRental = RentalTestFactory.toPersisted(mappedRental);
+		RentalCreatedDTO expected = RentalTestFactory.toCreatedDTO(persistedRental);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(renterId);
+		when(userService.getValidReference(renterId)).thenReturn(renter);
+		when(itemService.getItemRentedContext(itemId)).thenReturn(context);
+		when(mapper.create(renter, renterId, context, period, RentalStatus.CREATED, finalPrice))
+		.thenReturn(mappedRental);
+		when(rentalRepository.save(mappedRental)).thenReturn(persistedRental);
+		when(mapper.toCreatedDto(persistedRental)).thenReturn(expected);
+		
+		RentalCreatedDTO result = rentalService.addRent(request);
+		
+		assertThat(result).isEqualTo(expected);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(userService).getValidReference(renterId);
+		verify(rentalRepository).save(mappedRental);
 	}
 }
