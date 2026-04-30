@@ -17,6 +17,7 @@ import br.com.omnirent.category.SubCategoryRepository;
 import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
@@ -192,5 +193,41 @@ public class ItemServiceIT extends SpringIntegrationTest {
 	    
 	    assertThat(persisted.getSubCategoryId()).isNotEqualTo(mouse.getId());
 	    assertThat(persisted.getSubCategoryId()).isEqualTo(notebook.getId());
+	}
+	
+	@Test
+	void shouldUpdateItemStatusToUnavailable() {
+		itemService.updateStatus(item.getId());
+		
+		entityManager.flush();
+	    entityManager.clear();
+		
+		Optional<Item> optPersisted = itemRepository.findById(item.getId());
+	    assertThat(optPersisted).isPresent();
+	    Item persisted = optPersisted.get();
+	    
+	    assertThat(persisted.getItemStatus()).isEqualTo(ItemStatus.UNAVAILABLE);
+	    
+	    itemService.updateStatus(item.getId());
+	}
+	
+	@Test
+	void shouldUpdateItemStatusToAvailable() {
+		Item newItem = ItemTestFactory.create(owner, ownerAddress, ball, "200", ItemCondition.USED);
+		newItem.setItemStatus(ItemStatus.UNAVAILABLE);
+		Item result = itemRepository.save(newItem);
+		
+		assertThat(result.getItemStatus()).isEqualTo(ItemStatus.UNAVAILABLE);
+		
+		itemService.updateStatus(result.getId());
+		
+		entityManager.flush();
+	    entityManager.clear();
+		
+		Optional<Item> optPersisted = itemRepository.findById(result.getId());
+	    assertThat(optPersisted).isPresent();
+	    Item persisted = optPersisted.get();
+	    
+	    assertThat(persisted.getItemStatus()).isEqualTo(ItemStatus.AVAILABLE);	    
 	}
 }
