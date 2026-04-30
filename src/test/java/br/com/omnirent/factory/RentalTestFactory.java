@@ -117,4 +117,8 @@ public final class RentalTestFactory {
 	        rental.getCreatedAt()
 	    );
 	}
+	
+	public static RentalRequestDTO newRentalRequest(String itemId, String rentalPeriod) {
+		return new RentalRequestDTO(itemId, rentalPeriod);
+	}
 }
