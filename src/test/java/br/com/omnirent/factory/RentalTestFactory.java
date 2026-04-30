@@ -11,6 +11,7 @@ import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.user.domain.User;
+import br.com.omnirent.utils.Sequence;
 
 public final class RentalTestFactory {
 
@@ -39,6 +40,17 @@ public final class RentalTestFactory {
 		
 		rental.setOwnerId(owner.getId());
 		rental.setRenterId(renter.getId());
+		
+		return rental;
+	}
+	
+	public static Rental createPersisted(Item item, User owner, User renter, Address address,
+			String finalPrice, RentalStatus status, RentalPeriod period, LocalDateTime startDate, LocalDateTime endDate) {
+		Rental rental = create(item, owner, renter, address, finalPrice, status, period, startDate, endDate);
+		
+		rental.setId(Sequence.nextString("rentalId"));
+		rental.setCreatedAt(LocalDateTime.now());
+		rental.setUpdatedAt(LocalDateTime.now());
 		
 		return rental;
 	}
