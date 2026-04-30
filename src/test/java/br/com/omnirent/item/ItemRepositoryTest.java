@@ -31,6 +31,7 @@ import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
+import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
@@ -237,6 +238,18 @@ public class ItemRepositoryTest extends IntegrationTest {
 	    	assertThat(context.ownerId()).isEqualTo(item.getOwnerId());
 	    	assertThat(context.currentSubCategoryId()).isEqualTo(item.getSubCategoryId());
 	    	assertThat(context.status()).isEqualTo(item.getItemStatus());
+	    });
+	}
+	
+	@Test
+	void shouldGetUpdateItemStatusContext() {
+		Optional<UpdateItemStatusContext> optContext = queryRepository.getUpdateStatusContext(item.getId());
+		assertThat(optContext).isPresent();
+	    assertThat(optContext.get())
+	    .satisfies(context -> {
+	    	assertThat(context.id()).isEqualTo(item.getId());
+	    	assertThat(context.ownerId()).isEqualTo(item.getOwnerId());
+	    	assertThat(context.currentStatus()).isEqualTo(item.getItemStatus());
 	    });
 	}
 }
