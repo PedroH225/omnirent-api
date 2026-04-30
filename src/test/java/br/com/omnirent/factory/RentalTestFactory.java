@@ -89,6 +89,14 @@ public final class RentalTestFactory {
 		return rental;
 	}
 	
+	public static Rental toPersisted(Rental rental) {
+		rental.setId(Sequence.nextString("rentalId"));
+		rental.setCreatedAt(LocalDateTime.now());
+		rental.setUpdatedAt(LocalDateTime.now());
+		
+		return rental;
+	}
+	
 	public static RentalDisplayDTO toRentalDisplayDTO(Rental rental) {
 	    return new RentalDisplayDTO(
 	        rental.getId(), rental.getStartDate(), rental.getEndDate(),
