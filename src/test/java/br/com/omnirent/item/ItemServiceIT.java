@@ -175,4 +175,22 @@ public class ItemServiceIT extends SpringIntegrationTest {
 	    assertThat(persisted.getPickupAddressId()).isNotEqualTo(ownerAddress.getId());
 	    assertThat(persisted.getPickupAddressId()).isEqualTo(ownerAddress2.getId());	
 	}
+	
+	@Test
+	void shouldChangeItemSubCategory() {
+		itemService.changeSubCategory(item.getId(), notebook.getId());
+		
+		entityManager.flush();
+	    entityManager.clear();
+		
+		Optional<Item> optPersisted = itemRepository.findById(item.getId());
+	    assertThat(optPersisted).isPresent();
+	    Item persisted = optPersisted.get();
+	    
+	    assertThat(persisted.getId()).isEqualTo(item.getId());
+	    assertThat(persisted.getOwnerId()).isEqualTo(owner.getId());
+	    
+	    assertThat(persisted.getSubCategoryId()).isNotEqualTo(mouse.getId());
+	    assertThat(persisted.getSubCategoryId()).isEqualTo(notebook.getId());
+	}
 }
