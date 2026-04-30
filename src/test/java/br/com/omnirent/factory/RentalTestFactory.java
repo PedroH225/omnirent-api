@@ -14,6 +14,7 @@ import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.item.dto.ItemSnapshotDTO;
+import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
@@ -120,5 +121,10 @@ public final class RentalTestFactory {
 	
 	public static RentalRequestDTO newRentalRequest(String itemId, String rentalPeriod) {
 		return new RentalRequestDTO(itemId, rentalPeriod);
+	}
+	
+	public static RentalStatusChangeContext toRentalStatusChangeContext(Rental rental) {
+		return new RentalStatusChangeContext(rental.getId(), rental.getOwnerId(),
+				rental.getRenterId(), rental.getRentalStatus(), rental.getRentalPeriod());
 	}
 }
