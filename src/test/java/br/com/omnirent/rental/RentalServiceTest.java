@@ -119,7 +119,7 @@ public class RentalServiceTest {
 	
 	@Test
 	void shouldThrowWhenUserDoesNotExistOnFindUserRented() {
-	    String invalidId = "invalid-idt";
+	    String invalidId = "invalid-id";
 
 	    when(currentUserProvider.currentUserId()).thenReturn(invalidId);
 	    doThrow(UserNotFoundException.class)
@@ -148,5 +148,21 @@ public class RentalServiceTest {
 		
 		verify(currentUserProvider).currentUserId();
 		verify(userService).requireExistence(ownerId);
+	}
+	
+	@Test
+	void shouldThrowWhenUserDoesNotExistOnFindUserRentals() {
+	    String invalidId = "invalid-id";
+
+	    when(currentUserProvider.currentUserId()).thenReturn(invalidId);
+	    doThrow(UserNotFoundException.class)
+	        .when(userService).requireExistence(invalidId);
+
+	    assertThatThrownBy(() -> rentalService.findUserRentals())
+	        .isInstanceOf(UserNotFoundException.class);
+
+	    verify(currentUserProvider).currentUserId();
+	    verify(userService).requireExistence(invalidId);
+	    verifyNoInteractions(queryRepository);
 	}
 }
