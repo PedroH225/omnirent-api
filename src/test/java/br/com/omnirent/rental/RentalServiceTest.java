@@ -1,0 +1,108 @@
+package br.com.omnirent.rental;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import br.com.omnirent.address.domain.Address;
+import br.com.omnirent.category.domain.Category;
+import br.com.omnirent.category.domain.SubCategory;
+import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.RentalPeriod;
+import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.factory.AddressTestFactory;
+import br.com.omnirent.factory.CategoryTestFactory;
+import br.com.omnirent.factory.ItemTestFactory;
+import br.com.omnirent.factory.RentalTestFactory;
+import br.com.omnirent.factory.SubCategoryTestFactory;
+import br.com.omnirent.factory.UserTestFactory;
+import br.com.omnirent.item.ItemService;
+import br.com.omnirent.item.domain.Item;
+import br.com.omnirent.rental.domain.Rental;
+import br.com.omnirent.rental.domain.RentalAuthorizationService;
+import br.com.omnirent.security.CurrentUserProvider;
+import br.com.omnirent.user.UserService;
+import br.com.omnirent.user.domain.User;
+
+@ExtendWith(MockitoExtension.class)
+public class RentalServiceTest {
+	
+	@InjectMocks
+	private RentalService rentalService;
+	
+	@Mock
+	private RentalRepository rentalRepository;
+	
+	@Mock
+	private RentalQueryRepository queryRepository;
+	
+	@Mock
+	private ItemService itemService;
+	
+	@Mock
+	private UserService userService;
+	
+	@Mock
+	private RentalAuthorizationService authorizationService;
+	
+	@Mock
+	private RentalMapper mapper;
+	
+	@Mock
+	private CurrentUserProvider currentUserProvider;
+	
+	private User owner;
+	private User renter;
+
+	private Address ownerAddress;
+	private Address ownerAddress2;
+	
+	private Category tools;
+	private SubCategory drill;
+
+	private Item item;
+	private Item item2;
+	
+	private Rental rental;
+	
+	@BeforeEach
+	void setUp() {
+		owner = UserTestFactory.persistedOwner();
+		renter = UserTestFactory.persistedUser();
+
+		ownerAddress = AddressTestFactory.forPersistedUser(owner);
+		ownerAddress2 = AddressTestFactory.forPersistedUser(owner);
+
+        tools = CategoryTestFactory.createPersisted("Tools");
+        drill = SubCategoryTestFactory.createPersisted("Drill", tools);
+
+        item = ItemTestFactory.createPersisted(owner, ownerAddress, drill,
+        		"200", ItemCondition.NEW);
+        
+        item2 = ItemTestFactory.createPersisted(owner, ownerAddress, drill,
+        		"100", ItemCondition.USED);
+        
+        rental = RentalTestFactory.createPersisted(item, owner, renter, ownerAddress2, "4400", 
+        		RentalStatus.CREATED, RentalPeriod.MONTHLY, null, null);
+	}
+	
+	@Test
+	void test() {
+		System.out.println("ownerId = " + owner.getId());
+		System.out.println("renterId = " + renter.getId());
+
+		System.out.println("ownerAddressId = " + ownerAddress.getId());
+		System.out.println("ownerAddress2Id = " + ownerAddress2.getId());
+
+		System.out.println("toolsId = " + tools.getId());
+		System.out.println("drillId = " + drill.getId());
+
+		System.out.println("itemId = " + item.getId());
+		System.out.println("item2Id = " + item2.getId());
+
+		System.out.println("rentalId = " + rental.getId());
+	}
+}
