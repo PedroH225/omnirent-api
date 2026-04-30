@@ -1,6 +1,7 @@
 package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.contentOf;
 
 import java.io.ObjectInputFilter.Config;
 import java.util.Optional;
@@ -26,6 +27,7 @@ import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringIntegrationTest;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
+import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.User;
@@ -112,12 +114,6 @@ public class ItemServiceIT extends SpringIntegrationTest {
 	    assertThat(result.getBasePrice()).isEqualByComparingTo("200");
 	    assertThat(result.getItemCondition()).isEqualTo(condition.toString());
 
-	    assertThat(result.getSubCategory()).isNotNull();
-	    assertThat(result.getSubCategory().getId()).isEqualTo(notebook.getId());
-
-	    assertThat(result.getPickupAddress()).isNotNull();
-	    assertThat(result.getPickupAddress().getId()).isEqualTo(ownerAddress.getId());
-
 	    Optional<Item> optPersisted = itemRepository.findById(result.getId());
 	    assertThat(optPersisted).isPresent();
 	    Item persisted = optPersisted.get();
@@ -131,5 +127,41 @@ public class ItemServiceIT extends SpringIntegrationTest {
 	        .isEqualByComparingTo("200");
 	    assertThat(persisted.getItemData().getItemCondition())
 	        .isEqualTo(condition);
+	}
+	
+	@Test
+	void shouldUpdateItemFieldsOnly() {
+		ItemCondition condition = ItemCondition.USED;
+	    ItemRequestDTO request = ItemTestFactory.createItemRequest(
+		        item.getId(), "300", "USED", ball.getId(), ownerAddress2.getId()
+		    );	
+	    ItemDetailDTO result = itemService.updateItem(request);
+	    
+	    assertThat(result).isNotNull();
+	    assertThat(result.getId()).isEqualTo(item.getId());
+
+	    assertThat(result.getBasePrice()).isEqualByComparingTo("300");
+	    assertThat(result.getItemCondition()).isEqualTo(condition.toString());
+
+	    assertThat(result.getSubCategory()).isNotNull();
+	    assertThat(result.getSubCategory().getId()).isEqualTo(mouse.getId());
+
+	    assertThat(result.getPickupAddress()).isNotNull();
+	    assertThat(result.getPickupAddress().getId()).isEqualTo(ownerAddress.getId());
+
+	    Optional<Item> optPersisted = itemRepository.findById(result.getId());
+	    assertThat(optPersisted).isPresent();
+	    Item persisted = optPersisted.get();
+	    
+	    assertThat(persisted.getId()).isEqualTo(item.getId());
+	    assertThat(persisted.getOwnerId()).isEqualTo(owner.getId());
+
+	    assertThat(persisted.getItemData().getBasePrice())
+	        .isEqualByComparingTo("300");
+	    assertThat(persisted.getItemData().getItemCondition())
+	        .isEqualTo(condition);
+
+	    assertThat(persisted.getSubCategoryId()).isEqualTo(mouse.getId());
+	    assertThat(persisted.getPickupAddressId()).isEqualTo(ownerAddress.getId());
 	}
 }
