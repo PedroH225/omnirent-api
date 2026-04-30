@@ -28,6 +28,7 @@ import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.IntegrationTest;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
+import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.domain.Item;
@@ -219,10 +220,23 @@ public class ItemRepositoryTest extends IntegrationTest {
 	    assertThat(optContext.get())
 	    .satisfies(context -> {
 	    	assertThat(context.id()).isEqualTo(item.getId());
-	    	assertThat(context.ownerId()).isEqualTo(owner.getId());
-	    	assertThat(context.currentAddressId()).isEqualTo(ownerAddress.getId());
+	    	assertThat(context.ownerId()).isEqualTo(item.getOwnerId());
+	    	assertThat(context.currentAddressId()).isEqualTo(item.getPickupAddressId());
 	    	assertThat(context.status()).isEqualTo(item.getItemStatus());
 	    });
 	}
 	
+	@Test
+	void shouldGetChangeItemSubCategoryContext() {
+		Optional<ChangeItemSubCategoryContext> optContext = queryRepository.getChangeSubCategoryContext(item.getId());
+		
+		assertThat(optContext).isPresent();
+	    assertThat(optContext.get())
+	    .satisfies(context -> {
+	    	assertThat(context.id()).isEqualTo(item.getId());
+	    	assertThat(context.ownerId()).isEqualTo(item.getOwnerId());
+	    	assertThat(context.currentSubCategoryId()).isEqualTo(item.getSubCategoryId());
+	    	assertThat(context.status()).isEqualTo(item.getItemStatus());
+	    });
+	}
 }
