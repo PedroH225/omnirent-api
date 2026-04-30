@@ -97,6 +97,17 @@ public final class RentalTestFactory {
 		return rental;
 	}
 	
+	public static RentalCreatedDTO toCreatedDTO(Rental rental) {
+		ItemSnapshotDTO itemSnapshotDTO = ItemTestFactory.toSnapshotDTO(rental.getItemSnapshot());
+		AddressSnapshotDTO addressSnapshotDTO = AddressTestFactory.toSnapDto(rental.getAddressSnapshot());
+		
+		return new RentalCreatedDTO(
+			    rental.getId(), rental.getStartDate(), rental.getEndDate(),
+			    rental.getFinalPrice(), rental.getRentalStatus(), rental.getRentalPeriod(),
+			    itemSnapshotDTO, addressSnapshotDTO
+			);
+	}
+	
 	public static RentalDisplayDTO toRentalDisplayDTO(Rental rental) {
 	    return new RentalDisplayDTO(
 	        rental.getId(), rental.getStartDate(), rental.getEndDate(),
