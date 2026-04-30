@@ -231,4 +231,25 @@ public class RentalServiceTest {
 		verify(authorizationService).requireOne(allowedActors, currentUser);
 		verify(rentalRepository).updateRentalStatus(rentalId, targetStatus);
 	}
+	
+	@Test
+	void shouldStartPreparing() {
+		String currentUser = owner.getId();
+
+		String rentalId = rental.getId();
+		rental.setRentalStatus(RentalStatus.CONFIRMED);
+		RentalStatus targetStatus = RentalStatus.PREPARING;
+		
+		Set<String> allowedActors = Set.of(rental.getOwnerId());
+		RentalStatusChangeContext context = RentalTestFactory.toRentalStatusChangeContext(rental);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUser);
+		when(queryRepository.getStatusChangeContext(rentalId)).thenReturn(Optional.of(context));
+		
+		rentalService.startPreparing(rentalId);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireOne(allowedActors, currentUser);
+		verify(rentalRepository).updateRentalStatus(rentalId, targetStatus);
+	}
 }
