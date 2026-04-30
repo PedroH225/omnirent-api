@@ -18,11 +18,14 @@ import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
+import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.ItemSnapshotDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
+import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserResponseDTO;
 import br.com.omnirent.utils.Sequence;
@@ -47,6 +50,8 @@ public final class ItemTestFactory {
         item.setItemStatus(ItemStatus.AVAILABLE);
         item.setOwnerId(owner.getId());
         item.setSubCategoryId(subCategory.getId());
+        
+        item.setPickupAddress(address);
         item.setPickupAddressId(address.getId());
         return item;
     }
@@ -210,4 +215,25 @@ public final class ItemTestFactory {
     	return new UpdateItemStatusContext(item.getId(), item.getItemStatus(),
     			item.getOwnerId());
     }
+    
+    public static ItemSnapshot toSnapshot(ItemInfo itemInfo, Rental rental) {
+    	ItemSnapshot itemSnapshot = new ItemSnapshot(
+    	        itemInfo.getItemName(), itemInfo.getBrand(), itemInfo.getModel(),
+    	        itemInfo.getDescription(), itemInfo.getBasePrice(), itemInfo.getItemCondition()
+    	    );
+
+    	    itemSnapshot.setRental(rental);
+
+    	    return itemSnapshot;
+    }
+    
+	public static ItemSnapshotDTO toSnapshotDTO(ItemSnapshot itemSnapshot) {
+		ItemData itemData = itemSnapshot.getItemData();
+
+		return new ItemSnapshotDTO(
+			    itemSnapshot.getId(), itemSnapshot.getName(), itemData.getBrand(),
+			    itemData.getModel(), itemData.getBasePrice(), itemData.getItemCondition(),
+			    itemData.getDescription()
+			);
+	}
 }
