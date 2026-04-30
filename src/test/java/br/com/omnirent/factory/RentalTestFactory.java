@@ -10,6 +10,7 @@ import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.rental.domain.Rental;
+import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.utils.Sequence;
 
@@ -38,7 +39,10 @@ public final class RentalTestFactory {
 		rental.setRentalPeriod(period);
 		rental.setFinalPrice(new BigDecimal(finalPrice));
 		
+		rental.setOwner(owner);
 		rental.setOwnerId(owner.getId());
+		
+		rental.setRenter(renter);
 		rental.setRenterId(renter.getId());
 		
 		return rental;
@@ -53,5 +57,15 @@ public final class RentalTestFactory {
 		rental.setUpdatedAt(LocalDateTime.now());
 		
 		return rental;
+	}
+	
+	public static RentalDisplayDTO toRentalDisplayDTO(Rental rental) {
+	    return new RentalDisplayDTO(
+	        rental.getId(), rental.getStartDate(), rental.getEndDate(),
+	        rental.getFinalPrice(), rental.getRentalStatus(), rental.getRentalPeriod(),
+	        rental.getItemSnapshot().getId(), rental.getItemSnapshot().getName(), rental.getRenterId(),
+	        rental.getRenter().getName(), rental.getOwnerId(), rental.getOwner().getName(),
+	        rental.getCreatedAt()
+	    );
 	}
 }
