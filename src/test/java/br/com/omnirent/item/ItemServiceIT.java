@@ -1,6 +1,7 @@
 package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Optional;
 
@@ -18,6 +19,7 @@ import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.exception.common.ForbiddenException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
@@ -25,6 +27,7 @@ import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringIntegrationTest;
 import br.com.omnirent.item.domain.Item;
+import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
@@ -157,6 +160,29 @@ public class ItemServiceIT extends SpringIntegrationTest {
 
 	    assertThat(persisted.getSubCategoryId()).isEqualTo(mouse.getId());
 	    assertThat(persisted.getPickupAddressId()).isEqualTo(ownerAddress.getId());
+	}
+	
+	@Test
+	void shouldThrowWhenUserIsNotOwnerOnUpdateItem() {
+		SecurityTestUtils.setAuthenticatedUser(owner2.getId());
+	    UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "300", "USED");
+	    
+	    assertThatThrownBy(() -> itemService.updateItem(request))
+	    .isInstanceOf(ForbiddenException.class);
+	    
+	    entityManager.flush();
+	    entityManager.clear();
+
+	    Optional<Item> optPersisted = itemRepository.findById(item.getId());
+	    assertThat(optPersisted).isPresent();
+
+	    Item persisted = optPersisted.get();
+	    ItemData persistedData = persisted.getItemData();
+
+	    assertThat(persistedData.getBasePrice()).isNotEqualByComparingTo("300");
+	    assertThat(persisted.getItemStatus()).isNotEqualTo(ItemCondition.USED);
+	    
+	    assertThat(persisted.getOwnerId()).isEqualTo(owner.getId());
 	}
 	
 	@Test
