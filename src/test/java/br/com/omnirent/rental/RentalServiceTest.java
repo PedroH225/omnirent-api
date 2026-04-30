@@ -1,7 +1,10 @@
 package br.com.omnirent.rental;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -19,6 +22,7 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
@@ -111,5 +115,21 @@ public class RentalServiceTest {
 		
 		verify(currentUserProvider).currentUserId();
 		verify(userService).requireExistence(renterId);
+	}
+	
+	@Test
+	void shouldThrowWhenUserDoesNotExistOnFindUserRented() {
+	    String invalidId = "invalid-id";
+
+	    when(currentUserProvider.currentUserId()).thenReturn(invalidId);
+	    doThrow(UserNotFoundException.class)
+	        .when(userService).requireExistence(invalidId);
+
+	    assertThatThrownBy(() -> rentalService.findUserRented())
+	        .isInstanceOf(UserNotFoundException.class);
+
+	    verify(currentUserProvider).currentUserId();
+	    verify(userService).requireExistence(invalidId);
+	    verifyNoInteractions(queryRepository);
 	}
 }
