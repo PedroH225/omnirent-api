@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import br.com.omnirent.address.AddressRepository;
 import br.com.omnirent.address.domain.Address;
+import br.com.omnirent.address.domain.AddressData;
 import br.com.omnirent.category.CategoryRepository;
 import br.com.omnirent.category.SubCategoryRepository;
 import br.com.omnirent.category.domain.Category;
@@ -155,5 +156,23 @@ public class ItemServiceIT extends SpringIntegrationTest {
 
 	    assertThat(persisted.getSubCategoryId()).isEqualTo(mouse.getId());
 	    assertThat(persisted.getPickupAddressId()).isEqualTo(ownerAddress.getId());
+	}
+	
+	@Test
+	void shouldChangeItemAddress() {
+		itemService.changePickupAddress(item.getId(), ownerAddress2.getId());
+		
+	    entityManager.flush();
+	    entityManager.clear();
+		
+		Optional<Item> optPersisted = itemRepository.findById(item.getId());
+	    assertThat(optPersisted).isPresent();
+	    Item persisted = optPersisted.get();
+	    
+	    assertThat(persisted.getId()).isEqualTo(item.getId());
+	    assertThat(persisted.getOwnerId()).isEqualTo(owner.getId());
+
+	    assertThat(persisted.getPickupAddressId()).isNotEqualTo(ownerAddress.getId());
+	    assertThat(persisted.getPickupAddressId()).isEqualTo(ownerAddress2.getId());	
 	}
 }
