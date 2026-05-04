@@ -401,4 +401,26 @@ public class RentalServiceTest {
 	    verify(authorizationService).requireOne(allowedActors, currentUser);
 	    verifyNoInteractions(rentalRepository);
 	}
+	
+	@Test
+	void shouldThrowWhenOwnerTriesToRequestReturn() {
+	    String currentUser = owner.getId();
+
+	    String rentalId = rental.getId();
+	    rental.setRentalStatus(RentalStatus.IN_USE);
+
+	    Set<String> allowedActors = Set.of(rental.getRenterId());
+	    RentalStatusChangeContext context = RentalTestFactory.toRentalStatusChangeContext(rental);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUser);
+	    when(queryRepository.getStatusChangeContext(rentalId)).thenReturn(Optional.of(context));
+	    doThrow(ForbiddenException.class).when(authorizationService).requireOne(allowedActors, currentUser);
+
+	    assertThatThrownBy(() -> rentalService.requestReturn(rentalId))
+	        .isInstanceOf(ForbiddenException.class);
+
+	    verify(currentUserProvider).currentUserId();
+	    verify(authorizationService).requireOne(allowedActors, currentUser);
+	    verifyNoInteractions(rentalRepository);
+	}
 }
