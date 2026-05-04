@@ -28,6 +28,7 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.exception.common.ForbiddenException;
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
@@ -356,5 +357,26 @@ public class RentalServiceTest {
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireOne(allowedActors, currentUser);
 		verify(rentalRepository).updateRentalStatus(rentalId, targetStatus);
+	}
+	
+	@Test
+	void shouldThrowWhenUserIsNotActorOnConfirm() {
+		String currentUser = owner.getId();
+
+		String rentalId = rental.getId();
+		Set<String> allowedActors = Set.of(rental.getOwnerId(), rental.getRenterId());
+		
+		RentalStatusChangeContext context = RentalTestFactory.toRentalStatusChangeContext(rental);
+		
+		when(currentUserProvider.currentUserId()).thenReturn(currentUser);
+		when(queryRepository.getStatusChangeContext(rentalId)).thenReturn(Optional.of(context));
+		doThrow(ForbiddenException.class).when(authorizationService).requireOne(allowedActors, currentUser);
+		
+		assertThatThrownBy(() -> rentalService.confirm(rentalId))
+		.isInstanceOf(ForbiddenException.class);
+
+		verify(currentUserProvider).currentUserId();
+		verify(authorizationService).requireOne(allowedActors, currentUser);
+		verifyNoInteractions(rentalRepository);
 	}
 }
