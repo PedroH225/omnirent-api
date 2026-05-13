@@ -137,6 +137,8 @@ public class RentalServiceIT extends SpringIntegrationTest {
 		assertThat(persisted.getRenterId()).isEqualTo(renter.getId());
 		assertThat(persisted.getOwnerId()).isEqualTo(owner.getId());
 		assertThat(persisted.getFinalPrice()).isEqualByComparingTo(result.getFinalPrice());
+		assertThat(persisted.getStartDate()).isNull();
+		assertThat(persisted.getEndDate()).isNull();;
 	}
 	
 	@Test
