@@ -1,5 +1,9 @@
 package br.com.omnirent.rental;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Optional;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +29,8 @@ import br.com.omnirent.item.ItemRepository;
 import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.rental.domain.Rental;
+import br.com.omnirent.rental.dto.RentalCreatedDTO;
+import br.com.omnirent.rental.dto.RentalRequestDTO;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -103,19 +109,23 @@ public class RentalServiceIT extends SpringIntegrationTest {
 	}
 	
 	@Test
-	void test() {
-		System.out.println("ownerId = " + owner.getId());
-		System.out.println("renterId = " + renter.getId());
+	void shouldAddRental() {
+		SecurityTestUtils.setAuthenticatedUser(renter.getId());
+		String itemId = item2.getId();
+		RentalPeriod period = RentalPeriod.MONTHLY;
+		
+		RentalRequestDTO request = RentalTestFactory.newRentalRequest(itemId, period.name());
+	
+		RentalCreatedDTO result = rentalService.addRent(request);
+		
+		Optional<Rental> optPersisted = rentalRepository.findById(result.getId());
+		assertThat(optPersisted).isPresent();
 
-		System.out.println("ownerAddressId = " + ownerAddress.getId());
-		System.out.println("ownerAddress2Id = " + ownerAddress2.getId());
-
-		System.out.println("toolsId = " + tools.getId());
-		System.out.println("drillId = " + drill.getId());
-
-		System.out.println("itemId = " + item.getId());
-		System.out.println("item2Id = " + item2.getId());
-
-		System.out.println("rentalId = " + rental.getId());
+		Rental persisted = optPersisted.get();
+		assertThat(persisted.getRentalStatus()).isEqualTo(RentalStatus.CREATED);
+		assertThat(persisted.getRentalPeriod()).isEqualTo(RentalPeriod.MONTHLY);
+		assertThat(persisted.getRenterId()).isEqualTo(renter.getId());
+		assertThat(persisted.getOwnerId()).isEqualTo(owner.getId());
+		assertThat(persisted.getFinalPrice()).isEqualByComparingTo(result.getFinalPrice());
 	}
 }
