@@ -2,10 +2,14 @@ package br.com.omnirent.factory;
 
 import java.time.LocalDateTime;
 
+import br.com.omnirent.address.context.AddressInfo;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.domain.AddressData;
+import br.com.omnirent.address.domain.AddressSnapshot;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
+import br.com.omnirent.address.dto.AddressSnapshotDTO;
+import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.utils.Sequence;
 
@@ -124,4 +128,24 @@ public final class AddressTestFactory {
 
         return copy;
     }
+    	
+    public static AddressSnapshot toSnapshot(AddressInfo address, Rental rental) {
+    	AddressSnapshot addressSnapshot = new AddressSnapshot(
+	            address.getStreet(), address.getNumber(),
+	            address.getComplement(), address.getDistrict(), address.getCity(),
+	            address.getState(), address.getCountry(), address.getZipCode(),
+	            rental);		
+		addressSnapshot.setRental(rental);
+		
+		return addressSnapshot;
+    }
+    
+    public static AddressSnapshotDTO toSnapDto(AddressSnapshot address) {
+		AddressData addressData = address.getAddressData();
+	    return new AddressSnapshotDTO(
+	            address.getId(), addressData.getStreet(), addressData.getNumber(),
+	            addressData.getComplement(), addressData.getDistrict(), addressData.getCity(),
+	            addressData.getState(), addressData.getCountry(), addressData.getZipCode()
+	    );
+	}
 }
