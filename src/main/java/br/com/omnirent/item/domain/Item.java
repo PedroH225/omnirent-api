@@ -50,8 +50,4 @@ public class Item extends NamedEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "owner_id", insertable = false, updatable = false)
 	private User owner;
-	
-	public void updateItemStatus(String status) {
-	    setItemStatus(ItemStatus.fromString(status));
-	}
 }
