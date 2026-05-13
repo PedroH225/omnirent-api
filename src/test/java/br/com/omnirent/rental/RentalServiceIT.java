@@ -30,11 +30,14 @@ import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalCreatedDTO;
+import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.rental.dto.RentalRequestDTO;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.utils.SecurityTestUtils;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 @Transactional
@@ -60,6 +63,9 @@ public class RentalServiceIT extends SpringIntegrationTest {
 	@Autowired
 	private SubCategoryRepository subRepository;
 	
+	@PersistenceContext
+	private EntityManager entityManager;
+	
 	@Autowired
 	private ItemService itemService;
 	
@@ -79,6 +85,7 @@ public class RentalServiceIT extends SpringIntegrationTest {
 	private Item item2;
 	
 	private Rental rental;
+	private Rental rental2;
 	
 	@BeforeEach
 	void setUp() {
@@ -100,6 +107,9 @@ public class RentalServiceIT extends SpringIntegrationTest {
         rental = rentalRepository.save(RentalTestFactory.create(item, owner, renter, ownerAddress2, "4400", 
         		RentalStatus.CREATED, RentalPeriod.MONTHLY, null, null));
 	
+        rental2 = rentalRepository.save(RentalTestFactory.create(item2, owner, renter, ownerAddress2, "4400", 
+        		RentalStatus.SHIPPED, RentalPeriod.MONTHLY, null, null));
+        
 		SecurityTestUtils.setAuthenticatedUser(owner.getId());
 	}
 	
@@ -127,5 +137,24 @@ public class RentalServiceIT extends SpringIntegrationTest {
 		assertThat(persisted.getRenterId()).isEqualTo(renter.getId());
 		assertThat(persisted.getOwnerId()).isEqualTo(owner.getId());
 		assertThat(persisted.getFinalPrice()).isEqualByComparingTo(result.getFinalPrice());
+	}
+	
+	@Test
+	void shouldMarkInUse() {
+		String rentId = rental2.getId();
+		
+		rentalService.markInUse(rentId);
+		
+		entityManager.flush();
+		entityManager.clear();
+		
+		Optional<Rental> optPersisted = rentalRepository.findById(rentId);
+		assertThat(optPersisted).isPresent();
+		
+		Rental persisted = optPersisted.get();
+		assertThat(persisted.getRentalStatus()).isEqualTo(RentalStatus.IN_USE);
+		assertThat(persisted.getStartDate()).isNotNull();
+		assertThat(persisted.getEndDate()).isNotNull();
+		assertThat(persisted.getStartDate()).isBefore(persisted.getEndDate());
 	}
 }
