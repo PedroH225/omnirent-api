@@ -40,11 +40,16 @@ public class RentalMapper {
 	public RentalCreatedDTO toCreatedDto(Rental rental) {
 		ItemSnapshotDTO itemSnapshotDTO = itemMapper.toSnapshotDTO(rental.getItemSnapshot());
 		AddressSnapshotDTO addressSnapshotDTO = addressMapper.toSnapDto(rental.getAddressSnapshot());
-		return new RentalCreatedDTO(
+		RentalCreatedDTO newRental = new RentalCreatedDTO(
 			    rental.getId(), rental.getStartDate(), rental.getEndDate(),
 			    rental.getFinalPrice(), rental.getRentalStatus(), rental.getRentalPeriod(),
 			    itemSnapshotDTO, addressSnapshotDTO
 			);
+		
+		newRental.setRentalPeriodLabel(messageService.get(newRental.getRentalPeriod().getMessageKey()));
+		newRental.setRentalStatusLabel(messageService.get(newRental.getRentalStatus().getMessageKey()));
+		
+		return newRental;
 	}
 	
 	public Rental create(User renter, String renterId, ItemRentedContext context,
