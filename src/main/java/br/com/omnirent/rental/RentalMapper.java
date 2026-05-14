@@ -35,19 +35,7 @@ public class RentalMapper {
 	
 	private AddressMapper addressMapper;
 	
-	private UserMapper userMapper;
-
 	private MessageService messageService;
-	
-	public RentalDetailDTO toDetailDto(Rental rental) {
-		return new RentalDetailDTO(rental);
-	}
-	
-	public List<RentalDetailDTO> toDto(List<Rental> rentals) {
-		return rentals.stream()
-				.map(RentalDetailDTO::new)
-				.collect(Collectors.toList());
-	}
 	
 	public RentalCreatedDTO toCreatedDto(Rental rental) {
 		ItemSnapshotDTO itemSnapshotDTO = itemMapper.toSnapshotDTO(rental.getItemSnapshot());
