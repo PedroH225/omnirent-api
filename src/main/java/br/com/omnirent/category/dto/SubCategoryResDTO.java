@@ -30,6 +30,6 @@ public class SubCategoryResDTO {
 	
 	@JsonIgnore
 	public String getCategoryMessageKey() {
-		return "category." + this.name;  
+		return "category." + this.category;  
 	}
 }
