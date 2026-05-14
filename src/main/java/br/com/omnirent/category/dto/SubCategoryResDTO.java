@@ -1,6 +1,7 @@
 package br.com.omnirent.category.dto;
 
-import br.com.omnirent.category.domain.SubCategory;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 
 @Data
@@ -11,6 +12,10 @@ public class SubCategoryResDTO {
 	private String name;
 	
 	private String category;
+	
+	private String subCategoryLabel;
+	
+	private String categoryLabel;
 
 	public SubCategoryResDTO(String id, String name, String categoryName) {
 		this.id = id;
@@ -18,5 +23,13 @@ public class SubCategoryResDTO {
 		this.category = categoryName;
 	}
 	
+	@JsonIgnore
+	public String getMessageKey() {
+		return "subcategory." + this.name;  
+	}
 	
+	@JsonIgnore
+	public String getCategoryMessageKey() {
+		return "category." + this.name;  
+	}
 }
