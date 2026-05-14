@@ -46,44 +46,21 @@ public class RentalService {
 	private RentalMapper mapper;
 	
 	private CurrentUserProvider currentUserProvider;
-	
-	public Rental findById(String id) {
-		Optional<Rental> rental = rentalRepository.findById(id);
-		
-		if (rental.isEmpty()) {
-			throw new RentalNotFoundException();
-		}
-		
-		return rental.get();
-	}
-
 
 	public RentalDisplayDTO findRentalDisplayDTO(String id) {
-		Optional<RentalDisplayDTO> optRental = queryRepository.findRentalDisplayDTO(id);
+		return queryRepository.findRentalDisplayDTO(id)
+				.orElseThrow(RentalNotFoundException::new);
 		
-		if (optRental.isEmpty()) {
-			throw new RentalNotFoundException();
-		}
-		
-		return optRental.get();
 	}
 		
 	public RentalDetailDTO getRentalById(String id) {
-		Optional<RentalDetailDTO> rOptional = queryRepository.findRentalDetail(id);
-		if (rOptional.isEmpty()) {
-			throw new RentalNotFoundException();
-		}
-		
-		return rOptional.get();
+		return queryRepository.findRentalDetail(id)
+				.orElseThrow(RentalNotFoundException::new);
 	}
 	
 	private RentalStatusChangeContext getStatusChangeContext(String rentId) {
-		Optional<RentalStatusChangeContext> optContext = queryRepository.getStatusChangeContext(rentId);
-		
-		if (optContext.isEmpty()) {
-			throw new RentalNotFoundException();
-		}
-		return optContext.get();
+		return queryRepository.getStatusChangeContext(rentId)
+				.orElseThrow(RentalNotFoundException::new);
 	}
 
 	public RentalCreatedDTO addRent(RentalRequestDTO rentalRequestDTO) {
