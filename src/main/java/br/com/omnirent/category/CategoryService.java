@@ -37,7 +37,7 @@ public class CategoryService {
 		List<SubCategoryResDTO> subCategories = subRepository.findSubByCategoryId(id);
 		category.setSubCategories(subCategories);
 		
-		return category;
+		return mapper.localize(category);
  	}
 	
 	public SubCategory getValidSubReference(String subCategoryId) {
