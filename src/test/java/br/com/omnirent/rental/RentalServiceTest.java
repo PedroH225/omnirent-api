@@ -122,7 +122,8 @@ public class RentalServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(renterId);
 		when(queryRepository.findUserRented(renterId)).thenReturn(expected);
-		
+		when(mapper.localize(expected)).thenReturn(expected);
+
 		List<RentalDisplayDTO> result = rentalService.findUserRented();
 		
 		assertThat(result).isEqualTo(expected);
@@ -155,7 +156,8 @@ public class RentalServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(ownerId);
 		when(queryRepository.findUserRentals(ownerId)).thenReturn(expected);
-		
+		when(mapper.localize(expected)).thenReturn(expected);
+
 		List<RentalDisplayDTO> result = rentalService.findUserRentals();
 		
 		assertThat(result).isEqualTo(expected);
@@ -186,7 +188,7 @@ public class RentalServiceTest {
 		String itemId = item2.getId();
 		RentalPeriod period = RentalPeriod.MONTHLY;
 		
-		RentalRequestDTO request = RentalTestFactory.newRentalRequest(itemId, period.name());
+		RentalRequestDTO request = RentalTestFactory.newRentalRequest(itemId, period);
 		ItemRentedContext context = ItemTestFactory.toItemRentedContext(item2, item2.getPickupAddress(), owner);
 		
 		BigDecimal basePrice = context.getItemInfo().getBasePrice();

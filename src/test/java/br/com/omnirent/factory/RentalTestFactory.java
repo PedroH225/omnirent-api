@@ -119,7 +119,7 @@ public final class RentalTestFactory {
 	    );
 	}
 	
-	public static RentalRequestDTO newRentalRequest(String itemId, String rentalPeriod) {
+	public static RentalRequestDTO newRentalRequest(String itemId, RentalPeriod rentalPeriod) {
 		return new RentalRequestDTO(itemId, rentalPeriod);
 	}
 	

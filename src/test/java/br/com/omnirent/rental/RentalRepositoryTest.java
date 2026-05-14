@@ -146,8 +146,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getStartDate()).isEqualTo(dtf.format(rental.getStartDate()));
 	    assertThat(dto.getEndDate()).isEqualTo(dtf.format(rental.getEndDate()));
 	    assertThat(dto.getFinalPrice()).isEqualByComparingTo(rental.getFinalPrice());
-	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus().toString());
-	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod().toString());
+	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
+	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
 
 	    assertThat(renterDto.getId()).isEqualTo(renter.getId());
 	    assertThat(renterDto.getUsername()).isEqualTo(renter.getDisplayUsername());
@@ -191,8 +191,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getStartDate()).isEqualTo(dtf.format(rental.getStartDate()));
 	    assertThat(dto.getEndDate()).isEqualTo(dtf.format(rental.getEndDate()));
 	    assertThat(dto.getFinalPrice()).isEqualByComparingTo(rental.getFinalPrice());
-	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus().toString());
-	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod().toString());
+	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
+	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
 
 	    assertThat(dto.getItemId()).isEqualTo(itemSnp.getId());
 	    assertThat(dto.getItemName()).isEqualTo(itemSnp.getName());
@@ -224,8 +224,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getStartDate()).isEqualTo(rental.getStartDate().format(dtf));
 	    assertThat(dto.getEndDate()).isEqualTo(rental.getEndDate().format(dtf));
 	    assertThat(dto.getFinalPrice()).isEqualByComparingTo(rental.getFinalPrice());
-	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus().toString());
-	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod().toString());
+	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
+	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
 
 	    assertThat(dto.getItemId()).isEqualTo(itemSnp.getId());
 	    assertThat(dto.getItemName()).isEqualTo(itemSnp.getName());
@@ -264,8 +264,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getStartDate()).isEqualTo(rental.getStartDate().format(dtf));
 	    assertThat(dto.getEndDate()).isEqualTo(rental.getEndDate().format(dtf));
 	    assertThat(dto.getFinalPrice()).isEqualByComparingTo(rental.getFinalPrice());
-	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus().toString());
-	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod().toString());
+	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
+	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
 
 	    assertThat(dto.getItemId()).isEqualTo(itemSnp.getId());
 	    assertThat(dto.getItemName()).isEqualTo(itemSnp.getName());
