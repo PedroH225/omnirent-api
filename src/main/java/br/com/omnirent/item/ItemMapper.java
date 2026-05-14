@@ -55,10 +55,15 @@ public class ItemMapper {
 	public ItemCreatedDTO toCreatedDto(Item item) {
 		ItemData itemData = item.getItemData();
 
-		return new ItemCreatedDTO(
+		ItemCreatedDTO newItem = new ItemCreatedDTO(
 		        item.getId(), item.getName(), itemData.getBrand(),
 		        itemData.getModel(), itemData.getDescription(), itemData.getBasePrice(),
 		        itemData.getItemCondition(), item.getItemStatus());
+		
+		newItem.setItemConditionLabel(messageService.get(newItem.getItemCondition().getMessageKey()));
+		newItem.setItemStatusLabel(messageService.get(newItem.getItemStatus().getMessageKey()));
+		
+		return newItem;
 	}
 	
 	public ItemSnapshotDTO toSnapshotDTO(ItemSnapshot itemSnapshot) {
