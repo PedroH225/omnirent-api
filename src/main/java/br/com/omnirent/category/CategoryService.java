@@ -74,6 +74,8 @@ public class CategoryService {
 	        cat.setSubCategories(subs != null ? subs : new ArrayList<>());
 	    }
 		
+		categories.forEach(c -> mapper.localize(c));
+		
 		return categories;
 	}
 	
