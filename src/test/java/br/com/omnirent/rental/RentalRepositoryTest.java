@@ -114,7 +114,7 @@ public class RentalRepositoryTest extends IntegrationTest {
         		"100", ItemCondition.USED));
         
         rental = rentalRepository.save(RentalTestFactory.create(item, owner, renter, ownerAddress,
-        		"300", RentalStatus.ACTIVE, RentalPeriod.MONTHLY, LocalDateTime.now(), LocalDateTime.now()));
+        		"300", RentalStatus.CREATED, RentalPeriod.MONTHLY, LocalDateTime.now(), LocalDateTime.now()));
         
         LocalDateTime lateStartDate = LocalDateTime.now().minusDays(2);
         LocalDateTime lateEndDate = LocalDateTime.now().minusDays(2);
@@ -326,7 +326,7 @@ public class RentalRepositoryTest extends IntegrationTest {
 	
 	@Test
 	void shouldUpdateRentalStatus() {
-		assertThat(rental.getRentalStatus()).isEqualTo(RentalStatus.ACTIVE);
+		assertThat(rental.getRentalStatus()).isEqualTo(RentalStatus.CREATED);
 		
 		rentalRepository.updateRentalStatus(rental.getId(), RentalStatus.IN_USE);
 		
@@ -341,7 +341,7 @@ public class RentalRepositoryTest extends IntegrationTest {
 	
 	@Test
 	void shouldUpdateRentalStatusAndPeriod() {
-		assertThat(rental.getRentalStatus()).isEqualTo(RentalStatus.ACTIVE);
+		assertThat(rental.getRentalStatus()).isEqualTo(RentalStatus.CREATED);
 		LocalDateTime startDate = LocalDateTime.now().withNano(0);
 		LocalDateTime endDate = LocalDateTime.now().withNano(0);
 		

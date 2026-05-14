@@ -27,8 +27,7 @@ public class RentalStatusTest {
 			    Map.entry(RETURN_SHIPPED, Set.of(RETURNED)),
 			    Map.entry(RETURNED, Set.<RentalStatus>of()),
 			    Map.entry(CANCELLED, Set.<RentalStatus>of()),
-			    Map.entry(LATE, Set.of(IN_USE)),
-			    Map.entry(ACTIVE, Set.<RentalStatus>of())
+			    Map.entry(LATE, Set.of(IN_USE))
 			);
 
 	    for (RentalStatus status : RentalStatus.values()) {
