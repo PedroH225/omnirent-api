@@ -8,7 +8,6 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.category.dto.CategoryResponseDTO;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
@@ -89,7 +88,10 @@ public class CategoryService {
 	}
 
 	public List<SubCategoryResDTO> findSubsByCategory(String categoryName) {
-		return subRepository.findAllSubByCategoryName(categoryName);
+		List<SubCategoryResDTO> result = subRepository.findAllSubByCategoryName(categoryName);
+		result.forEach(sc -> mapper.localize(sc));
+		
+		return result;
 	}
 	
 }
