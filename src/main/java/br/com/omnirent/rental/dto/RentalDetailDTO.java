@@ -4,19 +4,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
-import br.com.omnirent.address.domain.AddressSnapshot;
 import br.com.omnirent.address.dto.AddressSnapshotDTO;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
-import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.item.dto.ItemSnapshotDTO;
-import br.com.omnirent.rental.domain.Rental;
-import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.dto.UserResponseDTO;
 import lombok.Data;
 
@@ -31,10 +25,14 @@ public class RentalDetailDTO {
 	
 	private BigDecimal finalPrice;
 	
-	private String rentalStatus;
+	private RentalStatus rentalStatus;
 	
-	private String rentalPeriod;
+	private String rentalStatusLabel;
+
+	private RentalPeriod rentalPeriod;
 	
+	private String rentalPeriodLabel;
+
 	private UserResponseDTO renter;
 	
 	private UserResponseDTO owner;
@@ -53,8 +51,8 @@ public class RentalDetailDTO {
 			AddressSnapshotDTO addressSnapshot) {
 		this.id = id;
 		this.finalPrice = finalPrice;
-		this.rentalStatus = rentalStatus.toString();
-		this.rentalPeriod = rentalPeriod.toString();
+		this.rentalStatus = rentalStatus;
+		this.rentalPeriod = rentalPeriod;
 		this.renter = renter;
 		this.owner = owner;
 		this.itemSnapshot = itemSnapshot;
@@ -63,30 +61,4 @@ public class RentalDetailDTO {
 		this.startDate = startDate != null ? dtf.format(startDate) : null;
 		this.endDate = endDate != null ? dtf.format(endDate) : null;
 	}
-	
-	public RentalDetailDTO(Rental rental) {
-		this.id = rental.getId();
-		
-		this.finalPrice = rental.getFinalPrice();
-		this.rentalStatus = rental.getRentalStatus().toString();
-		this.rentalPeriod = rental.getRentalPeriod().toString();
-		
-		//this.renter = UserMapper.toDto(rental.getRenter());
-		//this.owner = UserMapper.toDto(rental.getOwner());
-		
-		this.itemSnapshot = new ItemSnapshotDTO(rental.getItemSnapshot());
-		this.addressSnapshot = new AddressSnapshotDTO(rental.getAddressSnapshot());
-		
-		if (rental.getStartDate() != null) {
-			this.startDate = dtf.format(rental.getStartDate());
-		}
-		
-		if (rental.getStartDate() != null) {
-			this.endDate = dtf.format(rental.getEndDate());
-		}
-	}
-
-	
-	
-	
 }
