@@ -50,8 +50,10 @@ public class CategoryService {
 
 	
 	public SubCategoryResDTO getSubCategoryById(String id) {		
-		return subRepository.findSubById(id)
+		SubCategoryResDTO result = subRepository.findSubById(id)
 				.orElseThrow(SubCategoryNotFoundException::new);
+		
+		return mapper.localize(result);
  	}
 	
 	public List<CategoryResponseDTO> findAll() {

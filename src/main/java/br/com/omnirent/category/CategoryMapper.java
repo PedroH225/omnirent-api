@@ -42,4 +42,11 @@ public class CategoryMapper {
 		
 		return categoryDTO;
 	}
+	
+	public SubCategoryResDTO localize(SubCategoryResDTO subCategoryDTO) {
+		subCategoryDTO.setSubCategoryLabel(messageService.get(subCategoryDTO.getMessageKey()));
+		subCategoryDTO.setCategoryLabel(messageService.get(subCategoryDTO.getCategoryMessageKey()));
+		
+		return subCategoryDTO;
+	}
 }
