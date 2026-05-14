@@ -82,7 +82,10 @@ public class CategoryService {
 	}
 	
 	public List<SubCategoryResDTO> findAllSub() {
-		return subRepository.findAllSubCat();
+		List<SubCategoryResDTO> result = subRepository.findAllSubCat();
+		result.forEach(sc -> mapper.localize(sc));
+		
+		return result;
 	}
 
 	public List<SubCategoryResDTO> findSubsByCategory(String categoryName) {
