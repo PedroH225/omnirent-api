@@ -3,10 +3,8 @@ package br.com.omnirent.item;
 import org.springframework.stereotype.Component;
 
 import br.com.omnirent.address.AddressMapper;
-import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.category.CategoryMapper;
-import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.item.context.ItemInfo;
@@ -19,7 +17,6 @@ import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemSnapshotDTO;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.user.UserMapper;
-import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserResponseDTO;
 import lombok.AllArgsConstructor;
 
@@ -73,7 +70,8 @@ public class ItemMapper {
 		Item item = new Item();
 		
 		item.setName(itemDTO.name());
-		ItemData itemData = new ItemData(itemDTO);
+		ItemData itemData = new ItemData(itemDTO.brand(), itemDTO.model(),
+				itemDTO.description(), itemDTO.basePrice(), itemDTO.itemCondition());
 		
 		item.setOwnerId(ownerId);
 		item.setPickupAddressId(pickupAddressId);
