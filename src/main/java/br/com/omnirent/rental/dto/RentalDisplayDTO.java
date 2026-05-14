@@ -21,9 +21,13 @@ public class RentalDisplayDTO {
 	
 	private BigDecimal finalPrice;
 	
-	private String rentalStatus;
+	private RentalStatus rentalStatus;
 	
-	private String rentalPeriod;
+	private String rentalStatusLabel;
+	
+	private RentalPeriod rentalPeriod;
+	
+	private String rentalPeriodLabel;
 	
 	private String itemId;
 	
@@ -47,8 +51,8 @@ public class RentalDisplayDTO {
 			String ownerName, LocalDateTime createdAt) {
 		this.id = id;
 		this.finalPrice = finalPrice;
-		this.rentalStatus = rentalStatus.toString();
-		this.rentalPeriod = rentalPeriod.toString();
+		this.rentalStatus = rentalStatus;
+		this.rentalPeriod = rentalPeriod;
 		this.itemId = itemId;
 		this.itemName = itemName;
 		this.renterId = renterId;
