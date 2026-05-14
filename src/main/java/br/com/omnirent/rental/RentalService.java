@@ -48,9 +48,12 @@ public class RentalService {
 	private CurrentUserProvider currentUserProvider;
 
 	public RentalDisplayDTO findRentalDisplayDTO(String id) {
-		return queryRepository.findRentalDisplayDTO(id)
+		RentalDisplayDTO result = queryRepository.findRentalDisplayDTO(id)
 				.orElseThrow(RentalNotFoundException::new);
 		
+		result = mapper.localize(result);
+		
+		return result;
 	}
 		
 	public RentalDetailDTO getRentalById(String id) {
@@ -72,7 +75,7 @@ public class RentalService {
 		ItemInfo itemInfo = context.getItemInfo();
 		
 		RentalStatus rentalStatus = RentalStatus.CREATED;
-		RentalPeriod rentalPeriod = RentalPeriod.fromString(rentalRequestDTO.rentalPeriod());
+		RentalPeriod rentalPeriod = rentalRequestDTO.rentalPeriod();
 		
 		BigDecimal finalPrice = RentalPriceService.calculateFinalPrice(itemInfo.getBasePrice(), rentalPeriod);
 		
@@ -204,12 +207,22 @@ public class RentalService {
 	public List<RentalDisplayDTO> findUserRented() {
 		String renterId = currentUserProvider.currentUserId();
 		userService.requireExistence(renterId);
-		return queryRepository.findUserRented(renterId);
+		
+		List<RentalDisplayDTO> result = queryRepository.findUserRented(renterId);
+		
+		result = mapper.localize(result);
+		
+		return result;
 	}
 
 	public List<RentalDisplayDTO> findUserRentals() {
 		String ownerId = currentUserProvider.currentUserId();
 		userService.requireExistence(ownerId);
-		return queryRepository.findUserRentals(ownerId);
+		
+		List<RentalDisplayDTO> result = queryRepository.findUserRentals(ownerId);
+		
+		result = mapper.localize(result);
+		
+		return result;
 	}
 }

@@ -12,6 +12,7 @@ import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressSnapshotDTO;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.item.ItemMapper;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
@@ -20,6 +21,7 @@ import br.com.omnirent.item.dto.ItemSnapshotDTO;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
+import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserResponseDTO;
@@ -35,6 +37,8 @@ public class RentalMapper {
 	
 	private UserMapper userMapper;
 
+	private MessageService messageService;
+	
 	public RentalDetailDTO toDetailDto(Rental rental) {
 		return new RentalDetailDTO(rental);
 	}
@@ -82,5 +86,21 @@ public class RentalMapper {
 		rental.setEndDate(endDate);
 		
 		return rental;
+	}
+	
+	public List<RentalDisplayDTO> localize(List<RentalDisplayDTO> displayDTOs) {
+		displayDTOs.forEach(r -> {
+		r.setRentalPeriodLabel(messageService.get(r.getRentalPeriod().getMessageKey()));
+		r.setRentalStatusLabel(messageService.get(r.getRentalStatus().getMessageKey()));
+		});
+		
+		return displayDTOs;
+	}
+	
+	public RentalDisplayDTO localize(RentalDisplayDTO displayDTO) {
+		displayDTO.setRentalPeriodLabel(messageService.get(displayDTO.getRentalPeriod().getMessageKey()));
+		displayDTO.setRentalStatusLabel(messageService.get(displayDTO.getRentalStatus().getMessageKey()));
+	
+		return displayDTO;
 	}
 }
