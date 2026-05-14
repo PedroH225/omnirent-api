@@ -109,4 +109,11 @@ public class ItemMapper {
 		
 		return displayDTOs;
 	}
+	
+	public ItemDetailDTO localize(ItemDetailDTO itemDTO) {
+		itemDTO.setItemStatusLabel(messageService.get(itemDTO.getItemStatus().getMessageKey()));
+		itemDTO.setItemConditionLabel(messageService.get(itemDTO.getItemCondition().getMessageKey()));
+		
+		return itemDTO;
+	}
 }

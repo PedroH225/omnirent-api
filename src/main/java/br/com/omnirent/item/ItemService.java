@@ -50,14 +50,11 @@ public class ItemService {
 	
 	private ItemMapper itemMapper;
 	
-	private MessageService messageService;	
-	
 	public ItemDetailDTO getItemById(String id) {
 		ItemDetailDTO result = queryRepository.findItemDetailDTO(id)
 				.orElseThrow(ItemNotFoundException::new);
 		
-		result.setItemStatusLabel(messageService.get(result.getItemStatus().getMessageKey()));
-		result.setItemConditionLabel(messageService.get(result.getItemCondition().getMessageKey()));
+		result = itemMapper.localize(result);
 		
 		return result;
 	}
