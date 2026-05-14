@@ -57,8 +57,12 @@ public class RentalService {
 	}
 		
 	public RentalDetailDTO getRentalById(String id) {
-		return queryRepository.findRentalDetail(id)
+		RentalDetailDTO result = queryRepository.findRentalDetail(id)
 				.orElseThrow(RentalNotFoundException::new);
+		
+		result = mapper.localize(result);
+		
+		return result;
 	}
 	
 	private RentalStatusChangeContext getStatusChangeContext(String rentId) {

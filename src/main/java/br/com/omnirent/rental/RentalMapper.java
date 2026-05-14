@@ -91,4 +91,11 @@ public class RentalMapper {
 	
 		return displayDTO;
 	}
+	
+	public RentalDetailDTO localize(RentalDetailDTO detailDTO) {
+		detailDTO.setRentalPeriodLabel(messageService.get(detailDTO.getRentalPeriod().getMessageKey()));
+		detailDTO.setRentalStatusLabel(messageService.get(detailDTO.getRentalStatus().getMessageKey()));
+		
+		return detailDTO;
+	}
 }
