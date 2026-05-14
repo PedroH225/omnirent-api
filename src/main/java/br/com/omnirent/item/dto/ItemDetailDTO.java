@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
@@ -28,9 +29,13 @@ public class ItemDetailDTO {
 	
 	private BigDecimal basePrice;
 	
-	private String itemCondition;
+	private ItemCondition itemCondition;
 	
-	private String itemStatus;
+	private String itemConditionLabel;
+	
+	private ItemStatus itemStatus;
+	
+	private String itemStatusLabel;
 	
 	private SubCategoryResDTO subCategory;
 	
@@ -54,8 +59,8 @@ public class ItemDetailDTO {
 		this.model = model;
 		this.description = description;
 		this.basePrice = basePrice;
-		this.itemCondition = itemCondition.toString();
-		this.itemStatus = itemStatus.toString();
+		this.itemCondition = itemCondition;
+		this.itemStatus = itemStatus;
 		this.subCategory = subCategory;
 		this.pickupAddress = pickupAddress;
 		this.owner = owner;
