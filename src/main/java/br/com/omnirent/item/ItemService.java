@@ -10,6 +10,7 @@ import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.exception.domain.OptimisticLockException;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
@@ -49,11 +50,16 @@ public class ItemService {
 	
 	private ItemMapper itemMapper;
 	
-
+	private MessageService messageService;	
 	
 	public ItemDetailDTO getItemById(String id) {
-		return queryRepository.findItemDetailDTO(id)
+		ItemDetailDTO result = queryRepository.findItemDetailDTO(id)
 				.orElseThrow(ItemNotFoundException::new);
+		
+		result.setItemStatusLabel(messageService.get(result.getItemStatus().getMessageKey()));
+		result.setItemConditionLabel(messageService.get(result.getItemCondition().getMessageKey()));
+		
+		return result;
 	}
 	
 	public ItemRentedContext getItemRentedContext(String id) {
@@ -110,7 +116,7 @@ public class ItemService {
 		int updated = itemRepository.updateItem(
 			context.itemInfo().getId(), context.status(), request.name(), request.brand(),
 			request.model(), request.description(), request.basePrice(),
-			ItemCondition.fromString(request.itemCondition())
+			request.itemCondition()
 		);
 		
 		if (updated == 0) {
