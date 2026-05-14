@@ -1,5 +1,7 @@
 package br.com.omnirent.item;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import br.com.omnirent.address.AddressMapper;
@@ -7,12 +9,14 @@ import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.category.CategoryMapper;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
+import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemSnapshotDTO;
 import br.com.omnirent.rental.domain.Rental;
@@ -29,6 +33,8 @@ public class ItemMapper {
 	private CategoryMapper categoryMapper;
 	
 	private UserMapper userMapper;
+	
+	private MessageService messageService;
 	
 	public ItemDetailDTO toDto(Item item) {
 		ItemData itemData = item.getItemData();
@@ -95,4 +101,12 @@ public class ItemMapper {
 	    return itemSnapshot;
 	}
 	
+	public List<ItemDisplayDTO> localize(List<ItemDisplayDTO> displayDTOs) {
+		displayDTOs.forEach(d -> {
+			d.setItemConditionLabel(messageService.get(d.getItemCondition().getMessageKey()));;
+			d.setItemStatusLabel(messageService.get(d.getItemStatus().getMessageKey()));
+		});
+		
+		return displayDTOs;
+	}
 }

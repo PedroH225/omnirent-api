@@ -90,7 +90,11 @@ public class ItemService {
 	public List<ItemDisplayDTO> getUserItems() {
 		String userId = currentUserProvider.currentUserId();
 		userService.requireExistence(userId);
-		return queryRepository.findUserItems(userId);
+		List<ItemDisplayDTO> result = queryRepository.findUserItems(userId);
+		
+		result = itemMapper.localize(result);
+		
+		return result;
 	}
 
 	public ItemCreatedDTO addItem(ItemRequestDTO itemDTO) {
