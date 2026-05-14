@@ -2,6 +2,7 @@ package br.com.omnirent.category;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -76,6 +77,7 @@ public class CategoryServiceTest {
     	
     	when(categoryRepository.getCategoryById(electronicsId)).thenReturn(optCategory);
     	when(subRepository.findSubByCategoryId(electronicsId)).thenReturn(expected);
+    	when(mapper.localize(optCategory.get())).thenReturn(optCategory.get());
     	
     	CategoryResponseDTO result = categoryService.getCategoryById(electronicsId);
     	
@@ -110,6 +112,7 @@ public class CategoryServiceTest {
     	SubCategoryResDTO subCatDTO = SubCategoryTestFactory.toSubDto(notebook);
     	
     	when(subRepository.findSubById(subCatId)).thenReturn(Optional.of(subCatDTO));
+    	when(mapper.localize(subCatDTO)).thenReturn(subCatDTO);
     	
     	SubCategoryResDTO result = categoryService.getSubCategoryById(subCatId);
     	
