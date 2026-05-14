@@ -98,14 +98,14 @@ public class ItemRepositoryTest extends IntegrationTest {
 	        // Item
 	        assertThat(i.getId()).isEqualTo(item.getId());
 	        assertThat(i.getName()).isEqualTo(item.getName());
-	        assertThat(i.getItemStatus()).isEqualTo(ItemStatus.AVAILABLE.toString());
+	        assertThat(i.getItemStatus()).isEqualTo(ItemStatus.AVAILABLE);
 
 	        // ItemData
 	        assertThat(i.getBrand()).isEqualTo(item.getItemData().getBrand());
 	        assertThat(i.getModel()).isEqualTo(item.getItemData().getModel());
 	        assertThat(i.getDescription()).isEqualTo(item.getItemData().getDescription());
 	        assertThat(i.getBasePrice()).isEqualByComparingTo(item.getItemData().getBasePrice());
-	        assertThat(i.getItemCondition()).isEqualTo(ItemCondition.NEW.toString());
+	        assertThat(i.getItemCondition()).isEqualTo(ItemCondition.NEW);
 
 	        // SubCategory + Category
 	        assertThat(i.getSubCategory().getName()).isEqualTo(drill.getName());

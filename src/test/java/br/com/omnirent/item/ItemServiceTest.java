@@ -123,6 +123,7 @@ public class ItemServiceTest {
 		ItemDetailDTO itemDetailDTO = ItemTestFactory.toItemDetailsDto(item, drill, ownerAddress, owner);
 	
 		when(queryRepository.findItemDetailDTO(itemId)).thenReturn(Optional.of(itemDetailDTO));
+		when(itemMapper.localize(itemDetailDTO)).thenReturn(itemDetailDTO);
 		
 		ItemDetailDTO result = itemService.getItemById(itemId);
 		
@@ -180,6 +181,7 @@ public class ItemServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(userId);
 		when(queryRepository.findUserItems(userId)).thenReturn(expected);
+		when(itemMapper.localize(expected)).thenReturn(expected);
 
 		List<ItemDisplayDTO> result = itemService.getUserItems();
 		
@@ -211,7 +213,7 @@ public class ItemServiceTest {
 		String addressId = ownerAddress.getId();
 		String categoryId = drill.getId();
 		
-		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", "NEW", categoryId, addressId);
+		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", ItemCondition.NEW, categoryId, addressId);
 		
 		Item mappedItem = ItemTestFactory.fromNewItemRequestDTO(request, drill, ownerAddress, owner);
 		Item persistedItem = ItemTestFactory.toPersisted(mappedItem);
@@ -239,7 +241,7 @@ public class ItemServiceTest {
 	void shouldThrowWhenUserNotFoundOnAddItem() {
 		String invalidId = "invalidId";
 		
-		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", "NEW", drill.getId(), ownerAddress.getId());
+		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", ItemCondition.NEW, drill.getId(), ownerAddress.getId());
 		
 		when(currentUserProvider.currentUserId()).thenReturn(invalidId);
 		doThrow(UserNotFoundException.class).when(userService).getValidReference(invalidId);
@@ -256,7 +258,7 @@ public class ItemServiceTest {
 		String invalidOwnerId = owner.getId();
 		String invalidAddressId = "invalidId";
 
-		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", "NEW", drill.getId(), invalidAddressId);
+		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", ItemCondition.NEW, drill.getId(), invalidAddressId);
 		
 		when(currentUserProvider.currentUserId()).thenReturn(invalidOwnerId);
 		doThrow(AddressNotFoundException.class).when(addressService).getValidReference(invalidAddressId, invalidOwnerId);
@@ -273,7 +275,7 @@ public class ItemServiceTest {
 		String ownerId = owner.getId();
 		String invalidId = "invalidId";
 		
-		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", "NEW", invalidId, ownerAddress.getId());
+		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", ItemCondition.NEW, invalidId, ownerAddress.getId());
 		
 		when(currentUserProvider.currentUserId()).thenReturn(ownerId);
 		doThrow(SubCategoryNotFoundException.class).when(categoryService).getValidSubReference(invalidId);
@@ -289,7 +291,7 @@ public class ItemServiceTest {
 	void shouldUpdateItem() {
 		String currentUserId = owner.getId();
 		
-		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", "USED");
+		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", ItemCondition.USED);
 		UpdateItemContext context = ItemTestFactory.updateItemContext(item, currentUserId);
 
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
@@ -297,7 +299,7 @@ public class ItemServiceTest {
 		when(itemRepository.updateItem(
 			    context.itemInfo().getId(), context.status(), request.name(),
 			    request.brand(), request.model(), request.description(),
-			    request.basePrice(), ItemCondition.fromString(request.itemCondition())
+			    request.basePrice(), request.itemCondition()
 			)).thenReturn(1); 
 		
 		itemService.updateItem(request);
@@ -308,7 +310,7 @@ public class ItemServiceTest {
 		verify(itemRepository).updateItem(
 			    context.itemInfo().getId(), context.status(), request.name(),
 			    request.brand(), request.model(), request.description(),
-			    request.basePrice(), ItemCondition.fromString(request.itemCondition()));
+			    request.basePrice(), request.itemCondition());
 		verifyNoMoreInteractions(itemRepository, authorizationService, currentUserProvider);
 	}
 	
@@ -316,7 +318,7 @@ public class ItemServiceTest {
 	void shouldThrowWhenItemIsBlockedOnUpdateItem() {
 		String currentUserId = owner.getId();
 		
-		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", "USED");
+		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", ItemCondition.USED);
 		UpdateItemContext context = ItemTestFactory.updateItemContext(item, currentUserId);
 
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
@@ -338,7 +340,7 @@ public class ItemServiceTest {
 		String currentUserId = owner2.getId();
 		String actualOwner = owner.getId();
 		
-		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", "USED");
+		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", ItemCondition.USED);
 		UpdateItemContext context = ItemTestFactory.updateItemContext(item, actualOwner);
 
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
@@ -360,7 +362,7 @@ public class ItemServiceTest {
 	void shouldThrowWhenConcurrentUpdate() {
 		String currentUserId = owner.getId();
 		
-		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", "USED");
+		UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "200", ItemCondition.USED);
 		UpdateItemContext context = ItemTestFactory.updateItemContext(item, currentUserId);
 
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
@@ -368,7 +370,7 @@ public class ItemServiceTest {
 		when(itemRepository.updateItem(
 			    context.itemInfo().getId(), context.status(), request.name(),
 			    request.brand(), request.model(), request.description(),
-			    request.basePrice(), ItemCondition.fromString(request.itemCondition())
+			    request.basePrice(), request.itemCondition()
 			)).thenReturn(0); 
 		
 		assertThatThrownBy(() -> itemService.updateItem(request))
@@ -380,7 +382,7 @@ public class ItemServiceTest {
 		verify(itemRepository).updateItem(
 			    context.itemInfo().getId(), context.status(), request.name(),
 			    request.brand(), request.model(), request.description(),
-			    request.basePrice(), ItemCondition.fromString(request.itemCondition()));
+			    request.basePrice(), request.itemCondition());
 		verifyNoMoreInteractions(itemRepository, authorizationService, currentUserProvider);
 	}
 	
