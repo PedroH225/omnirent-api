@@ -3,24 +3,23 @@ package br.com.omnirent.common.enums;
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 
-import br.com.omnirent.exception.domain.IllegalEnumerationException;
-
 public enum RentalPeriod {
-	HOURLY("Hourly", ChronoUnit.HOURS, new BigDecimal("0.2")),
-	DAILY("Daily", ChronoUnit.DAYS, BigDecimal.ONE),
-	WEEKLY("Weekly", ChronoUnit.WEEKS, new BigDecimal("5.5")),
-	MONTHLY("Monthly", ChronoUnit.MONTHS, new BigDecimal("22"));
-	
-	private final String rentalPeriod;
-	
+	HOURLY(ChronoUnit.HOURS, new BigDecimal("0.2")),
+	DAILY(ChronoUnit.DAYS, BigDecimal.ONE),
+	WEEKLY(ChronoUnit.WEEKS, new BigDecimal("5.5")),
+	MONTHLY(ChronoUnit.MONTHS, new BigDecimal("22"));
+		
 	private final ChronoUnit unit;
 	
 	private final BigDecimal multiplier;
 	
-	RentalPeriod(String rentalPeriod, ChronoUnit unit, BigDecimal multiplier) {
-		this.rentalPeriod = rentalPeriod;
+	RentalPeriod(ChronoUnit unit, BigDecimal multiplier) {
 		this.multiplier = multiplier;
 		this.unit = unit;
+	}
+	
+	public String getMessageKey() {
+		return "rental.period." + name();
 	}
 	
 	public BigDecimal getMultiplier() {
@@ -30,18 +29,4 @@ public enum RentalPeriod {
 	public ChronoUnit getChronoUnit() {
 		return this.unit;
 	}
-	
-	@Override
-	public String toString() {
-		return this.rentalPeriod;
-	}
-	
-	public static RentalPeriod fromString(String text) {
-        for (RentalPeriod rentalPeriod : RentalPeriod.values()) {
-            if (rentalPeriod.rentalPeriod.equalsIgnoreCase(text)) {
-                return rentalPeriod;
-            }
-        }
-        throw new IllegalEnumerationException(RentalPeriod.class, text);
-    }
 }
