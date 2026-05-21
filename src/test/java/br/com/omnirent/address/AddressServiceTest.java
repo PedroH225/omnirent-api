@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
-import br.com.omnirent.exception.domain.AddressNotFoundException;
+import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.UserNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
@@ -151,7 +151,7 @@ public class AddressServiceTest {
 	    .thenReturn(Optional.empty());
 		
 		assertThatThrownBy(() -> addressService.updateAddress(addressDto))
-		.isInstanceOf(AddressNotFoundException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(addressRepository).findById(addressDto.id());
 		verifyNoMoreInteractions(addressRepository, mapper);
