@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import br.com.omnirent.common.enums.UserStatus;
-import br.com.omnirent.exception.domain.UserNotFoundException;
+import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.domain.User;
@@ -77,7 +77,7 @@ public class UserServiceTest {
 		when(userRepository.findUserDetailsById(invalidId)).thenReturn(Optional.empty());
 		
 		assertThatThrownBy(() -> userService.getUserDetailsById())
-		.isInstanceOf(UserNotFoundException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verify(userRepository).findUserDetailsById(invalidId);
@@ -136,7 +136,7 @@ public class UserServiceTest {
 		when(userRepository.findById(invalidId)).thenReturn(Optional.empty());
 		
 		assertThatThrownBy(() -> userService.update(request))
-		.isInstanceOf(UserNotFoundException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verify(userRepository).findById(invalidId);
@@ -197,7 +197,7 @@ public class UserServiceTest {
 		when(userRepository.findById(invalidId)).thenReturn(Optional.empty());
 		
 		assertThatThrownBy(() -> userService.activateUser())
-		.isInstanceOf(UserNotFoundException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verify(userRepository).findById(invalidId);
@@ -212,7 +212,7 @@ public class UserServiceTest {
 		when(userRepository.findById(invalidId)).thenReturn(Optional.empty());
 		
 		assertThatThrownBy(() -> userService.deactivateUser())
-		.isInstanceOf(UserNotFoundException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verify(userRepository).findById(invalidId);
