@@ -1,7 +1,6 @@
 package br.com.omnirent.address;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -10,7 +9,6 @@ import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.AddressErrorType;
-import br.com.omnirent.exception.domain.AddressNotFoundException;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import lombok.AllArgsConstructor;
