@@ -8,7 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+
 import br.com.omnirent.config.i18n.MessageService;
+import br.com.omnirent.exception.domain.CommonErrorType;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
@@ -35,15 +38,6 @@ public class GlobalExceptionHandler {
 	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiErrorResponse> handleGeneric(Exception e, HttpServletRequest request) {
-	    ApiErrorResponse err = new ApiErrorResponse(
-	            Instant.now(),
-	            500,
-	            "temp",
-	            "Internal server error",
-	            "Unexpected error",
-	            request.getRequestURI()
-	    );
-
-	    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
+	    return handleException(new ApiException(CommonErrorType.INTERNAL_ERROR), request);
 	}
 }
