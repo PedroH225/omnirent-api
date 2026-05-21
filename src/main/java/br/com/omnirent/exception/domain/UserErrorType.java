@@ -8,8 +8,9 @@ import lombok.Getter;
 @Getter
 public enum UserErrorType implements AppErrorType {
 
-    NOT_FOUND("NOT_FOUND", "USER_NOT_FOUND", "not_found", HttpStatus.NOT_FOUND);
-    	
+    NOT_FOUND("NOT_FOUND", "USER_NOT_FOUND", "not_found", HttpStatus.NOT_FOUND),
+    EMAIL_ALREADY_IN_USE("CONFLICT", "EMAIL_ALREADY_IN_USE", "email_already_in_use", HttpStatus.CONFLICT);	
+	
     private String errorType;
 	
 	private String errorCode;
