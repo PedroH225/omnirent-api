@@ -25,12 +25,11 @@ import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
-import br.com.omnirent.exception.common.ForbiddenException;
-import br.com.omnirent.exception.domain.AddressNotFoundException;
-import br.com.omnirent.exception.domain.ItemNotFoundException;
-import br.com.omnirent.exception.domain.OptimisticLockException;
-import br.com.omnirent.exception.domain.SubCategoryNotFoundException;
-import br.com.omnirent.exception.domain.UserNotFoundException;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.AddressErrorType;
+import br.com.omnirent.exception.domain.ItemErrorType;
+import br.com.omnirent.exception.domain.SubCategoryErrorType;
+import br.com.omnirent.exception.domain.UserErrorType;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
@@ -139,7 +138,7 @@ public class ItemServiceTest {
 		when(queryRepository.findItemDetailDTO(invalidId)).thenReturn(Optional.empty());
 		
 		assertThatThrownBy(() -> itemService.getItemById(invalidId))
-			.isInstanceOf(ItemNotFoundException.class);
+			.isInstanceOf(ApiException.class);
 				
 		verify(queryRepository).findItemDetailDTO(invalidId);
 	}
@@ -165,7 +164,7 @@ public class ItemServiceTest {
 		when(queryRepository.getItemRentedContext(invalidId)).thenReturn(Optional.empty());
 		
 		assertThatThrownBy(() -> itemService.getItemRentedContext(invalidId))
-			.isInstanceOf(ItemNotFoundException.class);
+			.isInstanceOf(ApiException.class);
 				
 		verify(queryRepository).getItemRentedContext(invalidId);
 		verifyNoMoreInteractions(itemRepository);
@@ -197,10 +196,10 @@ public class ItemServiceTest {
 		String invalidId = "invalid-id";
 		
 		when(currentUserProvider.currentUserId()).thenReturn(invalidId);	
-		doThrow(UserNotFoundException.class).when(userService).requireExistence(invalidId);
+		doThrow(new ApiException(UserErrorType.NOT_FOUND)).when(userService).requireExistence(invalidId);
 	
 		assertThatThrownBy(() -> itemService.getUserItems())
-		.isInstanceOf(UserNotFoundException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verify(userService).requireExistence(invalidId);
@@ -244,10 +243,11 @@ public class ItemServiceTest {
 		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", ItemCondition.NEW, drill.getId(), ownerAddress.getId());
 		
 		when(currentUserProvider.currentUserId()).thenReturn(invalidId);
-		doThrow(UserNotFoundException.class).when(userService).getValidReference(invalidId);
+		doThrow(new ApiException(UserErrorType.NOT_FOUND))
+		.when(userService).getValidReference(invalidId);
 		
 		assertThatThrownBy(() -> itemService.addItem(request))
-		.isInstanceOf(UserNotFoundException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verifyNoInteractions(itemRepository);
@@ -261,10 +261,11 @@ public class ItemServiceTest {
 		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", ItemCondition.NEW, drill.getId(), invalidAddressId);
 		
 		when(currentUserProvider.currentUserId()).thenReturn(invalidOwnerId);
-		doThrow(AddressNotFoundException.class).when(addressService).getValidReference(invalidAddressId, invalidOwnerId);
+		doThrow(new ApiException(AddressErrorType.NOT_FOUND))
+		.when(addressService).getValidReference(invalidAddressId, invalidOwnerId);
 		
 		assertThatThrownBy(() -> itemService.addItem(request))
-		.isInstanceOf(AddressNotFoundException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verifyNoInteractions(itemRepository);
@@ -278,10 +279,11 @@ public class ItemServiceTest {
 		ItemRequestDTO request = ItemTestFactory.createItemRequest(item.getId(), "200", ItemCondition.NEW, invalidId, ownerAddress.getId());
 		
 		when(currentUserProvider.currentUserId()).thenReturn(ownerId);
-		doThrow(SubCategoryNotFoundException.class).when(categoryService).getValidSubReference(invalidId);
+		doThrow(new ApiException(SubCategoryErrorType.NOT_FOUND))
+		.when(categoryService).getValidSubReference(invalidId);
 		
 		assertThatThrownBy(() -> itemService.addItem(request))
-		.isInstanceOf(SubCategoryNotFoundException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verifyNoInteractions(itemRepository);
@@ -323,10 +325,10 @@ public class ItemServiceTest {
 
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
 		when(queryRepository.getUpdateContext(item.getId())).thenReturn(Optional.of(context));
-		doThrow(ForbiddenException.class).when(authorizationService).requireNotBlocked(context.status());
+		doThrow(new ApiException(ItemErrorType.BLOCKED)).when(authorizationService).requireNotBlocked(context.status());
 		
 		assertThatThrownBy(() -> itemService.updateItem(request))
-		.isInstanceOf(ForbiddenException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verify(queryRepository).getUpdateContext(item.getId());
@@ -345,10 +347,10 @@ public class ItemServiceTest {
 
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
 		when(queryRepository.getUpdateContext(item.getId())).thenReturn(Optional.of(context));
-		doThrow(ForbiddenException.class).when(authorizationService).requireOwner(actualOwner, currentUserId);
+		doThrow(new ApiException(ItemErrorType.OWNER_REQUIRED)).when(authorizationService).requireOwner(actualOwner, currentUserId);
 		
 		assertThatThrownBy(() -> itemService.updateItem(request))
-		.isInstanceOf(ForbiddenException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verify(queryRepository).getUpdateContext(item.getId());
@@ -374,7 +376,7 @@ public class ItemServiceTest {
 			)).thenReturn(0); 
 		
 		assertThatThrownBy(() -> itemService.updateItem(request))
-		.isInstanceOf(OptimisticLockException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireNotBlocked(context.status());
@@ -427,7 +429,7 @@ public class ItemServiceTest {
 		.thenReturn(0);
 		
 		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
-		.isInstanceOf(OptimisticLockException.class);
+		.isInstanceOf(ApiException.class);
 
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireNotBlocked(context.status());
@@ -464,11 +466,11 @@ public class ItemServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
 		when(queryRepository.getChangeAddressContext(itemId)).thenReturn(Optional.of(context));
-		doThrow(AddressNotFoundException.class)
+		doThrow(new ApiException(AddressErrorType.NOT_FOUND))
 		.when(addressService).getValidReference(newAddressId, currentUserId);
 		
 		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
-		.isInstanceOf(AddressNotFoundException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireNotBlocked(context.status());
@@ -486,11 +488,11 @@ public class ItemServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
 		when(queryRepository.getChangeAddressContext(itemId)).thenReturn(Optional.of(context));
-		doThrow(ForbiddenException.class)
+		doThrow(new ApiException(ItemErrorType.OWNER_REQUIRED))
 		.when(authorizationService).requireOwner(context.ownerId(), currentUserId);
 
 		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
-		.isInstanceOf(ForbiddenException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireNotBlocked(context.status());
@@ -508,11 +510,11 @@ public class ItemServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
 		when(queryRepository.getChangeAddressContext(itemId)).thenReturn(Optional.of(context));
-		doThrow(ForbiddenException.class)
+		doThrow(new ApiException(ItemErrorType.BLOCKED))
 		.when(authorizationService).requireNotBlocked(context.status());
 
 		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
-		.isInstanceOf(ForbiddenException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireNotBlocked(context.status());
@@ -561,7 +563,7 @@ public class ItemServiceTest {
 		.thenReturn(0);
 		
 		assertThatThrownBy(() -> itemService.changeSubCategory(itemId, newSubCategoryId))
-		.isInstanceOf(OptimisticLockException.class);
+		.isInstanceOf(ApiException.class);
 
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireNotBlocked(context.status());
@@ -599,11 +601,11 @@ public class ItemServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
 		when(queryRepository.getChangeSubCategoryContext(itemId)).thenReturn(Optional.of(context));
-		doThrow(SubCategoryNotFoundException.class)
+		doThrow(new ApiException(SubCategoryErrorType.NOT_FOUND))
 		.when(categoryService).getValidSubReference(newSubCategoryId);
 		
 		assertThatThrownBy(() -> itemService.changeSubCategory(itemId, newSubCategoryId))
-		.isInstanceOf(SubCategoryNotFoundException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireNotBlocked(context.status());
@@ -621,11 +623,11 @@ public class ItemServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
 		when(queryRepository.getChangeSubCategoryContext(itemId)).thenReturn(Optional.of(context));
-		doThrow(ForbiddenException.class)
+		doThrow(new ApiException(ItemErrorType.OWNER_REQUIRED))
 		.when(authorizationService).requireOwner(context.ownerId(), currentUserId);
 
 		assertThatThrownBy(() -> itemService.changeSubCategory(itemId, newSubCategoryId))
-		.isInstanceOf(ForbiddenException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireNotBlocked(context.status());
@@ -643,11 +645,11 @@ public class ItemServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
 		when(queryRepository.getChangeSubCategoryContext(itemId)).thenReturn(Optional.of(context));
-		doThrow(ForbiddenException.class)
+		doThrow(new ApiException(ItemErrorType.BLOCKED))
 		.when(authorizationService).requireNotBlocked(context.status());
 
 		assertThatThrownBy(() -> itemService.changeSubCategory(itemId, newSubCategoryId))
-		.isInstanceOf(ForbiddenException.class);
+		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireNotBlocked(context.status());
@@ -713,7 +715,7 @@ public class ItemServiceTest {
 			.thenReturn(0);
 		
 		assertThatThrownBy(() -> itemService.updateStatus(itemId))
-			.isInstanceOf(OptimisticLockException.class);
+			.isInstanceOf(ApiException.class);
 
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireNotBlocked(context.currentStatus());
@@ -730,11 +732,11 @@ public class ItemServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
 		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
-		doThrow(ForbiddenException.class)
+		doThrow(new ApiException(ItemErrorType.OWNER_REQUIRED))
 			.when(authorizationService).requireOwner(context.ownerId(), currentUserId);
 
 		assertThatThrownBy(() -> itemService.updateStatus(itemId))
-			.isInstanceOf(ForbiddenException.class);
+			.isInstanceOf(ApiException.class);
 
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireNotBlocked(context.currentStatus());
@@ -751,11 +753,11 @@ public class ItemServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
 		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
-		doThrow(ForbiddenException.class)
+		doThrow(new ApiException(ItemErrorType.BLOCKED))
 			.when(authorizationService).requireNotBlocked(context.currentStatus());
 
 		assertThatThrownBy(() -> itemService.updateStatus(itemId))
-			.isInstanceOf(ForbiddenException.class);
+			.isInstanceOf(ApiException.class);
 
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireNotBlocked(context.currentStatus());
@@ -772,7 +774,7 @@ public class ItemServiceTest {
 			.thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> itemService.updateStatus(itemId))
-			.isInstanceOf(ItemNotFoundException.class);
+			.isInstanceOf(ApiException.class);
 
 		verify(currentUserProvider).currentUserId();
 		verifyNoInteractions(authorizationService, itemRepository);
@@ -789,7 +791,7 @@ public class ItemServiceTest {
 			.thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
-			.isInstanceOf(ItemNotFoundException.class);
+			.isInstanceOf(ApiException.class);
 
 		verify(currentUserProvider).currentUserId();
 		verifyNoInteractions(authorizationService, itemRepository);
@@ -806,7 +808,7 @@ public class ItemServiceTest {
 			.thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> itemService.changeSubCategory(itemId, newSubCategoryId))
-			.isInstanceOf(ItemNotFoundException.class);
+			.isInstanceOf(ApiException.class);
 
 		verify(currentUserProvider).currentUserId();
 		verifyNoInteractions(authorizationService, itemRepository);
