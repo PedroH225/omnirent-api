@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
 			
 	@ExceptionHandler(exception = ApiException.class)
 	public ResponseEntity<ApiErrorResponse> handleException(ApiException e, HttpServletRequest request) {
-	    String localizedMessage = messageService.get(e.getMessageKey());
+	    String localizedMessage = messageService.get(e.getMessageKey(), e.getArgs());
 
 	    ApiErrorResponse err = new ApiErrorResponse(
 	            Instant.now(),
