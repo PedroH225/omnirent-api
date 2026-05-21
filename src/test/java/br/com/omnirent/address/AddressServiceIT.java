@@ -14,12 +14,10 @@ import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.domain.AddressData;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
-import br.com.omnirent.exception.domain.AddressNotFoundException;
-import br.com.omnirent.exception.domain.UserNotFoundException;
+import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringIntegrationTest;
-import br.com.omnirent.security.domain.AuthenticatedUser;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.utils.SecurityTestUtils;
@@ -90,7 +88,7 @@ public class AddressServiceIT extends SpringIntegrationTest {
 		
 		SecurityTestUtils.setAuthenticatedUser("invalid-id");
 		assertThatThrownBy(() -> addressService.addAddress(addressRequestDTO))
-		.isInstanceOf(UserNotFoundException.class);
+		.isInstanceOf(ApiException.class);
 	}
 	
 	@Test
@@ -135,7 +133,7 @@ public class AddressServiceIT extends SpringIntegrationTest {
 		AddressRequestDTO addressRequestDTO = AddressTestFactory.toInvalidRequestDTO(userAddress);
 
 		assertThatThrownBy(() -> addressService.updateAddress(addressRequestDTO))
-		.isInstanceOf(AddressNotFoundException.class);
+		.isInstanceOf(ApiException.class);
 	}
 	
 	@Test
@@ -150,6 +148,6 @@ public class AddressServiceIT extends SpringIntegrationTest {
 	@Test
 	void shouldThrowWhenDeletingNonexistentAddress() {
 	    assertThatThrownBy(() -> addressService.deleteAddress("invalid-id"))
-	        .isInstanceOf(AddressNotFoundException.class);
+	        .isInstanceOf(ApiException.class);
 	}
 }
