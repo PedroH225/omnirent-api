@@ -17,15 +17,15 @@ public class GlobalExceptionHandler {
 	@Autowired
 	private MessageService messageService;
 			
-	@ExceptionHandler(exception = BusinessException.class)
-	public ResponseEntity<StandardError> handleException(BusinessException e, HttpServletRequest request) {
-	    String localizedError = messageService.get(e.getErrorKey(), e.getError());
-	    String localizedMessage = messageService.get(e.getMessageKey(), e.getMessage());
+	@ExceptionHandler(exception = ApiException.class)
+	public ResponseEntity<ApiErrorResponse> handleException(ApiException e, HttpServletRequest request) {
+	    String localizedMessage = messageService.get(e.getMessageKey());
 
-	    StandardError err = new StandardError(
+	    ApiErrorResponse err = new ApiErrorResponse(
 	            Instant.now(),
 	            e.getHttpStatus().value(),
-	            localizedError,
+	            e.getErrorType(),
+	            e.getErrorCode(),
 	            localizedMessage,
 	            request.getRequestURI()
 	    );
@@ -34,10 +34,11 @@ public class GlobalExceptionHandler {
 	}
 	
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<StandardError> handleGeneric(Exception e, HttpServletRequest request) {
-	    StandardError err = new StandardError(
+	public ResponseEntity<ApiErrorResponse> handleGeneric(Exception e, HttpServletRequest request) {
+	    ApiErrorResponse err = new ApiErrorResponse(
 	            Instant.now(),
 	            500,
+	            "temp",
 	            "Internal server error",
 	            "Unexpected error",
 	            request.getRequestURI()
