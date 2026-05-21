@@ -2,8 +2,6 @@ package br.com.omnirent.common.enums;
 
 import java.util.Set;
 
-import br.com.omnirent.exception.domain.IllegalRentalStateException;
-
 public enum RentalStatus {
 	CREATED,
 	CONFIRMED,
@@ -39,9 +37,7 @@ public enum RentalStatus {
 		return allowedTransitions;
 	}
 	
-	public void validateTransition(RentalStatus target) {
-		if (!allowedTransitions.contains(target)) {
-			throw new IllegalRentalStateException(this, target);
-		}
+	public boolean canTransition(RentalStatus target) {
+		return allowedTransitions.contains(target);
 	}
 }
