@@ -12,11 +12,9 @@ import lombok.AllArgsConstructor;
 @Service
 public class ItemAuthorizationService {
 	
-	private final String DEFAULT_MESSAGE = "You are not allowed to perform this operation.";
-
 	public void requireOwner(String ownerId, String currentUserId) {
 		if (!ownerId.equals(currentUserId)) {
-			throw new ForbiddenException(DEFAULT_MESSAGE);
+			throw new ApiException(ItemErrorType.OWNER_REQUIRED);
 		}
 	}
 	
