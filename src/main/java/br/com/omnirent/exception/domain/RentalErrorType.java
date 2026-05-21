@@ -8,8 +8,10 @@ import lombok.Getter;
 @Getter
 public enum RentalErrorType implements AppErrorType {
 
-    NOT_FOUND("NOT_FOUND", "RENTAL_NOT_FOUND", "not_found", HttpStatus.NOT_FOUND);
-    	
+    NOT_FOUND("NOT_FOUND", "RENTAL_NOT_FOUND", "not_found", HttpStatus.NOT_FOUND),
+    OPERATION_FORBIDDEN("OPERATION_FORBIDDEN", "RENTAL_OPERATION_FORBIDDEN",
+    		"operation_forbidden", HttpStatus.FORBIDDEN);
+	
     private String errorType;
 	
 	private String errorCode;
