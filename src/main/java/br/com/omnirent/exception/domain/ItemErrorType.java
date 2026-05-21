@@ -9,8 +9,9 @@ import lombok.Getter;
 public enum ItemErrorType implements AppErrorType {
 
     NOT_FOUND("NOT_FOUND", "ITEM_NOT_FOUND", "not_found", HttpStatus.NOT_FOUND),
-    BLOCKED("BLOCKED", "ITEM_BLOCKED", "blocked", HttpStatus.FORBIDDEN);
-    
+    BLOCKED("BLOCKED", "ITEM_BLOCKED", "blocked", HttpStatus.FORBIDDEN),
+    OWNER_REQUIRED("OWNER_REQUIRED", "ITEM_OWNER_REQUIRED", "owner_required", HttpStatus.FORBIDDEN);
+	
     private String errorType;
 	
 	private String errorCode;
