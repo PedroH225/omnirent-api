@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.AddressErrorType;
 import br.com.omnirent.exception.domain.AddressNotFoundException;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
@@ -26,19 +28,14 @@ public class AddressService {
 	private CurrentUserProvider currentUserProvider;
 	
 	public Address findById(String id) {
-		Optional<Address> address = addressRepository.findById(id);
-		
-		if (address.isEmpty()) {
-			throw new AddressNotFoundException();
-		}
-		
-		return address.get();
+		return addressRepository.findById(id)
+				.orElseThrow(() -> new ApiException(AddressErrorType.NOT_FOUND));
 	}
 	
 	public Address getValidReference(String addressId, String userId) {
 		boolean found = addressRepository.verifyAddress(addressId, userId);
 		if (!found) {
-			throw new AddressNotFoundException();
+			throw new ApiException(AddressErrorType.NOT_FOUND);
 		}
 		return addressRepository.getReferenceById(addressId);
 	}
