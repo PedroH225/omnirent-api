@@ -8,7 +8,6 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.category.dto.CategoryResponseDTO;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
@@ -37,7 +36,7 @@ public class CategoryService {
 		List<SubCategoryResDTO> subCategories = subRepository.findSubByCategoryId(id);
 		category.setSubCategories(subCategories);
 		
-		return category;
+		return mapper.localize(category);
  	}
 	
 	public SubCategory getValidSubReference(String subCategoryId) {
@@ -50,8 +49,10 @@ public class CategoryService {
 
 	
 	public SubCategoryResDTO getSubCategoryById(String id) {		
-		return subRepository.findSubById(id)
+		SubCategoryResDTO result = subRepository.findSubById(id)
 				.orElseThrow(SubCategoryNotFoundException::new);
+		
+		return mapper.localize(result);
  	}
 	
 	public List<CategoryResponseDTO> findAll() {
@@ -74,15 +75,23 @@ public class CategoryService {
 	        cat.setSubCategories(subs != null ? subs : new ArrayList<>());
 	    }
 		
+		categories.forEach(c -> mapper.localize(c));
+		
 		return categories;
 	}
 	
 	public List<SubCategoryResDTO> findAllSub() {
-		return subRepository.findAllSubCat();
+		List<SubCategoryResDTO> result = subRepository.findAllSubCat();
+		result.forEach(sc -> mapper.localize(sc));
+		
+		return result;
 	}
 
 	public List<SubCategoryResDTO> findSubsByCategory(String categoryName) {
-		return subRepository.findAllSubByCategoryName(categoryName);
+		List<SubCategoryResDTO> result = subRepository.findAllSubByCategoryName(categoryName);
+		result.forEach(sc -> mapper.localize(sc));
+		
+		return result;
 	}
 	
 }

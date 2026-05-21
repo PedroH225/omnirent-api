@@ -24,9 +24,13 @@ public class ItemCreatedDTO {
 	
 	private BigDecimal basePrice;
 	
-	private String itemCondition;
+	private ItemCondition itemCondition;
 	
-	private String itemStatus;
+	private String itemConditionLabel;
+	
+	private ItemStatus itemStatus;
+	
+	private String itemStatusLabel;
 			
 	public ItemCreatedDTO(String id, String name, String brand, String model, String description,
 			BigDecimal basePrice, ItemCondition itemCondition,
@@ -37,7 +41,7 @@ public class ItemCreatedDTO {
 		this.model = model;
 		this.description = description;
 		this.basePrice = basePrice;
-		this.itemCondition = itemCondition.toString();
-		this.itemStatus = itemStatus.toString();
+		this.itemCondition = itemCondition;
+		this.itemStatus = itemStatus;
 	}
 }

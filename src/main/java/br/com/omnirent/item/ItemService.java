@@ -10,6 +10,7 @@ import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.domain.ItemNotFoundException;
 import br.com.omnirent.exception.domain.OptimisticLockException;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
@@ -49,11 +50,13 @@ public class ItemService {
 	
 	private ItemMapper itemMapper;
 	
-
-	
 	public ItemDetailDTO getItemById(String id) {
-		return queryRepository.findItemDetailDTO(id)
+		ItemDetailDTO result = queryRepository.findItemDetailDTO(id)
 				.orElseThrow(ItemNotFoundException::new);
+		
+		result = itemMapper.localize(result);
+		
+		return result;
 	}
 	
 	public ItemRentedContext getItemRentedContext(String id) {
@@ -84,7 +87,11 @@ public class ItemService {
 	public List<ItemDisplayDTO> getUserItems() {
 		String userId = currentUserProvider.currentUserId();
 		userService.requireExistence(userId);
-		return queryRepository.findUserItems(userId);
+		List<ItemDisplayDTO> result = queryRepository.findUserItems(userId);
+		
+		result = itemMapper.localize(result);
+		
+		return result;
 	}
 
 	public ItemCreatedDTO addItem(ItemRequestDTO itemDTO) {
@@ -110,7 +117,7 @@ public class ItemService {
 		int updated = itemRepository.updateItem(
 			context.itemInfo().getId(), context.status(), request.name(), request.brand(),
 			request.model(), request.description(), request.basePrice(),
-			ItemCondition.fromString(request.itemCondition())
+			request.itemCondition()
 		);
 		
 		if (updated == 0) {

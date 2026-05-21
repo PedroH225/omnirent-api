@@ -3,13 +3,9 @@ package br.com.omnirent.item.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import br.com.omnirent.address.dto.AddressResponseDTO;
-import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.user.dto.UserResponseDTO;
@@ -24,9 +20,13 @@ public class ItemDisplayDTO {
 	
 	private BigDecimal basePrice;
 	
-	private String itemCondition;
+	private ItemCondition itemCondition;
 	
-	private String itemStatus;
+	private String itemConditionLabel;
+	
+	private ItemStatus itemStatus;
+	
+	private String itemStatusLabel;
 	
 	private String subCategoryName;
 			
@@ -43,8 +43,8 @@ public class ItemDisplayDTO {
 		this.id = id;
 		this.name = name;
 		this.basePrice = basePrice;
-		this.itemCondition = itemCondition.toString();
-		this.itemStatus = itemStatus.toString();
+		this.itemCondition = itemCondition;
+		this.itemStatus = itemStatus;
 		this.subCategoryName = subCategoryName;
 		this.owner = owner;
 		this.createdAt = dtf.format(createdAt);

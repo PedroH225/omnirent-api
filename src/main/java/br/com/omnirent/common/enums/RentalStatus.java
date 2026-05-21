@@ -1,31 +1,26 @@
 package br.com.omnirent.common.enums;
 
-import java.util.HashSet;
 import java.util.Set;
 
-import br.com.omnirent.exception.domain.IllegalEnumerationException;
 import br.com.omnirent.exception.domain.IllegalRentalStateException;
 
 public enum RentalStatus {
-	CREATED("Created"),
-	CONFIRMED("Confirmed"),
-	PREPARING("Preparing"),
-	SHIPPED("Shipped"),
-	IN_USE("In use"),
-	RETURN_REQUESTED("Return requested"),
-	RETURN_SHIPPED("Return shipped"),
-	RETURNED("Returned"),
-	CANCELLED("Cancelled"),
-	LATE("Late"),
-	ACTIVE("Active");
+	CREATED,
+	CONFIRMED,
+	PREPARING,
+	SHIPPED,
+	IN_USE,
+	RETURN_REQUESTED,
+	RETURN_SHIPPED,
+	RETURNED,
+	CANCELLED,
+	LATE;
 	
-	private String rentalStatus;
+	public String getMessageKey() {
+		return "rental.status." + name();
+	}
 	
 	private Set<RentalStatus> allowedTransitions;
-	
-	RentalStatus (String rentalStatus){
-        this.rentalStatus = rentalStatus;
-    }
 	
 	static {
 		CREATED.allowedTransitions = Set.of(CONFIRMED, CANCELLED);
@@ -38,16 +33,6 @@ public enum RentalStatus {
         RETURNED.allowedTransitions = Set.of();
         CANCELLED.allowedTransitions = Set.of();
         LATE.allowedTransitions = Set.of(IN_USE);
-        ACTIVE.allowedTransitions = Set.of();
-    }
-    
-	public static RentalStatus fromString(String text) {
-        for (RentalStatus rentalStatus : RentalStatus.values()) {
-            if (rentalStatus.rentalStatus.equalsIgnoreCase(text)) {
-                return rentalStatus;
-            }
-        }
-        throw new IllegalEnumerationException(RentalStatus.class, text);
     }
 	
 	public Set<RentalStatus> getAllowedTransitions() {
@@ -59,8 +44,4 @@ public enum RentalStatus {
 			throw new IllegalRentalStateException(this, target);
 		}
 	}
-
-    public String toString(){
-        return rentalStatus;
-    }
 }

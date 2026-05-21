@@ -46,44 +46,28 @@ public class RentalService {
 	private RentalMapper mapper;
 	
 	private CurrentUserProvider currentUserProvider;
-	
-	public Rental findById(String id) {
-		Optional<Rental> rental = rentalRepository.findById(id);
-		
-		if (rental.isEmpty()) {
-			throw new RentalNotFoundException();
-		}
-		
-		return rental.get();
-	}
-
 
 	public RentalDisplayDTO findRentalDisplayDTO(String id) {
-		Optional<RentalDisplayDTO> optRental = queryRepository.findRentalDisplayDTO(id);
+		RentalDisplayDTO result = queryRepository.findRentalDisplayDTO(id)
+				.orElseThrow(RentalNotFoundException::new);
 		
-		if (optRental.isEmpty()) {
-			throw new RentalNotFoundException();
-		}
+		result = mapper.localize(result);
 		
-		return optRental.get();
+		return result;
 	}
 		
 	public RentalDetailDTO getRentalById(String id) {
-		Optional<RentalDetailDTO> rOptional = queryRepository.findRentalDetail(id);
-		if (rOptional.isEmpty()) {
-			throw new RentalNotFoundException();
-		}
+		RentalDetailDTO result = queryRepository.findRentalDetail(id)
+				.orElseThrow(RentalNotFoundException::new);
 		
-		return rOptional.get();
+		result = mapper.localize(result);
+		
+		return result;
 	}
 	
 	private RentalStatusChangeContext getStatusChangeContext(String rentId) {
-		Optional<RentalStatusChangeContext> optContext = queryRepository.getStatusChangeContext(rentId);
-		
-		if (optContext.isEmpty()) {
-			throw new RentalNotFoundException();
-		}
-		return optContext.get();
+		return queryRepository.getStatusChangeContext(rentId)
+				.orElseThrow(RentalNotFoundException::new);
 	}
 
 	public RentalCreatedDTO addRent(RentalRequestDTO rentalRequestDTO) {
@@ -95,7 +79,7 @@ public class RentalService {
 		ItemInfo itemInfo = context.getItemInfo();
 		
 		RentalStatus rentalStatus = RentalStatus.CREATED;
-		RentalPeriod rentalPeriod = RentalPeriod.fromString(rentalRequestDTO.rentalPeriod());
+		RentalPeriod rentalPeriod = rentalRequestDTO.rentalPeriod();
 		
 		BigDecimal finalPrice = RentalPriceService.calculateFinalPrice(itemInfo.getBasePrice(), rentalPeriod);
 		
@@ -227,12 +211,22 @@ public class RentalService {
 	public List<RentalDisplayDTO> findUserRented() {
 		String renterId = currentUserProvider.currentUserId();
 		userService.requireExistence(renterId);
-		return queryRepository.findUserRented(renterId);
+		
+		List<RentalDisplayDTO> result = queryRepository.findUserRented(renterId);
+		
+		result = mapper.localize(result);
+		
+		return result;
 	}
 
 	public List<RentalDisplayDTO> findUserRentals() {
 		String ownerId = currentUserProvider.currentUserId();
 		userService.requireExistence(ownerId);
-		return queryRepository.findUserRentals(ownerId);
+		
+		List<RentalDisplayDTO> result = queryRepository.findUserRentals(ownerId);
+		
+		result = mapper.localize(result);
+		
+		return result;
 	}
 }

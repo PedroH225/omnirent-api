@@ -3,6 +3,8 @@ package br.com.omnirent.category.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 
 @Data
@@ -11,6 +13,8 @@ public class CategoryResponseDTO {
 	private String id;
 	
 	private String name;
+	
+	private String categoryLabel;
 	
 	private List<SubCategoryResDTO> subCategories = new ArrayList<SubCategoryResDTO>();
 
@@ -23,6 +27,11 @@ public class CategoryResponseDTO {
 		this.id = id;
 		this.name = name;
 		this.subCategories = subCategories;
+	}
+	
+	@JsonIgnore
+	public String getMessageKey() {
+		return "category." + this.name;
 	}
 	
 }

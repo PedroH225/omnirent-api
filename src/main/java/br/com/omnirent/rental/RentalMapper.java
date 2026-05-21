@@ -12,6 +12,7 @@ import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressSnapshotDTO;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.item.ItemMapper;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
@@ -20,6 +21,7 @@ import br.com.omnirent.item.dto.ItemSnapshotDTO;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
+import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserResponseDTO;
@@ -33,26 +35,21 @@ public class RentalMapper {
 	
 	private AddressMapper addressMapper;
 	
-	private UserMapper userMapper;
-
-	public RentalDetailDTO toDetailDto(Rental rental) {
-		return new RentalDetailDTO(rental);
-	}
-	
-	public List<RentalDetailDTO> toDto(List<Rental> rentals) {
-		return rentals.stream()
-				.map(RentalDetailDTO::new)
-				.collect(Collectors.toList());
-	}
+	private MessageService messageService;
 	
 	public RentalCreatedDTO toCreatedDto(Rental rental) {
 		ItemSnapshotDTO itemSnapshotDTO = itemMapper.toSnapshotDTO(rental.getItemSnapshot());
 		AddressSnapshotDTO addressSnapshotDTO = addressMapper.toSnapDto(rental.getAddressSnapshot());
-		return new RentalCreatedDTO(
+		RentalCreatedDTO newRental = new RentalCreatedDTO(
 			    rental.getId(), rental.getStartDate(), rental.getEndDate(),
 			    rental.getFinalPrice(), rental.getRentalStatus(), rental.getRentalPeriod(),
 			    itemSnapshotDTO, addressSnapshotDTO
 			);
+		
+		newRental.setRentalPeriodLabel(messageService.get(newRental.getRentalPeriod().getMessageKey()));
+		newRental.setRentalStatusLabel(messageService.get(newRental.getRentalStatus().getMessageKey()));
+		
+		return newRental;
 	}
 	
 	public Rental create(User renter, String renterId, ItemRentedContext context,
@@ -82,5 +79,28 @@ public class RentalMapper {
 		rental.setEndDate(endDate);
 		
 		return rental;
+	}
+	
+	public List<RentalDisplayDTO> localize(List<RentalDisplayDTO> displayDTOs) {
+		displayDTOs.forEach(r -> {
+		r.setRentalPeriodLabel(messageService.get(r.getRentalPeriod().getMessageKey()));
+		r.setRentalStatusLabel(messageService.get(r.getRentalStatus().getMessageKey()));
+		});
+		
+		return displayDTOs;
+	}
+	
+	public RentalDisplayDTO localize(RentalDisplayDTO displayDTO) {
+		displayDTO.setRentalPeriodLabel(messageService.get(displayDTO.getRentalPeriod().getMessageKey()));
+		displayDTO.setRentalStatusLabel(messageService.get(displayDTO.getRentalStatus().getMessageKey()));
+	
+		return displayDTO;
+	}
+	
+	public RentalDetailDTO localize(RentalDetailDTO detailDTO) {
+		detailDTO.setRentalPeriodLabel(messageService.get(detailDTO.getRentalPeriod().getMessageKey()));
+		detailDTO.setRentalStatusLabel(messageService.get(detailDTO.getRentalStatus().getMessageKey()));
+		
+		return detailDTO;
 	}
 }

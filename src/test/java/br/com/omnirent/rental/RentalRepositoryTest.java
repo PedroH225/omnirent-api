@@ -114,7 +114,7 @@ public class RentalRepositoryTest extends IntegrationTest {
         		"100", ItemCondition.USED));
         
         rental = rentalRepository.save(RentalTestFactory.create(item, owner, renter, ownerAddress,
-        		"300", RentalStatus.ACTIVE, RentalPeriod.MONTHLY, LocalDateTime.now(), LocalDateTime.now()));
+        		"300", RentalStatus.CREATED, RentalPeriod.MONTHLY, LocalDateTime.now(), LocalDateTime.now()));
         
         LocalDateTime lateStartDate = LocalDateTime.now().minusDays(2);
         LocalDateTime lateEndDate = LocalDateTime.now().minusDays(2);
@@ -146,8 +146,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getStartDate()).isEqualTo(dtf.format(rental.getStartDate()));
 	    assertThat(dto.getEndDate()).isEqualTo(dtf.format(rental.getEndDate()));
 	    assertThat(dto.getFinalPrice()).isEqualByComparingTo(rental.getFinalPrice());
-	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus().toString());
-	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod().toString());
+	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
+	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
 
 	    assertThat(renterDto.getId()).isEqualTo(renter.getId());
 	    assertThat(renterDto.getUsername()).isEqualTo(renter.getDisplayUsername());
@@ -191,8 +191,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getStartDate()).isEqualTo(dtf.format(rental.getStartDate()));
 	    assertThat(dto.getEndDate()).isEqualTo(dtf.format(rental.getEndDate()));
 	    assertThat(dto.getFinalPrice()).isEqualByComparingTo(rental.getFinalPrice());
-	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus().toString());
-	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod().toString());
+	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
+	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
 
 	    assertThat(dto.getItemId()).isEqualTo(itemSnp.getId());
 	    assertThat(dto.getItemName()).isEqualTo(itemSnp.getName());
@@ -224,8 +224,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getStartDate()).isEqualTo(rental.getStartDate().format(dtf));
 	    assertThat(dto.getEndDate()).isEqualTo(rental.getEndDate().format(dtf));
 	    assertThat(dto.getFinalPrice()).isEqualByComparingTo(rental.getFinalPrice());
-	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus().toString());
-	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod().toString());
+	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
+	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
 
 	    assertThat(dto.getItemId()).isEqualTo(itemSnp.getId());
 	    assertThat(dto.getItemName()).isEqualTo(itemSnp.getName());
@@ -264,8 +264,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getStartDate()).isEqualTo(rental.getStartDate().format(dtf));
 	    assertThat(dto.getEndDate()).isEqualTo(rental.getEndDate().format(dtf));
 	    assertThat(dto.getFinalPrice()).isEqualByComparingTo(rental.getFinalPrice());
-	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus().toString());
-	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod().toString());
+	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
+	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
 
 	    assertThat(dto.getItemId()).isEqualTo(itemSnp.getId());
 	    assertThat(dto.getItemName()).isEqualTo(itemSnp.getName());
@@ -326,7 +326,7 @@ public class RentalRepositoryTest extends IntegrationTest {
 	
 	@Test
 	void shouldUpdateRentalStatus() {
-		assertThat(rental.getRentalStatus()).isEqualTo(RentalStatus.ACTIVE);
+		assertThat(rental.getRentalStatus()).isEqualTo(RentalStatus.CREATED);
 		
 		rentalRepository.updateRentalStatus(rental.getId(), RentalStatus.IN_USE);
 		
@@ -341,7 +341,7 @@ public class RentalRepositoryTest extends IntegrationTest {
 	
 	@Test
 	void shouldUpdateRentalStatusAndPeriod() {
-		assertThat(rental.getRentalStatus()).isEqualTo(RentalStatus.ACTIVE);
+		assertThat(rental.getRentalStatus()).isEqualTo(RentalStatus.CREATED);
 		LocalDateTime startDate = LocalDateTime.now().withNano(0);
 		LocalDateTime endDate = LocalDateTime.now().withNano(0);
 		

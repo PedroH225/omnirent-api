@@ -124,7 +124,7 @@ public final class ItemTestFactory {
         );
     }
     
-    public static ItemRequestDTO createItemRequest(String itemId, String basePrice, String itemCondition,
+    public static ItemRequestDTO createItemRequest(String itemId, String basePrice, ItemCondition itemCondition,
     		String subCategoryId, String addressId) {
     	String item = Sequence.nextString("item");
     	
@@ -137,7 +137,7 @@ public final class ItemTestFactory {
         );
     }
     
-    public static UpdateItemRequestDTO updateItemRequest(String itemId, String basePrice, String itemCondition) {
+    public static UpdateItemRequestDTO updateItemRequest(String itemId, String basePrice, ItemCondition itemCondition) {
     	String item = Sequence.nextString("item");
     	
         return new UpdateItemRequestDTO(
@@ -168,8 +168,7 @@ public final class ItemTestFactory {
 
         ItemData itemData = new ItemData(
                 dto.brand(), dto.model(), dto.description(),
-                dto.basePrice(), ItemCondition.valueOf(dto.itemCondition())
-        );
+                dto.basePrice(), dto.itemCondition());
 
         Item item = new Item();
         item.setName(dto.name());

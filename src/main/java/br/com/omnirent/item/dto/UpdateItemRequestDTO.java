@@ -2,6 +2,8 @@ package br.com.omnirent.item.dto;
 
 import java.math.BigDecimal;
 
+import br.com.omnirent.common.enums.ItemCondition;
+
 public record UpdateItemRequestDTO(
 		String id,
 		String name,
@@ -9,5 +11,5 @@ public record UpdateItemRequestDTO(
 		String brand,
 		String description,
 		BigDecimal basePrice,
-		String itemCondition
+		ItemCondition itemCondition
 		) {}

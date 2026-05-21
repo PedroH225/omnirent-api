@@ -11,7 +11,6 @@ import br.com.omnirent.address.dto.AddressSnapshotDTO;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.item.dto.ItemSnapshotDTO;
-import br.com.omnirent.user.dto.UserResponseDTO;
 import lombok.Data;
 
 @Data
@@ -24,9 +23,13 @@ private String id;
 	
 	private BigDecimal finalPrice;
 	
-	private String rentalStatus;
+	private RentalStatus rentalStatus;
 	
-	private String rentalPeriod;
+	private String rentalStatusLabel;
+	
+	private RentalPeriod rentalPeriod;
+	
+	private String rentalPeriodLabel;
 			
 	@JsonProperty("item")
 	private ItemSnapshotDTO itemSnapshot;
@@ -42,8 +45,8 @@ private String id;
 			AddressSnapshotDTO addressSnapshot) {
 		this.id = id;
 		this.finalPrice = finalPrice;
-		this.rentalStatus = rentalStatus.toString();
-		this.rentalPeriod = rentalPeriod.toString();
+		this.rentalStatus = rentalStatus;
+		this.rentalPeriod = rentalPeriod;
 		this.itemSnapshot = itemSnapshot;
 		this.addressSnapshot = addressSnapshot;
 		

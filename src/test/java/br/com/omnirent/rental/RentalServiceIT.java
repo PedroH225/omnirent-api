@@ -124,7 +124,7 @@ public class RentalServiceIT extends SpringIntegrationTest {
 		String itemId = item2.getId();
 		RentalPeriod period = RentalPeriod.MONTHLY;
 		
-		RentalRequestDTO request = RentalTestFactory.newRentalRequest(itemId, period.name());
+		RentalRequestDTO request = RentalTestFactory.newRentalRequest(itemId, period);
 	
 		RentalCreatedDTO result = rentalService.addRent(request);
 		

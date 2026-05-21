@@ -110,7 +110,7 @@ public class ItemServiceIT extends SpringIntegrationTest {
 	void shouldAddItem() {
 		ItemCondition condition = ItemCondition.NEW;
 	    ItemRequestDTO request = ItemTestFactory.createItemRequest(
-	        null, "200", "NEW", notebook.getId(), ownerAddress.getId()
+	        null, "200", ItemCondition.NEW, notebook.getId(), ownerAddress.getId()
 	    );
 
 	    ItemCreatedDTO result = itemService.addItem(request);
@@ -119,7 +119,7 @@ public class ItemServiceIT extends SpringIntegrationTest {
 	    assertThat(result.getId()).isNotNull();
 
 	    assertThat(result.getBasePrice()).isEqualByComparingTo("200");
-	    assertThat(result.getItemCondition()).isEqualTo(condition.toString());
+	    assertThat(result.getItemCondition()).isEqualTo(condition);
 
 	    Optional<Item> optPersisted = itemRepository.findById(result.getId());
 	    assertThat(optPersisted).isPresent();
@@ -139,7 +139,7 @@ public class ItemServiceIT extends SpringIntegrationTest {
 	@Test
 	void shouldUpdateItem() {
 		ItemCondition condition = ItemCondition.USED;
-	    UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "300", "USED");
+	    UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "300", ItemCondition.USED);
 
 	    itemService.updateItem(request);
 	    
@@ -165,7 +165,7 @@ public class ItemServiceIT extends SpringIntegrationTest {
 	@Test
 	void shouldThrowWhenUserIsNotOwnerOnUpdateItem() {
 		SecurityTestUtils.setAuthenticatedUser(owner2.getId());
-	    UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "300", "USED");
+	    UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "300", ItemCondition.USED);
 	    
 	    assertThatThrownBy(() -> itemService.updateItem(request))
 	    .isInstanceOf(ForbiddenException.class);
