@@ -11,7 +11,8 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.config.i18n.MessageService;
-import br.com.omnirent.exception.domain.ItemNotFoundException;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.ItemErrorType;
 import br.com.omnirent.exception.domain.OptimisticLockException;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
@@ -52,36 +53,34 @@ public class ItemService {
 	
 	public ItemDetailDTO getItemById(String id) {
 		ItemDetailDTO result = queryRepository.findItemDetailDTO(id)
-				.orElseThrow(ItemNotFoundException::new);
+				.orElseThrow(() -> new ApiException(ItemErrorType.NOT_FOUND));
 		
-		result = itemMapper.localize(result);
-		
-		return result;
+		return itemMapper.localize(result);	
 	}
 	
 	public ItemRentedContext getItemRentedContext(String id) {
 		return queryRepository.getItemRentedContext(id)
-				.orElseThrow(ItemNotFoundException::new);
+				.orElseThrow(() -> new ApiException(ItemErrorType.NOT_FOUND));
 	}
 	
 	private UpdateItemContext getUpdateContext(String id) {
 		return queryRepository.getUpdateContext(id)
-				.orElseThrow(ItemNotFoundException::new);
+				.orElseThrow(() -> new ApiException(ItemErrorType.NOT_FOUND));
 	}
 	
 	private UpdateItemStatusContext getUpdateStatusContext(String id) {
 		return queryRepository.getUpdateStatusContext(id)
-				.orElseThrow(ItemNotFoundException::new);
+				.orElseThrow(() -> new ApiException(ItemErrorType.NOT_FOUND));
 	}
 	
 	private ChangeItemAddressContext getChangeItemAddressContext(String id) {
 		return queryRepository.getChangeAddressContext(id)
-				.orElseThrow(ItemNotFoundException::new);
+				.orElseThrow(() -> new ApiException(ItemErrorType.NOT_FOUND));
 	}
 
 	private ChangeItemSubCategoryContext getChangeItemSubCategoryContext(String id) {
 		return queryRepository.getChangeSubCategoryContext(id)
-				.orElseThrow(ItemNotFoundException::new);
+				.orElseThrow(() -> new ApiException(ItemErrorType.NOT_FOUND));
 	}
 	
 	public List<ItemDisplayDTO> getUserItems() {
