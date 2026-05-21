@@ -8,12 +8,10 @@ import br.com.omnirent.address.AddressService;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.SubCategory;
-import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
-import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.ItemErrorType;
-import br.com.omnirent.exception.domain.OptimisticLockException;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemRentedContext;
@@ -88,9 +86,7 @@ public class ItemService {
 		userService.requireExistence(userId);
 		List<ItemDisplayDTO> result = queryRepository.findUserItems(userId);
 		
-		result = itemMapper.localize(result);
-		
-		return result;
+		return itemMapper.localize(result);
 	}
 
 	public ItemCreatedDTO addItem(ItemRequestDTO itemDTO) {
@@ -120,7 +116,7 @@ public class ItemService {
 		);
 		
 		if (updated == 0) {
-			throw new OptimisticLockException();
+			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 		}
 	}
 	
@@ -143,7 +139,7 @@ public class ItemService {
 	        itemId, validatedNewAddressId, context.currentAddressId(), context.status());
 
 	    if (updated == 0) {
-			throw new OptimisticLockException();
+			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 	    }
 	}
 	
@@ -166,7 +162,7 @@ public class ItemService {
 	        itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status());
 
 	    if (updated == 0) {
-			throw new OptimisticLockException();
+			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 	    }
 	}
 
@@ -186,7 +182,7 @@ public class ItemService {
 		int updated = itemRepository.updateStatus(itemId, currentStatus, newStatus);
 		
 		if (updated == 0) {
-			throw new OptimisticLockException();
+			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 		}
 	}
 	
