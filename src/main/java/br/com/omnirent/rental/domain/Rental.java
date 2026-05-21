@@ -7,7 +7,6 @@ import br.com.omnirent.address.domain.AddressSnapshot;
 import br.com.omnirent.common.BaseEntity;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
-import br.com.omnirent.exception.domain.IllegalRentalStateException;
 import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.user.domain.User;
 import jakarta.persistence.CascadeType;
