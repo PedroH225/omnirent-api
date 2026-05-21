@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.category.dto.CategoryResponseDTO;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
-import br.com.omnirent.exception.domain.CategoryNotFoundException;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.CategoryErrorType;
 import br.com.omnirent.exception.domain.SubCategoryNotFoundException;
 import lombok.AllArgsConstructor;
 
@@ -29,7 +30,7 @@ public class CategoryService {
 		Optional<CategoryResponseDTO> optCategory = categoryRepository.getCategoryById(id);
 				
 		if (optCategory.isEmpty()) {
-			throw new CategoryNotFoundException();
+			throw new ApiException(CategoryErrorType.NOT_FOUND);
 		}
 		
 		CategoryResponseDTO category = optCategory.get();
