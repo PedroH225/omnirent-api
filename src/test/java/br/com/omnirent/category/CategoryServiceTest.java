@@ -2,7 +2,6 @@ package br.com.omnirent.category;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -23,8 +22,7 @@ import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.category.dto.CategoryResponseDTO;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
-import br.com.omnirent.exception.domain.CategoryNotFoundException;
-import br.com.omnirent.exception.domain.SubCategoryNotFoundException;
+import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 
@@ -98,7 +96,7 @@ public class CategoryServiceTest {
     	when(categoryRepository.getCategoryById(invalidId)).thenReturn(Optional.empty());
     	    	
     	assertThatThrownBy(() -> categoryService.getCategoryById(invalidId))
-    	.isInstanceOf(CategoryNotFoundException.class);
+    	.isInstanceOf(ApiException.class);
     	
     	verify(categoryRepository).getCategoryById(invalidId);
     	verifyNoInteractions(subRepository);
@@ -130,7 +128,7 @@ public class CategoryServiceTest {
     	when(subRepository.findSubById(invalidId)).thenReturn(Optional.empty());
     	    	
     	assertThatThrownBy(() -> categoryService.getSubCategoryById(invalidId))
-    	.isInstanceOf(SubCategoryNotFoundException.class);
+    	.isInstanceOf(ApiException.class);
     	
     	verify(subRepository).findSubById(invalidId);
     	verifyNoMoreInteractions(subRepository);
