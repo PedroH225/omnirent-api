@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
-import br.com.omnirent.exception.domain.RentalNotFoundException;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.RentalErrorType;
 import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
@@ -49,25 +50,21 @@ public class RentalService {
 
 	public RentalDisplayDTO findRentalDisplayDTO(String id) {
 		RentalDisplayDTO result = queryRepository.findRentalDisplayDTO(id)
-				.orElseThrow(RentalNotFoundException::new);
+				.orElseThrow(() -> new ApiException(RentalErrorType.NOT_FOUND));
 		
-		result = mapper.localize(result);
-		
-		return result;
+		return mapper.localize(result);
 	}
 		
 	public RentalDetailDTO getRentalById(String id) {
 		RentalDetailDTO result = queryRepository.findRentalDetail(id)
-				.orElseThrow(RentalNotFoundException::new);
+				.orElseThrow(() -> new ApiException(RentalErrorType.NOT_FOUND));
 		
-		result = mapper.localize(result);
-		
-		return result;
+		return mapper.localize(result);
 	}
 	
 	private RentalStatusChangeContext getStatusChangeContext(String rentId) {
 		return queryRepository.getStatusChangeContext(rentId)
-				.orElseThrow(RentalNotFoundException::new);
+				.orElseThrow(() -> new ApiException(RentalErrorType.NOT_FOUND));
 	}
 
 	public RentalCreatedDTO addRent(RentalRequestDTO rentalRequestDTO) {
@@ -214,9 +211,7 @@ public class RentalService {
 		
 		List<RentalDisplayDTO> result = queryRepository.findUserRented(renterId);
 		
-		result = mapper.localize(result);
-		
-		return result;
+		return mapper.localize(result);
 	}
 
 	public List<RentalDisplayDTO> findUserRentals() {
@@ -225,8 +220,6 @@ public class RentalService {
 		
 		List<RentalDisplayDTO> result = queryRepository.findUserRentals(ownerId);
 		
-		result = mapper.localize(result);
-		
-		return result;
+		return mapper.localize(result);
 	}
 }
