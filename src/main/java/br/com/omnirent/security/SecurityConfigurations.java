@@ -2,7 +2,6 @@ package br.com.omnirent.security;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,12 +15,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import lombok.AllArgsConstructor;
+
 @Configuration
 @EnableWebSecurity
+@AllArgsConstructor
 public class SecurityConfigurations {
 
-    @Autowired
-    SecurityFilter securityFilter;
+    private SecurityFilter securityFilter;
+    
+    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    
+    private CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean 
     protected SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity) throws Exception{
@@ -39,6 +44,9 @@ public class SecurityConfigurations {
                         .requestMatchers("/address/**").authenticated()
                         .anyRequest().permitAll()
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                		.accessDeniedHandler(customAccessDeniedHandler))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
