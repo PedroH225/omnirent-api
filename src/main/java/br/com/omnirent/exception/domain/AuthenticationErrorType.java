@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 public enum AuthenticationErrorType implements AppErrorType {
 
+    AUTHENTICATION_REQUIRED("UNAUTHORIZED", "AUTHENTICATION_REQUIRED", "authentication_required", HttpStatus.UNAUTHORIZED),
     INVALID_CREDENTIALS("UNAUTHORIZED", "INVALID_CREDENTIALS", "invalid_credentials", HttpStatus.UNAUTHORIZED);
     	
     private String errorType;
