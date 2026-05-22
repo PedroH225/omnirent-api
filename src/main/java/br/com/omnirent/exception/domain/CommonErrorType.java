@@ -8,8 +8,9 @@ import lombok.Getter;
 @Getter
 public enum CommonErrorType implements AppErrorType {
 
+    ILLEGAL_ENUMERATION("CONFLICT", "ILLEGAL_ENUMERATION", "illegal_enumeration", HttpStatus.BAD_REQUEST),
 	INTERNAL_ERROR("INTERNAL_SERVER_ERROR", "INTERNAL_SERVER_ERROR", "internal_server_error", HttpStatus.INTERNAL_SERVER_ERROR);
-	
+
     private String errorType;
 	
 	private String errorCode;
