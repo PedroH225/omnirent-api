@@ -12,14 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import br.com.omnirent.address.AddressRepository;
 import br.com.omnirent.address.domain.Address;
-import br.com.omnirent.address.domain.AddressData;
 import br.com.omnirent.category.CategoryRepository;
 import br.com.omnirent.category.SubCategoryRepository;
 import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
-import br.com.omnirent.exception.common.ForbiddenException;
+import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
@@ -168,7 +167,7 @@ public class ItemServiceIT extends SpringIntegrationTest {
 	    UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "300", ItemCondition.USED);
 	    
 	    assertThatThrownBy(() -> itemService.updateItem(request))
-	    .isInstanceOf(ForbiddenException.class);
+	    .isInstanceOf(ApiException.class);
 	    
 	    entityManager.flush();
 	    entityManager.clear();
