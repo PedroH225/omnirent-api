@@ -16,8 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.config.GlobalConfigHolder;
-import br.com.omnirent.exception.domain.EmailInUseException;
-import br.com.omnirent.exception.domain.FailedLoginException;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.AuthenticationErrorType;
+import br.com.omnirent.exception.domain.UserErrorType;
 import br.com.omnirent.security.context.LoginContext;
 import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
@@ -69,14 +70,14 @@ public class AuthenticationService implements UserDetailsService {
              var token = tokenService.generateToken((User) auth.getPrincipal());
              return Map.of("token", token);
 		} catch (BadCredentialsException e) {
-			throw new FailedLoginException();
+			throw new ApiException(AuthenticationErrorType.INVALID_CREDENTIALS);
 		}
     }
 
     public ResponseEntity<Object> register (RegisterDTO registerDto){
     	String email = registerDto.email();
     	if (verifyExistingEmail(email)) {
-			throw new EmailInUseException(email);
+			throw new ApiException(UserErrorType.EMAIL_ALREADY_IN_USE);
 		}
     	
     	String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());

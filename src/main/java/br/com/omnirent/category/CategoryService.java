@@ -11,8 +11,9 @@ import org.springframework.stereotype.Service;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.category.dto.CategoryResponseDTO;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
-import br.com.omnirent.exception.domain.CategoryNotFoundException;
-import br.com.omnirent.exception.domain.SubCategoryNotFoundException;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.CategoryErrorType;
+import br.com.omnirent.exception.domain.SubCategoryErrorType;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -29,7 +30,7 @@ public class CategoryService {
 		Optional<CategoryResponseDTO> optCategory = categoryRepository.getCategoryById(id);
 				
 		if (optCategory.isEmpty()) {
-			throw new CategoryNotFoundException();
+			throw new ApiException(CategoryErrorType.NOT_FOUND);
 		}
 		
 		CategoryResponseDTO category = optCategory.get();
@@ -42,7 +43,7 @@ public class CategoryService {
 	public SubCategory getValidSubReference(String subCategoryId) {
 		boolean found = subRepository.verifySubCategory(subCategoryId);
 		if (!found) {
-			throw new SubCategoryNotFoundException();
+			throw new ApiException(SubCategoryErrorType.NOT_FOUND);
 		}
 		return subRepository.getReferenceById(subCategoryId);
 	}
@@ -50,7 +51,7 @@ public class CategoryService {
 	
 	public SubCategoryResDTO getSubCategoryById(String id) {		
 		SubCategoryResDTO result = subRepository.findSubById(id)
-				.orElseThrow(SubCategoryNotFoundException::new);
+				.orElseThrow(() -> new ApiException(SubCategoryErrorType.NOT_FOUND));
 		
 		return mapper.localize(result);
  	}

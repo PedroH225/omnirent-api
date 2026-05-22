@@ -3,14 +3,15 @@ package br.com.omnirent.rental;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
-import br.com.omnirent.exception.domain.RentalNotFoundException;
+import br.com.omnirent.config.i18n.MessageService;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.RentalErrorType;
 import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
@@ -46,28 +47,34 @@ public class RentalService {
 	private RentalMapper mapper;
 	
 	private CurrentUserProvider currentUserProvider;
+	
+	private MessageService messageService;
+	
+	private void validateTransition(RentalStatus currStatus, RentalStatus targetStatus) {
+		if (!currStatus.canTransition(targetStatus)) {
+			throw new ApiException(RentalErrorType.ILLEGAL_STATE_TRANSITION,
+					messageService.get(currStatus.getMessageKey()),
+					messageService.get(targetStatus.getMessageKey()));
+		}
+	}
 
 	public RentalDisplayDTO findRentalDisplayDTO(String id) {
 		RentalDisplayDTO result = queryRepository.findRentalDisplayDTO(id)
-				.orElseThrow(RentalNotFoundException::new);
+				.orElseThrow(() -> new ApiException(RentalErrorType.NOT_FOUND));
 		
-		result = mapper.localize(result);
-		
-		return result;
+		return mapper.localize(result);
 	}
 		
 	public RentalDetailDTO getRentalById(String id) {
 		RentalDetailDTO result = queryRepository.findRentalDetail(id)
-				.orElseThrow(RentalNotFoundException::new);
+				.orElseThrow(() -> new ApiException(RentalErrorType.NOT_FOUND));
 		
-		result = mapper.localize(result);
-		
-		return result;
+		return mapper.localize(result);
 	}
 	
 	private RentalStatusChangeContext getStatusChangeContext(String rentId) {
 		return queryRepository.getStatusChangeContext(rentId)
-				.orElseThrow(RentalNotFoundException::new);
+				.orElseThrow(() -> new ApiException(RentalErrorType.NOT_FOUND));
 	}
 
 	public RentalCreatedDTO addRent(RentalRequestDTO rentalRequestDTO) {
@@ -98,7 +105,7 @@ public class RentalService {
 		RentalStatus currStatus = context.getRentalStatus();
 		
 		authorizationService.requireOne(Set.of(context.getOwnerId()), currentUserId);
-		currStatus.validateTransition(RentalStatus.PREPARING);
+		validateTransition(currStatus, RentalStatus.PREPARING);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.PREPARING);
 	}
@@ -111,7 +118,7 @@ public class RentalService {
 		RentalStatus currStatus = context.getRentalStatus();
 		
 		authorizationService.requireOne(Set.of(context.getOwnerId()), currentUserId);
-		currStatus.validateTransition(RentalStatus.SHIPPED);
+		validateTransition(currStatus, RentalStatus.SHIPPED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.SHIPPED);
 	}
@@ -127,7 +134,7 @@ public class RentalService {
 		
 		// TEMPORARY
 		authorizationService.requireOne(actors, currentUserId);
-		currStatus.validateTransition(RentalStatus.IN_USE);
+		validateTransition(currStatus, RentalStatus.IN_USE);
 		
 		LocalDateTime startDate = LocalDateTime.now();
 		LocalDateTime endDateTime = RentalDateService.
@@ -146,7 +153,7 @@ public class RentalService {
 		RentalStatus currStatus = context.getRentalStatus();
 		
 		authorizationService.requireOne(Set.of(context.getRenterId()), currentUserId);
-		currStatus.validateTransition(RentalStatus.RETURN_REQUESTED);
+		validateTransition(currStatus, RentalStatus.RETURN_REQUESTED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.RETURN_REQUESTED);
 	}
@@ -159,7 +166,7 @@ public class RentalService {
 		RentalStatus currStatus = context.getRentalStatus();
 		
 		authorizationService.requireOne(Set.of(context.getRenterId()), currentUserId);
-		currStatus.validateTransition(RentalStatus.RETURN_SHIPPED);
+		validateTransition(currStatus, RentalStatus.RETURN_SHIPPED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.RETURN_SHIPPED);
 	}
@@ -173,7 +180,7 @@ public class RentalService {
 		
 		authorizationService.requireOne(Set.of(context.getOwnerId()), currentUserId);
 
-		currStatus.validateTransition(RentalStatus.RETURNED);
+		validateTransition(currStatus, RentalStatus.RETURNED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.RETURNED);
 	}
@@ -188,7 +195,7 @@ public class RentalService {
 		
 		authorizationService.requireOne(actors, currentUserId);
 		
-		currStatus.validateTransition(RentalStatus.CANCELLED);
+		validateTransition(currStatus, RentalStatus.CANCELLED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.CANCELLED);
 	}
@@ -203,7 +210,7 @@ public class RentalService {
 		
 		// TEMPORARY
 		authorizationService.requireOne(actors, currentUserId);
-		currStatus.validateTransition(RentalStatus.CONFIRMED);
+		validateTransition(currStatus, RentalStatus.CONFIRMED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.CONFIRMED);
 	}
@@ -214,9 +221,7 @@ public class RentalService {
 		
 		List<RentalDisplayDTO> result = queryRepository.findUserRented(renterId);
 		
-		result = mapper.localize(result);
-		
-		return result;
+		return mapper.localize(result);
 	}
 
 	public List<RentalDisplayDTO> findUserRentals() {
@@ -225,8 +230,6 @@ public class RentalService {
 		
 		List<RentalDisplayDTO> result = queryRepository.findUserRentals(ownerId);
 		
-		result = mapper.localize(result);
-		
-		return result;
+		return mapper.localize(result);
 	}
 }

@@ -7,9 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.awt.MultipleGradientPaint.ColorSpaceType;
 import java.math.BigDecimal;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -20,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.NativeDetector.Context;
 
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.domain.Category;
@@ -28,8 +25,9 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
-import br.com.omnirent.exception.common.ForbiddenException;
-import br.com.omnirent.exception.domain.UserNotFoundException;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.RentalErrorType;
+import br.com.omnirent.exception.domain.UserErrorType;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
@@ -37,14 +35,11 @@ import br.com.omnirent.factory.RentalTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.item.ItemService;
-import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
-import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.domain.RentalAuthorizationService;
-import br.com.omnirent.rental.domain.RentalPriceService;
 import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.rental.dto.RentalRequestDTO;
@@ -137,11 +132,11 @@ public class RentalServiceTest {
 	    String invalidId = "invalid-id";
 
 	    when(currentUserProvider.currentUserId()).thenReturn(invalidId);
-	    doThrow(UserNotFoundException.class)
+	    doThrow(new ApiException(UserErrorType.NOT_FOUND))
 	        .when(userService).requireExistence(invalidId);
 
 	    assertThatThrownBy(() -> rentalService.findUserRented())
-	        .isInstanceOf(UserNotFoundException.class);
+	        .isInstanceOf(ApiException.class);
 
 	    verify(currentUserProvider).currentUserId();
 	    verify(userService).requireExistence(invalidId);
@@ -171,11 +166,11 @@ public class RentalServiceTest {
 	    String invalidId = "invalid-id";
 
 	    when(currentUserProvider.currentUserId()).thenReturn(invalidId);
-	    doThrow(UserNotFoundException.class)
+	    doThrow(new ApiException(UserErrorType.NOT_FOUND))
 	        .when(userService).requireExistence(invalidId);
 
 	    assertThatThrownBy(() -> rentalService.findUserRentals())
-	        .isInstanceOf(UserNotFoundException.class);
+	        .isInstanceOf(ApiException.class);
 
 	    verify(currentUserProvider).currentUserId();
 	    verify(userService).requireExistence(invalidId);
@@ -372,10 +367,10 @@ public class RentalServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(currentUser);
 		when(queryRepository.getStatusChangeContext(rentalId)).thenReturn(Optional.of(context));
-		doThrow(ForbiddenException.class).when(authorizationService).requireOne(allowedActors, currentUser);
+		doThrow(new ApiException(RentalErrorType.OPERATION_FORBIDDEN)).when(authorizationService).requireOne(allowedActors, currentUser);
 		
 		assertThatThrownBy(() -> rentalService.confirm(rentalId))
-		.isInstanceOf(ForbiddenException.class);
+		.isInstanceOf(ApiException.class);
 
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireOne(allowedActors, currentUser);
@@ -394,10 +389,10 @@ public class RentalServiceTest {
 
 	    when(currentUserProvider.currentUserId()).thenReturn(currentUser);
 	    when(queryRepository.getStatusChangeContext(rentalId)).thenReturn(Optional.of(context));
-	    doThrow(ForbiddenException.class).when(authorizationService).requireOne(allowedActors, currentUser);
+	    doThrow(new ApiException(RentalErrorType.OPERATION_FORBIDDEN)).when(authorizationService).requireOne(allowedActors, currentUser);
 
 	    assertThatThrownBy(() -> rentalService.startPreparing(rentalId))
-	    .isInstanceOf(ForbiddenException.class);
+	    .isInstanceOf(ApiException.class);
 
 	    verify(currentUserProvider).currentUserId();
 	    verify(authorizationService).requireOne(allowedActors, currentUser);
@@ -416,10 +411,10 @@ public class RentalServiceTest {
 
 	    when(currentUserProvider.currentUserId()).thenReturn(currentUser);
 	    when(queryRepository.getStatusChangeContext(rentalId)).thenReturn(Optional.of(context));
-	    doThrow(ForbiddenException.class).when(authorizationService).requireOne(allowedActors, currentUser);
+	    doThrow(new ApiException(RentalErrorType.OPERATION_FORBIDDEN)).when(authorizationService).requireOne(allowedActors, currentUser);
 
 	    assertThatThrownBy(() -> rentalService.requestReturn(rentalId))
-	        .isInstanceOf(ForbiddenException.class);
+	        .isInstanceOf(ApiException.class);
 
 	    verify(currentUserProvider).currentUserId();
 	    verify(authorizationService).requireOne(allowedActors, currentUser);

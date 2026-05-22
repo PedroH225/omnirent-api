@@ -1,13 +1,13 @@
 package br.com.omnirent.user;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import br.com.omnirent.exception.domain.UserNotFoundException;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.UserErrorType;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
@@ -29,14 +29,12 @@ public class UserService {
 	
 	public void requireExistence(String userId) {
 		if (!userRepository.verifyUser(userId)) {
-			throw new UserNotFoundException();
+			throw new ApiException(UserErrorType.NOT_FOUND);
 		}
 	}
 	
 	public User getUserReference(String userId) {
-		User user = userRepository.getReferenceById(userId);
-		
-		return user;
+		return userRepository.getReferenceById(userId);
 	}
 	
 	public User getValidReference(String userId) {
@@ -45,24 +43,14 @@ public class UserService {
 	}
 		
 	public User findById(String id) {
-		Optional<User> user = userRepository.findById(id);
-		
-		if (user.isEmpty()) {
-			throw new UserNotFoundException();
-		}
-		
-		return user.get();
+		return userRepository.findById(id)
+				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
 	}
 	
 	public UserDetailsDTO getUserDetailsById() {
 		String userId = currentUserProvider.currentUserId();
-		Optional<UserDetailsDTO> user = userRepository.findUserDetailsById(userId);
-
-		if (user.isEmpty()) {
-			throw new UserNotFoundException();
-		}
-		
-		return user.get();
+		return userRepository.findUserDetailsById(userId)
+				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
 	}
 
 	public List<UserResponseDTO> findAll() {

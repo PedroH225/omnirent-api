@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import br.com.omnirent.common.enums.RentalStatus;
 import static br.com.omnirent.common.enums.RentalStatus.*;
-import br.com.omnirent.exception.domain.IllegalRentalStateException;
 
 public class RentalStatusTest {
 
@@ -41,7 +40,7 @@ public class RentalStatusTest {
 	void shouldAllowValidTransitions() {
 		for (RentalStatus source : RentalStatus.values()) {
 			for (RentalStatus target : source.getAllowedTransitions()) {
-				assertThatCode(() -> source.validateTransition(target)).doesNotThrowAnyException();
+				assertThat(source.canTransition(target)).isTrue();
 			}
 		}
 	}
@@ -51,8 +50,7 @@ public class RentalStatusTest {
 		for (RentalStatus source : RentalStatus.values()) {
 			for (RentalStatus target : RentalStatus.values()) {
 				if (!source.getAllowedTransitions().contains(target)) {
-					assertThatThrownBy(() -> source.validateTransition(target))
-							.isInstanceOf(IllegalRentalStateException.class);
+					assertThat(source.canTransition(target)).isFalse();
 				}
 			}
 		}

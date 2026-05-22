@@ -4,16 +4,14 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import br.com.omnirent.exception.common.ForbiddenException;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.RentalErrorType;
 
 @Service
-public class RentalAuthorizationService {
-	
-	private final String DEFAULT_MESSAGE = "You are not allowed to perform this operation.";
-	
+public class RentalAuthorizationService {	
 	public void requireOne(Set<String> actors, String currentUserId) {
 		if (!actors.contains(currentUserId)) {
-			throw new ForbiddenException(DEFAULT_MESSAGE);
+			throw new ApiException(RentalErrorType.OPERATION_FORBIDDEN);
 		}
 	}
 }
