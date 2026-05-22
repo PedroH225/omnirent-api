@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.common.ApiException;
-import br.com.omnirent.exception.common.ForbiddenException;
 import br.com.omnirent.exception.domain.ItemErrorType;
 import lombok.AllArgsConstructor;
 
