@@ -25,7 +25,9 @@ public class UserDetailsDTO {
 	
 	private String birthDate;
 	
-	private String userStatus;
+	private UserStatus userStatus;
+	
+	private String userStatusLabel;
 	
 	@JsonIgnore
 	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -36,7 +38,7 @@ public class UserDetailsDTO {
 		this.username = username;
 		this.email = email;
 		this.birthDate = dtf.format(birthDate);
-		this.userStatus = userStatus.toString();
+		this.userStatus = userStatus;
 	}
 	 
 	public UserDetailsDTO(User user) {
@@ -45,6 +47,6 @@ public class UserDetailsDTO {
 		this.username = user.getDisplayUsername();
 		this.email = user.getEmail();
 		this.birthDate = dtf.format(user.getBirthDate());
-		this.userStatus = user.getUserStatus().toString();
+		this.userStatus = user.getUserStatus();
 	}	
 }
