@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -20,7 +21,7 @@ public class AuthenticationController {
 	private AuthenticationService authenticationService;
 	
 	@PostMapping("/register")
-	public ResponseEntity<Object> register(@RequestBody RegisterDTO registerDTO) {
+	public ResponseEntity<Object> register(@RequestBody @Valid RegisterDTO registerDTO) {
 		return authenticationService.register(registerDTO);
 	}
 	
