@@ -1,18 +1,11 @@
 package br.com.omnirent.common.enums;
 
 public enum UserStatus {
-	ACTIVE("Active"),
-	INACTIVE("Inactive"),
-	BANNED("Banned");
+	ACTIVE,
+	INACTIVE,
+	BANNED;
 	
-	private String userStatus;
-	
-	UserStatus(String userStatus) {
-		this.userStatus = userStatus;
-	}
-	
-	@Override
-	public String toString() {
-		return this.userStatus;
+	public String getMessageKey() {
+		return "user.status." + name(); 
 	}
 }
