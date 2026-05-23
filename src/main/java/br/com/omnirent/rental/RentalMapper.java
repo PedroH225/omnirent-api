@@ -1,6 +1,7 @@
  package br.com.omnirent.rental;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,10 @@ import br.com.omnirent.address.AddressMapper;
 import br.com.omnirent.address.context.AddressInfo;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressSnapshotDTO;
+import br.com.omnirent.common.enums.EnumOption;
+import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.common.enums.RentalEnums;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.config.i18n.MessageService;
@@ -102,5 +107,17 @@ public class RentalMapper {
 		detailDTO.setRentalStatusLabel(messageService.get(detailDTO.getRentalStatus().getMessageKey()));
 		
 		return detailDTO;
+	}
+
+	public RentalEnums getLocalizedEnums() {
+		List<EnumOption> rentalPeriods = Arrays.stream(RentalPeriod.values())
+				.map(i -> new EnumOption(i.name(), messageService.get(i.getMessageKey())))
+				.collect(Collectors.toList());
+		
+		List<EnumOption> rentalStatuses = Arrays.stream(RentalStatus.values())
+				.map(i -> new EnumOption(i.name(), messageService.get(i.getMessageKey())))
+				.collect(Collectors.toList());
+		
+		return new RentalEnums(rentalPeriods, rentalStatuses);
 	}
 }

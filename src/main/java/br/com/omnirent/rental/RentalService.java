@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.common.enums.RentalEnums;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.config.i18n.MessageService;
@@ -231,5 +232,9 @@ public class RentalService {
 		List<RentalDisplayDTO> result = queryRepository.findUserRentals(ownerId);
 		
 		return mapper.localize(result);
+	}
+
+	public RentalEnums getEnums() {
+		return mapper.getLocalizedEnums();
 	}
 }
