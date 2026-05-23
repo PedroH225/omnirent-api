@@ -20,7 +20,9 @@ public class ItemSnapshotDTO {
 	
 	private BigDecimal basePrice;
 	
-	private String itemCondition;
+	private ItemCondition itemCondition;
+	
+	private String itemConditionLabel;
 	
 	private String description;
 	
@@ -31,7 +33,7 @@ public class ItemSnapshotDTO {
 		this.brand = brand;
 		this.model = model;
 		this.basePrice = basePrice;
-		this.itemCondition = itemCondition.toString();
+		this.itemCondition = itemCondition;
 		this.description = description;
 	}
 		
@@ -45,6 +47,6 @@ public class ItemSnapshotDTO {
 		this.model = itemData.getModel();
 		this.description = itemData.getDescription();
 		this.basePrice = itemData.getBasePrice();
-		this.itemCondition = itemData.getItemCondition().toString();
+		this.itemCondition = itemData.getItemCondition();
 	}
 }

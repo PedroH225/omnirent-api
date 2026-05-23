@@ -106,6 +106,9 @@ public class RentalMapper {
 		detailDTO.setRentalPeriodLabel(messageService.get(detailDTO.getRentalPeriod().getMessageKey()));
 		detailDTO.setRentalStatusLabel(messageService.get(detailDTO.getRentalStatus().getMessageKey()));
 		
+		ItemSnapshotDTO itemSnapshotDTO = detailDTO.getItemSnapshot();
+		itemSnapshotDTO.setItemConditionLabel(
+				messageService.get(itemSnapshotDTO.getItemCondition().getMessageKey()));
 		return detailDTO;
 	}
 
