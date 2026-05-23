@@ -118,6 +118,7 @@ public class ItemMapper {
 	public ItemDetailDTO localize(ItemDetailDTO itemDTO) {
 		itemDTO.setItemStatusLabel(messageService.get(itemDTO.getItemStatus().getMessageKey()));
 		itemDTO.setItemConditionLabel(messageService.get(itemDTO.getItemCondition().getMessageKey()));
+		categoryMapper.localize(itemDTO.getSubCategory());
 		
 		return itemDTO;
 	}
