@@ -50,8 +50,10 @@ public class UserService {
 	
 	public UserDetailsDTO getUserDetailsById() {
 		String userId = currentUserProvider.currentUserId();
-		return userRepository.findUserDetailsById(userId)
+		UserDetailsDTO result = userRepository.findUserDetailsById(userId)
 				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
+		
+		return userMapper.localize(result);
 	}
 
 	public List<UserResponseDTO> findAll() {

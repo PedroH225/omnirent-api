@@ -52,4 +52,9 @@ public class UserMapper {
 		
 		return new UserEnums(userStatuses);
 	}
+
+	public UserDetailsDTO localize(UserDetailsDTO result) {
+		result.setUserStatusLabel(messageService.get(result.getUserStatus().getMessageKey()));
+		return result;
+	}
 }
