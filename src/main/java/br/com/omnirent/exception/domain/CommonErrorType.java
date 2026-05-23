@@ -10,8 +10,9 @@ public enum CommonErrorType implements AppErrorType {
 
 	FORBIDDEN("FORBIDDEN", "FORBIDDEN", "forbidden", HttpStatus.FORBIDDEN),
     ILLEGAL_ENUMERATION("CONFLICT", "ILLEGAL_ENUMERATION", "illegal_enumeration", HttpStatus.BAD_REQUEST),
-	INTERNAL_ERROR("INTERNAL_SERVER_ERROR", "INTERNAL_SERVER_ERROR", "internal_server_error", HttpStatus.INTERNAL_SERVER_ERROR);
-
+	VALIDATION_ERROR("CONFLICT", "VALIDATION_ERROR", "validation_error", HttpStatus.CONFLICT),
+    INTERNAL_ERROR("INTERNAL_SERVER_ERROR", "INTERNAL_SERVER_ERROR", "internal_server_error", HttpStatus.INTERNAL_SERVER_ERROR);
+	
     private String errorType;
 	
 	private String errorCode;
