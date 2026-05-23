@@ -43,7 +43,7 @@ public class ItemController {
 	
 	@GetMapping("/enums")
 	public ItemEnums getEnums() {
-		return new ItemEnums();
+		return itemService.getEnums();
 	}
 	
 	@PostMapping

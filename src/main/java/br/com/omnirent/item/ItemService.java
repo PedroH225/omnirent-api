@@ -8,6 +8,7 @@ import br.com.omnirent.address.AddressService;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.SubCategory;
+import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.ConcurrencyErrorType;
@@ -184,6 +185,10 @@ public class ItemService {
 		if (updated == 0) {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 		}
+	}
+
+	public ItemEnums getEnums() {
+		return itemMapper.getLocalizedEnums();
 	}
 	
 }

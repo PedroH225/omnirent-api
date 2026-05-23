@@ -1,6 +1,8 @@
 package br.com.omnirent.item;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -8,6 +10,9 @@ import br.com.omnirent.address.AddressMapper;
 import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.category.CategoryMapper;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
+import br.com.omnirent.common.enums.EnumOption;
+import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.item.context.ItemInfo;
@@ -122,4 +127,16 @@ public class ItemMapper {
 		
 		return itemDTO;
 	}
-}
+	
+	public ItemEnums getLocalizedEnums() {
+		List<EnumOption> itemConditions = Arrays.stream(ItemCondition.values())
+				.map(i -> new EnumOption(i.name(), messageService.get(i.getMessageKey())))
+				.collect(Collectors.toList());
+		
+		List<EnumOption> itemStatus = Arrays.stream(ItemStatus.values())
+				.map(i -> new EnumOption(i.name(), messageService.get(i.getMessageKey())))
+				.collect(Collectors.toList());
+		
+		return new ItemEnums(itemConditions, itemStatus);
+	}
+} 
