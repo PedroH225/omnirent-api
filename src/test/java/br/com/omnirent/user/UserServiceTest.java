@@ -59,6 +59,7 @@ public class UserServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(userId);
 		when(userRepository.findUserDetailsById(userId)).thenReturn(Optional.of(expected));
+		when(mapper.localize(expected)).thenReturn(expected);
 		
 		UserDetailsDTO result = userService.getUserDetailsById();
 		

@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.UserErrorType;
 import br.com.omnirent.security.CurrentUserProvider;
@@ -49,8 +50,10 @@ public class UserService {
 	
 	public UserDetailsDTO getUserDetailsById() {
 		String userId = currentUserProvider.currentUserId();
-		return userRepository.findUserDetailsById(userId)
+		UserDetailsDTO result = userRepository.findUserDetailsById(userId)
 				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
+		
+		return userMapper.localize(result);
 	}
 
 	public List<UserResponseDTO> findAll() {
@@ -83,6 +86,10 @@ public class UserService {
 		userRepository.save(user.activate());		
 	}
 	
+	public UserEnums getEnums() {
+		return userMapper.getLocalizedEnums();
+	}
+	
 	@Cacheable(value = "tokenVersion", key = "#userId")
 	public AuthMetadata getTokenVersion(String userId) {
 	    AuthMetadata authMetadata = userRepository.findTokenVersionById(userId);
@@ -97,5 +104,4 @@ public class UserService {
 		authMetadata.setTokenVersion(currentTokenVer == null ? 1 : currentTokenVer + 1);
 	    return userRepository.save(user);
 	}
-
 }

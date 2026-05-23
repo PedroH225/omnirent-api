@@ -160,7 +160,7 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(itemSnpDto.getBrand()).isEqualTo(itemData.getBrand());
 	    assertThat(itemSnpDto.getModel()).isEqualTo(itemData.getModel());
 	    assertThat(itemSnpDto.getBasePrice()).isEqualByComparingTo(itemData.getBasePrice());
-	    assertThat(itemSnpDto.getItemCondition()).isEqualTo(itemData.getItemCondition().toString());
+	    assertThat(itemSnpDto.getItemCondition()).isEqualTo(itemData.getItemCondition());
 	    assertThat(itemSnpDto.getDescription()).isEqualTo(itemData.getDescription());
 
 	    assertThat(adrsSnpDto.getId()).isEqualTo(adrsSnp.getId());

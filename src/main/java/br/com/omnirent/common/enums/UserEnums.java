@@ -7,9 +7,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ItemEnums {
+public class UserEnums {
 
-	List<EnumOption> itemConditions;
-	
-	List<EnumOption> itemStatuses;
+	private List<EnumOption> userStatuses;
 }

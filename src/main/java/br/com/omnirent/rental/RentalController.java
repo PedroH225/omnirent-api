@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.omnirent.common.enums.RentalEnums;
 import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
@@ -38,6 +39,10 @@ public class RentalController {
 		return rentalService.findUserRentals();
 	}
 	
+	@GetMapping("/enums")
+	public RentalEnums getEnums() {
+		return rentalService.getEnums();
+	}
 	@PostMapping
 	public RentalCreatedDTO addRent(@RequestBody RentalRequestDTO rentalRequestDTO) {
 		return rentalService.addRent(rentalRequestDTO);

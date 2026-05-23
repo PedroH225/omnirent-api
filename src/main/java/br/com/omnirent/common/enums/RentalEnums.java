@@ -7,9 +7,9 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ItemEnums {
+public class RentalEnums {
 
-	List<EnumOption> itemConditions;
+	private List<EnumOption> rentalPeriods;
 	
-	List<EnumOption> itemStatuses;
+	private List<EnumOption> rentalStatuses;
 }
