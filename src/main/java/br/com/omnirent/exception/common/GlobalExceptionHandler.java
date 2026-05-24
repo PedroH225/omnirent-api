@@ -110,6 +110,7 @@ public class GlobalExceptionHandler {
 	private String getFieldCode(String field) {
 		return switch (field) {
 		case "registerDTO" -> "user.field.";
+		case "userRequestDTO" -> "user.field.";
 		case "itemRequestDTO" -> "item.field.";
 		case "updateItemRequestDTO" -> "item.field.";
 		default -> "";

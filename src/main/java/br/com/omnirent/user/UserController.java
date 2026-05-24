@@ -13,6 +13,7 @@ import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -38,7 +39,7 @@ public class UserController {
 	}
 	
 	@PutMapping("/update")
-	public UserDetailsDTO updateUser(@RequestBody UserRequestDTO user) {
+	public UserDetailsDTO updateUser(@RequestBody @Valid UserRequestDTO user) {
 		return userService.update(user);
 	}
 	
