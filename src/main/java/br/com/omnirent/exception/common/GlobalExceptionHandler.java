@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.domain.CommonErrorType;
 import br.com.omnirent.exception.domain.FieldErrorResponse;
+import br.com.omnirent.security.dto.RegisterDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import tools.jackson.databind.exc.InvalidFormatException;
 
@@ -109,6 +110,7 @@ public class GlobalExceptionHandler {
 	private String getFieldCode(String field) {
 		return switch (field) {
 		case "registerDTO" -> "user.field.";
+		case "itemRequestDTO" -> "item.field.";
 		default -> "";
 		};
 	}

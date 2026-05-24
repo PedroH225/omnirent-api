@@ -17,6 +17,7 @@ import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -47,7 +48,7 @@ public class ItemController {
 	}
 	
 	@PostMapping
-	public ItemCreatedDTO addItem(@RequestBody ItemRequestDTO itemDTO) {
+	public ItemCreatedDTO addItem(@RequestBody @Valid ItemRequestDTO itemDTO) {
 		return itemService.addItem(itemDTO);
 	}
 	
