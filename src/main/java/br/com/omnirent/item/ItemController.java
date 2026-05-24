@@ -53,7 +53,7 @@ public class ItemController {
 	}
 	
 	@PutMapping
-	public void updateItem(@RequestBody UpdateItemRequestDTO itemDTO) {
+	public void updateItem(@RequestBody @Valid UpdateItemRequestDTO itemDTO) {
 		itemService.updateItem(itemDTO);
 	}
 	

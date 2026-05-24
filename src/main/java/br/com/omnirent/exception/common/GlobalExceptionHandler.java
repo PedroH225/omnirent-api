@@ -111,6 +111,7 @@ public class GlobalExceptionHandler {
 		return switch (field) {
 		case "registerDTO" -> "user.field.";
 		case "itemRequestDTO" -> "item.field.";
+		case "updateItemRequestDTO" -> "item.field.";
 		default -> "";
 		};
 	}
