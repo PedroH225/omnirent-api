@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -17,7 +18,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.domain.CommonErrorType;
 import br.com.omnirent.exception.domain.FieldErrorResponse;
+import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
+import br.com.omnirent.user.dto.UserRequestDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import tools.jackson.databind.exc.InvalidFormatException;
 
@@ -73,7 +77,7 @@ public class GlobalExceptionHandler {
 	        .getFieldErrors()
 	        .stream()
 	        .map(error -> {
-	            String fieldCode = getFieldCode(error.getObjectName());
+	            String fieldCode = getFieldCode(ex.getObjectName());
 
 	            String localizedField = messageService.get(
 	                fieldCode + error.getField()
@@ -107,13 +111,17 @@ public class GlobalExceptionHandler {
 	    return ResponseEntity.status(err.getStatus()).body(err);
 	}
 
-	private String getFieldCode(String field) {
-		return switch (field) {
-		case "registerDTO" -> "user.field.";
-		case "userRequestDTO" -> "user.field.";
-		case "itemRequestDTO" -> "item.field.";
-		case "updateItemRequestDTO" -> "item.field.";
-		default -> "";
-		};
+	private String getFieldCode(String objectName) {
+		String normalizedName = StringUtils.capitalize(objectName);
+		
+		if (normalizedName.equals(RegisterDTO.class.getSimpleName()) ||
+			normalizedName.equals(UserRequestDTO.class.getSimpleName())) {
+			return "user.field.";
+		}
+		if (normalizedName.equals(ItemRequestDTO.class.getSimpleName()) ||
+			normalizedName.equals(UpdateItemRequestDTO.class.getSimpleName())) {
+			return "item.field.";
+		}
+		return "";
 	}
 }
