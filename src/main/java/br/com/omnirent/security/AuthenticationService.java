@@ -24,6 +24,7 @@ import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
 import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.UserRepository;
+import br.com.omnirent.user.UserSanitizationService;
 import br.com.omnirent.user.UserValidationService;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
@@ -50,6 +51,9 @@ public class AuthenticationService implements UserDetailsService {
     @Autowired
     private UserValidationService validationService;
     
+    @Autowired 
+    private UserSanitizationService sanitizationService;
+    
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Optional<LoginContext> optUser = userRepository.findByEmail(email);
@@ -75,12 +79,13 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public ResponseEntity<Object> register (RegisterDTO registerDto){
-    	validationService.validateTakenFields(registerDto);
-    	validationService.validatePasswordMatch(registerDto.password(), registerDto.repeatedPassword());
+    	RegisterDTO sanitizedDTO = sanitizationService.sanitizeFields(registerDto);
+    	validationService.validateTakenFields(sanitizedDTO);
+    	validationService.validatePasswordMatch(sanitizedDTO.password(), sanitizedDTO.repeatedPassword());
     	
-    	String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
+    	String encryptedPassword = new BCryptPasswordEncoder().encode(sanitizedDTO.password());
         
-        this.userRepository.save(fromRegisterDTO(registerDto, encryptedPassword));
+        this.userRepository.save(fromRegisterDTO(sanitizedDTO, encryptedPassword));
         return ResponseEntity.ok().build();
     }
     
