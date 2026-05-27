@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record RegisterDTO(
@@ -26,6 +27,8 @@ public record RegisterDTO(
 		LocalDate birthDate,
 		
 		@NotBlank(message = "required")
+		@Size(min = 8, max = 100, message = "size")
+		@Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d).+$", message = "password.pattern")
 		String password,
 		
 		@NotBlank(message = "required")
