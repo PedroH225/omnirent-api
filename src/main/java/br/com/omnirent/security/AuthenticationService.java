@@ -24,6 +24,7 @@ import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
 import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.UserRepository;
+import br.com.omnirent.user.UserValidationService;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 
@@ -45,6 +46,9 @@ public class AuthenticationService implements UserDetailsService {
     
     @Autowired
     private GlobalConfigHolder globalConfigHolder;
+    
+    @Autowired
+    private UserValidationService validationService;
     
     private boolean verifyExistingEmail(String email) {
 		return userRepository.findExistingUserByEmail(email).isPresent();
@@ -75,10 +79,11 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public ResponseEntity<Object> register (RegisterDTO registerDto){
-    	String email = registerDto.email();
-    	if (verifyExistingEmail(email)) {
-			throw new ApiException(UserErrorType.EMAIL_ALREADY_IN_USE);
-		}
+    	validationService.validateTakenFields(registerDto);
+//    	String email = registerDto.email();
+//    	if (verifyExistingEmail(email)) {
+//			throw new ApiException(UserErrorType.EMAIL_ALREADY_IN_USE);
+//		}
     	
     	String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
         
