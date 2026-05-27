@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.common.formatter.CaptalizationUtils;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.domain.CommonErrorType;
@@ -158,6 +159,10 @@ public class GlobalExceptionHandler {
 		if (normalizedName.equals(ItemRequestDTO.class.getSimpleName()) ||
 			normalizedName.equals(UpdateItemRequestDTO.class.getSimpleName())) {
 			return "item.field.";
+		}
+		
+		if (normalizedName.equals(AddressRequestDTO.class.getSimpleName())) {
+			return "address.field.";
 		}
 		return "";
 	}

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -34,12 +35,12 @@ public class AddressController {
 	}
 	
 	@PostMapping
-	public AddressResponseDTO addAddress(@RequestBody AddressRequestDTO addressDto) {
+	public AddressResponseDTO addAddress(@RequestBody @Valid AddressRequestDTO addressDto) {
 		return addressService.addAddress(addressDto);
 	}
 	
 	@PutMapping
-	public AddressResponseDTO updateAddress(@RequestBody AddressRequestDTO addressDto) {
+	public AddressResponseDTO updateAddress(@RequestBody @Valid AddressRequestDTO addressDto) {
 		return addressService.updateAddress(addressDto);
 	}
 	
