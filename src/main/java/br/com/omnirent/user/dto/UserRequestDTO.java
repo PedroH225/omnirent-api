@@ -2,6 +2,7 @@ package br.com.omnirent.user.dto;
 
 import java.time.LocalDate;
 
+import br.com.omnirent.user.domain.UserIdentityInput;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,4 +24,14 @@ public record UserRequestDTO(
 		@NotNull(message = "required")
 		@Past(message = "past")
 		LocalDate birthDate
-) {}
+) implements UserIdentityInput {
+
+	@Override
+	public String getUsername() {
+		return username;
+	}
+
+	@Override
+	public String getEmail() {
+		return email;
+	}}

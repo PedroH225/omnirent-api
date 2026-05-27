@@ -2,6 +2,7 @@ package br.com.omnirent.security.dto;
 
 import java.time.LocalDate;
 
+import br.com.omnirent.user.domain.UserIdentityInput;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -30,4 +31,14 @@ public record RegisterDTO(
 		@NotBlank(message = "required")
 		String repeatedPassword
 		
-		) {}
+		) implements UserIdentityInput {
+
+	@Override
+	public String getUsername() {
+		return username;
+	}
+
+	@Override
+	public String getEmail() {
+		return email;
+	}}
