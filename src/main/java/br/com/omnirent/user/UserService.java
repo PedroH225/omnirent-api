@@ -1,6 +1,5 @@
 package br.com.omnirent.user;
 
-import br.com.omnirent.address.AddressController;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -13,7 +12,6 @@ import br.com.omnirent.exception.domain.UserErrorType;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
-import br.com.omnirent.user.domain.UserIdentityInput;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
@@ -31,6 +29,8 @@ public class UserService {
 	private CurrentUserProvider currentUserProvider;
 	
 	private UserValidationService validationService;
+	
+	private UserSanitizationService userSanitizationService;
 	
 	public void requireExistence(String userId) {
 		if (!userRepository.verifyUser(userId)) {
@@ -69,9 +69,10 @@ public class UserService {
 		String userId = currentUserProvider.currentUserId();
 		User user = findById(userId);
 		
-		validationService.validateTakenFields(userDTO);
+		UserRequestDTO sanitezedDTO = userSanitizationService.sanitizeFields(userDTO);
+		validationService.validateTakenFields(sanitezedDTO);
 		
-		User updatedUser = userRepository.save(user.update(userDTO));
+		User updatedUser = userRepository.save(user.update(sanitezedDTO));
 				
 		return userMapper.toDetailsDto(updatedUser);
 	}

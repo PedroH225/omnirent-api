@@ -3,6 +3,7 @@ package br.com.omnirent.user;
 import org.springframework.stereotype.Component;
 
 import br.com.omnirent.security.dto.RegisterDTO;
+import br.com.omnirent.user.dto.UserRequestDTO;
 
 @Component
 public class UserSanitizationService {
@@ -13,6 +14,14 @@ public class UserSanitizationService {
 				sanitizeUsername(registerDTO.username()),
 				sanitizeEmail(registerDTO.email()),
 				registerDTO.birthDate(), registerDTO.password(), registerDTO.repeatedPassword());
+	}
+	
+	public UserRequestDTO sanitizeFields(UserRequestDTO registerDTO) {
+		return new UserRequestDTO(
+				sanitizeName(registerDTO.name()), 
+				sanitizeUsername(registerDTO.username()),
+				sanitizeEmail(registerDTO.email()),
+				registerDTO.birthDate());
 	}
 	
 	private String sanitizeName(String name) {
