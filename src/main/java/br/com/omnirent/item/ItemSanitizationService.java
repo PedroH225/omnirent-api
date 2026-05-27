@@ -3,6 +3,7 @@ package br.com.omnirent.item;
 import org.springframework.stereotype.Component;
 
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 
 @Component
 public class ItemSanitizationService {
@@ -13,7 +14,7 @@ public class ItemSanitizationService {
 				sanitizeText(itemDTO.name()),
 				sanitizeText(itemDTO.model()),
 				sanitizeText(itemDTO.brand()),
-				itemDTO.description().strip(),
+				sanitizeDescription(itemDTO.description()),
 				itemDTO.basePrice(),
 				itemDTO.itemCondition(),
 				sanitizeIdentifier(itemDTO.subCategoryId()),
@@ -21,10 +22,28 @@ public class ItemSanitizationService {
 		);
 	}
 	
+	public UpdateItemRequestDTO sanitizeUpdateItemFields(UpdateItemRequestDTO itemDTO) {
+		return new UpdateItemRequestDTO(
+				sanitizeIdentifier(itemDTO.id()),
+				sanitizeText(itemDTO.name()),
+				sanitizeText(itemDTO.model()),
+				sanitizeText(itemDTO.brand()),
+				sanitizeDescription(itemDTO.description()),
+				itemDTO.basePrice(),
+				itemDTO.itemCondition()
+		);
+	}
+	
 	private String sanitizeText(String text) {
 		return text != null ?
 				text.strip()
 				.replaceAll("\\s+", " ")
+				: null;
+	}
+	
+	private String sanitizeDescription(String text) {
+		return text != null
+				? text.strip()
 				: null;
 	}
 	

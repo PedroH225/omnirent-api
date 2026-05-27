@@ -109,15 +109,17 @@ public class ItemService {
 	@Transactional
 	public void updateItem(UpdateItemRequestDTO request) {
 		String currentUserId = currentUserProvider.currentUserId();
-		UpdateItemContext context = getUpdateContext(request.id());
+		UpdateItemRequestDTO sanitizedDTO = sanitizationService.sanitizeUpdateItemFields(request);
+		
+		UpdateItemContext context = getUpdateContext(sanitizedDTO.id());
 		
 	    authorizationService.requireNotBlocked(context.status());
 		authorizationService.requireOwner(context.ownerId(), currentUserId);
 		
 		int updated = itemRepository.updateItem(
-			context.itemInfo().getId(), context.status(), request.name(), request.brand(),
-			request.model(), request.description(), request.basePrice(),
-			request.itemCondition()
+			context.itemInfo().getId(), context.status(), sanitizedDTO.name(), sanitizedDTO.brand(),
+			sanitizedDTO.model(), sanitizedDTO.description(), sanitizedDTO.basePrice(),
+			sanitizedDTO.itemCondition()
 		);
 		
 		if (updated == 0) {
