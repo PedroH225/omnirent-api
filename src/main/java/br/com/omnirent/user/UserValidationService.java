@@ -1,6 +1,7 @@
 package br.com.omnirent.user;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -10,16 +11,17 @@ import br.com.omnirent.exception.domain.CommonErrorType;
 import br.com.omnirent.exception.domain.FieldErrorResponse;
 import br.com.omnirent.user.context.UserTakenContext;
 import br.com.omnirent.user.domain.UserIdentityInput;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserValidationService {
 	
-	private UserQueryRepository queryRepository;
+	private final UserQueryRepository queryRepository;
 
+	private static String VALIDATION_PREFIX = "validation.field.";
+	
 	public void validateTakenFields(UserIdentityInput user) {
-		String validationPrefix = "validation.field.";
 		
 		List<FieldErrorResponse> takenFields = new ArrayList<>();
 		
@@ -35,16 +37,26 @@ public class UserValidationService {
 				.anyMatch(c -> c.email().equalsIgnoreCase(user.getEmail()));
 		
 		if (usernameTaken) {
-			takenFields.add(new FieldErrorResponse("username", validationPrefix + "taken"));
+			takenFields.add(new FieldErrorResponse("username", VALIDATION_PREFIX + "taken"));
 		}
 		
 		if (emailTaken) {
-			takenFields.add(new FieldErrorResponse("email", validationPrefix + "taken"));
+			takenFields.add(new FieldErrorResponse("email", VALIDATION_PREFIX + "taken"));
 		}
 		
 		if (!takenFields.isEmpty()) {
 			throw new ValidationException(
 					CommonErrorType.VALIDATION_ERROR, takenFields, user.getClass().getSimpleName());
+		}
+	}
+	
+	public void validatePasswordMatch(String password, String repeatedPassword) {
+		if (!password.equals(repeatedPassword)) {
+			FieldErrorResponse invalidField =
+					new FieldErrorResponse("repeatedPassword", VALIDATION_PREFIX + "password.mismatch");
+			
+			throw new ValidationException(
+					CommonErrorType.VALIDATION_ERROR, Arrays.asList(invalidField), "user");
 		}
 	}
 }

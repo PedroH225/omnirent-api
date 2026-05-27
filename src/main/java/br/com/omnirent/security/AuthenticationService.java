@@ -50,10 +50,6 @@ public class AuthenticationService implements UserDetailsService {
     @Autowired
     private UserValidationService validationService;
     
-    private boolean verifyExistingEmail(String email) {
-		return userRepository.findExistingUserByEmail(email).isPresent();
-	}
-    
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Optional<LoginContext> optUser = userRepository.findByEmail(email);
@@ -80,10 +76,7 @@ public class AuthenticationService implements UserDetailsService {
 
     public ResponseEntity<Object> register (RegisterDTO registerDto){
     	validationService.validateTakenFields(registerDto);
-//    	String email = registerDto.email();
-//    	if (verifyExistingEmail(email)) {
-//			throw new ApiException(UserErrorType.EMAIL_ALREADY_IN_USE);
-//		}
+    	validationService.validatePasswordMatch(registerDto.password(), registerDto.repeatedPassword());
     	
     	String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
         
