@@ -1,8 +1,11 @@
 package br.com.omnirent.exception.common;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import br.com.omnirent.address.dto.AddressRequestDTO;
+import br.com.omnirent.common.enums.FieldErrorPriority;
 import br.com.omnirent.common.formatter.CaptalizationUtils;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.domain.CommonErrorType;
@@ -33,7 +37,6 @@ public class GlobalExceptionHandler {
 
 	@Autowired
     private MessageService messageService;
-
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiErrorResponse> handleException(
@@ -82,6 +85,8 @@ public class GlobalExceptionHandler {
 	        .stream()
 	        .map(error -> {
 	            String fieldCode = getFieldCode(ex.getObjectName());
+	            
+	            FieldErrorPriority errorPriority = FieldErrorPriority.fromSpringCode(error.getCode());
 
 	            String localizedField = messageService.get(
 	                fieldCode + error.getField()
@@ -99,17 +104,19 @@ public class GlobalExceptionHandler {
 
 	            String message = messageService.get(messageKey, args);
 
-	            return new FieldErrorResponse(error.getField(), message);
+	            return new FieldErrorResponse(error.getField(), message, errorPriority.ordinal());
 	        })
 	        .collect(Collectors.toList());
 
+	    List<FieldErrorResponse> filteredErrors = filterBestError(fields);
+	    
 	    ApiException e = new ApiException(CommonErrorType.VALIDATION_ERROR);
 
 		String localizedMessage = messageService.get(e.getMessageKey());
 	    
 	    ValidationErrorResponse err = new ValidationErrorResponse(
 	        Instant.now(), e.getHttpStatus().value(), e.getErrorType(),
-	        e.getErrorCode(), localizedMessage, request.getRequestURI(), fields
+	        e.getErrorCode(), localizedMessage, request.getRequestURI(), filteredErrors
 	        );
 
 	    return ResponseEntity.status(err.getStatus()).body(err);
@@ -126,14 +133,15 @@ public class GlobalExceptionHandler {
 	        .stream()
 	        .map(field -> {
 	            String fieldCode = getFieldCode(ex.getObjectName());
-
+	            
 	            String localizedField = messageService.get(fieldCode + field.field());
 
 	            String localizedMessage = messageService.get(field.message(), localizedField);
-
+	            
 	            return new FieldErrorResponse(
 	                field.field(),
-	                CaptalizationUtils.firstCaptalizedOnly(localizedMessage)
+	                CaptalizationUtils.firstCaptalizedOnly(localizedMessage),
+	                null
 	            );
 	        })
 	        .collect(Collectors.toList());
@@ -146,6 +154,24 @@ public class GlobalExceptionHandler {
 	        );
 
 	    return ResponseEntity.status(err.getStatus()).body(err);
+	}
+	
+	private List<FieldErrorResponse> filterBestError(List<FieldErrorResponse> fieldErrors) {
+	    Map<String, FieldErrorResponse> bestByField = new HashMap<>();
+
+	    for (FieldErrorResponse error : fieldErrors) {
+
+	        bestByField.merge(
+	                error.field(),
+	                error,
+	                (existing, incoming) ->
+	                        incoming.priority() < existing.priority()
+	                                ? incoming
+	                                : existing
+	        );
+	    }
+
+	    return new ArrayList<>(bestByField.values());
 	}
 
 	private String getFieldCode(String objectName) {

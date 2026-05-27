@@ -37,11 +37,11 @@ public class UserValidationService {
 				.anyMatch(c -> c.email().equalsIgnoreCase(user.getEmail()));
 		
 		if (usernameTaken) {
-			takenFields.add(new FieldErrorResponse("username", VALIDATION_PREFIX + "taken"));
+			takenFields.add(new FieldErrorResponse("username", VALIDATION_PREFIX + "taken", null));
 		}
 		
 		if (emailTaken) {
-			takenFields.add(new FieldErrorResponse("email", VALIDATION_PREFIX + "taken"));
+			takenFields.add(new FieldErrorResponse("email", VALIDATION_PREFIX + "taken", null));
 		}
 		
 		if (!takenFields.isEmpty()) {
@@ -53,7 +53,7 @@ public class UserValidationService {
 	public void validatePasswordMatch(String password, String repeatedPassword) {
 		if (!password.equals(repeatedPassword)) {
 			FieldErrorResponse invalidField =
-					new FieldErrorResponse("repeatedPassword", VALIDATION_PREFIX + "password.mismatch");
+					new FieldErrorResponse("repeatedPassword", VALIDATION_PREFIX + "password.mismatch", null);
 			
 			throw new ValidationException(
 					CommonErrorType.VALIDATION_ERROR, Arrays.asList(invalidField), "user");
