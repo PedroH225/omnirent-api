@@ -15,12 +15,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import br.com.omnirent.common.formatter.CaptalizationUtils;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.domain.CommonErrorType;
 import br.com.omnirent.exception.domain.FieldErrorResponse;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
+import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserRequestDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import tools.jackson.databind.exc.InvalidFormatException;
@@ -30,6 +32,7 @@ public class GlobalExceptionHandler {
 
 	@Autowired
     private MessageService messageService;
+
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiErrorResponse> handleException(
@@ -88,7 +91,7 @@ public class GlobalExceptionHandler {
 	            
 	            Object[] args = Stream.concat(
 	                Stream.of(localizedField),
-	                Arrays.stream(validationArgs, 1, validationArgs.length)
+	                Arrays.stream(validationArgs).skip(1)
 	            ).toArray();
 
 	            String messageKey = "validation.field." + error.getDefaultMessage();
@@ -110,12 +113,46 @@ public class GlobalExceptionHandler {
 
 	    return ResponseEntity.status(err.getStatus()).body(err);
 	}
+	
+	@ExceptionHandler(ValidationException.class)
+	public ResponseEntity<ValidationErrorResponse> handleValidationException(
+	        ValidationException ex,
+	        HttpServletRequest request
+	) {
+		String localizedErrorMessage = messageService.get(ex.getMessageKey(), ex.getArgs());
+
+	    List<FieldErrorResponse> localizedFields = ex.getFields()
+	        .stream()
+	        .map(field -> {
+	            String fieldCode = getFieldCode(ex.getObjectName());
+
+	            String localizedField = messageService.get(fieldCode + field.field());
+
+	            String localizedMessage = messageService.get(field.message(), localizedField);
+
+	            return new FieldErrorResponse(
+	                field.field(),
+	                CaptalizationUtils.firstCaptalizedOnly(localizedMessage)
+	            );
+	        })
+	        .collect(Collectors.toList());
+
+	    ValidationErrorResponse err =
+	        new ValidationErrorResponse(
+	            Instant.now(), ex.getHttpStatus().value(), ex.getErrorType(),
+	            ex.getErrorCode(), localizedErrorMessage, request.getRequestURI(),
+	            localizedFields
+	        );
+
+	    return ResponseEntity.status(err.getStatus()).body(err);
+	}
 
 	private String getFieldCode(String objectName) {
 		String normalizedName = StringUtils.capitalize(objectName);
 		
 		if (normalizedName.equals(RegisterDTO.class.getSimpleName()) ||
-			normalizedName.equals(UserRequestDTO.class.getSimpleName())) {
+			normalizedName.equals(UserRequestDTO.class.getSimpleName()) ||
+			normalizedName.equals(User.class.getSimpleName())) {
 			return "user.field.";
 		}
 		if (normalizedName.equals(ItemRequestDTO.class.getSimpleName()) ||
