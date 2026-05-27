@@ -50,6 +50,8 @@ public class ItemService {
 	
 	private ItemMapper itemMapper;
 	
+	private ItemSanitizationService sanitizationService;
+	
 	public ItemDetailDTO getItemById(String id) {
 		ItemDetailDTO result = queryRepository.findItemDetailDTO(id)
 				.orElseThrow(() -> new ApiException(ItemErrorType.NOT_FOUND));
@@ -93,11 +95,13 @@ public class ItemService {
 	public ItemCreatedDTO addItem(ItemRequestDTO itemDTO) {
 		String currentUserId = currentUserProvider.currentUserId();
 		
-		User user = userService.getValidReference(currentUserId);
-		Address pickupAddress = addressService.getValidReference(itemDTO.addressId(), currentUserId);
-		SubCategory subCategory = categoryService.getValidSubReference(itemDTO.subCategoryId());
+		ItemRequestDTO sanitizedDTO = sanitizationService.sanitizeItemFields(itemDTO);
 		
-		Item item = itemMapper.fromDto(itemDTO, user.getId(), pickupAddress.getId(),
+		User user = userService.getValidReference(currentUserId);
+		Address pickupAddress = addressService.getValidReference(sanitizedDTO.addressId(), currentUserId);
+		SubCategory subCategory = categoryService.getValidSubReference(sanitizedDTO.subCategoryId());
+		
+		Item item = itemMapper.fromDto(sanitizedDTO, user.getId(), pickupAddress.getId(),
 				subCategory.getId(), ItemStatus.AVAILABLE);
 		return itemMapper.toCreatedDto(itemRepository.save(item));
 	}
