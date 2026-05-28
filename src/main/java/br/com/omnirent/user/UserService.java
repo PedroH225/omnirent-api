@@ -7,9 +7,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.UserEnums;
+import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.UserErrorType;
 import br.com.omnirent.security.CurrentUserProvider;
+import br.com.omnirent.user.context.ChangeUserStatusContext;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
@@ -26,9 +29,13 @@ public class UserService {
 
 	private UserRepository userRepository;
 	
+	private UserQueryRepository queryRepository;
+	
 	private CurrentUserProvider currentUserProvider;
 	
 	private UserValidationService validationService;
+	
+	private UserAutorizationService autorizationService;
 		
 	public void requireExistence(String userId) {
 		if (!userRepository.verifyUser(userId)) {
@@ -75,19 +82,22 @@ public class UserService {
 	}
 
 	@Transactional
-	public void deactivateUser() {
+	public void changeUserStatus() {
 		String userId = currentUserProvider.currentUserId();
-		User user = findById(userId);
+		ChangeUserStatusContext context = queryRepository.getUserStatusChangeContext(userId)
+				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
 		
-		userRepository.save(user.deactivate());
-	}
-
-	@Transactional
-	public void activateUser() {
-		String userId = currentUserProvider.currentUserId();
-		User user = findById(userId);
+		autorizationService.requireNotBanned(context.currentUserStatus());
 		
-		userRepository.save(user.activate());		
+		UserStatus newStatus = context.currentUserStatus() == UserStatus.ACTIVE ?
+				UserStatus.INACTIVE : UserStatus.ACTIVE;
+		
+		int updated =
+				userRepository.updateUserStatus(userId, context.currentUserStatus(), newStatus);
+		
+		if (updated == 0) {
+			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
+		}
 	}
 	
 	public UserEnums getEnums() {
