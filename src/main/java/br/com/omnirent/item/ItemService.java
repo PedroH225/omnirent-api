@@ -49,9 +49,7 @@ public class ItemService {
 	private ItemAuthorizationService authorizationService;
 	
 	private ItemMapper itemMapper;
-	
-	private ItemSanitizationService sanitizationService;
-	
+		
 	public ItemDetailDTO getItemById(String id) {
 		ItemDetailDTO result = queryRepository.findItemDetailDTO(id)
 				.orElseThrow(() -> new ApiException(ItemErrorType.NOT_FOUND));
@@ -94,14 +92,12 @@ public class ItemService {
 
 	public ItemCreatedDTO addItem(ItemRequestDTO itemDTO) {
 		String currentUserId = currentUserProvider.currentUserId();
-		
-		ItemRequestDTO sanitizedDTO = sanitizationService.sanitizeItemFields(itemDTO);
-		
+				
 		User user = userService.getValidReference(currentUserId);
-		Address pickupAddress = addressService.getValidReference(sanitizedDTO.addressId(), currentUserId);
-		SubCategory subCategory = categoryService.getValidSubReference(sanitizedDTO.subCategoryId());
+		Address pickupAddress = addressService.getValidReference(itemDTO.addressId(), currentUserId);
+		SubCategory subCategory = categoryService.getValidSubReference(itemDTO.subCategoryId());
 		
-		Item item = itemMapper.fromDto(sanitizedDTO, user.getId(), pickupAddress.getId(),
+		Item item = itemMapper.fromDto(itemDTO, user.getId(), pickupAddress.getId(),
 				subCategory.getId(), ItemStatus.AVAILABLE);
 		return itemMapper.toCreatedDto(itemRepository.save(item));
 	}
@@ -109,17 +105,16 @@ public class ItemService {
 	@Transactional
 	public void updateItem(UpdateItemRequestDTO request) {
 		String currentUserId = currentUserProvider.currentUserId();
-		UpdateItemRequestDTO sanitizedDTO = sanitizationService.sanitizeUpdateItemFields(request);
 		
-		UpdateItemContext context = getUpdateContext(sanitizedDTO.id());
+		UpdateItemContext context = getUpdateContext(request.id());
 		
 	    authorizationService.requireNotBlocked(context.status());
 		authorizationService.requireOwner(context.ownerId(), currentUserId);
 		
 		int updated = itemRepository.updateItem(
-			context.itemInfo().getId(), context.status(), sanitizedDTO.name(), sanitizedDTO.brand(),
-			sanitizedDTO.model(), sanitizedDTO.description(), sanitizedDTO.basePrice(),
-			sanitizedDTO.itemCondition()
+			context.itemInfo().getId(), context.status(), request.name(), request.brand(),
+			request.model(), request.description(), request.basePrice(),
+			request.itemCondition()
 		);
 		
 		if (updated == 0) {

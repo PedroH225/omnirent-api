@@ -29,9 +29,7 @@ public class UserService {
 	private CurrentUserProvider currentUserProvider;
 	
 	private UserValidationService validationService;
-	
-	private UserSanitizationService userSanitizationService;
-	
+		
 	public void requireExistence(String userId) {
 		if (!userRepository.verifyUser(userId)) {
 			throw new ApiException(UserErrorType.NOT_FOUND);
@@ -69,10 +67,9 @@ public class UserService {
 		String userId = currentUserProvider.currentUserId();
 		User user = findById(userId);
 		
-		UserRequestDTO sanitezedDTO = userSanitizationService.sanitizeFields(userDTO);
-		validationService.validateTakenFields(sanitezedDTO);
+		validationService.validateTakenFields(userDTO);
 		
-		User updatedUser = userRepository.save(user.update(sanitezedDTO));
+		User updatedUser = userRepository.save(user.update(userDTO));
 				
 		return userMapper.toDetailsDto(updatedUser);
 	}
