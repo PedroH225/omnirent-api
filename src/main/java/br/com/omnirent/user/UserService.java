@@ -21,13 +21,15 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @Service
 public class UserService {
-	
+
 	private UserMapper userMapper;
 
 	private UserRepository userRepository;
 	
 	private CurrentUserProvider currentUserProvider;
 	
+	private UserValidationService validationService;
+		
 	public void requireExistence(String userId) {
 		if (!userRepository.verifyUser(userId)) {
 			throw new ApiException(UserErrorType.NOT_FOUND);
@@ -64,7 +66,9 @@ public class UserService {
 	public UserDetailsDTO update(UserRequestDTO userDTO) {
 		String userId = currentUserProvider.currentUserId();
 		User user = findById(userId);
-				
+		
+		validationService.validateTakenFields(userDTO);
+		
 		User updatedUser = userRepository.save(user.update(userDTO));
 				
 		return userMapper.toDetailsDto(updatedUser);

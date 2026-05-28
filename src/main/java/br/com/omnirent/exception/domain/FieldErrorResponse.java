@@ -1,0 +1,10 @@
+package br.com.omnirent.exception.domain;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public record FieldErrorResponse(
+		String field,
+		String message,
+		@JsonIgnore
+		Integer priority
+		) {}

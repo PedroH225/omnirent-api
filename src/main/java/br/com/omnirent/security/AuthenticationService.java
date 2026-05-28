@@ -18,12 +18,12 @@ import org.springframework.stereotype.Service;
 import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.AuthenticationErrorType;
-import br.com.omnirent.exception.domain.UserErrorType;
 import br.com.omnirent.security.context.LoginContext;
 import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
 import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.UserRepository;
+import br.com.omnirent.user.UserValidationService;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 
@@ -46,9 +46,8 @@ public class AuthenticationService implements UserDetailsService {
     @Autowired
     private GlobalConfigHolder globalConfigHolder;
     
-    private boolean verifyExistingEmail(String email) {
-		return userRepository.findExistingUserByEmail(email).isPresent();
-	}
+    @Autowired
+    private UserValidationService validationService;
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -75,10 +74,8 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public ResponseEntity<Object> register (RegisterDTO registerDto){
-    	String email = registerDto.email();
-    	if (verifyExistingEmail(email)) {
-			throw new ApiException(UserErrorType.EMAIL_ALREADY_IN_USE);
-		}
+    	validationService.validateTakenFields(registerDto);
+    	validationService.validatePasswordMatch(registerDto.password(), registerDto.repeatedPassword());
     	
     	String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
         

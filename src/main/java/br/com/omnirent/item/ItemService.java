@@ -49,7 +49,7 @@ public class ItemService {
 	private ItemAuthorizationService authorizationService;
 	
 	private ItemMapper itemMapper;
-	
+		
 	public ItemDetailDTO getItemById(String id) {
 		ItemDetailDTO result = queryRepository.findItemDetailDTO(id)
 				.orElseThrow(() -> new ApiException(ItemErrorType.NOT_FOUND));
@@ -92,7 +92,7 @@ public class ItemService {
 
 	public ItemCreatedDTO addItem(ItemRequestDTO itemDTO) {
 		String currentUserId = currentUserProvider.currentUserId();
-		
+				
 		User user = userService.getValidReference(currentUserId);
 		Address pickupAddress = addressService.getValidReference(itemDTO.addressId(), currentUserId);
 		SubCategory subCategory = categoryService.getValidSubReference(itemDTO.subCategoryId());
@@ -105,6 +105,7 @@ public class ItemService {
 	@Transactional
 	public void updateItem(UpdateItemRequestDTO request) {
 		String currentUserId = currentUserProvider.currentUserId();
+		
 		UpdateItemContext context = getUpdateContext(request.id());
 		
 	    authorizationService.requireNotBlocked(context.status());
