@@ -25,6 +25,7 @@ import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
+import br.com.omnirent.user.dto.UserResponseDTO;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -40,6 +41,9 @@ public class UserServiceTest {
 	
 	@Mock
 	private CurrentUserProvider currentUserProvider;
+	
+	@Mock
+	private UserValidationService validationService;
 	
 	private User user1;
 	private User user2;
@@ -96,36 +100,17 @@ public class UserServiceTest {
 		
 		when(currentUserProvider.currentUserId()).thenReturn(userId);
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user1));
-	    when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-	    when(mapper.toDetailsDto(any(User.class)))
-	    .thenAnswer(invocation -> {
-	        User u = invocation.getArgument(0, User.class);
-	        return UserTestFactory.toUserDetails(u);
-	    });
-	   
-	    UserDetailsDTO result = userService.update(request);
-
-	    ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-
-	    verify(currentUserProvider).currentUserId();
-	    verify(userRepository).findById(userId);
-	    verify(userRepository).save(userCaptor.capture());
-	    verify(mapper).toDetailsDto(userCaptor.getValue());
-	    verifyNoMoreInteractions(userRepository, mapper, currentUserProvider);
-
-	    User saved = userCaptor.getValue();
-
-	    assertThat(result).isEqualTo(expectedDto);
-
-	    assertThat(saved).isNotNull();
-	    assertThat(saved.getId()).isEqualTo(user1.getId());
-	    assertThat(saved.getEmail()).isEqualTo(request.email());
-	    assertThat(saved.getName()).isEqualTo(request.name());
-	    assertThat(saved.getUsername()).isEqualTo(request.username());
-
-	    assertThat(saved.getEmail()).isEqualTo(result.getEmail());
-	    assertThat(saved.getName()).isEqualTo(result.getName());
-	    assertThat(saved.getUsername()).isEqualTo(result.getUsername());
+		when(userRepository.save(user1)).thenReturn(expected);
+		when(mapper.toDetailsDto(expected)).thenReturn(expectedDto);
+		
+		UserDetailsDTO result = userService.update(request);
+		
+		assertThat(result).isEqualTo(expectedDto);
+		
+		verify(currentUserProvider).currentUserId();
+		verify(validationService).validateTakenFields(request);
+		verify(userRepository).save(user1);
+		verifyNoMoreInteractions(userRepository, currentUserProvider, validationService);
 	}
 	
 	@Test
