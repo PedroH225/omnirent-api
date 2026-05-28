@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter;
 
+import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.common.formatter.SanitizationUtils;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
@@ -50,8 +51,26 @@ public class SanitizationRequestBodyAdvice extends RequestBodyAdviceAdapter {
         if (body instanceof UpdateItemRequestDTO dto) {
 			return sanitizeUpdateItemFields(dto);
 		}
+        
+        if (body instanceof AddressRequestDTO dto) {
+        	return sanitizeAddressFields(dto);
+        }
 
         return body;
+    }
+
+    private AddressRequestDTO sanitizeAddressFields(AddressRequestDTO dto) {
+        return new AddressRequestDTO(
+            SanitizationUtils.identifier(dto.id()),
+            SanitizationUtils.text(dto.street()),
+            SanitizationUtils.noWhitespaceText(dto.number()),
+            SanitizationUtils.text(dto.complement()),
+            SanitizationUtils.text(dto.district()),
+            SanitizationUtils.text(dto.city()),
+            SanitizationUtils.text(dto.state()),
+            SanitizationUtils.text(dto.country()),
+            SanitizationUtils.noWhitespaceText(dto.zipCode())
+        );
     }
 
 	private RegisterDTO sanitizeRegisterDTO(RegisterDTO registerDTO) {

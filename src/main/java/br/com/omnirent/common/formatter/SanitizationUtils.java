@@ -33,6 +33,13 @@ public class SanitizationUtils {
 				: null;
 	}
 	
+	public static String noWhitespaceText(String text) {
+		return text != null ?
+				text.strip()
+				.replaceAll("\\s+", "")
+				: null;
+	}
+	
 	public static String description(String text) {
 		return text != null
 				? text.strip()
