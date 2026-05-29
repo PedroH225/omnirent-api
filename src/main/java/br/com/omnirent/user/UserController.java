@@ -43,15 +43,8 @@ public class UserController {
 		return userService.update(user);
 	}
 	
-	@PatchMapping("/deactivate")
-	public void deactivateUser() {
-		userService.deactivateUser();
-
-	}
-	
-	@PatchMapping("/activate")
-	public void activateUser() {
-		userService.activateUser();
-
+	@PatchMapping("/changeStatus")
+	public void changeUserStatus() {
+		userService.changeUserStatus();
 	}
 }

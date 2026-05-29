@@ -21,15 +21,11 @@ public class UserValidationService {
 
 	private static String VALIDATION_PREFIX = "validation.field.";
 	
-	public void validateTakenFields(UserIdentityInput user) {
-		
+	public void validateTakenFields(String userId, UserIdentityInput user) {
 		List<FieldErrorResponse> takenFields = new ArrayList<>();
 		
-	    List<UserTakenContext> conflictingUsers = queryRepository.findTakenFields(
-	    		user.getUsername(),
-	    		user.getEmail()
-	            );		
-
+	    List<UserTakenContext> conflictingUsers = findConflictingUsers(userId, user);
+	    
 	    boolean usernameTaken = conflictingUsers.stream()
 				.anyMatch(c -> c.username().equals(user.getUsername()));
 		
@@ -58,5 +54,14 @@ public class UserValidationService {
 			throw new ValidationException(
 					CommonErrorType.VALIDATION_ERROR, Arrays.asList(invalidField), "user");
 		}
+	}
+	
+	private List<UserTakenContext> findConflictingUsers(
+			String userId, UserIdentityInput user) {
+	    if (userId != null) { 
+	    	return queryRepository.findTakenFieldsNotId(userId, user.getUsername(), user.getEmail());		
+		} 
+	    
+	    return queryRepository.findTakenFields(user.getUsername(),user.getEmail());		
 	}
 }
