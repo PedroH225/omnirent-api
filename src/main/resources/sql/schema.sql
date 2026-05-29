@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `birth_date` DATE NOT NULL,
   `user_status` VARCHAR(20) DEFAULT 'ACTIVE',
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `token_version` INT NOT NULL DEFAULT 1,
   `global_version` INT NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
   `id` CHAR(36) NOT NULL,
   `name` VARCHAR(45) UNIQUE NOT NULL,
   `created_at` DATETIME NOT NULL,
-  `updated_at` DATETIME NOT NULL,
+  `updated_at` DATETIME NOT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB;
 
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `sub_categories` (
   `name` VARCHAR(45) UNIQUE NOT NULL,
   `category_id` CHAR(36) NOT NULL,
   `created_at` DATETIME NOT NULL,
-  `updated_at` DATETIME NOT NULL,
+  `updated_at` DATETIME NOT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   INDEX `idx_sub_categories_category` (`category_id`),
   CONSTRAINT `fk_sub_categories_category`
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `addresses` (
   `zip_code` VARCHAR(20) NOT NULL,
   `user_id` CHAR(36) NOT NULL,
   `created_at` DATETIME NOT NULL,
-  `updated_at` DATETIME NOT NULL,
+  `updated_at` DATETIME NOT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   INDEX `idx_addresses_user` (`user_id`),
   INDEX `idx_addresses_city` (`city`),
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `items` (
   `owner_id` CHAR(36) NOT NULL,
   `pickup_address_id` CHAR(36) NOT NULL,
   `created_at` DATETIME NOT NULL,
-  `updated_at` DATETIME NOT NULL,
+  `updated_at` DATETIME NOT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   INDEX `idx_items_sub_category` (`sub_category_id`),
   INDEX `idx_items_owner` (`owner_id`),
@@ -131,7 +131,7 @@ CREATE TABLE IF NOT EXISTS `rentals` (
   `renter_id` CHAR(36) NOT NULL,
   `owner_id` CHAR(36) NOT NULL,
   `created_at` DATETIME NOT NULL,
-  `updated_at` DATETIME NOT NULL,
+  `updated_at` DATETIME NOT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   INDEX `idx_rentals_renter` (`renter_id`),
   CONSTRAINT `fk_rentals_renter`
