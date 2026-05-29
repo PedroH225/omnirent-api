@@ -85,7 +85,7 @@ public class UserRepositoryTest extends IntegrationTest {
     @Test
     void shouldFindTakenFields() {
         List<UserTakenContext> taken1 = queryRepository.findTakenFields(user1.getUsername(), user1.getEmail());
-        List<UserTakenContext> takenNotFound = queryRepository.findTakenFields("usuario_inexistente", "naoexiste@email.com");
+        List<UserTakenContext> takenNotFound = queryRepository.findTakenFields("nonexistent_user", "nonexistent@email.com");
 
         assertThat(taken1).isNotEmpty();
         assertThat(taken1)
@@ -125,9 +125,9 @@ public class UserRepositoryTest extends IntegrationTest {
 
     @Test
     void shouldUpdateUserDetails() {
-        String newName = "Nome Atualizado";
-        String newUsername = "user_atualizado";
-        String newEmail = "atualizado@email.com";
+        String newName = "Updated Name";
+        String newUsername = "updated_user";
+        String newEmail = "updated@email.com";
         LocalDate newBirthDate = LocalDate.of(1995, 5, 20);
 
         int affectedRows = userRepository.updateUser(
@@ -150,7 +150,7 @@ public class UserRepositoryTest extends IntegrationTest {
     @Test
     void shouldReturnZeroWhenUpdatingNonExistentUser() {
         int affectedRows = userRepository.updateUser(
-            "id_inexistente", "Nome", "username", "email@teste.com", LocalDate.now()
+            "nonexistent_id", "Name", "username", "email@test.com", LocalDate.now()
         );
 
         assertThat(affectedRows).isEqualTo(0);
