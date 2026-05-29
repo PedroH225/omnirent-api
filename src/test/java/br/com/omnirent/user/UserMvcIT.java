@@ -1,6 +1,7 @@
 package br.com.omnirent.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -83,5 +84,27 @@ public class UserMvcIT extends SpringMvcIntegration {
 	    assertThat(user.getName()).isEqualTo("John Doe");
 	    assertThat(user.getDisplayUsername()).isEqualTo("johndoe");
 	    assertThat(user.getEmail()).isEqualTo("johndoe@email.com");
+	}
+	
+	@Test
+	void shouldThrowAfterSanitization() throws Exception {
+	    String dirtyName = "    a    ";
+	    String dirtyUsername = "  JOHN    DOE  ";
+	    String dirtyEmail = "  JOHNDOE@EMAIL.COM  ";
+
+	    UserRequestDTO dirty = UserTestFactory.requestDtoBuilder(
+	            dirtyName,
+	            dirtyUsername,
+	            dirtyEmail,
+	            user1.getBirthDate().minusYears(20)
+	    );
+
+	    String payload = objectMapper.writeValueAsString(dirty);
+
+	    mockMvc.perform(put(USER_PREFIX + "/update")
+	            .with(SecurityTestUtils.auth(user1.getId()))
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .content(payload))
+	        .andExpect(status().isConflict());
 	}
 }
