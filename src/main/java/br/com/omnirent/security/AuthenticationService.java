@@ -76,7 +76,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public ResponseEntity<Object> register (RegisterDTO registerDto){
-    	validationService.validateTakenFields(registerDto);
+    	validationService.validateTakenFields(null, registerDto);
     	validationService.validatePasswordMatch(registerDto.password(), registerDto.repeatedPassword());
     	
     	String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
