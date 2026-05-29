@@ -49,6 +49,12 @@ public interface UserQueryRepository extends Repository<User, String> {
 	List<UserTakenContext> findTakenFields(String username, String email);
 	
 	@Query("""
+			SELECT new br.com.omnirent.user.context.UserTakenContext(u.username, u.email)
+			FROM User u WHERE u.id != :id AND (u.username = :username OR u.email = :email)
+			""")
+	List<UserTakenContext> findTakenFieldsNotId(String id, String username, String email);
+	
+	@Query("""
 			SELECT new br.com.omnirent.user.context.ChangeUserStatusContext(u.id, u.userStatus)
 			FROM User u WHERE u.id = :id
 			""")
