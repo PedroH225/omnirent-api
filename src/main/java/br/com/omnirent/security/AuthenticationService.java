@@ -22,10 +22,12 @@ import br.com.omnirent.security.context.LoginContext;
 import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
 import br.com.omnirent.user.UserMapper;
+import br.com.omnirent.user.UserQueryRepository;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserValidationService;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
+import lombok.RequiredArgsConstructor;
 
 @Service
 public class AuthenticationService implements UserDetailsService {
@@ -34,6 +36,9 @@ public class AuthenticationService implements UserDetailsService {
     
 	@Autowired
     private UserRepository userRepository;
+	
+	@Autowired
+	private UserQueryRepository queryRepository;
 	
 	@Autowired
     private TokenService tokenService;
@@ -51,13 +56,10 @@ public class AuthenticationService implements UserDetailsService {
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<LoginContext> optUser = userRepository.findByEmail(email);
+        LoginContext context = queryRepository.findByEmail(email)
+        		.orElseThrow(() -> new UsernameNotFoundException(email));
         
-        if (optUser.isEmpty()) {
-			throw new UsernameNotFoundException(email);
-		}
-        
-        return mapper.toAuthUser(optUser.get());
+        return mapper.toAuthUser(context);
     } 
 
     public Map<String, String> login(LoginDTO data){

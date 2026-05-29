@@ -38,7 +38,7 @@ public class UserService {
 	private UserAutorizationService autorizationService;
 		
 	public void requireExistence(String userId) {
-		if (!userRepository.verifyUser(userId)) {
+		if (!queryRepository.verifyUser(userId)) {
 			throw new ApiException(UserErrorType.NOT_FOUND);
 		}
 	}
@@ -59,14 +59,14 @@ public class UserService {
 	
 	public UserDetailsDTO getUserDetailsById() {
 		String userId = currentUserProvider.currentUserId();
-		UserDetailsDTO result = userRepository.findUserDetailsById(userId)
+		UserDetailsDTO result = queryRepository.findUserDetailsById(userId)
 				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
 		
 		return userMapper.localize(result);
 	}
 
 	public List<UserResponseDTO> findAll() {
-		return userRepository.findAllUser();
+		return queryRepository.findAllUser();
 	}
 
 	@Transactional
@@ -106,7 +106,7 @@ public class UserService {
 	
 	@Cacheable(value = "tokenVersion", key = "#userId")
 	public AuthMetadata getTokenVersion(String userId) {
-	    AuthMetadata authMetadata = userRepository.findTokenVersionById(userId);
+	    AuthMetadata authMetadata = queryRepository.findTokenVersionById(userId);
 	    
 	    return authMetadata;
 	}
