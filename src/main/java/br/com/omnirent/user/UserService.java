@@ -51,11 +51,6 @@ public class UserService {
 		requireExistence(userId);
 		return getUserReference(userId);
 	}
-		
-	public User findById(String id) {
-		return userRepository.findById(id)
-				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
-	}
 	
 	public UserDetailsDTO getUserDetailsById() {
 		String userId = currentUserProvider.currentUserId();
@@ -72,13 +67,18 @@ public class UserService {
 	@Transactional
 	public UserDetailsDTO update(UserRequestDTO userDTO) {
 		String userId = currentUserProvider.currentUserId();
-		User user = findById(userId);
+		requireExistence(userId);
 		
-		validationService.validateTakenFields(userDTO);
+		validationService.validateTakenFields(userId, userDTO);
 		
-		User updatedUser = userRepository.save(user.update(userDTO));
+		int updated = userRepository.updateUser(userId, userDTO.name(), userDTO.username(),
+				userDTO.email(), userDTO.birthDate());
 				
-		return userMapper.toDetailsDto(updatedUser);
+		if (updated == 0) {
+			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
+		}
+		
+		return getUserDetailsById();
 	}
 
 	@Transactional
