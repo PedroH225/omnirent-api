@@ -61,15 +61,6 @@ public class User extends NamedEntity implements UserDetails {
 	@Embedded
 	private AuthMetadata authMetadata;
 	
-	public User update(UserRequestDTO userDTO) {
-		this.name = userDTO.name();
-		this.username = userDTO.username();
-		this.email = userDTO.email();
-		this.birthDate = userDTO.birthDate();
-		
-		return this;
-	}
-	
 	public User(String id, String email, String password, Integer tokenVersion, Integer globalVersion) {
 		this.id = id;
 		this.email = email;
@@ -82,24 +73,6 @@ public class User extends NamedEntity implements UserDetails {
         this.authMetadata = authMetadata;
 	}
 	
-	public User deactivate() {
-		if (this.userStatus == UserStatus.BANNED) {
-			throw new RuntimeException("User is banned.");
-		}
-		
-		this.userStatus = UserStatus.INACTIVE;
-		return this;
-	}
-	
-	public User activate() {
-		if (this.userStatus == UserStatus.BANNED) {
-			throw new RuntimeException("User is banned.");
-		}
-		
-		this.userStatus = UserStatus.ACTIVE;
-		return this;
-	}
-	
 	@PrePersist
 	public void onCreate() {
 		setUserStatus(UserStatus.ACTIVE);
@@ -107,7 +80,6 @@ public class User extends NamedEntity implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		// TODO Auto-generated method stub
 		return Collections.emptyList();
 	}
 	
@@ -142,20 +114,5 @@ public class User extends NamedEntity implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-	public User(String name, String username, String email, String password, LocalDate birthDate, Integer tokenVersion, Integer globalVersion) {
-		this.name = name;
-		this.username = username;
-		this.email = email;
-		this.password = password;
-		this.birthDate = birthDate;
-		
-		AuthMetadata authMetadata = new AuthMetadata();
-		authMetadata.setGlobalVersion(globalVersion);
-		authMetadata.setTokenVersion(tokenVersion);
-		this.authMetadata = authMetadata;
-	}
-    
-    
+    } 
 }
