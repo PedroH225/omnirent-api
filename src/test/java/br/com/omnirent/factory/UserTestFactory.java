@@ -82,4 +82,10 @@ public final class UserTestFactory {
 		String user = Sequence.nextString("user");
 		return new UserRequestDTO(user, user, user, LocalDate.now());
 	}
+
+	public static UserRequestDTO requestDtoBuilder(
+	        String name, String username, String email, LocalDate birthDate) {
+
+	    return new UserRequestDTO(name, username, email, birthDate);
+	}
 }
