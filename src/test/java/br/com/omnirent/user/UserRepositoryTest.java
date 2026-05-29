@@ -123,5 +123,36 @@ public class UserRepositoryTest extends IntegrationTest {
         assertThat(affectedRows).isEqualTo(0);
     }
 
+    @Test
+    void shouldUpdateUserDetails() {
+        String newName = "Nome Atualizado";
+        String newUsername = "user_atualizado";
+        String newEmail = "atualizado@email.com";
+        LocalDate newBirthDate = LocalDate.of(1995, 5, 20);
 
+        int affectedRows = userRepository.updateUser(
+            user1.getId(), newName, newUsername, newEmail, newBirthDate
+        );
+
+        assertThat(affectedRows).isEqualTo(1);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        User updatedUser = userRepository.findById(user1.getId()).orElseThrow();
+        
+        assertThat(updatedUser.getName()).isEqualTo(newName);
+        assertThat(updatedUser.getDisplayUsername()).isEqualTo(newUsername);
+        assertThat(updatedUser.getEmail()).isEqualTo(newEmail);
+        assertThat(updatedUser.getBirthDate()).isEqualTo(newBirthDate);
+    }
+    
+    @Test
+    void shouldReturnZeroWhenUpdatingNonExistentUser() {
+        int affectedRows = userRepository.updateUser(
+            "id_inexistente", "Nome", "username", "email@teste.com", LocalDate.now()
+        );
+
+        assertThat(affectedRows).isEqualTo(0);
+    }
 }
