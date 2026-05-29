@@ -1,14 +1,10 @@
 package br.com.omnirent.factory;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
-
-import org.springframework.security.core.userdetails.UserDetails;
 
 import br.com.omnirent.common.enums.UserStatus;
+import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
@@ -18,20 +14,30 @@ public final class UserTestFactory {
 
     private UserTestFactory() {}
 
-    public static User owner() {
-    	String owner = Sequence.nextString("owner");
-        return new User(
-        	owner, owner, owner + "@email.com",
-        	owner, LocalDate.now(), 1, 1
-        );
+    private static User createUser(String prefix) {
+        String value = Sequence.nextString(prefix);
+
+        AuthMetadata authMetadata = new AuthMetadata();
+        authMetadata.setGlobalVersion(1);
+        authMetadata.setTokenVersion(1);
+
+        User user = new User();
+        user.setName(value);
+        user.setUsername(value);
+        user.setEmail(value + "@email.com");
+        user.setPassword(value);
+        user.setBirthDate(LocalDate.now());
+        user.setAuthMetadata(authMetadata);
+
+        return user;
     }
-    
+
+    public static User owner() {
+        return createUser("owner");
+    }
+
     public static User user() {
-    	String owner = Sequence.nextString("user");
-        return new User(
-        	owner, owner, owner + "@email.com",
-        	owner, LocalDate.now(), 1, 1
-        );
+        return createUser("user");
     }
     
     public static User persistedUser() {
@@ -55,10 +61,21 @@ public final class UserTestFactory {
     }
     
     public static User fromRequestDto(UserRequestDTO requestDTO, User user) {
-    	User updatedUser = new User(requestDTO.name(), requestDTO.username(), requestDTO.email(), user.getPassword(), requestDTO.birthDate(), 1, 1);
-    	updatedUser.setId(user.getId());
-    	updatedUser.setUserStatus(UserStatus.ACTIVE);
-    	return updatedUser;
+        AuthMetadata authMetadata = new AuthMetadata();
+        authMetadata.setGlobalVersion(1);
+        authMetadata.setTokenVersion(1);
+
+        User updatedUser = new User();
+        updatedUser.setId(user.getId());
+        updatedUser.setName(requestDTO.name());
+        updatedUser.setUsername(requestDTO.username());
+        updatedUser.setEmail(requestDTO.email());
+        updatedUser.setPassword(user.getPassword());
+        updatedUser.setBirthDate(requestDTO.birthDate());
+        updatedUser.setUserStatus(UserStatus.ACTIVE);
+        updatedUser.setAuthMetadata(authMetadata);
+
+        return updatedUser;
     }
 
 	public static UserRequestDTO requestDto() {
