@@ -8,8 +8,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.domain.AddressData;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class AddressResponseDTO {
 	
 	private String id;
