@@ -149,4 +149,27 @@ public class ItemMvcIT extends SpringMvcIntegration {
 		assertThat(persistedItem.getPickupAddressId())
 		        .isEqualTo(address1.getId());
 	}
+	
+	@Test
+	void shouldThrowAfterSanitizeNewItemFields() throws Exception {
+		ItemRequestDTO dirty = new ItemRequestDTO(
+		        null,
+		        "      a     ",
+		        "  MODEL    X  ",
+		        "  BRAND    NAME  ",
+		        "  Descrição    com    vários    espaços  ",
+		        new BigDecimal("100.00"),
+		        ItemCondition.NEW,
+		        String.format("   %s    ", notebook.getId()),
+		        String.format("   %s    ", address1.getId())
+		);
+		
+		String payload = objectMapper.writeValueAsString(dirty);
+
+		mockMvc.perform(post(ITEM_PREFIX)
+				.with(SecurityTestUtils.auth(user1.getId()))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(payload))
+		.andExpect(status().isConflict());
+	}
 }
