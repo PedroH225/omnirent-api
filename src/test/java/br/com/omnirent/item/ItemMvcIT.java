@@ -2,6 +2,7 @@ package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
@@ -33,6 +34,7 @@ import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.utils.SecurityTestUtils;
@@ -171,5 +173,57 @@ public class ItemMvcIT extends SpringMvcIntegration {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isConflict());
+	}
+	
+	@Test
+	void shouldSanitizeUpdatedItemFields() throws Exception {
+		UpdateItemRequestDTO dirty = new UpdateItemRequestDTO(
+		        String.format("   %s     ", item1.getId()),
+		        "  Item   Premium  ",
+		        "  MODEL    X  ",
+		        "  BRAND    NAME  ",
+		        "  Descrição    com    vários    espaços  ",
+		        new BigDecimal("100.00"),
+		        ItemCondition.NEW
+		);
+		
+		String payload = objectMapper.writeValueAsString(dirty);
+
+		mockMvc.perform(put(ITEM_PREFIX)
+				.with(SecurityTestUtils.auth(user1.getId()))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(payload))
+		.andExpect(status().isOk());
+			
+		entityManager.flush();
+		entityManager.clear();
+		
+		Item persistedItem = itemRepository.findById(item1.getId()).orElseThrow();
+	
+		ItemData itemData = persistedItem.getItemData();
+	
+		assertThat(persistedItem.getName())
+		        .isEqualTo("Item Premium");
+	
+		assertThat(itemData.getBrand())
+		        .isEqualTo("BRAND NAME");
+	
+		assertThat(itemData.getModel())
+		        .isEqualTo("MODEL X");
+	
+		assertThat(itemData.getDescription())
+		        .isEqualTo("Descrição    com    vários    espaços");
+	
+		assertThat(itemData.getBasePrice())
+		        .isEqualByComparingTo("100.00");
+	
+		assertThat(itemData.getItemCondition())
+		        .isEqualTo(ItemCondition.NEW);
+	
+		assertThat(persistedItem.getSubCategoryId())
+		        .isEqualTo(notebook.getId());
+	
+		assertThat(persistedItem.getPickupAddressId())
+		        .isEqualTo(address1.getId());
 	}
 }
