@@ -202,4 +202,27 @@ public class AddressMvcIT extends SpringMvcIntegration {
 		assertThat(addressData.getZipCode())
 		        .isEqualTo("01234-567");
 	}
+	
+	@Test
+	void shouldThrowAfterSanitizeUpdatedAddressFields() throws Exception {
+		AddressRequestDTO dirty = new AddressRequestDTO(
+		        String.format(" 	 %s	 ", address1.getId()),
+		        "	  a  	",
+		        "  1	23  ",
+		        "  Apartamento    45  ",
+		        "  Centro    Histórico  ",
+		        "  SÃO    PAULO  ",
+		        "  SÃO    PAULO  ",
+		        "  BRASIL  ",
+		        "  012	34-567  "
+		);
+		
+		String payload = objectMapper.writeValueAsString(dirty);
+
+		mockMvc.perform(put(ADDRESS_PREFIX)
+				.with(SecurityTestUtils.auth(user1.getId()))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(payload))
+		.andExpect(status().isConflict());
+	}
 }
