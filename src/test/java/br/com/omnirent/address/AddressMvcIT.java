@@ -115,4 +115,27 @@ public class AddressMvcIT extends SpringMvcIntegration {
 		        .isEqualTo("01234-567");
 		
 	}
+	
+	@Test
+	void shouldThrowAfterNewAddressFieldsSanitization() throws Exception {
+		AddressRequestDTO dirty = new AddressRequestDTO(
+		        null,
+		        "	 	 a 	 		",
+		        "  1	23  ",
+		        "  Apartamento    45  ",
+		        "  Centro    Histórico  ",
+		        "  SÃO    PAULO  ",
+		        "  SÃO    PAULO  ",
+		        "  BRASIL  ",
+		        "  012	34-567  "
+		);
+		
+		String payload = objectMapper.writeValueAsString(dirty);
+
+		mockMvc.perform(post(ADDRESS_PREFIX)
+				.with(SecurityTestUtils.auth(user1.getId()))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(payload))
+		.andExpect(status().isConflict());
+	}
 }
