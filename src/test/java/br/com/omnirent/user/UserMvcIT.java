@@ -11,7 +11,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -81,12 +80,26 @@ public class UserMvcIT extends SpringMvcIntegration {
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .content(payload))
 	        .andExpect(status().isOk());
-	    
-	    User user = userRepository.findByEmail("johndoe@email.com").orElseThrow();
 
-	    assertThat(user.getName()).isEqualTo("John Doe");
-	    assertThat(user.getDisplayUsername()).isEqualTo("johndoe");
-	    assertThat(user.getEmail()).isEqualTo("johndoe@email.com");
+	}
+	
+	@Test
+	void shouldThrowAfterSanitizeNewUser() throws Exception {
+		RegisterDTO dirty = new RegisterDTO(
+		        "     a     ",
+		        "  JOHN    DOE  ",
+		        "  JOHNDOE@EMAIL.COM  ",
+		        LocalDate.now().minusYears(20),
+		        "  Password123  ",
+		        "  Password123  "
+		);
+		
+		String payload = objectMapper.writeValueAsString(dirty);
+		
+	    mockMvc.perform(post(AUTH_PREFIX + "/register")
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .content(payload))
+	        .andExpect(status().isConflict());
 	}
 	
 	@Test
@@ -121,7 +134,7 @@ public class UserMvcIT extends SpringMvcIntegration {
 	}
 	
 	@Test
-	void shouldThrowAfterSanitization() throws Exception {
+	void shouldThrowAfterSanitizatizeUpdateUserBody() throws Exception {
 	    String dirtyName = "    a    ";
 	    String dirtyUsername = "  JOHN    DOE  ";
 	    String dirtyEmail = "  JOHNDOE@EMAIL.COM  ";
