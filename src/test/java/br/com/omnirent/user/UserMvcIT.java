@@ -103,6 +103,26 @@ public class UserMvcIT extends SpringMvcIntegration {
 	}
 	
 	@Test
+	void shouldThrowWhenEmailTakenOnRegister() throws Exception {
+		RegisterDTO dirty = new RegisterDTO(
+		        "  John   Doe  ",
+		        "  JOHN    DOE  ",
+		        user1.getEmail(),
+		        LocalDate.now().minusYears(20),
+		        "  Password123  ",
+		        "  Password123  "
+		);
+		
+		String payload = objectMapper.writeValueAsString(dirty);
+		
+	    mockMvc.perform(post(AUTH_PREFIX + "/register")
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .content(payload))
+	        .andExpect(status().isConflict());
+
+	}
+	
+	@Test
 	void shouldSanitizeUpdateUserBody() throws Exception {
 		String dirtyName = "  John   Doe  ";
 		String dirtyUsername = "  JOHN    DOE  ";
