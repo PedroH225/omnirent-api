@@ -9,9 +9,9 @@ import br.com.omnirent.address.context.AddressAuditSnapshot;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
+import br.com.omnirent.address.event.AddressAddedEvent;
 import br.com.omnirent.address.event.AddressUpdatedEvent;
 import br.com.omnirent.common.enums.DomainEventType;
-import br.com.omnirent.common.event.DomainEvent;
 import br.com.omnirent.common.event.DomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.AddressErrorType;
@@ -32,7 +32,7 @@ public class AddressService {
 	private CurrentUserProvider currentUserProvider;
 	
 	private DomainEventPublisher eventPublisher;
-	
+		
 	public Address findById(String id) {
 		return addressRepository.findById(id)
 				.orElseThrow(() -> new ApiException(AddressErrorType.NOT_FOUND));
@@ -58,7 +58,13 @@ public class AddressService {
 				
 		Address address = mapper.fromAddressDTO(addressDto, userId);
 		
-		return mapper.toDto(addressRepository.save(address));
+		AddressResponseDTO result = mapper.toDto(addressRepository.save(address));
+		
+		eventPublisher.publish(new AddressAddedEvent(
+				currentUserProvider.currentUserId(),
+				result.getId(),mapper.toAuditSnapshot(result), Instant.now()));
+		
+		return result;
 	}
 	
 	public AddressResponseDTO updateAddress(AddressRequestDTO addressDTO) {
@@ -74,8 +80,8 @@ public class AddressService {
 		
 		eventPublisher.publish(new AddressUpdatedEvent(
 				currentUserProvider.currentUserId(),
-				addressDTO.id(), DomainEventType.ADDRESS_UPDATED,
-				oldData, newData, Instant.now()));
+				addressDTO.id(),oldData,
+				newData, Instant.now()));
 		
 		return result;
 	}
@@ -84,4 +90,5 @@ public class AddressService {
 		Address address = findById(addressId);
 		addressRepository.delete(address);
 	}
+
 }
