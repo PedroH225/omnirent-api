@@ -3,6 +3,7 @@ package br.com.omnirent.common.enums;
 public enum DomainEventType {
 	USER_UPDATED,
 	USER_STATUS_UPDATED,
+	USER_REGISTERED,
 	
 	ADDRESS_DELETED,
 	ADDRESS_ADDED,

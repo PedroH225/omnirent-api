@@ -68,4 +68,11 @@ public class UserMapper {
 	            userDTO.getBirthDate().toString()
 	    );
 	}
+	
+	public UserAuditSnapshot toAuditSnapshot(User user) {
+	    return new UserAuditSnapshot(
+	    		user.getId(), user.getName(),
+	    		user.getUsername(), user.getEmail(),
+	            user.getBirthDate().toString());
+	}
 }

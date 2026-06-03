@@ -1,5 +1,6 @@
 package br.com.omnirent.security;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,18 +16,21 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.common.event.DomainEventPublisher;
 import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.AuthenticationErrorType;
 import br.com.omnirent.security.context.LoginContext;
 import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
+import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.UserQueryRepository;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserValidationService;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
+import br.com.omnirent.user.event.UserUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -53,6 +57,9 @@ public class AuthenticationService implements UserDetailsService {
     
     @Autowired
     private UserValidationService validationService;
+    
+    @Autowired
+	private DomainEventPublisher eventPublisher;
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -81,7 +88,14 @@ public class AuthenticationService implements UserDetailsService {
     	
     	String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
         
-        this.userRepository.save(fromRegisterDTO(registerDto, encryptedPassword));
+        User persistedUser = this.userRepository.save(fromRegisterDTO(registerDto, encryptedPassword));
+		
+        eventPublisher.publish(
+			    new UserRegisteredEvent(
+			        persistedUser.getId(),
+			        mapper.toAuditSnapshot(persistedUser),
+			        Instant.now()));
+        
         return ResponseEntity.ok().build();
     }
     
