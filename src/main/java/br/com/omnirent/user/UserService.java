@@ -21,6 +21,7 @@ import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
+import br.com.omnirent.user.event.UserStatusChangeEvent;
 import br.com.omnirent.user.event.UserUpdatedEvent;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -112,7 +113,12 @@ public class UserService {
 		if (updated == 0) {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 		}
-	}
+		
+		eventPublisher.publish(
+			    new UserStatusChangeEvent(
+			        userId, userId,
+			        newStatus, Instant.now()));	
+		}
 	
 	public UserEnums getEnums() {
 		return userMapper.getLocalizedEnums();
