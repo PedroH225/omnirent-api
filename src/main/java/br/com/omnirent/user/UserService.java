@@ -1,5 +1,6 @@
 package br.com.omnirent.user;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -8,16 +9,19 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.common.enums.UserStatus;
+import br.com.omnirent.common.event.DomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.UserErrorType;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.context.ChangeUserStatusContext;
+import br.com.omnirent.user.context.UserAuditSnapshot;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
+import br.com.omnirent.user.event.UserUpdatedEvent;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
@@ -36,6 +40,8 @@ public class UserService {
 	private UserValidationService validationService;
 	
 	private UserAutorizationService autorizationService;
+	
+	private DomainEventPublisher eventPublisher;
 		
 	public void requireExistence(String userId) {
 		if (!queryRepository.verifyUser(userId)) {
@@ -78,7 +84,15 @@ public class UserService {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 		}
 		
-		return getUserDetailsById();
+		UserDetailsDTO updatedUser = getUserDetailsById();
+
+		eventPublisher.publish(
+		    new UserUpdatedEvent(
+		        userId, updatedUser.getId(),
+		        userMapper.toAuditSnapshot(updatedUser),
+		        Instant.now()));
+
+		return updatedUser;
 	}
 
 	@Transactional

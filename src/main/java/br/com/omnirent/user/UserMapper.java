@@ -12,6 +12,7 @@ import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.security.context.LoginContext;
+import br.com.omnirent.user.context.UserAuditSnapshot;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
@@ -56,5 +57,15 @@ public class UserMapper {
 	public UserDetailsDTO localize(UserDetailsDTO result) {
 		result.setUserStatusLabel(messageService.get(result.getUserStatus().getMessageKey()));
 		return result;
+	}
+	
+	public UserAuditSnapshot toAuditSnapshot(UserDetailsDTO userDTO) {
+	    return new UserAuditSnapshot(
+	            userDTO.getId(),
+	            userDTO.getName(),
+	            userDTO.getUsername(),
+	            userDTO.getEmail(),
+	            userDTO.getBirthDate().toString()
+	    );
 	}
 }
