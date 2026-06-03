@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import br.com.omnirent.address.context.AddressAuditSnapshot;
 import br.com.omnirent.address.context.AddressInfo;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.domain.AddressData;
@@ -64,5 +65,24 @@ public class AddressMapper {
 		addressSnapshot.setRental(rental);
 		
 		return addressSnapshot;
+	}
+	
+	public AddressAuditSnapshot toAuditSnapshot(AddressResponseDTO addressDTO) {
+	    return new AddressAuditSnapshot(
+	            addressDTO.getId(), addressDTO.getStreet(),
+	            addressDTO.getNumber(), addressDTO.getComplement(),
+	            addressDTO.getDistrict(), addressDTO.getCity(),
+	            addressDTO.getState(), addressDTO.getCountry(),
+	            addressDTO.getZipCode());
+	}
+	
+	public AddressAuditSnapshot toAuditSnapshot(Address address) {
+		AddressData addressData = address.getAddressData();
+	    return new AddressAuditSnapshot(
+	            address.getId(), addressData.getStreet(),
+	            addressData.getNumber(), addressData.getComplement(),
+	            addressData.getDistrict(), addressData.getCity(),
+	            addressData.getState(), addressData.getCountry(),
+	            addressData.getZipCode());
 	}
 }
