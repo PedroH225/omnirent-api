@@ -8,6 +8,10 @@ public interface DomainEvent {
 	
 	DomainEventType eventType();
 	
+	String actorId();
+	
+	String entityId();
+	
 	Instant occurredAt();
 	
 }
