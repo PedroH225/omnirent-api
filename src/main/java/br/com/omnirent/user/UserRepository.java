@@ -1,6 +1,7 @@
 package br.com.omnirent.user;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,6 +13,8 @@ import br.com.omnirent.user.domain.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
+	
+	Optional<User> findByEmail(String emal);
 	
 	@Modifying
 	@Query("""
