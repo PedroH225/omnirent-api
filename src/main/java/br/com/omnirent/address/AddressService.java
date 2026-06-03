@@ -10,6 +10,7 @@ import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.address.event.AddressAddedEvent;
+import br.com.omnirent.address.event.AddressDeletedEvent;
 import br.com.omnirent.address.event.AddressUpdatedEvent;
 import br.com.omnirent.common.enums.DomainEventType;
 import br.com.omnirent.common.event.DomainEventPublisher;
@@ -89,6 +90,10 @@ public class AddressService {
 	public void deleteAddress(String addressId) {
 		Address address = findById(addressId);
 		addressRepository.delete(address);
+		
+		eventPublisher.publish(new AddressDeletedEvent(
+				currentUserProvider.currentUserId(),
+				address.getId(),mapper.toAuditSnapshot(address), Instant.now()));
 	}
 
 }
