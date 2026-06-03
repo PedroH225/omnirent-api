@@ -174,4 +174,26 @@ public class UserMvcIT extends SpringMvcIntegration {
 	            .content(payload))
 	        .andExpect(status().isConflict());
 	}
+	
+	@Test
+	void shouldThrowWhenEmailTakenOnUpdate() throws Exception {
+		User user2 = userRepository.save(UserTestFactory.owner());
+		String dirtyName = "  John   Doe  ";
+	    String dirtyUsername = "  JOHN    DOE  ";
+
+	    UserRequestDTO dirty = UserTestFactory.requestDtoBuilder(
+	            dirtyName,
+	            dirtyUsername,
+	            user2.getEmail(),
+	            LocalDate.now().minusYears(20)
+	    );
+
+	    String payload = objectMapper.writeValueAsString(dirty);
+
+	    mockMvc.perform(put(USER_PREFIX + "/update")
+	            .with(SecurityTestUtils.auth(user1.getId()))
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .content(payload))
+	        .andExpect(status().isConflict());
+	}
 }
