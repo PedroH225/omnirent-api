@@ -16,6 +16,7 @@ import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -53,8 +54,8 @@ public class ItemController {
 	}
 	
 	@PutMapping
-	public void updateItem(@RequestBody @Valid UpdateItemRequestDTO itemDTO) {
-		itemService.updateItem(itemDTO);
+	public ItemUpdatedDTO updateItem(@RequestBody @Valid UpdateItemRequestDTO itemDTO) {
+		return itemService.updateItem(itemDTO);
 	}
 	
 	@PatchMapping("/changeAddress/{id}/{addressId}")

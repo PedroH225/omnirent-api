@@ -17,6 +17,7 @@ import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.item.context.ItemAuditSnapshot;
 import br.com.omnirent.item.context.ItemInfo;
+import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.domain.ItemSnapshot;
@@ -25,6 +26,8 @@ import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemSnapshotDTO;
+import br.com.omnirent.item.dto.ItemUpdatedDTO;
+import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.dto.UserResponseDTO;
@@ -141,6 +144,20 @@ public class ItemMapper {
 		return new ItemEnums(itemConditions, itemStatus);
 	}
 	
+	public ItemUpdatedDTO toItemUpdatedDTO(
+	        UpdateItemContext context, UpdateItemRequestDTO request) {
+		ItemUpdatedDTO updatedItem = new ItemUpdatedDTO(
+	            context.itemInfo().getId(), request.name(),
+	            request.brand(), request.model(),
+	            request.description(), request.basePrice(),
+	            request.itemCondition(), context.status(),
+	            context.ownerId(), context.addressId(), context.subCategoryId());
+		
+		updatedItem.setItemConditionLabel(messageService.get(updatedItem.getItemCondition().getMessageKey()));
+		updatedItem.setItemStatusLabel(messageService.get(updatedItem.getItemStatus().getMessageKey()));
+		
+	    return updatedItem;
+	}
 	public ItemAuditSnapshot toAuditSnapshot(Item item) {
 		ItemData itemData = item.getItemData();
 	    return new ItemAuditSnapshot(

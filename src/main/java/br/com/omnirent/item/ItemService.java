@@ -25,6 +25,7 @@ import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.item.event.ItemAddressChangedEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
@@ -118,7 +119,7 @@ public class ItemService {
 	}
 	
 	@Transactional
-	public void updateItem(UpdateItemRequestDTO request) {
+	public ItemUpdatedDTO updateItem(UpdateItemRequestDTO request) {
 		String currentUserId = currentUserProvider.currentUserId();
 		
 		UpdateItemContext context = getUpdateContext(request.id());
@@ -135,6 +136,8 @@ public class ItemService {
 		if (updated == 0) {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 		}
+		
+		return itemMapper.toItemUpdatedDTO(context, request);
 	}
 	
 	@Transactional
