@@ -10,7 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 public class LoggingEventListener {
     @EventListener
     public void handle(DomainEvent event) {
-    	log.info("""
+    	log.info(
+    		"""
         		
 	        	event= {}
 	        	actorId= {}
@@ -19,4 +20,20 @@ public class LoggingEventListener {
 	        """,
 	        event.eventType(), event.actorId(), event.entityId(), event.occurredAt());
     	}
+    
+    @EventListener
+    public void handle(SecurityEvent event) {
+    	log.info(
+    			"""
+    			
+		    		security_event= {}
+		    		userId= {}
+		    		ip= {}
+		    		userAgent= {}
+		    		success= {}
+		    		occurredAt= {}
+    			""",
+                event.eventType(), event.userId(), event.ip(), event.userAgent(),
+                event.success(), event.occurredAt());
+    }
 }
