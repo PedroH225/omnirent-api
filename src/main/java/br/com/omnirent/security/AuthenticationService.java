@@ -2,7 +2,6 @@ package br.com.omnirent.security;
 
 import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -16,13 +15,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.common.enums.SecurityEventType;
 import br.com.omnirent.common.event.DomainEventPublisher;
+import br.com.omnirent.common.event.SecurityEventPublisher;
 import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.AuthenticationErrorType;
 import br.com.omnirent.security.context.LoginContext;
 import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
+import br.com.omnirent.security.event.UserLoggedInEvent;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.UserQueryRepository;
@@ -30,8 +32,7 @@ import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserValidationService;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
-import br.com.omnirent.user.event.UserUpdatedEvent;
-import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class AuthenticationService implements UserDetailsService {
@@ -59,7 +60,10 @@ public class AuthenticationService implements UserDetailsService {
     private UserValidationService validationService;
     
     @Autowired
-	private DomainEventPublisher eventPublisher;
+    private DomainEventPublisher eventPublisher;
+    
+    @Autowired
+	private SecurityEventPublisher securityEventPublisher;
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -69,13 +73,24 @@ public class AuthenticationService implements UserDetailsService {
         return mapper.toAuthUser(context);
     } 
 
-    public Map<String, String> login(LoginDTO data){
+    public Map<String, String> login(LoginDTO data, HttpServletRequest request){
     	try {
         authenticationManager = context.getBean(AuthenticationManager.class);
 
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         	 var auth = this.authenticationManager.authenticate(usernamePassword);
-             var token = tokenService.generateToken((User) auth.getPrincipal());
+
+             var user = (User) auth.getPrincipal();
+
+             var token = tokenService.generateToken(user);
+             
+             String ip = extractIp(request);
+             String userAgent = request.getHeader("User-Agent");
+
+             securityEventPublisher.publish(
+                     new UserLoggedInEvent(
+                             user.getId(), ip, userAgent, true, Instant.now()));
+            
              return Map.of("token", token);
 		} catch (BadCredentialsException e) {
 			throw new ApiException(AuthenticationErrorType.INVALID_CREDENTIALS);
@@ -114,5 +129,15 @@ public class AuthenticationService implements UserDetailsService {
         user.setPassword(encryptedPassword);
         
         return user;
+    }
+    
+    private String extractIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
+        }
+
+        return request.getRemoteAddr();
     }
 }

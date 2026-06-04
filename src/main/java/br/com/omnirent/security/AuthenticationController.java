@@ -7,9 +7,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -26,8 +29,8 @@ public class AuthenticationController {
 	}
 	
 	@PostMapping("/login")
-	public Map<String, String> login(@RequestBody LoginDTO loginDTO) {
-		return authenticationService.login(loginDTO);
+	public Map<String, String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
+		return authenticationService.login(loginDTO, request);
 	}
 
 }
