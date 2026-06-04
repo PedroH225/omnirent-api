@@ -12,7 +12,6 @@ import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.address.event.AddressAddedEvent;
 import br.com.omnirent.address.event.AddressDeletedEvent;
 import br.com.omnirent.address.event.AddressUpdatedEvent;
-import br.com.omnirent.common.enums.DomainEventType;
 import br.com.omnirent.common.event.DomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.AddressErrorType;

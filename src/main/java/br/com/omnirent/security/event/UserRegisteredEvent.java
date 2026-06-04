@@ -2,7 +2,6 @@ package br.com.omnirent.security.event;
 
 import java.time.Instant;
 
-import br.com.omnirent.common.enums.DomainEventType;
 import br.com.omnirent.common.event.DomainEvent;
 import br.com.omnirent.user.context.UserAuditSnapshot;
 
@@ -11,11 +10,6 @@ public record UserRegisteredEvent(
         UserAuditSnapshot newUser,
         Instant occurredAt
 	) implements DomainEvent {
-	
-	    @Override
-	    public DomainEventType eventType() {
-	        return DomainEventType.USER_REGISTERED;
-	    }
 	
 	    @Override
 	    public String entityId() {
