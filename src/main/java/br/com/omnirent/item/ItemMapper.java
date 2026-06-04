@@ -158,6 +158,7 @@ public class ItemMapper {
 		
 	    return updatedItem;
 	}
+	
 	public ItemAuditSnapshot toAuditSnapshot(Item item) {
 		ItemData itemData = item.getItemData();
 	    return new ItemAuditSnapshot(
@@ -167,6 +168,17 @@ public class ItemMapper {
 	            itemData.getItemCondition(), item.getItemStatus(),
 	            item.getOwnerId(), item.getSubCategoryId(),
 	            item.getPickupAddressId()
+	    );
+	}
+	
+	public ItemAuditSnapshot toAuditSnapshot(ItemUpdatedDTO item) {
+	    return new ItemAuditSnapshot(
+	            item.getId(), item.getName(),
+	            item.getBrand(), item.getModel(),
+	            item.getDescription(), item.getBasePrice(),
+	            item.getItemCondition(), item.getItemStatus(),
+	            item.getOwnerId(), item.getSubCategoryId(),
+	            item.getAddressId()
 	    );
 	}
 } 

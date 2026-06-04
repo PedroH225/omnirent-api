@@ -31,6 +31,7 @@ import br.com.omnirent.item.event.ItemAddressChangedEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.item.event.ItemStatusUpdatedEvent;
 import br.com.omnirent.item.event.ItemSubcategoryChangedEvent;
+import br.com.omnirent.item.event.ItemUpdatedEvent;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -137,7 +138,13 @@ public class ItemService {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 		}
 		
-		return itemMapper.toItemUpdatedDTO(context, request);
+		ItemUpdatedDTO itemUpdatedDTO = itemMapper.toItemUpdatedDTO(context, request);
+		
+		eventPublisher.publish(new ItemUpdatedEvent(
+				currentUserId, itemUpdatedDTO.getId(), 
+				itemMapper.toAuditSnapshot(itemUpdatedDTO), Instant.now()));
+		
+		return itemUpdatedDTO;
 	}
 	
 	@Transactional
