@@ -15,6 +15,7 @@ import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.config.i18n.MessageService;
+import br.com.omnirent.item.context.ItemAuditSnapshot;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
@@ -138,5 +139,17 @@ public class ItemMapper {
 				.collect(Collectors.toList());
 		
 		return new ItemEnums(itemConditions, itemStatus);
+	}
+	
+	public ItemAuditSnapshot toAuditSnapshot(Item item) {
+		ItemData itemData = item.getItemData();
+	    return new ItemAuditSnapshot(
+	            item.getId(), item.getName(),
+	            itemData.getBrand(), itemData.getModel(),
+	            itemData.getDescription(), itemData.getBasePrice(),
+	            itemData.getItemCondition(), item.getItemStatus(),
+	            item.getOwnerId(), item.getSubCategoryId(),
+	            item.getPickupAddressId()
+	    );
 	}
 } 
