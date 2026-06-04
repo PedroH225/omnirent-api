@@ -29,6 +29,7 @@ import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.item.event.ItemAddressChangedEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.item.event.ItemStatusUpdatedEvent;
+import br.com.omnirent.item.event.ItemSubcategoryChangedEvent;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -184,6 +185,10 @@ public class ItemService {
 	    if (updated == 0) {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 	    }
+	    
+	    eventPublisher.publish(new ItemSubcategoryChangedEvent(
+				currentUserId, context.id(), 
+				validatedNewSubCatId, Instant.now()));
 	}
 
 	@Transactional
