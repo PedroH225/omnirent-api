@@ -26,6 +26,7 @@ import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
+import br.com.omnirent.item.event.ItemAddressChangedEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.item.event.ItemStatusUpdatedEvent;
 import br.com.omnirent.security.CurrentUserProvider;
@@ -156,6 +157,10 @@ public class ItemService {
 	    if (updated == 0) {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 	    }
+	    
+	    eventPublisher.publish(new ItemAddressChangedEvent(
+				currentUserId, context.id(), 
+				validatedNewAddressId, Instant.now()));
 	}
 	
 	@Transactional
