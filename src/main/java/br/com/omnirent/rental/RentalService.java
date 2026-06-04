@@ -1,6 +1,7 @@
 package br.com.omnirent.rental;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import br.com.omnirent.common.enums.RentalEnums;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.common.event.DomainEventPublisher;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.RentalErrorType;
@@ -50,6 +52,8 @@ public class RentalService {
 	private CurrentUserProvider currentUserProvider;
 	
 	private MessageService messageService;
+	
+	private DomainEventPublisher eventPublisher;
 	
 	private void validateTransition(RentalStatus currStatus, RentalStatus targetStatus) {
 		if (!currStatus.canTransition(targetStatus)) {
@@ -95,7 +99,13 @@ public class RentalService {
 			    rentalPeriod, rentalStatus,
 			    finalPrice);
 		
-		return mapper.toCreatedDto(rentalRepository.save(rental));
+		Rental persistedRental = rentalRepository.save(rental);
+		
+		eventPublisher.publish(
+				new RentalCreatedEvent(userId, persistedRental.getId(),
+						mapper.toAuditSnapshot(persistedRental), Instant.now()));
+		
+		return mapper.toCreatedDto(persistedRental);
 	}
 
 	@Transactional

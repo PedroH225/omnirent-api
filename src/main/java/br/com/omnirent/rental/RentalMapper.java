@@ -9,11 +9,8 @@ import org.springframework.stereotype.Component;
 
 import br.com.omnirent.address.AddressMapper;
 import br.com.omnirent.address.context.AddressInfo;
-import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressSnapshotDTO;
 import br.com.omnirent.common.enums.EnumOption;
-import br.com.omnirent.common.enums.ItemCondition;
-import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.common.enums.RentalEnums;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
@@ -21,15 +18,13 @@ import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.item.ItemMapper;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
-import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemSnapshotDTO;
+import br.com.omnirent.rental.context.RentalAuditSnapshot;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
-import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.domain.User;
-import br.com.omnirent.user.dto.UserResponseDTO;
 import lombok.AllArgsConstructor;
 
 @Component
@@ -122,5 +117,16 @@ public class RentalMapper {
 				.collect(Collectors.toList());
 		
 		return new RentalEnums(rentalPeriods, rentalStatuses);
+	}
+	
+	public RentalAuditSnapshot toAuditSnapshot(Rental rental) {
+	    return new RentalAuditSnapshot(
+	            rental.getId(),
+	            rental.getStartDate() != null ? rental.getStartDate().toString() : null,
+	            rental.getEndDate() != null ? rental.getEndDate().toString() : null,
+	            rental.getFinalPrice(), rental.getRentalStatus(), rental.getRentalPeriod(),
+	            rental.getItemSnapshot(), rental.getAddressSnapshot(),
+	            rental.getRenterId(), rental.getOwnerId()
+	    );
 	}
 }
