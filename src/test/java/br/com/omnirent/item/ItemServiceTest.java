@@ -3,6 +3,7 @@ package br.com.omnirent.item;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -25,6 +26,7 @@ import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.common.event.DomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.AddressErrorType;
 import br.com.omnirent.exception.domain.ItemErrorType;
@@ -45,6 +47,7 @@ import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
@@ -79,6 +82,9 @@ public class ItemServiceTest {
 
 	@Mock
 	private ItemMapper itemMapper;
+	
+	@Mock
+	private DomainEventPublisher eventPublisher;
 	
 	private User owner;
 	private User owner2;
@@ -303,6 +309,7 @@ public class ItemServiceTest {
 			    request.brand(), request.model(), request.description(),
 			    request.basePrice(), request.itemCondition()
 			)).thenReturn(1); 
+		when(itemMapper.toItemUpdatedDTO(context, request)).thenReturn(mock(ItemUpdatedDTO.class));
 		
 		itemService.updateItem(request);
 		
