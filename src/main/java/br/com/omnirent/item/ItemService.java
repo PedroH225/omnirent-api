@@ -1,5 +1,6 @@
 package br.com.omnirent.item;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.common.event.DomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.ItemErrorType;
@@ -23,7 +25,13 @@ import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
+import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
+import br.com.omnirent.item.event.ItemAddressChangedEvent;
+import br.com.omnirent.item.event.ItemCreatedEvent;
+import br.com.omnirent.item.event.ItemStatusUpdatedEvent;
+import br.com.omnirent.item.event.ItemSubcategoryChangedEvent;
+import br.com.omnirent.item.event.ItemUpdatedEvent;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -49,6 +57,8 @@ public class ItemService {
 	private ItemAuthorizationService authorizationService;
 	
 	private ItemMapper itemMapper;
+	
+	private DomainEventPublisher eventPublisher;
 		
 	public ItemDetailDTO getItemById(String id) {
 		ItemDetailDTO result = queryRepository.findItemDetailDTO(id)
@@ -99,11 +109,18 @@ public class ItemService {
 		
 		Item item = itemMapper.fromDto(itemDTO, user.getId(), pickupAddress.getId(),
 				subCategory.getId(), ItemStatus.AVAILABLE);
-		return itemMapper.toCreatedDto(itemRepository.save(item));
+		
+		Item persistedItem = itemRepository.save(item);
+		
+		eventPublisher.publish(new ItemCreatedEvent(
+				currentUserId, item.getId(), 
+				itemMapper.toAuditSnapshot(persistedItem), Instant.now()));
+		
+		return itemMapper.toCreatedDto(persistedItem);
 	}
 	
 	@Transactional
-	public void updateItem(UpdateItemRequestDTO request) {
+	public ItemUpdatedDTO updateItem(UpdateItemRequestDTO request) {
 		String currentUserId = currentUserProvider.currentUserId();
 		
 		UpdateItemContext context = getUpdateContext(request.id());
@@ -120,6 +137,14 @@ public class ItemService {
 		if (updated == 0) {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 		}
+		
+		ItemUpdatedDTO itemUpdatedDTO = itemMapper.toItemUpdatedDTO(context, request);
+		
+		eventPublisher.publish(new ItemUpdatedEvent(
+				currentUserId, itemUpdatedDTO.getId(), 
+				itemMapper.toAuditSnapshot(itemUpdatedDTO), Instant.now()));
+		
+		return itemUpdatedDTO;
 	}
 	
 	@Transactional
@@ -143,6 +168,10 @@ public class ItemService {
 	    if (updated == 0) {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 	    }
+	    
+	    eventPublisher.publish(new ItemAddressChangedEvent(
+				currentUserId, context.id(), 
+				validatedNewAddressId, Instant.now()));
 	}
 	
 	@Transactional
@@ -166,6 +195,10 @@ public class ItemService {
 	    if (updated == 0) {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 	    }
+	    
+	    eventPublisher.publish(new ItemSubcategoryChangedEvent(
+				currentUserId, context.id(), 
+				validatedNewSubCatId, Instant.now()));
 	}
 
 	@Transactional
@@ -186,6 +219,10 @@ public class ItemService {
 		if (updated == 0) {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 		}
+		
+		eventPublisher.publish(new ItemStatusUpdatedEvent(
+				currentUserId, context.id(), 
+				newStatus, Instant.now()));
 	}
 
 	public ItemEnums getEnums() {

@@ -1,12 +1,18 @@
 package br.com.omnirent.address;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.address.context.AddressAuditSnapshot;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
+import br.com.omnirent.address.event.AddressAddedEvent;
+import br.com.omnirent.address.event.AddressDeletedEvent;
+import br.com.omnirent.address.event.AddressUpdatedEvent;
+import br.com.omnirent.common.event.DomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.AddressErrorType;
 import br.com.omnirent.security.CurrentUserProvider;
@@ -25,6 +31,8 @@ public class AddressService {
 	
 	private CurrentUserProvider currentUserProvider;
 	
+	private DomainEventPublisher eventPublisher;
+		
 	public Address findById(String id) {
 		return addressRepository.findById(id)
 				.orElseThrow(() -> new ApiException(AddressErrorType.NOT_FOUND));
@@ -50,20 +58,41 @@ public class AddressService {
 				
 		Address address = mapper.fromAddressDTO(addressDto, userId);
 		
-		return mapper.toDto(addressRepository.save(address));
+		AddressResponseDTO result = mapper.toDto(addressRepository.save(address));
+		
+		eventPublisher.publish(new AddressAddedEvent(
+				currentUserProvider.currentUserId(),
+				result.getId(),mapper.toAuditSnapshot(result), Instant.now()));
+		
+		return result;
 	}
 	
 	public AddressResponseDTO updateAddress(AddressRequestDTO addressDTO) {
 		Address address = findById(addressDTO.id());
 		
+		AddressAuditSnapshot oldData = mapper.toAuditSnapshot(address);
+		
 		address.updateFields(addressDTO);
 		
-		return mapper.toDto(addressRepository.save(address));
+		AddressResponseDTO result = mapper.toDto(addressRepository.save(address));
+		
+		AddressAuditSnapshot newData = mapper.toAuditSnapshot(result);
+		
+		eventPublisher.publish(new AddressUpdatedEvent(
+				currentUserProvider.currentUserId(),
+				addressDTO.id(),oldData,
+				newData, Instant.now()));
+		
+		return result;
 	}
 	
 	public void deleteAddress(String addressId) {
 		Address address = findById(addressId);
 		addressRepository.delete(address);
+		
+		eventPublisher.publish(new AddressDeletedEvent(
+				currentUserProvider.currentUserId(),
+				address.getId(),mapper.toAuditSnapshot(address), Instant.now()));
 	}
-	
+
 }

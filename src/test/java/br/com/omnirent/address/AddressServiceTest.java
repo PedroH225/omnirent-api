@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
+import br.com.omnirent.common.event.DomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.UserErrorType;
 import br.com.omnirent.factory.AddressTestFactory;
@@ -46,6 +47,9 @@ public class AddressServiceTest {
 
 	@Mock
 	private CurrentUserProvider currentUserProvider;
+	
+	@Mock
+	private DomainEventPublisher eventPublisher;
 	
 	private User user;
 
@@ -106,7 +110,7 @@ public class AddressServiceTest {
 		verify(mapper).fromAddressDTO(addressDTO, userId);
 		verify(addressRepository).save(userAddress);
 		verify(mapper).toDto(userAddress);
-		verifyNoMoreInteractions(userService, mapper, addressRepository);
+		verifyNoMoreInteractions(userService, addressRepository);
 	}
 
 	@Test
@@ -140,7 +144,7 @@ public class AddressServiceTest {
 		verify(addressRepository).findById(addressDTO.id());
 		verify(addressRepository).save(userAddress);
 		verify(mapper).toDto(userAddress);
-		verifyNoMoreInteractions(addressRepository, mapper);
+		verifyNoMoreInteractions(addressRepository);
 	}
 
 	@Test

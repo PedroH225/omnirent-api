@@ -160,7 +160,8 @@ public final class ItemTestFactory {
             data.getItemCondition()
         );
 
-        return new UpdateItemContext(itemInfo, ownerId, item.getItemStatus());
+        return new UpdateItemContext(itemInfo, ownerId, item.getPickupAddressId(),
+        		item.getSubCategoryId(), item.getItemStatus());
     }
     
     public static Item fromNewItemRequestDTO(ItemRequestDTO dto,

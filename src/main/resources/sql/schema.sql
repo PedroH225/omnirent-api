@@ -183,3 +183,18 @@ CREATE TABLE IF NOT EXISTS `item_snapshots` (
     ON DELETE CASCADE
     ON UPDATE NO ACTION
 ) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS `audit_log` (
+  `id` CHAR(36) NOT NULL,
+  `event_type` VARCHAR(50) NOT NULL,
+  `entity_type` VARCHAR(50) NOT NULL,
+  `entity_id` CHAR(36) NOT NULL,
+  `actor_id` CHAR(36) NOT NULL,
+  `old_data` JSON,
+  `new_data` JSON,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX idx_audit_entity (entity_type, entity_id),
+  INDEX idx_audit_actor (actor_id),
+  INDEX idx_audit_created_at (created_at) 	
+) ENGINE=InnoDB;

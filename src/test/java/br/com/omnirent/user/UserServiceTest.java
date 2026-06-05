@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.common.enums.UserStatus;
+import br.com.omnirent.common.event.DomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.UserErrorType;
@@ -53,6 +54,9 @@ public class UserServiceTest {
 
 	@Mock
 	private UserAutorizationService autorizationService;
+	
+	@Mock
+	private DomainEventPublisher eventPublisher;
 
 	@Test
 	void shouldThrowExceptionWhenUserDoesNotExist() {
