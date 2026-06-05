@@ -3,6 +3,7 @@ package br.com.omnirent.address.event;
 import java.time.Instant;
 
 import br.com.omnirent.address.context.AddressAuditSnapshot;
+import br.com.omnirent.common.audit.AuditableEvent;
 import br.com.omnirent.common.event.DomainEvent;
 
 public record AddressUpdatedEvent(
@@ -11,7 +12,7 @@ public record AddressUpdatedEvent(
 		AddressAuditSnapshot oldData,
 		AddressAuditSnapshot newData,
 		Instant occurredAt
-		) implements DomainEvent {
+		) implements DomainEvent, AuditableEvent {
 		
 		@Override
 		public String entityId() {
