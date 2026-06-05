@@ -19,6 +19,7 @@ import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
+import br.com.omnirent.rental.context.RentalStatusChangedEvent;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.domain.RentalAuthorizationService;
 import br.com.omnirent.rental.domain.RentalDateService;
@@ -119,6 +120,8 @@ public class RentalService {
 		validateTransition(currStatus, RentalStatus.PREPARING);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.PREPARING);
+		
+		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), currStatus);
 	}
 
 	@Transactional
@@ -132,6 +135,8 @@ public class RentalService {
 		validateTransition(currStatus, RentalStatus.SHIPPED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.SHIPPED);
+		
+		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), currStatus);
 	}
 
 	@Transactional
@@ -167,7 +172,8 @@ public class RentalService {
 		validateTransition(currStatus, RentalStatus.RETURN_REQUESTED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.RETURN_REQUESTED);
-	}
+		
+		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), currStatus);	}
 	
 	@Transactional
 	public void markReturnShipped(String rentId) {
@@ -180,6 +186,8 @@ public class RentalService {
 		validateTransition(currStatus, RentalStatus.RETURN_SHIPPED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.RETURN_SHIPPED);
+		
+		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), currStatus);
 	}
 	
 	@Transactional
@@ -194,6 +202,8 @@ public class RentalService {
 		validateTransition(currStatus, RentalStatus.RETURNED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.RETURNED);
+		
+		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), currStatus);
 	}
 
 	@Transactional
@@ -209,6 +219,8 @@ public class RentalService {
 		validateTransition(currStatus, RentalStatus.CANCELLED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.CANCELLED);
+		
+		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), currStatus);
 	}
 
 	@Transactional
@@ -224,6 +236,8 @@ public class RentalService {
 		validateTransition(currStatus, RentalStatus.CONFIRMED);
 		
 		rentalRepository.updateRentalStatus(rentId, RentalStatus.CONFIRMED);
+		
+		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), currStatus);
 	}
 
 	public List<RentalDisplayDTO> findUserRented() {
@@ -233,6 +247,13 @@ public class RentalService {
 		List<RentalDisplayDTO> result = queryRepository.findUserRented(renterId);
 		
 		return mapper.localize(result);
+	}
+	
+	private void publishDefaultTransition(
+			String actorId, String entityId, RentalStatus oldStatus, RentalStatus newStatus) {
+		eventPublisher.publish(new RentalStatusChangedEvent(
+				actorId, entityId,
+				oldStatus, newStatus, Instant.now()));
 	}
 
 	public List<RentalDisplayDTO> findUserRentals() {
