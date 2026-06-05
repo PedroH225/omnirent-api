@@ -181,4 +181,18 @@ public class ItemMapper {
 	            item.getAddressId()
 	    );
 	}
+
+	public ItemAuditSnapshot toAuditSnapshot(ItemSnapshot itemSnapshot) {
+	    ItemData itemData = itemSnapshot.getItemData();
+
+	    return new ItemAuditSnapshot(
+	            itemSnapshot.getId(),
+	            itemSnapshot.getName(),
+	            itemData.getBrand(),
+	            itemData.getModel(),
+	            itemData.getDescription(),
+	            itemData.getBasePrice(),
+	            itemData.getItemCondition(),
+	            null, null, null, null);
+	}
 } 

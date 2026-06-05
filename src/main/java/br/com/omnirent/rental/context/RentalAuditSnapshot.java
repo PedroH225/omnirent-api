@@ -2,10 +2,10 @@ package br.com.omnirent.rental.context;
 
 import java.math.BigDecimal;
 
-import br.com.omnirent.address.domain.AddressSnapshot;
+import br.com.omnirent.address.context.AddressAuditSnapshot;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
-import br.com.omnirent.item.domain.ItemSnapshot;
+import br.com.omnirent.item.context.ItemAuditSnapshot;
 
 public record RentalAuditSnapshot(
         String id,
@@ -15,8 +15,8 @@ public record RentalAuditSnapshot(
         RentalStatus rentalStatus,
         RentalPeriod rentalPeriod,
 
-        ItemSnapshot item,
-        AddressSnapshot address,
+        ItemAuditSnapshot item,
+        AddressAuditSnapshot address,
 
         String renterId,
         String ownerId

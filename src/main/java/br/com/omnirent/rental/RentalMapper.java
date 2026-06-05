@@ -125,7 +125,8 @@ public class RentalMapper {
 	            rental.getStartDate() != null ? rental.getStartDate().toString() : null,
 	            rental.getEndDate() != null ? rental.getEndDate().toString() : null,
 	            rental.getFinalPrice(), rental.getRentalStatus(), rental.getRentalPeriod(),
-	            rental.getItemSnapshot(), rental.getAddressSnapshot(),
+	            itemMapper.toAuditSnapshot(rental.getItemSnapshot()),
+	            addressMapper.toAuditSnapshot(rental.getAddressSnapshot()), 
 	            rental.getRenterId(), rental.getOwnerId()
 	    );
 	}

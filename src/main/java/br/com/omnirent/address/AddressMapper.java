@@ -85,4 +85,14 @@ public class AddressMapper {
 	            addressData.getState(), addressData.getCountry(),
 	            addressData.getZipCode());
 	}
+	
+	public AddressAuditSnapshot toAuditSnapshot(AddressSnapshot addressSnapshot) {
+		AddressData addressData = addressSnapshot.getAddressData();
+	    return new AddressAuditSnapshot(
+	            addressSnapshot.getId(), addressData.getStreet(),
+	            addressData.getNumber(), addressData.getComplement(),
+	            addressData.getDistrict(), addressData.getCity(),
+	            addressData.getState(), addressData.getCountry(),
+	            addressData.getZipCode());
+	}
 }
