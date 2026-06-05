@@ -1,14 +1,16 @@
-package br.com.omnirent.rental.context;
+package br.com.omnirent.rental.event;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.common.event.DomainEvent;
 
-public record RentalStatusChangedEvent(
+public record RentalInUseEvent(
 		String actorId,
 		String entityId,
 		RentalStatus oldStatus,
-		RentalStatus newStatus,	
+		LocalDateTime startDate,
+		LocalDateTime endDate,
 		Instant occurredAt
 		) implements DomainEvent {}

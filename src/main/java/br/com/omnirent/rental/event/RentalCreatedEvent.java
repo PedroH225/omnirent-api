@@ -1,4 +1,4 @@
-package br.com.omnirent.rental;
+package br.com.omnirent.rental.event;
 
 import java.time.Instant;
 

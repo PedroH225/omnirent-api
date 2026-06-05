@@ -19,7 +19,6 @@ import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
-import br.com.omnirent.rental.context.RentalStatusChangedEvent;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.domain.RentalAuthorizationService;
 import br.com.omnirent.rental.domain.RentalDateService;
@@ -28,6 +27,9 @@ import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.rental.dto.RentalRequestDTO;
+import br.com.omnirent.rental.event.RentalCreatedEvent;
+import br.com.omnirent.rental.event.RentalInUseEvent;
+import br.com.omnirent.rental.event.RentalStatusChangedEvent;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -158,7 +160,13 @@ public class RentalService {
 		
 		rentalRepository.updateRentalPeriodAndStatus(rentId, RentalStatus.IN_USE, startDate, endDateTime);
 		
-		return findRentalDisplayDTO(rentId);
+		RentalDisplayDTO rentalDto = findRentalDisplayDTO(rentId);
+		
+		eventPublisher.publish(new RentalInUseEvent(
+				currentUserId, rentalDto.getId(),
+				context.getRentalStatus(), startDate, endDateTime, Instant.now()));
+		
+		return rentalDto;
 	}
 
 	@Transactional
