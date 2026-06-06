@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import br.com.omnirent.common.enums.RentalEnums;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
-import br.com.omnirent.common.event.DomainEventPublisher;
+import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.RentalErrorType;
@@ -56,7 +56,7 @@ public class RentalService {
 	
 	private MessageService messageService;
 	
-	private DomainEventPublisher eventPublisher;
+	private SpringDomainEventPublisher eventPublisher;
 	
 	private void validateTransition(RentalStatus currStatus, RentalStatus targetStatus) {
 		if (!currStatus.canTransition(targetStatus)) {

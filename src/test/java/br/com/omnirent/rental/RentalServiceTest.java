@@ -25,7 +25,7 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
-import br.com.omnirent.common.event.DomainEventPublisher;
+import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.RentalErrorType;
 import br.com.omnirent.exception.domain.UserErrorType;
@@ -76,7 +76,7 @@ public class RentalServiceTest {
 	private CurrentUserProvider currentUserProvider;
 	
 	@Mock
-	private DomainEventPublisher eventPublisher;
+	private SpringDomainEventPublisher eventPublisher;
 	
 	private User owner;
 	private User renter;

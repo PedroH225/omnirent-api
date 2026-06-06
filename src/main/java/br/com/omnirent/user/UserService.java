@@ -9,13 +9,12 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.common.enums.UserStatus;
-import br.com.omnirent.common.event.DomainEventPublisher;
+import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.UserErrorType;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.context.ChangeUserStatusContext;
-import br.com.omnirent.user.context.UserAuditSnapshot;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
@@ -42,7 +41,7 @@ public class UserService {
 	
 	private UserAutorizationService autorizationService;
 	
-	private DomainEventPublisher eventPublisher;
+	private SpringDomainEventPublisher eventPublisher;
 		
 	public void requireExistence(String userId) {
 		if (!queryRepository.verifyUser(userId)) {

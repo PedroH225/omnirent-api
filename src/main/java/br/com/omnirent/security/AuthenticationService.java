@@ -15,8 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import br.com.omnirent.common.event.DomainEventPublisher;
-import br.com.omnirent.common.event.SecurityEventPublisher;
+import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.AuthenticationErrorType;
@@ -59,10 +58,7 @@ public class AuthenticationService implements UserDetailsService {
     private UserValidationService validationService;
     
     @Autowired
-    private DomainEventPublisher eventPublisher;
-    
-    @Autowired
-	private SecurityEventPublisher securityEventPublisher;
+	private SpringDomainEventPublisher eventPublisher;
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -86,7 +82,7 @@ public class AuthenticationService implements UserDetailsService {
              String ip = extractIp(request);
              String userAgent = request.getHeader("User-Agent");
 
-             securityEventPublisher.publish(
+             eventPublisher.publish(
                      new UserLoggedInEvent(
                              user.getId(), ip, userAgent, true, Instant.now()));
             
