@@ -114,7 +114,7 @@ public class ItemService {
 		
 		eventPublisher.publish(new ItemCreatedEvent(
 				currentUserId, item.getId(), 
-				itemMapper.toAuditSnapshot(persistedItem), Instant.now()));
+				itemMapper.toAuditSnapshot(persistedItem)));
 		
 		return itemMapper.toCreatedDto(persistedItem);
 	}

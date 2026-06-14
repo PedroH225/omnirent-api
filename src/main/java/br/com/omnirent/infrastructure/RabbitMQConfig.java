@@ -43,4 +43,15 @@ public class RabbitMQConfig {
                 .to(domainExchange)
                 .with(IntegrationEventRouting.USER_STATUS_CHANGED.getKey());
     }
+    
+    @Bean
+    Binding newItemChangedBinding(
+            Queue emailQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(emailQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.NEW_ITEM.getKey());
+    }
 }

@@ -1,6 +1,7 @@
 package br.com.omnirent.email;
 
 import java.util.Locale;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,11 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.config.i18n.MessageService;
+import br.com.omnirent.exception.common.InfrastructureException;
+import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.security.event.UserRegisteredEvent;
+import br.com.omnirent.user.UserQueryRepository;
+import br.com.omnirent.user.context.UserNotificationData;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
 import ch.qos.logback.core.spi.ConfigurationEvent.EventType;
 
@@ -20,6 +25,9 @@ public class EmailService {
 	
 	@Autowired
 	private MessageService messageService;
+	
+	@Autowired
+	private UserQueryRepository queryRepository;
 	
 	private static final String OMNI_SITE = "https://omnirent.com";
 	
@@ -70,6 +78,28 @@ public class EmailService {
 				event.email(),
 				messageService.get(buildSubject(newStatus.getMessageKey() ), userLocale),
 				messageService.get(buildBody(newStatus.getMessageKey()), userLocale, username),
+				buildFooter(userLocale)
+				);
+
+		emailSender.send(message);
+	}
+	
+	public void sendNewItemEmail(ItemCreatedEvent event) {
+		String messageKey = "new_item";
+		UserNotificationData notificationData = 
+				queryRepository.findNotificationData(event.actorId())
+				.orElseThrow(() -> new InfrastructureException("Notification data not found."));
+	
+		Locale userLocale = Locale.forLanguageTag(notificationData.locale());
+		String username = 
+				resolveUsername(notificationData.username(), userLocale);
+		String email = notificationData.email();
+		String itemName = event.data().itemName();
+		
+		EmailMessage message = new EmailMessage(
+				email,
+				messageService.get(buildSubject(messageKey), userLocale),
+				messageService.get(buildBody(messageKey), userLocale, username, itemName),
 				buildFooter(userLocale)
 				);
 
