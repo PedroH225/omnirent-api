@@ -1,6 +1,7 @@
 package br.com.omnirent.security;
 
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,20 +98,24 @@ public class AuthenticationService implements UserDetailsService {
     	validationService.validateTakenFields(null, registerDto);
     	validationService.validatePasswordMatch(registerDto.password(), registerDto.repeatedPassword());
     	
+    	Locale userLocale = LocaleContextHolder.getLocale();
+    	
     	String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
         
-        User persistedUser = this.userRepository.save(fromRegisterDTO(registerDto, encryptedPassword));
+        User persistedUser = this.userRepository.save(
+        		fromRegisterDTO(registerDto, encryptedPassword, userLocale));
 		
         eventPublisher.publish(
 			    new UserRegisteredEvent(
 			        persistedUser.getId(),
 			        mapper.toAuditSnapshot(persistedUser),
-			        LocaleContextHolder.getLocale()));
+			        userLocale));
         
         return ResponseEntity.ok().build();
     }
     
-    private User fromRegisterDTO(RegisterDTO registerDTO, String encryptedPassword) {
+    private User fromRegisterDTO(RegisterDTO registerDTO, String encryptedPassword,
+    		Locale locale) {
         User user = new User();
 
         AuthMetadata authMetadata = new AuthMetadata();
@@ -123,6 +128,7 @@ public class AuthenticationService implements UserDetailsService {
         user.setEmail(registerDTO.email());
         user.setBirthDate(registerDTO.birthDate());
         user.setPassword(encryptedPassword);
+        user.setLocale(locale.toLanguageTag());
         
         return user;
     }

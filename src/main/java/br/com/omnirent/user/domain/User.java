@@ -46,6 +46,8 @@ public class User extends NamedEntity implements UserDetails {
 	@Enumerated(EnumType.STRING)
 	private UserStatus userStatus;
 	
+	private String locale;
+	
 	@OneToMany(mappedBy = "user")
 	private List<Address> addresses;
 	
