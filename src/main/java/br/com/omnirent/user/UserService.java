@@ -2,6 +2,7 @@ package br.com.omnirent.user;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -23,6 +24,7 @@ import br.com.omnirent.user.dto.UserResponseDTO;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
 import br.com.omnirent.user.event.UserUpdatedEvent;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -115,9 +117,10 @@ public class UserService {
 		
 		eventPublisher.publish(
 			    new UserStatusChangeEvent(
-			        userId, userId,
-			        newStatus, Instant.now()));	
-		}
+			        userId, userId, newStatus, context.email(),
+			        context.username(), Locale.forLanguageTag(context.locale())
+			        ));	
+	}
 	
 	public UserEnums getEnums() {
 		return userMapper.getLocalizedEnums();

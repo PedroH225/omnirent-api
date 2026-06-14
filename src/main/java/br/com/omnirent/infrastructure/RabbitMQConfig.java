@@ -7,6 +7,8 @@ import org.springframework.amqp.core.TopicExchange;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import br.com.omnirent.common.enums.IntegrationEventRouting;
+
 @Configuration
 public class RabbitMQConfig {
 
@@ -28,6 +30,17 @@ public class RabbitMQConfig {
         return BindingBuilder
                 .bind(emailQueue)
                 .to(domainExchange)
-                .with("user.registered");
+                .with(IntegrationEventRouting.USER_REGISTERED.getKey());
+    }
+    
+    @Bean
+    Binding userStatusChangedBinding(
+            Queue emailQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(emailQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.USER_STATUS_CHANGED.getKey());
     }
 }

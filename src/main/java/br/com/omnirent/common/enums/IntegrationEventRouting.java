@@ -2,6 +2,7 @@ package br.com.omnirent.common.enums;
 
 import br.com.omnirent.infrastructure.IntegrationEvent;
 import br.com.omnirent.security.event.UserRegisteredEvent;
+import br.com.omnirent.user.event.UserStatusChangeEvent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -9,7 +10,8 @@ import lombok.Getter;
 @Getter
 public enum IntegrationEventRouting {
 	
-	USER_REGISTERED(UserRegisteredEvent.class, "user.registered");
+	USER_REGISTERED(UserRegisteredEvent.class, "user.registered"),
+	USER_STATUS_CHANGED(UserStatusChangeEvent.class,  "user.status_changed");
 	
 	private Class<? extends IntegrationEvent> eventClass;
 	
