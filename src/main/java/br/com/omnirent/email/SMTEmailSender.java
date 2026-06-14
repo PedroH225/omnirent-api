@@ -23,8 +23,8 @@ public class SMTEmailSender implements EmailSender {
 		emailMessage.setFrom(emailProperties.from());
 		emailMessage.setTo(message.to());
 		emailMessage.setSubject(message.subject());
-		emailMessage.setText(message.body());
-
+		emailMessage.setText(message.body() + message.footer());
+		
 		try {
 			javaMailSender.send(emailMessage);
 		} catch (MailException e) {

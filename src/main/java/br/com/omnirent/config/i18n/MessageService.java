@@ -18,4 +18,8 @@ public class MessageService {
 		Locale locale = LocaleContextHolder.getLocale();
 		return messageSource.getMessage(key, args, locale);
 	}
+	
+	public String get(String key, Locale locale, Object... args) {
+		return messageSource.getMessage(key, args, locale);
+	}
 }

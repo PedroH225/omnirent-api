@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -104,7 +105,7 @@ public class AuthenticationService implements UserDetailsService {
 			    new UserRegisteredEvent(
 			        persistedUser.getId(),
 			        mapper.toAuditSnapshot(persistedUser),
-			        Instant.now()));
+			        LocaleContextHolder.getLocale()));
         
         return ResponseEntity.ok().build();
     }
