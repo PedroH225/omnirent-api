@@ -106,7 +106,7 @@ public class RentalService {
 		
 		eventPublisher.publish(
 				new RentalCreatedEvent(userId, persistedRental.getId(),
-						mapper.toAuditSnapshot(persistedRental), Instant.now()));
+						mapper.toAuditSnapshot(persistedRental)));
 		
 		return mapper.toCreatedDto(persistedRental);
 	}

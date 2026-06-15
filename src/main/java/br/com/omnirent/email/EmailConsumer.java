@@ -5,6 +5,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 import br.com.omnirent.item.event.ItemCreatedEvent;
+import br.com.omnirent.rental.event.RentalCreatedEvent;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 public class EmailConsumer {
 
     private final EmailService emailService;
+    
+    private final RentalEmailService rentalEmailService;
     
     @RabbitHandler
     public void handle(UserRegisteredEvent event) {
@@ -28,6 +31,11 @@ public class EmailConsumer {
     
     @RabbitHandler
     public void handle(ItemCreatedEvent event) {
-        emailService.sendNewItemEmail(event);;
+        emailService.sendNewItemEmail(event);
+    }
+    
+    @RabbitHandler
+    public void handle(RentalCreatedEvent event) {
+    	rentalEmailService.sendRentalCreatedToOwner(event);
     }
 }
