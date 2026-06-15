@@ -60,6 +60,16 @@ public class RentalEmailService {
 				"rental.return_requested.renter", notificationData, notificationData.renterData());
 	}
 	
+	public void sendRentalReturnShippedToOwner(RentalNotificationData notificationData) {
+		sendEmailToActor(
+				"rental.return_shipped.owner", notificationData, notificationData.ownerData());
+	}
+
+	public void sendRentalReturnShippedToRenter(RentalNotificationData notificationData) {
+		sendEmailToActor(
+				"rental.return_shipped.renter", notificationData, notificationData.renterData());
+	}
+	
 	private void sendEmailToActor(
 			String messageKey, RentalNotificationData rentalData, UserNotificationData targetUserData) {
 		Locale userLocale = Locale.forLanguageTag(targetUserData.locale());
