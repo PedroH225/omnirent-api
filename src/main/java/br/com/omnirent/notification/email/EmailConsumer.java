@@ -57,12 +57,16 @@ public class EmailConsumer {
     	RentalNotificationData notificationData =
     			queryRepository.findRentalNotificationData(event.entityId())
     			.orElseThrow(() -> new NotificationDataNotException());
+    	
     	if (newStatus == RentalStatus.CONFIRMED) {
         	rentalEmailService.sendRentalConfirmedToOwner(notificationData);
         	rentalEmailService.sendRentalConfirmedToRenter(notificationData);
 		}
-    	if (newStatus == RentalStatus.PREPARING) {
+    	else if (newStatus == RentalStatus.PREPARING) {
 			rentalEmailService.sendRentalPreparingToRenter(notificationData);
 		}
+    	else if (newStatus == RentalStatus.SHIPPED) {
+    		rentalEmailService.sendRentalShippedToRenter(notificationData);
+    	}
     }
 }
