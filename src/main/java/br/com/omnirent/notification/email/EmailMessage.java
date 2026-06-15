@@ -1,4 +1,4 @@
-package br.com.omnirent.email;
+package br.com.omnirent.notification.email;
 
 public record EmailMessage(
 		String to,

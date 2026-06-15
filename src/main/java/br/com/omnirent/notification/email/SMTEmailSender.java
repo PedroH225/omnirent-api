@@ -1,4 +1,4 @@
-package br.com.omnirent.email;
+package br.com.omnirent.notification.email;
 
 import java.io.UnsupportedEncodingException;
 
