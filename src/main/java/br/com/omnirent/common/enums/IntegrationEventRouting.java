@@ -3,6 +3,7 @@ package br.com.omnirent.common.enums;
 import br.com.omnirent.infrastructure.IntegrationEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
+import br.com.omnirent.rental.event.RentalStatusChangedEvent;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,7 @@ public enum IntegrationEventRouting {
 	USER_REGISTERED(UserRegisteredEvent.class, "user.registered"),
 	NEW_ITEM(ItemCreatedEvent.class, "item.created"),
 	RENTAL_CREATED(RentalCreatedEvent.class, "rental.created"),
+	RENTAL_STATUS_CHANGED(RentalStatusChangedEvent.class, "rental.status.changed"),
 	USER_STATUS_CHANGED(UserStatusChangeEvent.class,  "user.status_changed");
 	
 	private Class<? extends IntegrationEvent> eventClass;

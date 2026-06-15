@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.notification.context.RentalNotificationData;
+import br.com.omnirent.rental.event.RentalStatusChangedEvent;
 
 @Service
 public class RentalEmailService {
@@ -76,5 +77,22 @@ public class RentalEmailService {
 				);
 		
 		emailSender.send(message);	
+	}
+
+	public void sendRentalConfirmedToRenter(RentalNotificationData notificationData) {
+		String messageKey = "rental.confirmed.renter";
+		Locale userLocale = Locale.forLanguageTag(notificationData.renterLocale());
+		String username = 
+				resolveUsername(notificationData.renterUsername(), userLocale);
+		String itemName = notificationData.itemName();
+
+		EmailMessage message = new EmailMessage(
+				notificationData.renterEmail(),
+				messageService.get(buildSubject(messageKey), userLocale),
+				messageService.get(buildBody(messageKey), userLocale, username, itemName),
+				buildFooter(userLocale)
+				);
+		
+		emailSender.send(message);
 	}
 }

@@ -1,16 +1,16 @@
 package br.com.omnirent.notification.email;
 
-import java.util.Optional;
-
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.notification.JpaNotificationQueryRepository;
 import br.com.omnirent.notification.context.RentalNotificationData;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
+import br.com.omnirent.rental.event.RentalStatusChangedEvent;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
 import lombok.RequiredArgsConstructor;
@@ -49,5 +49,16 @@ public class EmailConsumer {
     	
     	rentalEmailService.sendRentalCreatedToOwner(notificationData);
     	rentalEmailService.sendRentalCreatedToUser (notificationData);
+    }
+    
+    @RabbitHandler
+    public void handle(RentalStatusChangedEvent event) {
+    	RentalStatus newStatus = event.newStatus();
+    	RentalNotificationData notificationData =
+    			queryRepository.findRentalNotificationData(event.entityId())
+    			.orElseThrow(() -> new NotificationDataNotException());
+    	if (newStatus == RentalStatus.CONFIRMED) {
+        	rentalEmailService.sendRentalConfirmedToRenter(notificationData);
+		}
     }
 }
