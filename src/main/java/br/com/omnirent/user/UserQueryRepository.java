@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 
 import br.com.omnirent.security.context.LoginContext;
 import br.com.omnirent.user.context.ChangeUserStatusContext;
-import br.com.omnirent.user.context.UserNotificationData;
 import br.com.omnirent.user.context.UserTakenContext;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
@@ -17,14 +16,6 @@ import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
 
 public interface UserQueryRepository extends Repository<User, String> {
-	
-	@Query("""
-			SELECT new br.com.omnirent.user.context.UserNotificationData(u.id, u.username,
-			u.email, u.locale)
-			FROM User u
-			WHERE u.id = :id
-			""")
-	Optional<UserNotificationData> findNotificationData(@Param("id")String userId);
 	
 	@Query("""
 			SELECT new br.com.omnirent.security.context.LoginContext(u.id, u.email, u.password,

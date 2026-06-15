@@ -1,4 +1,4 @@
-package br.com.omnirent.user.context;
+package br.com.omnirent.notification.context;
 
 public record UserNotificationData(
 	    String userId,

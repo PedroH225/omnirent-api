@@ -8,11 +8,13 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.config.i18n.MessageService;
+import br.com.omnirent.email.context.NotificationQueryRepository;
 import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
 import br.com.omnirent.item.event.ItemCreatedEvent;
+import br.com.omnirent.notification.JpaNotificationQueryRepository;
+import br.com.omnirent.notification.context.UserNotificationData;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.UserQueryRepository;
-import br.com.omnirent.user.context.UserNotificationData;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
 
 @Service
@@ -25,7 +27,7 @@ public class EmailService {
 	private MessageService messageService;
 	
 	@Autowired
-	private UserQueryRepository queryRepository;
+	private JpaNotificationQueryRepository queryRepository;
 	
 	private static final String OMNI_SITE = "https://omnirent.com";
 	
