@@ -37,6 +37,6 @@ public class EmailConsumer {
     @RabbitHandler
     public void handle(RentalCreatedEvent event) {
     	rentalEmailService.sendRentalCreatedToOwner(event);
-    	rentalEmailService.sendRentalCreatedToUser(event);
+    	rentalEmailService.sendRentalCreatedToUser (event);
     }
 }
