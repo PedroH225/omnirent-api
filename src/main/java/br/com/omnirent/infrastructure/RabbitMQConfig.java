@@ -76,4 +76,15 @@ public class RabbitMQConfig {
                 .to(domainExchange)
                 .with(IntegrationEventRouting.RENTAL_STATUS_CHANGED.getKey());
     }
+    
+    @Bean
+    Binding rentalInUseBinding(
+            Queue emailQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(emailQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.RENTAL_IN_USE.getKey());
+    }
 }

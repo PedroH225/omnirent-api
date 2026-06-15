@@ -8,8 +8,10 @@ import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.notification.JpaNotificationQueryRepository;
+import br.com.omnirent.notification.context.RentalInUseNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
+import br.com.omnirent.rental.event.RentalInUseEvent;
 import br.com.omnirent.rental.event.RentalStatusChangedEvent;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
@@ -52,6 +54,16 @@ public class EmailConsumer {
     }
     
     @RabbitHandler
+    public void handle(RentalInUseEvent event) {
+    	RentalInUseNotificationData notificationData =
+    			queryRepository.findRentalInUseNotificationData(event.entityId())
+    			.orElseThrow(() -> new NotificationDataNotException());
+
+    	rentalEmailService.sendRentalInUseToOwner(notificationData);
+    	rentalEmailService.sendRentalInUseToRenter(notificationData);
+    }
+    
+    @RabbitHandler
     public void handle(RentalStatusChangedEvent event) {
     	RentalStatus newStatus = event.newStatus();
     	RentalNotificationData notificationData =
@@ -75,6 +87,10 @@ public class EmailConsumer {
     	else if (newStatus == RentalStatus.RETURN_SHIPPED) {
     		rentalEmailService.sendRentalReturnShippedToOwner(notificationData);
 			rentalEmailService.sendRentalReturnShippedToRenter(notificationData);
+    	}
+    	else if(newStatus == RentalStatus.RETURNED) {
+    		rentalEmailService.sendRentalReturnedToOwner(notificationData);
+			rentalEmailService.sendRentalReturnedToRenter(notificationData);
     	}
     }
 }
