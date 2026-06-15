@@ -69,4 +69,27 @@ public class RentalEmailService {
 		
 		emailSender.send(message);
 	}
+
+	public void sendRentalCreatedToUser(RentalCreatedEvent event) {
+		String messageKey = "rental.created.renter";
+		UserNotificationData notificationData = 
+				queryRepository.findNotificationData(event.data().renterId())
+				.orElseThrow(() -> new NotificationDataNotException());
+
+		Locale userLocale = Locale.forLanguageTag(notificationData.locale());
+		String username = 
+				resolveUsername(notificationData.username(), userLocale);
+		String email = notificationData.email();
+		String itemName = event.data().item().itemName();
+
+		EmailMessage message = new EmailMessage(
+				email,
+				messageService.get(buildSubject(messageKey), userLocale),
+				messageService.get(buildBody(messageKey), userLocale, username, itemName),
+				buildFooter(userLocale)
+				);
+		
+		emailSender.send(message);
+		
+	}
 }
