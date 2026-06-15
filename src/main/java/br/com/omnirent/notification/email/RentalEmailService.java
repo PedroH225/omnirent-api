@@ -40,6 +40,11 @@ public class RentalEmailService {
 				"rental.confirmed.renter", notificationData, notificationData.renterData());
 	}
 	
+	public void sendRentalPreparingToRenter(RentalNotificationData notificationData) {
+		sendEmailToActor(
+				"rental.preparing.renter", notificationData, notificationData.renterData());
+	}
+	
 	private void sendEmailToActor(
 			String messageKey, RentalNotificationData rentalData, UserNotificationData targetUserData) {
 		Locale userLocale = Locale.forLanguageTag(targetUserData.locale());

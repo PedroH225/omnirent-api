@@ -61,5 +61,8 @@ public class EmailConsumer {
         	rentalEmailService.sendRentalConfirmedToOwner(notificationData);
         	rentalEmailService.sendRentalConfirmedToRenter(notificationData);
 		}
+    	if (newStatus == RentalStatus.PREPARING) {
+			rentalEmailService.sendRentalPreparingToRenter(notificationData);
+		}
     }
 }
