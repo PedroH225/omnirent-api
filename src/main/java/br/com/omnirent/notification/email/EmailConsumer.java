@@ -1,10 +1,15 @@
 package br.com.omnirent.notification.email;
 
+import java.util.Optional;
+
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
 import br.com.omnirent.item.event.ItemCreatedEvent;
+import br.com.omnirent.notification.JpaNotificationQueryRepository;
+import br.com.omnirent.notification.context.RentalNotificationData;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
@@ -18,6 +23,8 @@ public class EmailConsumer {
     private final EmailService emailService;
     
     private final RentalEmailService rentalEmailService;
+    
+    private final JpaNotificationQueryRepository queryRepository;
     
     @RabbitHandler
     public void handle(UserRegisteredEvent event) {
@@ -36,7 +43,11 @@ public class EmailConsumer {
     
     @RabbitHandler
     public void handle(RentalCreatedEvent event) {
-    	rentalEmailService.sendRentalCreatedToOwner(event);
-    	rentalEmailService.sendRentalCreatedToUser (event);
+    	RentalNotificationData notificationData =
+    			queryRepository.findRentalNotificationData(event.entityId())
+    			.orElseThrow(() -> new NotificationDataNotException());
+    	
+    	rentalEmailService.sendRentalCreatedToOwner(notificationData);
+    	rentalEmailService.sendRentalCreatedToUser (notificationData);
     }
 }

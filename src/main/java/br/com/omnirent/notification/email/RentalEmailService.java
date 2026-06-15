@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.config.i18n.MessageService;
-import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
-import br.com.omnirent.notification.JpaNotificationQueryRepository;
-import br.com.omnirent.notification.context.UserNotificationData;
-import br.com.omnirent.rental.event.RentalCreatedEvent;
+import br.com.omnirent.notification.context.RentalNotificationData;
 
 @Service
 public class RentalEmailService {
@@ -19,9 +16,6 @@ public class RentalEmailService {
 	
 	@Autowired
 	private MessageService messageService;
-	
-	@Autowired
-	private JpaNotificationQueryRepository queryRepository;
 	
 	private static final String OMNI_SITE = "https://omnirent.com";
 	
@@ -48,20 +42,16 @@ public class RentalEmailService {
 		return username;
 	}
 	
-	public void sendRentalCreatedToOwner(RentalCreatedEvent event) {
+	public void sendRentalCreatedToOwner(RentalNotificationData notificationData) {
 		String messageKey = "rental.created.owner";
-		UserNotificationData notificationData = 
-				queryRepository.findNotificationData(event.data().ownerId())
-				.orElseThrow(() -> new NotificationDataNotException());
 
-		Locale userLocale = Locale.forLanguageTag(notificationData.locale());
+		Locale userLocale = Locale.forLanguageTag(notificationData.ownerLocale());
 		String username = 
-				resolveUsername(notificationData.username(), userLocale);
-		String email = notificationData.email();
-		String itemName = event.data().item().itemName();
+				resolveUsername(notificationData.ownerUsername(), userLocale);
+		String itemName = notificationData.itemName();
 
 		EmailMessage message = new EmailMessage(
-				email,
+				notificationData.ownerEmail(),
 				messageService.get(buildSubject(messageKey), userLocale),
 				messageService.get(buildBody(messageKey), userLocale, username, itemName),
 				buildFooter(userLocale)
@@ -70,26 +60,21 @@ public class RentalEmailService {
 		emailSender.send(message);
 	}
 
-	public void sendRentalCreatedToUser(RentalCreatedEvent event) {
+	public void sendRentalCreatedToUser(RentalNotificationData notificationData) {
 		String messageKey = "rental.created.renter";
-		UserNotificationData notificationData = 
-				queryRepository.findNotificationData(event.data().renterId())
-				.orElseThrow(() -> new NotificationDataNotException());
 
-		Locale userLocale = Locale.forLanguageTag(notificationData.locale());
+		Locale userLocale = Locale.forLanguageTag(notificationData.renterLocale());
 		String username = 
-				resolveUsername(notificationData.username(), userLocale);
-		String email = notificationData.email();
-		String itemName = event.data().item().itemName();
+				resolveUsername(notificationData.renterUsername(), userLocale);
+		String itemName = notificationData.itemName();
 
 		EmailMessage message = new EmailMessage(
-				email,
+				notificationData.renterEmail(),
 				messageService.get(buildSubject(messageKey), userLocale),
 				messageService.get(buildBody(messageKey), userLocale, username, itemName),
 				buildFooter(userLocale)
 				);
 		
-		emailSender.send(message);
-		
+		emailSender.send(message);	
 	}
 }
