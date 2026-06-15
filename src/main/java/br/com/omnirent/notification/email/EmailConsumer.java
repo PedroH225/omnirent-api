@@ -68,5 +68,9 @@ public class EmailConsumer {
     	else if (newStatus == RentalStatus.SHIPPED) {
     		rentalEmailService.sendRentalShippedToRenter(notificationData);
     	}
+    	else if (newStatus == RentalStatus.RETURN_REQUESTED) {
+			rentalEmailService.sendRentalReturnRequestedToOwner(notificationData);
+			rentalEmailService.sendRentalReturnRequestedToRenter(notificationData);
+		}
     }
 }
