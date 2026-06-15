@@ -58,6 +58,7 @@ public class EmailConsumer {
     			queryRepository.findRentalNotificationData(event.entityId())
     			.orElseThrow(() -> new NotificationDataNotException());
     	if (newStatus == RentalStatus.CONFIRMED) {
+        	rentalEmailService.sendRentalConfirmedToOwner(notificationData);
         	rentalEmailService.sendRentalConfirmedToRenter(notificationData);
 		}
     }

@@ -29,6 +29,11 @@ public class RentalEmailService {
 		sendEmailToActor(
 				"rental.created.renter", notificationData, notificationData.renterData());
 	}
+	
+	public void sendRentalConfirmedToOwner(RentalNotificationData notificationData) {
+		sendEmailToActor(
+				"rental.confirmed.owner", notificationData, notificationData.ownerData());
+	}
 
 	public void sendRentalConfirmedToRenter(RentalNotificationData notificationData) {
 		sendEmailToActor(
