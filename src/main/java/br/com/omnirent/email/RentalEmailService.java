@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.config.i18n.MessageService;
-import br.com.omnirent.exception.common.InfrastructureException;
+import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
 import br.com.omnirent.user.UserQueryRepository;
 import br.com.omnirent.user.context.UserNotificationData;
@@ -52,7 +52,7 @@ public class RentalEmailService {
 		String messageKey = "rental.created.owner";
 		UserNotificationData notificationData = 
 				queryRepository.findNotificationData(event.data().ownerId())
-				.orElseThrow(() -> new InfrastructureException("Notification data not found."));
+				.orElseThrow(() -> new NotificationDataNotException());
 
 		Locale userLocale = Locale.forLanguageTag(notificationData.locale());
 		String username = 

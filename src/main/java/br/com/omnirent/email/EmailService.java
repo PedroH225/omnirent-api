@@ -1,7 +1,6 @@
 package br.com.omnirent.email;
 
 import java.util.Locale;
-import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +8,12 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.config.i18n.MessageService;
-import br.com.omnirent.exception.common.InfrastructureException;
+import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.UserQueryRepository;
 import br.com.omnirent.user.context.UserNotificationData;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
-import ch.qos.logback.core.spi.ConfigurationEvent.EventType;
 
 @Service
 public class EmailService {
@@ -88,7 +86,7 @@ public class EmailService {
 		String messageKey = "new_item";
 		UserNotificationData notificationData = 
 				queryRepository.findNotificationData(event.actorId())
-				.orElseThrow(() -> new InfrastructureException("Notification data not found."));
+				.orElseThrow(() -> new NotificationDataNotException());
 	
 		Locale userLocale = Locale.forLanguageTag(notificationData.locale());
 		String username = 
