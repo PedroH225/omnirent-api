@@ -113,32 +113,34 @@ public class RentalService {
 
 	@Transactional
 	public void startPreparing(String rentId) {
+		RentalStatus targetStatus = RentalStatus.PREPARING;
 		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
 		RentalStatus currStatus = context.getRentalStatus();
 		
 		authorizationService.requireOne(Set.of(context.getOwnerId()), currentUserId);
-		validateTransition(currStatus, RentalStatus.PREPARING);
+		validateTransition(currStatus, targetStatus);
 		
-		rentalRepository.updateRentalStatus(rentId, RentalStatus.PREPARING);
+		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
-		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), currStatus);
+		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), targetStatus);
 	}
 
 	@Transactional
 	public void ship(String rentId) {
+		RentalStatus targetStatus = RentalStatus.SHIPPED;
 		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
 		RentalStatus currStatus = context.getRentalStatus();
 		
 		authorizationService.requireOne(Set.of(context.getOwnerId()), currentUserId);
-		validateTransition(currStatus, RentalStatus.SHIPPED);
+		validateTransition(currStatus, targetStatus);
 		
-		rentalRepository.updateRentalStatus(rentId, RentalStatus.SHIPPED);
+		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
-		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), currStatus);
+		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), targetStatus);
 	}
 
 	@Transactional
@@ -171,35 +173,39 @@ public class RentalService {
 
 	@Transactional
 	public void requestReturn(String rentId) {
+		RentalStatus targetStatus = RentalStatus.RETURN_REQUESTED;
 		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
 		RentalStatus currStatus = context.getRentalStatus();
 		
 		authorizationService.requireOne(Set.of(context.getRenterId()), currentUserId);
-		validateTransition(currStatus, RentalStatus.RETURN_REQUESTED);
+		validateTransition(currStatus, targetStatus);
 		
-		rentalRepository.updateRentalStatus(rentId, RentalStatus.RETURN_REQUESTED);
+		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
-		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), currStatus);	}
+		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), targetStatus);
+	}
 	
 	@Transactional
 	public void markReturnShipped(String rentId) {
+		RentalStatus targetStatus = RentalStatus.RETURN_SHIPPED;
 		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
 		RentalStatus currStatus = context.getRentalStatus();
 		
 		authorizationService.requireOne(Set.of(context.getRenterId()), currentUserId);
-		validateTransition(currStatus, RentalStatus.RETURN_SHIPPED);
+		validateTransition(currStatus, targetStatus);
 		
-		rentalRepository.updateRentalStatus(rentId, RentalStatus.RETURN_SHIPPED);
+		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
-		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), currStatus);
+		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), targetStatus);
 	}
 	
 	@Transactional
 	public void markReturned(String rentId) {
+		RentalStatus targetStatus = RentalStatus.RETURNED;
 		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
@@ -207,15 +213,16 @@ public class RentalService {
 		
 		authorizationService.requireOne(Set.of(context.getOwnerId()), currentUserId);
 
-		validateTransition(currStatus, RentalStatus.RETURNED);
+		validateTransition(currStatus, targetStatus);
 		
-		rentalRepository.updateRentalStatus(rentId, RentalStatus.RETURNED);
+		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
-		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), currStatus);
+		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), targetStatus);
 	}
 
 	@Transactional
 	public void cancel(String rentId) {
+		RentalStatus targetStatus = RentalStatus.CANCELLED;
 		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
@@ -224,15 +231,16 @@ public class RentalService {
 		
 		authorizationService.requireOne(actors, currentUserId);
 		
-		validateTransition(currStatus, RentalStatus.CANCELLED);
+		validateTransition(currStatus, targetStatus);
 		
-		rentalRepository.updateRentalStatus(rentId, RentalStatus.CANCELLED);
+		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
-		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), currStatus);
+		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), targetStatus);
 	}
 
 	@Transactional
 	public void confirm(String rentId) {
+		RentalStatus targetStatus = RentalStatus.CONFIRMED;
 		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
@@ -241,11 +249,11 @@ public class RentalService {
 		
 		// TEMPORARY
 		authorizationService.requireOne(actors, currentUserId);
-		validateTransition(currStatus, RentalStatus.CONFIRMED);
+		validateTransition(currStatus, targetStatus);
 		
-		rentalRepository.updateRentalStatus(rentId, RentalStatus.CONFIRMED);
+		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
-		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), currStatus);
+		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), targetStatus);
 	}
 
 	public List<RentalDisplayDTO> findUserRented() {
