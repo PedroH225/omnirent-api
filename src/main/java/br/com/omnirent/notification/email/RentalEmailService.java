@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.notification.context.RentalNotificationData;
-import br.com.omnirent.rental.event.RentalStatusChangedEvent;
+import br.com.omnirent.notification.context.UserNotificationData;
 
 @Service
 public class RentalEmailService {
@@ -19,6 +19,38 @@ public class RentalEmailService {
 	private MessageService messageService;
 	
 	private static final String OMNI_SITE = "https://omnirent.com";
+	
+	public void sendRentalCreatedToOwner(RentalNotificationData notificationData) {
+		sendEmailToActor(
+				"rental.created.owner", notificationData, notificationData.ownerData());
+	}
+
+	public void sendRentalCreatedToRenter(RentalNotificationData notificationData) {
+		sendEmailToActor(
+				"rental.created.renter", notificationData, notificationData.renterData());
+	}
+
+	public void sendRentalConfirmedToRenter(RentalNotificationData notificationData) {
+		sendEmailToActor(
+				"rental.confirmed.renter", notificationData, notificationData.renterData());
+	}
+	
+	private void sendEmailToActor(
+			String messageKey, RentalNotificationData rentalData, UserNotificationData targetUserData) {
+		Locale userLocale = Locale.forLanguageTag(targetUserData.locale());
+		String username = 
+				resolveUsername(targetUserData.username(), userLocale);
+		String itemName = rentalData.itemName();
+
+		EmailMessage message = new EmailMessage(
+				targetUserData.email(),
+				messageService.get(buildSubject(messageKey), userLocale),
+				messageService.get(buildBody(messageKey), userLocale, username, itemName),
+				buildFooter(userLocale)
+				);
+		
+		emailSender.send(message);
+	}
 	
 	private String buildBody(String messageKey) {
 		return "email.body." + messageKey;
@@ -41,58 +73,5 @@ public class RentalEmailService {
 			return messageService.get(buildTo("null.username"), locale);
 		}
 		return username;
-	}
-	
-	public void sendRentalCreatedToOwner(RentalNotificationData notificationData) {
-		String messageKey = "rental.created.owner";
-
-		Locale userLocale = Locale.forLanguageTag(notificationData.ownerLocale());
-		String username = 
-				resolveUsername(notificationData.ownerUsername(), userLocale);
-		String itemName = notificationData.itemName();
-
-		EmailMessage message = new EmailMessage(
-				notificationData.ownerEmail(),
-				messageService.get(buildSubject(messageKey), userLocale),
-				messageService.get(buildBody(messageKey), userLocale, username, itemName),
-				buildFooter(userLocale)
-				);
-		
-		emailSender.send(message);
-	}
-
-	public void sendRentalCreatedToUser(RentalNotificationData notificationData) {
-		String messageKey = "rental.created.renter";
-
-		Locale userLocale = Locale.forLanguageTag(notificationData.renterLocale());
-		String username = 
-				resolveUsername(notificationData.renterUsername(), userLocale);
-		String itemName = notificationData.itemName();
-
-		EmailMessage message = new EmailMessage(
-				notificationData.renterEmail(),
-				messageService.get(buildSubject(messageKey), userLocale),
-				messageService.get(buildBody(messageKey), userLocale, username, itemName),
-				buildFooter(userLocale)
-				);
-		
-		emailSender.send(message);	
-	}
-
-	public void sendRentalConfirmedToRenter(RentalNotificationData notificationData) {
-		String messageKey = "rental.confirmed.renter";
-		Locale userLocale = Locale.forLanguageTag(notificationData.renterLocale());
-		String username = 
-				resolveUsername(notificationData.renterUsername(), userLocale);
-		String itemName = notificationData.itemName();
-
-		EmailMessage message = new EmailMessage(
-				notificationData.renterEmail(),
-				messageService.get(buildSubject(messageKey), userLocale),
-				messageService.get(buildBody(messageKey), userLocale, username, itemName),
-				buildFooter(userLocale)
-				);
-		
-		emailSender.send(message);
 	}
 }

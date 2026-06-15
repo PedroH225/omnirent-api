@@ -28,17 +28,33 @@ public class JpaNotificationQueryRepository implements NotificationQueryReposito
 	        .stream().findFirst();
 	}
 
-	@Override
 	public Optional<RentalNotificationData> findRentalNotificationData(String rentalId) {
-		return em.createQuery("""
-	        SELECT new br.com.omnirent.notification.context.RentalNotificationData(
-	            i.name, o.username, o.email, o.locale, u.username, u.email, u.locale)
+
+	    return em.createQuery("""
+	        
+	        SELECT i.name,
+	            u.id, u.username, u.email, u.locale,
+	            o.id, o.username, o.email, o.locale
 	        FROM Rental r
 	        JOIN r.itemSnapshot i JOIN r.owner o JOIN r.renter u
 	        WHERE r.id = :id
-	        """, RentalNotificationData.class)
+	        """, Object[].class)
 	        .setParameter("id", rentalId)
-	        .getResultList()
-	        .stream().findFirst();
+	        .getResultList().stream().findFirst()
+	        .map(result -> new RentalNotificationData(
+	                (String) result[0],
+	                toUserData(result, 1),
+	                toUserData(result, 5)
+	        ));
+	}
+	
+	private UserNotificationData toUserData(Object[] result, int offset) {
+	    return new UserNotificationData(
+	            (String) result[offset],
+	            (String) result[offset + 1],
+
+	            (String) result[offset + 2],
+	            (String) result[offset + 3]
+	    );
 	}
 }

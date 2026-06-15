@@ -48,7 +48,7 @@ public class EmailConsumer {
     			.orElseThrow(() -> new NotificationDataNotException());
     	
     	rentalEmailService.sendRentalCreatedToOwner(notificationData);
-    	rentalEmailService.sendRentalCreatedToUser (notificationData);
+    	rentalEmailService.sendRentalCreatedToRenter(notificationData);
     }
     
     @RabbitHandler
