@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 import br.com.omnirent.notification.context.RentalInUseNotificationData;
+import br.com.omnirent.notification.context.RentalLateNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
 import br.com.omnirent.notification.context.UserNotificationData;
 import jakarta.persistence.EntityManager;
@@ -53,7 +54,6 @@ public class JpaNotificationQueryRepository implements NotificationQueryReposito
 	
 	public Optional<RentalInUseNotificationData> findRentalInUseNotificationData(String rentalId) {
 	    return em.createQuery("""
-	        
 	        SELECT i.name,
 	            u.id, u.username, u.email, u.locale,
 	            o.id, o.username, o.email, o.locale,
@@ -71,6 +71,27 @@ public class JpaNotificationQueryRepository implements NotificationQueryReposito
 
 	                (LocalDateTime) result[9],
 	                (LocalDateTime) result[10]
+	        ));
+	}
+	
+	public Optional<RentalLateNotificationData> findRentalLateNotificationData(String rentalId) {
+	    return em.createQuery("""
+	        SELECT i.name,
+	            u.id, u.username, u.email, u.locale,
+	            o.id, o.username, o.email, o.locale,
+	            r.endDate
+	        FROM Rental r
+	        JOIN r.itemSnapshot i JOIN r.owner o JOIN r.renter u
+	        WHERE r.id = :id
+	        """, Object[].class)
+	        .setParameter("id", rentalId)
+	        .getResultList().stream().findFirst()
+	        .map(result -> new RentalLateNotificationData(
+	                (String) result[0],
+	                toUserData(result, 1),
+	                toUserData(result, 5),
+
+	                (LocalDateTime) result[9]
 	        ));
 	}
 	

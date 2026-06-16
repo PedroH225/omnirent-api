@@ -9,9 +9,11 @@ import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.notification.JpaNotificationQueryRepository;
 import br.com.omnirent.notification.context.RentalInUseNotificationData;
+import br.com.omnirent.notification.context.RentalLateNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
 import br.com.omnirent.rental.event.RentalInUseEvent;
+import br.com.omnirent.rental.event.RentalLateEvent;
 import br.com.omnirent.rental.event.RentalStatusChangedEvent;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
@@ -61,6 +63,16 @@ public class EmailConsumer {
 
     	rentalEmailService.sendRentalInUseToOwner(notificationData);
     	rentalEmailService.sendRentalInUseToRenter(notificationData);
+    }
+    
+    @RabbitHandler
+    public void handle(RentalLateEvent event) {
+    	RentalLateNotificationData notificationData =
+    			queryRepository.findRentalLateNotificationData(event.rentalId())
+    			.orElseThrow(() -> new NotificationDataNotException());
+    	
+    	rentalEmailService.sendRentalLateToOwner(notificationData);
+    	rentalEmailService.sendRentalLateToRenter(notificationData);
     }
     
     @RabbitHandler

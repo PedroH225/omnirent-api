@@ -4,6 +4,7 @@ import br.com.omnirent.infrastructure.IntegrationEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
 import br.com.omnirent.rental.event.RentalInUseEvent;
+import br.com.omnirent.rental.event.RentalLateEvent;
 import br.com.omnirent.rental.event.RentalStatusChangedEvent;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
@@ -19,6 +20,7 @@ public enum IntegrationEventRouting {
 	RENTAL_CREATED(RentalCreatedEvent.class, "rental.created"),
 	RENTAL_STATUS_CHANGED(RentalStatusChangedEvent.class, "rental.status.changed"),
 	RENTAL_IN_USE(RentalInUseEvent.class, "rental.status.in_use"),
+	RENTAL_LATE(RentalLateEvent.class, "rental.status.late"),
 	USER_STATUS_CHANGED(UserStatusChangeEvent.class,  "user.status_changed");
 	
 	private Class<? extends IntegrationEvent> eventClass;

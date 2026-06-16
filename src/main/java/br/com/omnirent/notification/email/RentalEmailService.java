@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.notification.context.RentalInUseNotificationData;
+import br.com.omnirent.notification.context.RentalLateNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
 import br.com.omnirent.notification.context.UserNotificationData;
 
@@ -96,6 +97,16 @@ public class RentalEmailService {
 				"rental.returned.renter", notificationData, notificationData.renterData());
 	}
 	
+	public void sendRentalLateToOwner(RentalLateNotificationData notificationData) {
+		sendRentalLateToActor(
+				"rental.late.owner", notificationData, notificationData.ownerData());
+	}
+
+	public void sendRentalLateToRenter(RentalLateNotificationData notificationData) {
+		sendRentalLateToActor(
+				"rental.late.renter", notificationData, notificationData.renterData());
+	}
+	
 	private void sendEmailToActor(
 			String messageKey, RentalNotificationData rentalData, UserNotificationData targetUserData) {
 		Locale userLocale = Locale.forLanguageTag(targetUserData.locale());
@@ -129,6 +140,26 @@ public class RentalEmailService {
 				targetUserData.email(),
 				messageService.get(buildSubject(messageKey), userLocale),
 				messageService.get(buildBody(messageKey), userLocale, username, itemName, startDate, endDate),
+				buildFooter(userLocale)
+				);
+		
+		emailSender.send(message);
+	}
+	
+	private void sendRentalLateToActor(
+			String messageKey, RentalLateNotificationData rentalData, UserNotificationData targetUserData) {
+		Locale userLocale = Locale.forLanguageTag(targetUserData.locale());
+		String username = 
+				resolveUsername(targetUserData.username(), userLocale);
+		String itemName = rentalData.itemName();
+		
+		String endDate =
+		        formatDateTime(rentalData.endDate(), userLocale);
+
+		EmailMessage message = new EmailMessage(
+				targetUserData.email(),
+				messageService.get(buildSubject(messageKey), userLocale),
+				messageService.get(buildBody(messageKey), userLocale, username, itemName, endDate),
 				buildFooter(userLocale)
 				);
 		
