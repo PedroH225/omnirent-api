@@ -2,6 +2,7 @@ package br.com.omnirent.notification.email;
 
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import br.com.omnirent.common.enums.RentalStatus;
@@ -19,9 +20,15 @@ import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
 import lombok.RequiredArgsConstructor;
 
+@ConditionalOnProperty(
+	    value = "app.mail.consumers.enabled",
+	    havingValue = "true",
+	    matchIfMissing = true
+	)
 @Component
 @RequiredArgsConstructor
 @RabbitListener(queues = "email.queue")
+
 public class EmailConsumer {
 
     private final EmailService emailService;
