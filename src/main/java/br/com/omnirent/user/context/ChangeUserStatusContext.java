@@ -4,5 +4,8 @@ import br.com.omnirent.common.enums.UserStatus;
 
 public record ChangeUserStatusContext(
 		String id,
-		UserStatus currentUserStatus
+		UserStatus currentUserStatus,
+		String email,
+		String username,
+		String locale
 		) {}

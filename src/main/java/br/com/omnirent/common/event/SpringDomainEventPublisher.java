@@ -7,18 +7,12 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class SpringDomainEventPublisher
-        implements DomainEventPublisher, SecurityEventPublisher {
+public class SpringDomainEventPublisher {
 
     private final ApplicationEventPublisher publisher;
 
-    @Override
-    public void publish(DomainEvent event) {
+    public void publish(Object event) {
         publisher.publishEvent(event);
     }
-    
-    @Override
-    public void publish(SecurityEvent event) {
-        publisher.publishEvent(event);
-    }
+   
 }

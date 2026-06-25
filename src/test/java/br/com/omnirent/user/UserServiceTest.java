@@ -2,6 +2,7 @@ package br.com.omnirent.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.CoreMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -19,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.common.enums.UserStatus;
-import br.com.omnirent.common.event.DomainEventPublisher;
+import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.UserErrorType;
@@ -56,7 +57,7 @@ public class UserServiceTest {
 	private UserAutorizationService autorizationService;
 	
 	@Mock
-	private DomainEventPublisher eventPublisher;
+	private SpringDomainEventPublisher eventPublisher;
 
 	@Test
 	void shouldThrowExceptionWhenUserDoesNotExist() {
@@ -210,6 +211,7 @@ public class UserServiceTest {
 		when(queryRepository.getUserStatusChangeContext(userId)).thenReturn(Optional.of(context));
 		when(context.currentUserStatus()).thenReturn(UserStatus.ACTIVE);
 		when(userRepository.updateUserStatus(userId, UserStatus.ACTIVE, UserStatus.INACTIVE)).thenReturn(1);
+		when(context.locale()).thenReturn("pt-BR");
 
 		userService.changeUserStatus();
 
@@ -226,7 +228,8 @@ public class UserServiceTest {
 		when(queryRepository.getUserStatusChangeContext(userId)).thenReturn(Optional.of(context));
 		when(context.currentUserStatus()).thenReturn(UserStatus.INACTIVE);
 		when(userRepository.updateUserStatus(userId, UserStatus.INACTIVE, UserStatus.ACTIVE)).thenReturn(1);
-
+		when(context.locale()).thenReturn("pt-BR");
+		
 		userService.changeUserStatus();
 
 		verify(autorizationService).requireNotBanned(UserStatus.INACTIVE);

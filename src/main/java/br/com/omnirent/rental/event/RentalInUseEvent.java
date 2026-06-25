@@ -6,7 +6,7 @@ import java.util.Map;
 
 import br.com.omnirent.common.audit.AuditableEvent;
 import br.com.omnirent.common.enums.RentalStatus;
-import br.com.omnirent.common.event.DomainEvent;
+import br.com.omnirent.infrastructure.IntegrationEvent;
 
 public record RentalInUseEvent(
 		String actorId,
@@ -15,7 +15,7 @@ public record RentalInUseEvent(
 		LocalDateTime startDate,
 		LocalDateTime endDate,
 		Instant occurredAt
-		) implements DomainEvent, AuditableEvent {
+		) implements AuditableEvent, IntegrationEvent {
 
 	@Override
 	public Object oldData() {

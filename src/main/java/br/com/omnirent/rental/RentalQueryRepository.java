@@ -1,5 +1,6 @@
 package br.com.omnirent.rental;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
+import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
@@ -64,4 +66,12 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 			WHERE r.id = :id
 			""")
 	 Optional<RentalStatusChangeContext> getStatusChangeContext(@Param("id")String rentalId);
+
+	@Query("""
+		    SELECT r.id
+		    FROM Rental r
+		    WHERE r.rentalStatus = :inUse
+		      AND r.endDate < CURRENT_TIMESTAMP
+		    """)
+		List<String> findLateRentals(@Param("inUse") RentalStatus inUse);
 }

@@ -12,7 +12,7 @@ import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.address.event.AddressAddedEvent;
 import br.com.omnirent.address.event.AddressDeletedEvent;
 import br.com.omnirent.address.event.AddressUpdatedEvent;
-import br.com.omnirent.common.event.DomainEventPublisher;
+import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.AddressErrorType;
 import br.com.omnirent.security.CurrentUserProvider;
@@ -31,7 +31,7 @@ public class AddressService {
 	
 	private CurrentUserProvider currentUserProvider;
 	
-	private DomainEventPublisher eventPublisher;
+	private SpringDomainEventPublisher eventPublisher;
 		
 	public Address findById(String id) {
 		return addressRepository.findById(id)

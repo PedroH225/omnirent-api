@@ -11,7 +11,7 @@ import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
-import br.com.omnirent.common.event.DomainEventPublisher;
+import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.ItemErrorType;
@@ -58,7 +58,7 @@ public class ItemService {
 	
 	private ItemMapper itemMapper;
 	
-	private DomainEventPublisher eventPublisher;
+	private SpringDomainEventPublisher eventPublisher;
 		
 	public ItemDetailDTO getItemById(String id) {
 		ItemDetailDTO result = queryRepository.findItemDetailDTO(id)
@@ -114,7 +114,7 @@ public class ItemService {
 		
 		eventPublisher.publish(new ItemCreatedEvent(
 				currentUserId, item.getId(), 
-				itemMapper.toAuditSnapshot(persistedItem), Instant.now()));
+				itemMapper.toAuditSnapshot(persistedItem)));
 		
 		return itemMapper.toCreatedDto(persistedItem);
 	}

@@ -26,7 +26,7 @@ import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
-import br.com.omnirent.common.event.DomainEventPublisher;
+import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.AddressErrorType;
 import br.com.omnirent.exception.domain.ItemErrorType;
@@ -84,7 +84,7 @@ public class ItemServiceTest {
 	private ItemMapper itemMapper;
 	
 	@Mock
-	private DomainEventPublisher eventPublisher;
+	private SpringDomainEventPublisher eventPublisher;
 	
 	private User owner;
 	private User owner2;

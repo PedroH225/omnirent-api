@@ -2,6 +2,7 @@ package br.com.omnirent.user;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -9,13 +10,12 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.common.enums.UserStatus;
-import br.com.omnirent.common.event.DomainEventPublisher;
+import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.UserErrorType;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.context.ChangeUserStatusContext;
-import br.com.omnirent.user.context.UserAuditSnapshot;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
@@ -24,6 +24,7 @@ import br.com.omnirent.user.dto.UserResponseDTO;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
 import br.com.omnirent.user.event.UserUpdatedEvent;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -42,7 +43,7 @@ public class UserService {
 	
 	private UserAutorizationService autorizationService;
 	
-	private DomainEventPublisher eventPublisher;
+	private SpringDomainEventPublisher eventPublisher;
 		
 	public void requireExistence(String userId) {
 		if (!queryRepository.verifyUser(userId)) {
@@ -116,9 +117,10 @@ public class UserService {
 		
 		eventPublisher.publish(
 			    new UserStatusChangeEvent(
-			        userId, userId,
-			        newStatus, Instant.now()));	
-		}
+			        userId, userId, newStatus, context.email(),
+			        context.username(), Locale.forLanguageTag(context.locale())
+			        ));	
+	}
 	
 	public UserEnums getEnums() {
 		return userMapper.getLocalizedEnums();

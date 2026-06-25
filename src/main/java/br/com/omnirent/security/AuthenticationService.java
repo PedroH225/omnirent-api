@@ -1,10 +1,12 @@
 package br.com.omnirent.security;
 
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,8 +17,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import br.com.omnirent.common.event.DomainEventPublisher;
-import br.com.omnirent.common.event.SecurityEventPublisher;
+import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.AuthenticationErrorType;
@@ -59,10 +60,7 @@ public class AuthenticationService implements UserDetailsService {
     private UserValidationService validationService;
     
     @Autowired
-    private DomainEventPublisher eventPublisher;
-    
-    @Autowired
-	private SecurityEventPublisher securityEventPublisher;
+	private SpringDomainEventPublisher eventPublisher;
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -86,7 +84,7 @@ public class AuthenticationService implements UserDetailsService {
              String ip = extractIp(request);
              String userAgent = request.getHeader("User-Agent");
 
-             securityEventPublisher.publish(
+             eventPublisher.publish(
                      new UserLoggedInEvent(
                              user.getId(), ip, userAgent, true, Instant.now()));
             
@@ -100,20 +98,24 @@ public class AuthenticationService implements UserDetailsService {
     	validationService.validateTakenFields(null, registerDto);
     	validationService.validatePasswordMatch(registerDto.password(), registerDto.repeatedPassword());
     	
+    	Locale userLocale = LocaleContextHolder.getLocale();
+    	
     	String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
         
-        User persistedUser = this.userRepository.save(fromRegisterDTO(registerDto, encryptedPassword));
+        User persistedUser = this.userRepository.save(
+        		fromRegisterDTO(registerDto, encryptedPassword, userLocale));
 		
         eventPublisher.publish(
 			    new UserRegisteredEvent(
 			        persistedUser.getId(),
 			        mapper.toAuditSnapshot(persistedUser),
-			        Instant.now()));
+			        userLocale));
         
         return ResponseEntity.ok().build();
     }
     
-    private User fromRegisterDTO(RegisterDTO registerDTO, String encryptedPassword) {
+    private User fromRegisterDTO(RegisterDTO registerDTO, String encryptedPassword,
+    		Locale locale) {
         User user = new User();
 
         AuthMetadata authMetadata = new AuthMetadata();
@@ -126,6 +128,7 @@ public class AuthenticationService implements UserDetailsService {
         user.setEmail(registerDTO.email());
         user.setBirthDate(registerDTO.birthDate());
         user.setPassword(encryptedPassword);
+        user.setLocale(locale.toLanguageTag());
         
         return user;
     }
