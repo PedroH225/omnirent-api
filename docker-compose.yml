@@ -23,6 +23,7 @@ services:
       rabbitmq:
        condition: service_healthy
     environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       OMNI_DB_HOST: db
       OMNI_DB: ${OMNI_DB}
       OMNI_DB_USER: ${OMNI_DB_USER}
@@ -33,6 +34,7 @@ services:
       MAIL_PORT: ${MAIL_PORT}
       OMNI_EMAIL_PASS: ${OMNI_EMAIL_PASS}
       MAIL_PROTOCOL: ${MAIL_PROTOCOL}
+      RABBITMQ_HOST: rabbitmq
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
     ports:
