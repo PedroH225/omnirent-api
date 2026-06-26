@@ -1,0 +1,2 @@
+DROP DATABASE IF EXISTS `ominirent-db`;
+CREATE DATABASE IF NOT EXISTS `omnirent-db`;
