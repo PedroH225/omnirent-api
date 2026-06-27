@@ -131,7 +131,7 @@ CREATE TABLE IF NOT EXISTS `rentals` (
   `final_price` DECIMAL(10,2) NOT NULL,
   `renter_id` CHAR(36) NOT NULL,
   `owner_id` CHAR(36) NOT NULL,
-  `created_at` DATETIME NOT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   INDEX `idx_rentals_renter` (`renter_id`),
