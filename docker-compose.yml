@@ -1,26 +1,68 @@
 services:
   db:
-    image: mysql:latest
-    container_name: omnirent-db
+    image: mysql:8.4
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${OMNI_DB_PASS}
       MYSQL_DATABASE: ${OMNI_DB}
-    ports:
-      - ${OMNI_DB_PORT}:${DOCKER_PORT}
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${OMNI_DB_PASS}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  backend:
+    build: .
+    restart: on-failure
+    depends_on:
+      db:
+       condition: service_healthy
+      rabbitmq:
+       condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      OMNI_DB_HOST: db
+      OMNI_DB: ${OMNI_DB}
+      OMNI_DB_USER: ${OMNI_DB_USER}
+      OMNI_DB_PASS: ${OMNI_DB_PASS}
+      TOKEN_PASS: ${TOKEN_PASS}
+      OMNI_EMAIL: ${OMNI_EMAIL}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      OMNI_EMAIL_PASS: ${OMNI_EMAIL_PASS}
+      MAIL_PROTOCOL: ${MAIL_PROTOCOL}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "8080:8080"
+    stdin_open: true
+    tty: true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: omnirent-rabbitmq
     restart: always
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-    ports:
-      - ${RABBITMQ_PORT}:5672
-      - ${RABBITMQ_MANAGEMENT_PORT}:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
 volumes:
   db_data:
+  rabbitmq_data:

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import br.com.omnirent.common.enums.IntegrationEventRouting;
 
 @Configuration
-public class RabbitMQConfig {
+public class RabbitBindingConfig {
 
     @Bean
     TopicExchange domainExchange() {
