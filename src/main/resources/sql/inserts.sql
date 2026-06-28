@@ -4,9 +4,9 @@ INSERT IGNORE INTO global_configurations (id, global_token_version) VALUES
 
 -- USERS
 INSERT IGNORE INTO users (id, name, username, email, password, birth_date, user_status, created_at, updated_at) VALUES
-('ab6c0937-17ac-434e-80dd-c8b581d55935','Pedro Alves','pedro','pedro@email.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1998-05-10','ACTIVE',NOW(),NOW()),
-('d101df10-ca1d-446a-a897-8ffed7950acb','Maria Costa','maria','maria@email.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1995-03-22','ACTIVE',NOW(),NOW()),
-('966fc885-5107-4466-aa9a-ab7366e56fab','Lucas Lima','lucas','lucas@email.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1992-11-01','ACTIVE',NOW(),NOW());
+('ab6c0937-17ac-434e-80dd-c8b581d55935','Pedro Alves','pedro','pedro@example.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1998-05-10','ACTIVE',NOW(),NOW()),
+('d101df10-ca1d-446a-a897-8ffed7950acb','Maria Costa','maria','maria@example.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1995-03-22','ACTIVE',NOW(),NOW()),
+('966fc885-5107-4466-aa9a-ab7366e56fab','Lucas Lima','lucas','lucas@example.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1992-11-01','ACTIVE',NOW(),NOW());
 
 -- CATEGORIES
 INSERT IGNORE INTO categories VALUES
@@ -40,9 +40,9 @@ INSERT IGNORE INTO items VALUES
 -- =========================
 -- RENTALS
 -- =========================
-INSERT IGNORE INTO rentals VALUES
-('5f54c279-9ad6-40c2-8a32-22216d48ca39','CREATED','DAILY','2026-03-10 10:00:00','2026-03-12 10:00:00',160.00,'d101df10-ca1d-446a-a897-8ffed7950acb','ab6c0937-17ac-434e-80dd-c8b581d55935',NOW(),NOW()),
-('b24fca5b-648a-44e2-ba89-2223d8ab57b0','CONFIRMED','DAILY','2026-02-01 09:00:00','2026-02-03 09:00:00',240.00,'ab6c0937-17ac-434e-80dd-c8b581d55935','d101df10-ca1d-446a-a897-8ffed7950acb',NOW(),NOW());
+INSERT IGNORE INTO rentals (id, rental_status, rental_period, final_price, renter_id, owner_id) VALUES
+('5f54c279-9ad6-40c2-8a32-22216d48ca39','CREATED','DAILY',160.00,'d101df10-ca1d-446a-a897-8ffed7950acb','ab6c0937-17ac-434e-80dd-c8b581d55935'),
+('b24fca5b-648a-44e2-ba89-2223d8ab57b0','CONFIRMED','DAILY',240.00,'ab6c0937-17ac-434e-80dd-c8b581d55935','d101df10-ca1d-446a-a897-8ffed7950acb');
 
 -- =========================
 -- ITEM SNAPSHOTS

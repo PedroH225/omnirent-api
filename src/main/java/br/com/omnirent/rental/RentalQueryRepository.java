@@ -1,6 +1,6 @@
 package br.com.omnirent.rental;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,4 +74,12 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 		      AND r.endDate < CURRENT_TIMESTAMP
 		    """)
 		List<String> findLateRentals(@Param("inUse") RentalStatus inUse);
+
+	@Query("""
+			SELECT new br.com.omnirent.rental.context.RentalStatusChangeContext
+			(r.id, r.ownerId, r.renterId, r.rentalStatus, r.rentalPeriod)
+		    FROM Rental r
+		    WHERE r.rentalStatus = :status AND r.updatedAt <= :threshold
+		    """)
+	List<RentalStatusChangeContext> findShippedAfterThreshold(RentalStatus status, Instant threshold);
 }

@@ -1,12 +1,7 @@
 package br.com.omnirent.address.dto;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import br.com.omnirent.address.domain.Address;
-import br.com.omnirent.address.domain.AddressData;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -32,15 +27,12 @@ public class AddressResponseDTO {
 
 	private String zipCode;
 	
-	private String createdAt;
+	private Instant createdAt;
 	
-	private String updatedAt;
-	
-	@JsonIgnore
-	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+	private Instant updatedAt;
 
 	public AddressResponseDTO(String id, String street, String number, String complement, String district, String city,
-			String state, String country, String zipCode, LocalDateTime createdAt, LocalDateTime updatedAt) {
+			String state, String country, String zipCode, Instant createdAt, Instant updatedAt) {
 		this.id = id;
 		this.street = street;
 		this.number = number;
@@ -51,8 +43,8 @@ public class AddressResponseDTO {
 		this.country = country;
 		this.zipCode = zipCode;
 		
-	    this.createdAt = dtf.format(createdAt);
-	    this.updatedAt = dtf.format(updatedAt);
+	    this.createdAt = createdAt;
+	    this.updatedAt = updatedAt;
 	}
 	
 }

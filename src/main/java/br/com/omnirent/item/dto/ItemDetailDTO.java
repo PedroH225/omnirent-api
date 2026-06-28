@@ -1,11 +1,10 @@
 package br.com.omnirent.item.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
@@ -43,16 +42,16 @@ public class ItemDetailDTO {
 	
 	private UserResponseDTO owner;
 	
-	private String createdAt;
+	private Instant createdAt;
 	
-	private String updatedAt;
+	private Instant updatedAt;
 	
 	@JsonIgnore
 	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
 	public ItemDetailDTO(String id, String name, String brand, String model, String description,
 			BigDecimal basePrice, ItemCondition itemCondition, ItemStatus itemStatus, SubCategoryResDTO subCategory,
-			AddressResponseDTO pickupAddress, UserResponseDTO owner, LocalDateTime createdAt, LocalDateTime updatedAt) {
+			AddressResponseDTO pickupAddress, UserResponseDTO owner, Instant createdAt, Instant updatedAt) {
 		this.id = id;
 		this.name = name;
 		this.brand = brand;
@@ -64,10 +63,7 @@ public class ItemDetailDTO {
 		this.subCategory = subCategory;
 		this.pickupAddress = pickupAddress;
 		this.owner = owner;
-		this.createdAt = dtf.format(createdAt);
-		this.updatedAt = dtf.format(updatedAt);
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
 	}
-
-	
-
 }

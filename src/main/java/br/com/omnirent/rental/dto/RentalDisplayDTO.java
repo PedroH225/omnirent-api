@@ -1,10 +1,7 @@
 package br.com.omnirent.rental.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.time.Instant;
 
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
@@ -15,9 +12,9 @@ public class RentalDisplayDTO {
 
 	private String id;
 	
-	private String startDate;
+	private Instant startDate;
 
-	private String endDate;
+	private Instant endDate;
 	
 	private BigDecimal finalPrice;
 	
@@ -41,14 +38,11 @@ public class RentalDisplayDTO {
 	
 	private String ownerName;
 	
-	private String createdAt;
-	
-	@JsonIgnore
-	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+	private Instant createdAt;
 
-	public RentalDisplayDTO(String id, LocalDateTime startDate, LocalDateTime endDate, BigDecimal finalPrice, RentalStatus rentalStatus,
+	public RentalDisplayDTO(String id, Instant startDate, Instant endDate, BigDecimal finalPrice, RentalStatus rentalStatus,
 			RentalPeriod rentalPeriod, String itemId, String itemName, String renterId, String renterName, String ownerId,
-			String ownerName, LocalDateTime createdAt) {
+			String ownerName, Instant createdAt) {
 		this.id = id;
 		this.finalPrice = finalPrice;
 		this.rentalStatus = rentalStatus;
@@ -60,9 +54,9 @@ public class RentalDisplayDTO {
 		this.ownerId = ownerId;
 		this.ownerName = ownerName;
 		
-		this.createdAt = dtf.format(createdAt);
-		this.startDate = startDate != null ? dtf.format(startDate) : null;
-		this.endDate = endDate != null ? dtf.format(endDate) : null; 
+		this.createdAt = createdAt;
+		this.startDate = startDate;
+		this.endDate = endDate; 
 	}
 	
 	

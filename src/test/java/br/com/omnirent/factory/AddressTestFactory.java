@@ -1,6 +1,6 @@
 package br.com.omnirent.factory;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import br.com.omnirent.address.context.AddressInfo;
 import br.com.omnirent.address.domain.Address;
@@ -36,8 +36,8 @@ public final class AddressTestFactory {
     public static Address forPersistedUser(User user) {
     	Address address = forUser(user);
     	address.setId(Sequence.nextString("addressId"));
-    	address.setCreatedAt(LocalDateTime.now());
-    	address.setUpdatedAt(LocalDateTime.now());
+    	address.setCreatedAt(Instant.now());
+    	address.setUpdatedAt(Instant.now());
     	return address;
     }
     

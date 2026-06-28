@@ -1,2 +1,3 @@
-DROP DATABASE IF EXISTS `ominirent-db`;
-CREATE DATABASE IF NOT EXISTS `omnirent-db`;
+DROP SCHEMA IF EXISTS `omnirent_db`;
+CREATE SCHEMA IF NOT EXISTS `omnirent_db`;
+USE `omnirent_db`;

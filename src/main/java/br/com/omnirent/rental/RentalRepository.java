@@ -1,6 +1,7 @@
 package br.com.omnirent.rental;
 
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public interface RentalRepository extends JpaRepository<Rental, String> {
 			WHERE r.id = :id
 			""")
 	void updateRentalPeriodAndStatus
-	(@Param("id")String rentalId, RentalStatus status, LocalDateTime startDate, LocalDateTime endDate);
+	(@Param("id")String rentalId, RentalStatus status, Instant startDate, Instant endDate);
 
 	@Modifying
 	@Query("""
@@ -42,5 +43,6 @@ public interface RentalRepository extends JpaRepository<Rental, String> {
 	void markLate(@Param("late")RentalStatus late, @Param("inUse")RentalStatus inUse);
 	
 	List<Rental> findByRentalStatusAndEndDateBefore
-	(RentalStatus rentalStatus, LocalDateTime endDate);
+	(RentalStatus rentalStatus, Instant endDate);
+
 }

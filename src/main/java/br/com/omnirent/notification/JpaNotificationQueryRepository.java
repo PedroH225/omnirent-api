@@ -1,7 +1,6 @@
 package br.com.omnirent.notification;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
@@ -69,8 +68,8 @@ public class JpaNotificationQueryRepository implements NotificationQueryReposito
 	                toUserData(result, 1),
 	                toUserData(result, 5),
 
-	                (LocalDateTime) result[9],
-	                (LocalDateTime) result[10]
+	                (Instant) result[9],
+	                (Instant) result[10]
 	        ));
 	}
 	
@@ -91,7 +90,7 @@ public class JpaNotificationQueryRepository implements NotificationQueryReposito
 	                toUserData(result, 1),
 	                toUserData(result, 5),
 
-	                (LocalDateTime) result[9]
+	                (Instant) result[9]
 	        ));
 	}
 	

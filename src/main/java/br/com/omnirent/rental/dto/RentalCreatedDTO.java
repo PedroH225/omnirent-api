@@ -1,10 +1,8 @@
 package br.com.omnirent.rental.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import br.com.omnirent.address.dto.AddressSnapshotDTO;
@@ -17,9 +15,9 @@ import lombok.Data;
 public class RentalCreatedDTO {
 private String id;
 	
-	private String startDate;
+	private Instant startDate;
 
-	private String endDate;
+	private Instant endDate;
 	
 	private BigDecimal finalPrice;
 	
@@ -37,10 +35,7 @@ private String id;
 	@JsonProperty("address")
 	private AddressSnapshotDTO addressSnapshot;
 	
-	@JsonIgnore
-	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm");
-	
-	public RentalCreatedDTO(String id, LocalDateTime startDate, LocalDateTime endDate, BigDecimal finalPrice, RentalStatus rentalStatus,
+	public RentalCreatedDTO(String id, Instant startDate, Instant endDate, BigDecimal finalPrice, RentalStatus rentalStatus,
 			RentalPeriod rentalPeriod, ItemSnapshotDTO itemSnapshot,
 			AddressSnapshotDTO addressSnapshot) {
 		this.id = id;
@@ -50,7 +45,7 @@ private String id;
 		this.itemSnapshot = itemSnapshot;
 		this.addressSnapshot = addressSnapshot;
 		
-		this.startDate = startDate != null ? dtf.format(startDate) : null;
-		this.endDate = endDate != null ? dtf.format(endDate) : null;
+		this.startDate = startDate;
+		this.endDate = endDate;
 	}
 }

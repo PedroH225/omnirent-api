@@ -1,9 +1,8 @@
 package br.com.omnirent.notification.email;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +22,9 @@ public class RentalEmailService {
 	
 	@Autowired
 	private MessageService messageService;
+	
+	@Autowired
+	private ZoneId zoneId;
 	
 	private static final String OMNI_SITE = "https://omnirent.com";
 	
@@ -189,16 +191,16 @@ public class RentalEmailService {
 		return username;
 	}
 	
-	private String formatDateTime(
-	        LocalDateTime dateTime,
-	        Locale locale) {
-
+	private String formatDateTime(Instant dateTime, Locale locale) {
 	    String pattern = locale.getLanguage().equals("pt")
 	            ? "dd/MM/yyyy 'às' HH:mm"
 	            : "MMM d, yyyy 'at' h:mm a";
 
-	    return dateTime.format(
-	            DateTimeFormatter.ofPattern(pattern, locale)
-	    );
+	    DateTimeFormatter formatter =
+	            DateTimeFormatter.ofPattern(pattern, locale);
+
+	    return dateTime
+	            .atZone(zoneId)
+	            .format(formatter);
 	}
 }

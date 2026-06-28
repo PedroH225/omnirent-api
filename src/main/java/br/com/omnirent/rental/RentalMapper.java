@@ -1,5 +1,6 @@
  package br.com.omnirent.rental;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -74,7 +75,7 @@ public class RentalMapper {
 		return rental;
 	}
 	
-	public static Rental setDates(Rental rental, LocalDateTime startDate, LocalDateTime endDate) {
+	public static Rental setDates(Rental rental, Instant startDate, Instant endDate) {
 		rental.setStartDate(startDate);
 		rental.setEndDate(endDate);
 		
