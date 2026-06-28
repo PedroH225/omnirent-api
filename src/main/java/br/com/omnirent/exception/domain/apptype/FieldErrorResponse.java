@@ -1,4 +1,4 @@
-package br.com.omnirent.exception.domain;
+package br.com.omnirent.exception.domain.apptype;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

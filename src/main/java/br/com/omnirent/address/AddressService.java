@@ -14,7 +14,7 @@ import br.com.omnirent.address.event.AddressDeletedEvent;
 import br.com.omnirent.address.event.AddressUpdatedEvent;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
-import br.com.omnirent.exception.domain.AddressErrorType;
+import br.com.omnirent.exception.domain.apptype.AddressErrorType;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import lombok.AllArgsConstructor;

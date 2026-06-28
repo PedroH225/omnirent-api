@@ -2,7 +2,7 @@ package br.com.omnirent.exception.common;
 
 import java.util.List;
 
-import br.com.omnirent.exception.domain.FieldErrorResponse;
+import br.com.omnirent.exception.domain.apptype.FieldErrorResponse;
 import lombok.Getter;
 
 @Getter

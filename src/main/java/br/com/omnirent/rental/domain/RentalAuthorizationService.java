@@ -5,7 +5,7 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.exception.common.ApiException;
-import br.com.omnirent.exception.domain.RentalErrorType;
+import br.com.omnirent.exception.domain.apptype.RentalErrorType;
 
 @Service
 public class RentalAuthorizationService {	

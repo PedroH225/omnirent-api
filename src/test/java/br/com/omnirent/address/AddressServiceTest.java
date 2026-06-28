@@ -23,7 +23,7 @@ import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
-import br.com.omnirent.exception.domain.UserErrorType;
+import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.security.CurrentUserProvider;

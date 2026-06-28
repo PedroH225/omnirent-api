@@ -1,4 +1,4 @@
-package br.com.omnirent.exception.domain;
+package br.com.omnirent.exception.domain.apptype;
 
 import org.springframework.http.HttpStatus;
 
@@ -6,9 +6,9 @@ import br.com.omnirent.exception.common.AppErrorType;
 import lombok.Getter;
 
 @Getter
-public enum CategoryErrorType implements AppErrorType {
+public enum ConcurrencyErrorType implements AppErrorType {
 
-    NOT_FOUND("NOT_FOUND", "CATEGORY_NOT_FOUND", "not_found", HttpStatus.NOT_FOUND);
+    OPTMISTIC_LOCK("OPTIMISTIC_LOCK", "OPTIMISTIC_LOCK", "optimistic_lock", HttpStatus.CONFLICT);
     	
     private String errorType;
 	
@@ -18,7 +18,7 @@ public enum CategoryErrorType implements AppErrorType {
 	
 	private HttpStatus httpCode;
 	
-	CategoryErrorType(String errorType, String errorCode, String messageKey,
+	ConcurrencyErrorType(String errorType, String errorCode, String messageKey,
 			HttpStatus httpCode) {
 		this.errorType = errorType;
 		this.errorCode = errorCode;
@@ -28,6 +28,6 @@ public enum CategoryErrorType implements AppErrorType {
 	
 	@Override
 	public String getMessageKey() {
-		return "error.category." + this.messageKey;
+		return "error.concurrency." + this.messageKey;
 	}
 }

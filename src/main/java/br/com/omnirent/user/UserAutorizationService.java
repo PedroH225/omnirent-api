@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.exception.common.ApiException;
-import br.com.omnirent.exception.domain.UserErrorType;
+import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor

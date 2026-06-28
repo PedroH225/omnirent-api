@@ -3,7 +3,7 @@ package br.com.omnirent.exception.common;
 import java.time.Instant;
 import java.util.List;
 
-import br.com.omnirent.exception.domain.FieldErrorResponse;
+import br.com.omnirent.exception.domain.apptype.FieldErrorResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
