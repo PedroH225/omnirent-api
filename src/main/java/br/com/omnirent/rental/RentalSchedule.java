@@ -1,7 +1,8 @@
 package br.com.omnirent.rental;
 
+import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,6 +26,8 @@ public class RentalSchedule {
 	private SpringDomainEventPublisher eventPublisher;
 	
 	private RentalService rentalService;
+	
+	private Clock clock;
 
 	@Transactional
 	@Scheduled(fixedRate = 30000)
@@ -43,11 +46,11 @@ public class RentalSchedule {
 	@Transactional
 	@Scheduled(fixedRate = 30000)
 	public void updateShippedRentals() {
-		Instant threshold = Instant.now().minusSeconds(10);
+		Instant threshold = ZonedDateTime.now(clock).minusHours(1).toInstant();
 		
 		List<RentalStatusChangeContext> shippedRentals = queryRepository
 				.findShippedAfterThreshold(RentalStatus.SHIPPED, threshold);
-		System.out.println(shippedRentals);
+
 		rentalService.markInUse(shippedRentals);
 		
 		List<RentalStatusChangeContext> returnShippedRentals = queryRepository
