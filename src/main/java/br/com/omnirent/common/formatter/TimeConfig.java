@@ -1,5 +1,6 @@
 package br.com.omnirent.common.formatter;
 
+import java.time.Clock;
 import java.time.ZoneId;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -15,5 +16,10 @@ public class TimeConfig {
     @Bean
     ZoneId zoneId() {
         return ZoneId.of(timezone);
+    }
+    
+    @Bean
+    Clock clock() {
+    	return Clock.systemUTC();
     }
 }

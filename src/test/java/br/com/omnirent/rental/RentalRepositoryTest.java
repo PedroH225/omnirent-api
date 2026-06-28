@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +30,7 @@ import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.config.CacheTestConfig;
+import br.com.omnirent.config.TestClockConfig;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
@@ -53,7 +56,10 @@ import jakarta.transaction.Transactional;
 @Transactional
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(CacheTestConfig.class)
+@Import({
+	CacheTestConfig.class, 
+	TestClockConfig.class
+	})
 public class RentalRepositoryTest extends IntegrationTest {
 
 	@Autowired
@@ -79,6 +85,9 @@ public class RentalRepositoryTest extends IntegrationTest {
 	
 	@Autowired
 	private EntityManager entityManager;
+	
+	@Autowired
+	private Clock clock;
 	
 	private User owner;
 	private User renter;
@@ -110,10 +119,11 @@ public class RentalRepositoryTest extends IntegrationTest {
         		"100", ItemCondition.USED));
         
         rental = rentalRepository.save(RentalTestFactory.create(item, owner, renter, ownerAddress,
-        		"300", RentalStatus.CREATED, RentalPeriod.MONTHLY, Instant.now(), Instant.now()));
+        		"300", RentalStatus.CREATED, RentalPeriod.MONTHLY, Instant.now(clock), Instant.now(clock)));
         
-        Instant lateStartDate = Instant.now().minusMillis(1000000);
-        Instant lateEndDate = Instant.now().minusMillis(1000000);
+        ZonedDateTime zonedDate = ZonedDateTime.now(clock);
+        Instant lateStartDate = zonedDate.minusDays(2).toInstant();
+        Instant lateEndDate = zonedDate.minusDays(1).toInstant();
         
         rental2 = rentalRepository.save(RentalTestFactory.create(item2, owner, renter, ownerAddress,
         		"300", RentalStatus.IN_USE, RentalPeriod.MONTHLY, lateStartDate, lateEndDate));
@@ -335,8 +345,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	@Test
 	void shouldUpdateRentalStatusAndPeriod() {
 		assertThat(rental.getRentalStatus()).isEqualTo(RentalStatus.CREATED);
-		Instant startDate = Instant.now();
-		Instant endDate = Instant.now();
+		Instant startDate = Instant.now(clock);
+		Instant endDate = Instant.now(clock);
 		
 		rentalRepository.updateRentalPeriodAndStatus(rental.getId(), RentalStatus.IN_USE,
 				startDate, endDate);

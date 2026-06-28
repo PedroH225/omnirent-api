@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -77,6 +78,9 @@ public class RentalServiceTest {
 	
 	@Mock
 	private SpringDomainEventPublisher eventPublisher;
+	
+	@Mock
+	private Clock clock;
 	
 	private User owner;
 	private User renter;

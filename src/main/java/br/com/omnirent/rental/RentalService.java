@@ -1,6 +1,7 @@
 package br.com.omnirent.rental;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +53,8 @@ public class RentalService {
 	private RentalMapper mapper;
 	
 	private RentalDateService rentalDateService;
+	
+	private Clock clock;
 	
 	private CurrentUserProvider currentUserProvider;
 	
@@ -156,7 +159,7 @@ public class RentalService {
 		authorizationService.requireOne(actors, currentUserId);
 		validateTransition(currStatus, RentalStatus.IN_USE);
 		
-		Instant startDate = Instant.now();
+		Instant startDate = Instant.now(clock);
 		Instant endDateTime = rentalDateService.
 				calculateEndDate(startDate, context.getRentalPeriod());
 		
@@ -173,18 +176,17 @@ public class RentalService {
 	
 	@Transactional
 	public void markInUse(List<RentalStatusChangeContext> shippedRentals) {
-		Instant startDate = Instant.now();			
+		Instant startDate = Instant.now(clock);			
 		for(RentalStatusChangeContext context : shippedRentals) {
 			Instant endDateTime = rentalDateService.
 					calculateEndDate(startDate, context.getRentalPeriod());
-
 			rentalRepository
 			.updateRentalPeriodAndStatus(context.getId(), RentalStatus.IN_USE,
 					startDate, endDateTime);
 			
 			eventPublisher.publish(new RentalInUseEvent(
 					"SYSTEM_SCHEDULER", context.getId(),
-					context.getRentalStatus(), startDate, endDateTime, Instant.now()));
+					context.getRentalStatus(), startDate, endDateTime, Instant.now(clock)));
 		}
 	}
 
@@ -298,7 +300,7 @@ public class RentalService {
 			String actorId, String entityId, RentalStatus oldStatus, RentalStatus newStatus) {
 		eventPublisher.publish(new RentalStatusChangedEvent(
 				actorId, entityId,
-				oldStatus, newStatus, Instant.now()));
+				oldStatus, newStatus, Instant.now(clock)));
 	}
 
 	public List<RentalDisplayDTO> findUserRentals() {
