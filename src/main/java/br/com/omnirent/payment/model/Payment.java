@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 import br.com.omnirent.common.enums.PaymentStatus;
+import br.com.omnirent.exception.infrastructure.InvalidPaymentStateTransitionException;
 import br.com.omnirent.rental.domain.Rental;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -45,7 +46,16 @@ public class Payment {
 	
 	private Instant paidAt;
 	
-//    public static Payment create() {
-//        return;
-//    }
+	private void transitionTo(PaymentStatus target) {
+	    if (!status.canTransition(target)) {
+	        throw new InvalidPaymentStateTransitionException(status, target);
+	    }
+
+	    this.status = target;
+	}
+	
+    public void markAsPaid(Instant paidAt) {
+    	transitionTo(PaymentStatus.PAID);
+        this.paidAt = paidAt;
+    }
 }
