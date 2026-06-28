@@ -145,6 +145,11 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+		    <groupId>com.stripe</groupId>
+		    <artifactId>stripe-java</artifactId>
+		    <version>28.1.0</version>
+		</dependency>   
 	</dependencies>
 
 	<build>
