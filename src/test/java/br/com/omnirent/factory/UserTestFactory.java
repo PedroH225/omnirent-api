@@ -1,7 +1,7 @@
 package br.com.omnirent.factory;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.user.domain.AuthMetadata;
@@ -42,16 +42,16 @@ public final class UserTestFactory {
     
     public static User persistedUser() {
     	User user = user();
-    	user.setCreatedAt(LocalDateTime.now());
-    	user.setUpdatedAt(LocalDateTime.now());
+    	user.setCreatedAt(Instant.now());
+    	user.setUpdatedAt(Instant.now());
     	user.setId(Sequence.nextString("userId"));
     	return user;
     }
     
     public static User persistedOwner() {
     	User user = user();
-    	user.setCreatedAt(LocalDateTime.now());
-    	user.setUpdatedAt(LocalDateTime.now());
+    	user.setCreatedAt(Instant.now());
+    	user.setUpdatedAt(Instant.now());
     	user.setId(Sequence.nextString("ownerId"));
     	return user;
     }

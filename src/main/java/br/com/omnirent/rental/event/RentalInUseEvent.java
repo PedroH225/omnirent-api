@@ -1,7 +1,6 @@
 package br.com.omnirent.rental.event;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Map;
 
 import br.com.omnirent.common.audit.AuditableEvent;
@@ -12,8 +11,8 @@ public record RentalInUseEvent(
 		String actorId,
 		String entityId,
 		RentalStatus oldStatus,
-		LocalDateTime startDate,
-		LocalDateTime endDate,
+		Instant startDate,
+		Instant endDate,
 		Instant occurredAt
 		) implements AuditableEvent, IntegrationEvent {
 

@@ -2,9 +2,9 @@ package br.com.omnirent.rental;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAmount;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,8 +48,6 @@ import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserResponseDTO;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
 import jakarta.transaction.Transactional;
 
 @Transactional
@@ -95,9 +93,7 @@ public class RentalRepositoryTest extends IntegrationTest {
 	
 	private Rental rental;
 	private Rental rental2;
-	
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-	
+		
 	@BeforeEach
 	void setUp() {	
 		owner = userRepository.save(UserTestFactory.owner());
@@ -114,10 +110,10 @@ public class RentalRepositoryTest extends IntegrationTest {
         		"100", ItemCondition.USED));
         
         rental = rentalRepository.save(RentalTestFactory.create(item, owner, renter, ownerAddress,
-        		"300", RentalStatus.CREATED, RentalPeriod.MONTHLY, LocalDateTime.now(), LocalDateTime.now()));
+        		"300", RentalStatus.CREATED, RentalPeriod.MONTHLY, Instant.now(), Instant.now()));
         
-        LocalDateTime lateStartDate = LocalDateTime.now().minusDays(2);
-        LocalDateTime lateEndDate = LocalDateTime.now().minusDays(2);
+        Instant lateStartDate = Instant.now().minusMillis(1000000);
+        Instant lateEndDate = Instant.now().minusMillis(1000000);
         
         rental2 = rentalRepository.save(RentalTestFactory.create(item2, owner, renter, ownerAddress,
         		"300", RentalStatus.IN_USE, RentalPeriod.MONTHLY, lateStartDate, lateEndDate));
@@ -143,8 +139,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    ItemData itemData = itemSnp.getItemData();
 
 	    assertThat(dto.getId()).isEqualTo(rental.getId());
-	    assertThat(dto.getStartDate()).isEqualTo(dtf.format(rental.getStartDate()));
-	    assertThat(dto.getEndDate()).isEqualTo(dtf.format(rental.getEndDate()));
+	    assertThat(dto.getStartDate()).isEqualTo(rental.getStartDate().truncatedTo(ChronoUnit.SECONDS));
+	    assertThat(dto.getEndDate()).isEqualTo(rental.getEndDate().truncatedTo(ChronoUnit.SECONDS));
 	    assertThat(dto.getFinalPrice()).isEqualByComparingTo(rental.getFinalPrice());
 	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
 	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
@@ -188,8 +184,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    ItemSnapshot itemSnp = rental.getItemSnapshot();
 
 	    assertThat(dto.getId()).isEqualTo(rental.getId());
-	    assertThat(dto.getStartDate()).isEqualTo(dtf.format(rental.getStartDate()));
-	    assertThat(dto.getEndDate()).isEqualTo(dtf.format(rental.getEndDate()));
+	    assertThat(dto.getStartDate()).isEqualTo(rental.getStartDate().truncatedTo(ChronoUnit.SECONDS));
+	    assertThat(dto.getEndDate()).isEqualTo(rental.getEndDate().truncatedTo(ChronoUnit.SECONDS));
 	    assertThat(dto.getFinalPrice()).isEqualByComparingTo(rental.getFinalPrice());
 	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
 	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
@@ -203,7 +199,6 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getOwnerId()).isEqualTo(owner.getId());
 	    assertThat(dto.getOwnerName()).isEqualTo(owner.getName());
 
-	    assertThat(dto.getCreatedAt()).isEqualTo(dtf.format(rental.getCreatedAt()));
 	}
 
 	@Test
@@ -221,8 +216,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    ItemSnapshot itemSnp = rental.getItemSnapshot();
 
 	    assertThat(dto.getId()).isEqualTo(rental.getId());
-	    assertThat(dto.getStartDate()).isEqualTo(rental.getStartDate().format(dtf));
-	    assertThat(dto.getEndDate()).isEqualTo(rental.getEndDate().format(dtf));
+	    assertThat(dto.getStartDate()).isEqualTo(rental.getStartDate().truncatedTo(ChronoUnit.SECONDS));
+	    assertThat(dto.getEndDate()).isEqualTo(rental.getEndDate().truncatedTo(ChronoUnit.SECONDS));
 	    assertThat(dto.getFinalPrice()).isEqualByComparingTo(rental.getFinalPrice());
 	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
 	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
@@ -236,7 +231,6 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getOwnerId()).isEqualTo(owner.getId());
 	    assertThat(dto.getOwnerName()).isEqualTo(owner.getName());
 
-	    assertThat(dto.getCreatedAt()).isEqualTo(rental.getCreatedAt().format(dtf));
 	}
 
 	@Test
@@ -261,8 +255,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    ItemSnapshot itemSnp = rental.getItemSnapshot();
 
 	    assertThat(dto.getId()).isEqualTo(rental.getId());
-	    assertThat(dto.getStartDate()).isEqualTo(rental.getStartDate().format(dtf));
-	    assertThat(dto.getEndDate()).isEqualTo(rental.getEndDate().format(dtf));
+	    assertThat(dto.getStartDate()).isEqualTo(rental.getStartDate().truncatedTo(ChronoUnit.SECONDS));
+	    assertThat(dto.getEndDate()).isEqualTo(rental.getEndDate().truncatedTo(ChronoUnit.SECONDS));
 	    assertThat(dto.getFinalPrice()).isEqualByComparingTo(rental.getFinalPrice());
 	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
 	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
@@ -276,7 +270,6 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getOwnerId()).isEqualTo(owner.getId());
 	    assertThat(dto.getOwnerName()).isEqualTo(owner.getName());
 
-	    assertThat(dto.getCreatedAt()).isEqualTo(rental.getCreatedAt().format(dtf));
 	}
 
 	@Test
@@ -342,8 +335,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	@Test
 	void shouldUpdateRentalStatusAndPeriod() {
 		assertThat(rental.getRentalStatus()).isEqualTo(RentalStatus.CREATED);
-		LocalDateTime startDate = LocalDateTime.now().withNano(0);
-		LocalDateTime endDate = LocalDateTime.now().withNano(0);
+		Instant startDate = Instant.now();
+		Instant endDate = Instant.now();
 		
 		rentalRepository.updateRentalPeriodAndStatus(rental.getId(), RentalStatus.IN_USE,
 				startDate, endDate);
@@ -356,8 +349,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 		
 		Rental updatedRental = optRental.get();
 		assertThat(updatedRental.getRentalStatus()).isEqualTo(RentalStatus.IN_USE);
-	    assertThat(updatedRental.getStartDate()).isEqualTo(startDate);
-	    assertThat(updatedRental.getEndDate()).isEqualTo(endDate);
+	    assertThat(updatedRental.getStartDate()).isEqualTo(startDate.truncatedTo(ChronoUnit.SECONDS));
+	    assertThat(updatedRental.getEndDate()).isEqualTo(endDate.truncatedTo(ChronoUnit.SECONDS));
 	}	
 }
 

@@ -1,7 +1,7 @@
 package br.com.omnirent.factory;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 
 import br.com.omnirent.address.context.AddressInfo;
@@ -60,8 +60,8 @@ public final class ItemTestFactory {
             String price, ItemCondition condition) {
     	Item item = create(owner, address, subCategory, price, condition);
     	item.setId(Sequence.nextString("itemId"));
-    	item.setCreatedAt(LocalDateTime.now());
-    	item.setUpdatedAt(LocalDateTime.now());
+    	item.setCreatedAt(Instant.now());
+    	item.setUpdatedAt(Instant.now());
     	if (owner.getItems() == null) {
 			owner.setItems(new ArrayList<Item>());
 		}
@@ -187,8 +187,8 @@ public final class ItemTestFactory {
     
     public static Item toPersisted(Item item) {
     	item.setId(Sequence.nextString("item-id"));
-    	item.setCreatedAt(LocalDateTime.now());
-    	item.setUpdatedAt(LocalDateTime.now());
+    	item.setCreatedAt(Instant.now());
+    	item.setUpdatedAt(Instant.now());
     	return item;
     }
     

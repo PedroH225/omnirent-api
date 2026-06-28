@@ -1,15 +1,15 @@
 package br.com.omnirent.rental;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
-import br.com.omnirent.rental.domain.Rental;
+import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.event.RentalLateEvent;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -23,6 +23,8 @@ public class RentalSchedule {
 	private RentalQueryRepository queryRepository;
 	
 	private SpringDomainEventPublisher eventPublisher;
+	
+	private RentalService rentalService;
 
 	@Transactional
 	@Scheduled(fixedRate = 30000)
@@ -36,5 +38,21 @@ public class RentalSchedule {
 			.map(RentalLateEvent::new)
 			.forEach(eventPublisher::publish);
 		}			
+	}
+	
+	@Transactional
+	@Scheduled(fixedRate = 30000)
+	public void updateShippedRentals() {
+		Instant threshold = Instant.now().minusSeconds(10);
+		
+		List<RentalStatusChangeContext> shippedRentals = queryRepository
+				.findShippedAfterThreshold(RentalStatus.SHIPPED, threshold);
+		System.out.println(shippedRentals);
+		rentalService.markInUse(shippedRentals);
+		
+		List<RentalStatusChangeContext> returnShippedRentals = queryRepository
+				.findShippedAfterThreshold(RentalStatus.RETURN_SHIPPED, threshold);
+		
+		rentalService.markReturned(returnShippedRentals);
 	}
 }

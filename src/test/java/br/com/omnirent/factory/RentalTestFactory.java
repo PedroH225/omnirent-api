@@ -1,7 +1,7 @@
 package br.com.omnirent.factory;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import br.com.omnirent.address.context.AddressInfo;
 import br.com.omnirent.address.domain.Address;
@@ -27,7 +27,7 @@ public final class RentalTestFactory {
 	private RentalTestFactory() {}
 	
 	public static Rental create(Item item, User owner, User renter, Address address,
-			String finalPrice, RentalStatus status, RentalPeriod period, LocalDateTime startDate, LocalDateTime endDate) {
+			String finalPrice, RentalStatus status, RentalPeriod period, Instant startDate, Instant endDate) {
 		Rental rental = new Rental();
 		ItemSnapshot itemSnapshot = new ItemSnapshot(item.getName(), item.getItemData().getBrand(),
 				item.getItemData().getModel(), item.getItemData().getDescription(),
@@ -80,20 +80,20 @@ public final class RentalTestFactory {
 	}
 	
 	public static Rental createPersisted(Item item, User owner, User renter, Address address,
-			String finalPrice, RentalStatus status, RentalPeriod period, LocalDateTime startDate, LocalDateTime endDate) {
+			String finalPrice, RentalStatus status, RentalPeriod period, Instant startDate, Instant endDate) {
 		Rental rental = create(item, owner, renter, address, finalPrice, status, period, startDate, endDate);
 		
 		rental.setId(Sequence.nextString("rentalId"));
-		rental.setCreatedAt(LocalDateTime.now());
-		rental.setUpdatedAt(LocalDateTime.now());
+		rental.setCreatedAt(Instant.now());
+		rental.setUpdatedAt(Instant.now());
 		
 		return rental;
 	}
 	
 	public static Rental toPersisted(Rental rental) {
 		rental.setId(Sequence.nextString("rentalId"));
-		rental.setCreatedAt(LocalDateTime.now());
-		rental.setUpdatedAt(LocalDateTime.now());
+		rental.setCreatedAt(Instant.now());
+		rental.setUpdatedAt(Instant.now());
 		
 		return rental;
 	}

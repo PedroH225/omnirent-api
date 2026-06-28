@@ -1,7 +1,7 @@
 package br.com.omnirent.rental.domain;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import br.com.omnirent.address.domain.AddressSnapshot;
 import br.com.omnirent.common.BaseEntity;
@@ -29,9 +29,9 @@ import lombok.EqualsAndHashCode;
 public class Rental extends BaseEntity {
 	private static final long serialVersionUID = 1L;
 
-	private LocalDateTime startDate;
+	private Instant startDate;
 
-	private LocalDateTime endDate;
+	private Instant endDate;
 	
 	private BigDecimal finalPrice;
 	

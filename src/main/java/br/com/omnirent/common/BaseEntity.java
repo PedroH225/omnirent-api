@@ -1,6 +1,7 @@
 package br.com.omnirent.common;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -32,21 +33,21 @@ public abstract class BaseEntity implements Serializable {
 	protected String id;
 	
 	@CreatedDate
-	protected LocalDateTime createdAt;
+	protected Instant createdAt;
 	
 	@LastModifiedDate
-	protected LocalDateTime updatedAt;
+	protected Instant updatedAt;
 
 	@PrePersist
 	protected void onPersist() {
-		LocalDateTime currentDateTime = LocalDateTime.now();
+		Instant currentDateTime = Instant.now();
 		setCreatedAt(currentDateTime);
 		setUpdatedAt(currentDateTime);
 	}
 	
 	@PreUpdate
 	protected void onUpdate() {
-		LocalDateTime currentDateTime = LocalDateTime.now();
+		Instant currentDateTime = Instant.now();
 		setUpdatedAt(currentDateTime);
 	}
 }
