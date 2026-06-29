@@ -14,10 +14,11 @@ import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.common.ApiException;
-import br.com.omnirent.exception.domain.RentalErrorType;
+import br.com.omnirent.exception.domain.apptype.RentalErrorType;
 import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.payment.event.PaymentRequestedEvent;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.domain.RentalAuthorizationService;
@@ -61,7 +62,7 @@ public class RentalService {
 	private MessageService messageService;
 	
 	private SpringDomainEventPublisher eventPublisher;
-	
+		
 	private void validateTransition(RentalStatus currStatus, RentalStatus targetStatus) {
 		if (!currStatus.canTransition(targetStatus)) {
 			throw new ApiException(RentalErrorType.ILLEGAL_STATE_TRANSITION,
@@ -89,6 +90,7 @@ public class RentalService {
 				.orElseThrow(() -> new ApiException(RentalErrorType.NOT_FOUND));
 	}
 
+	@Transactional
 	public RentalCreatedDTO addRent(RentalRequestDTO rentalRequestDTO) {
 		String userId = currentUserProvider.currentUserId();
 		User renter = userService.getValidReference(userId);
@@ -112,6 +114,9 @@ public class RentalService {
 				new RentalCreatedEvent(userId, persistedRental.getId(),
 						mapper.toAuditSnapshot(persistedRental)));
 		
+		eventPublisher.publish(
+				new PaymentRequestedEvent(rental.getId(), userId, finalPrice, "brl"));
+				
 		return mapper.toCreatedDto(persistedRental);
 	}
 
@@ -278,7 +283,6 @@ public class RentalService {
 		RentalStatus currStatus = context.getRentalStatus();
 		Set<String> actors = Set.of(context.getOwnerId(), context.getRenterId());
 		
-		// TEMPORARY
 		authorizationService.requireOne(actors, currentUserId);
 		validateTransition(currStatus, targetStatus);
 		

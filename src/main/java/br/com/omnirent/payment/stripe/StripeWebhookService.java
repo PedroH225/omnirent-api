@@ -1,46 +1,57 @@
 package br.com.omnirent.payment.stripe;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
 import com.stripe.net.Webhook;
-import com.stripe.model.checkout.Session;
 
+import br.com.omnirent.config.properties.StripeProperties;
 import br.com.omnirent.payment.PaymentService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StripeWebhookService {
 
-	@Value("${stripe.webhook.secret}")
-	private String endpointSecret;
-
-	private final PaymentService paymentService;
+    private final PaymentService paymentService;
+    
+    private final StripeProperties stripeProperties;
 
 	public void handle(String payload, String signature) {
 		try {
-			Event event = Webhook.constructEvent(payload, signature, endpointSecret);
-
-			switch (event.getType()) {
-
-			case "checkout.session.completed" -> handleCheckoutCompleted(event);
+			Event event = Webhook.constructEvent(
+					payload, signature, stripeProperties.webhookSecret());	
 			
-			default -> {}
-			}
+			if (event.getType().equals("checkout.session.completed")) {
+		        handleCheckoutCompleted(payload);
+		    }
+			
 		} catch (SignatureVerificationException e) {
-			e.printStackTrace();
+			log.error("""
+					Cause: {}
+					Message: {}
+					""", e.getCause(), e.getMessage());
 		}
 
 	}
 
-	private void handleCheckoutCompleted(Event event) {
-		Session session = (Session) event.getDataObjectDeserializer()
-				.getObject()
-				.orElseThrow();
+	private void handleCheckoutCompleted(String payload) {
+	    JsonObject root = JsonParser.parseString(payload).getAsJsonObject();
 
-		paymentService.confirmPayment(session.getId());
+	    JsonObject data = root
+	            .getAsJsonObject("data")
+	            .getAsJsonObject("object");
+
+	    String paymentId = data
+	            .getAsJsonObject("metadata")
+	            .get("payment_reference")
+	            .getAsString();
+
+	    paymentService.confirmPayment(paymentId);
 	}
 }

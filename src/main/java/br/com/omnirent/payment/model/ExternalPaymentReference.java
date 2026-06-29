@@ -16,5 +16,10 @@ public class ExternalPaymentReference {
 	@Enumerated(EnumType.STRING)
 	private PaymentProvider paymentProvider;
 	
-	private String externalPaymentId;	
+	private String externalPaymentId;
+
+	protected ExternalPaymentReference(PaymentProvider provider, String externalPaymentId) {
+		this.paymentProvider = provider;
+		this.externalPaymentId = externalPaymentId;
+	}
 }
