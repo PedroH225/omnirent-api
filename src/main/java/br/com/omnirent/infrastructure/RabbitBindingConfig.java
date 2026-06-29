@@ -21,6 +21,11 @@ public class RabbitBindingConfig {
     Queue emailQueue() {
         return new Queue("email.queue");
     }
+    
+    @Bean
+    Queue paymentQueue() {
+        return new Queue("payment.queue");
+    }
 
     @Bean
     Binding userRegisteredBinding(
@@ -64,6 +69,17 @@ public class RabbitBindingConfig {
                 .bind(emailQueue)
                 .to(domainExchange)
                 .with(IntegrationEventRouting.RENTAL_CREATED.getKey());
+    }
+    
+    @Bean
+    Binding paymentRequestedBinding(
+            Queue paymentQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(paymentQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.PAYMENT_REQUESTED.getKey());
     }
     
     @Bean

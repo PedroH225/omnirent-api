@@ -2,6 +2,7 @@ package br.com.omnirent.common.enums;
 
 import br.com.omnirent.infrastructure.IntegrationEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
+import br.com.omnirent.payment.event.PaymentRequestedEvent;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
 import br.com.omnirent.rental.event.RentalInUseEvent;
 import br.com.omnirent.rental.event.RentalLateEvent;
@@ -15,6 +16,7 @@ import lombok.Getter;
 @Getter
 public enum IntegrationEventRouting {
 	
+	PAYMENT_REQUESTED(PaymentRequestedEvent.class, "payment.requested"),
 	USER_REGISTERED(UserRegisteredEvent.class, "user.registered"),
 	NEW_ITEM(ItemCreatedEvent.class, "item.created"),
 	RENTAL_CREATED(RentalCreatedEvent.class, "rental.created"),

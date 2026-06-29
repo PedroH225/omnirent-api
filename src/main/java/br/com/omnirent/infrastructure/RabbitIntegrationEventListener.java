@@ -17,8 +17,8 @@ public class RabbitIntegrationEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handle(IntegrationEvent event) {
 
-        IntegrationEventRouting eventRouting =  IntegrationEventRouting.from(event);;
-        
+    	IntegrationEventRouting eventRouting =  IntegrationEventRouting.from(event);
+
         rabbitTemplate.convertAndSend(
         		"domain.exchange",
         		eventRouting.getKey(),
