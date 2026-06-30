@@ -1,6 +1,5 @@
 package br.com.omnirent.payment;
 
-import java.lang.System.Logger;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
@@ -8,13 +7,17 @@ import java.time.Instant;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.PaymentStatus;
+import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.config.properties.AppProperties;
+import br.com.omnirent.exception.domain.InvalidPaymentStateTransitionException;
+import br.com.omnirent.exception.domain.InvalidRentalStatusTransitionException;
+import br.com.omnirent.exception.domain.OptimisticLockException;
 import br.com.omnirent.payment.dto.StripeCheckoutSession;
 import br.com.omnirent.payment.enums.PaymentProvider;
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
 import br.com.omnirent.payment.model.Payment;
 import br.com.omnirent.payment.stripe.StripeService;
-import br.com.omnirent.rental.domain.Rental;
+import br.com.omnirent.rental.RentalService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +29,10 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    
+    private final PaymentQueryRepository queryRepository;
+    
+    private final RentalService rentalService;
     
     private final StripeService stripeService;
     
@@ -59,15 +66,41 @@ public class PaymentService {
         log.debug("Session URL: {}", session.url());;
     }
 
-    public void confirmPayment(String stripeSessionId) {
-    	Payment payment = paymentRepository
-                .findById(stripeSessionId)
-                .orElseThrow();
+    @Transactional
+    public void confirmPayment(String paymentId) {
+    	PaymentConfirmedContext context = queryRepository.
+    			findConfirmedContext(paymentId)
+    			.orElseThrow();
 
-        if (payment.getStatus() == PaymentStatus.PAID) {
+    	PaymentStatus currentStatus = context.status();
+    	PaymentStatus targetStatus = PaymentStatus.PAID;
+    	RentalStatus currentRentalStatus = context.rentalStatus();
+    	
+        if (currentStatus == targetStatus) {
             return;
         }
         
-        payment.markAsPaid(Instant.now(clock));
+        if (!currentRentalStatus.canTransition(RentalStatus.CONFIRMED)) {
+			throw new InvalidRentalStatusTransitionException(
+					currentRentalStatus, currentRentalStatus);
+		}
+        validatePaymentTransition(currentStatus, targetStatus);
+        
+        Instant paidAt = Instant.now(clock);
+        int updated = paymentRepository.confirmPayment
+        		(paymentId, PaymentStatus.PENDING, targetStatus, paidAt);
+        
+        if (updated == 0) {
+			throw new OptimisticLockException(
+					PaymentConfirmedContext.class.getSimpleName(), paymentId);
+		}
+        
+        rentalService.confirm(context.rentalId(), currentRentalStatus);
     }
+    
+	private void validatePaymentTransition(PaymentStatus currentStatus, PaymentStatus target) {
+	    if (!currentStatus.canTransition(target)) {
+	        throw new InvalidPaymentStateTransitionException(currentStatus, target);
+	    }
+	}
 }

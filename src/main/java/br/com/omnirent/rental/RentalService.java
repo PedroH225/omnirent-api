@@ -275,20 +275,12 @@ public class RentalService {
 	}
 
 	@Transactional
-	public void confirm(String rentId) {
+	public void confirm(String rentId, RentalStatus currentStatus) {
 		RentalStatus targetStatus = RentalStatus.CONFIRMED;
-		String currentUserId = currentUserProvider.currentUserId();
-		RentalStatusChangeContext context = getStatusChangeContext(rentId);
-		
-		RentalStatus currStatus = context.getRentalStatus();
-		Set<String> actors = Set.of(context.getOwnerId(), context.getRenterId());
-		
-		authorizationService.requireOne(actors, currentUserId);
-		validateTransition(currStatus, targetStatus);
 		
 		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
-		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), targetStatus);
+		publishDefaultTransition("SERVER_CONFIRMATION", rentId, currentStatus, targetStatus);
 	}
 
 	public List<RentalDisplayDTO> findUserRented() {

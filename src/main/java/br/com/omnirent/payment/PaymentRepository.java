@@ -1,13 +1,27 @@
 package br.com.omnirent.payment;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.payment.model.Payment;
 
 public interface PaymentRepository extends JpaRepository<Payment, String> {
 
     Optional<Payment> findByExternalReference_ExternalPaymentId(String externalPaymentId);
+
+    @Modifying
+    @Query("""
+    		UPDATE Payment p 
+    		SET p.status = :targetStatus, p.paidAt = :paidAt
+    		WHERE p.id = :id AND p.status = :pending
+    		""")
+	int confirmPayment(@Param("id")String paymentId, PaymentStatus pending,
+			PaymentStatus targetStatus, Instant paidAt);
 
 }
