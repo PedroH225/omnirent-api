@@ -28,6 +28,7 @@ import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.rental.dto.RentalRequestDTO;
+import br.com.omnirent.rental.event.RentalCanceledEvent;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
 import br.com.omnirent.rental.event.RentalInUseEvent;
 import br.com.omnirent.rental.event.RentalStatusChangedEvent;
@@ -271,7 +272,9 @@ public class RentalService {
 		
 		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
-		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), targetStatus);
+		eventPublisher.publish(new RentalCanceledEvent(
+				currentUserId, rentId, currStatus, 
+				targetStatus, Instant.now(clock)));		
 	}
 
 	@Transactional

@@ -94,6 +94,28 @@ public class RabbitBindingConfig {
     }
     
     @Bean
+    Binding rentalCanceledBinding(
+            Queue emailQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(emailQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.RENTAL_CANCELED.getKey());
+    }
+    
+    @Bean
+    Binding rentalCanceledPaymentBinding(
+            Queue paymentQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(paymentQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.RENTAL_CANCELED.getKey());
+    }
+
+    @Bean
     Binding rentalInUseBinding(
             Queue emailQueue,
             TopicExchange domainExchange

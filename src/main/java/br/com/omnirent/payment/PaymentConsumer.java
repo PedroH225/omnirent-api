@@ -6,7 +6,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
+import br.com.omnirent.rental.event.RentalCanceledEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @ConditionalOnProperty(
 	    value = "app.payment.consumers.enabled",
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 @RabbitListener(queues = "payment.queue")
+@Slf4j
 public class PaymentConsumer {
 
 	private final PaymentService paymentService;
@@ -24,4 +27,9 @@ public class PaymentConsumer {
 	public void handle(PaymentRequestedEvent event) {
 		paymentService.createPayment(event);
 	}
+    
+    @RabbitHandler
+    public void handle(RentalCanceledEvent event) {
+    	log.debug("Payment: canceled event recieved");
+    }
 }
