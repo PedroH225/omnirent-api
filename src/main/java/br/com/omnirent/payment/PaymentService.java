@@ -67,7 +67,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public void confirmPayment(String paymentId) {
+    public void confirmPayment(String paymentId, String paymentIntent) {
     	PaymentConfirmedContext context = queryRepository.
     			findConfirmedContext(paymentId)
     			.orElseThrow();
@@ -88,7 +88,7 @@ public class PaymentService {
         
         Instant paidAt = Instant.now(clock);
         int updated = paymentRepository.confirmPayment
-        		(paymentId, PaymentStatus.PENDING, targetStatus, paidAt);
+        		(paymentId, PaymentStatus.PENDING, paymentIntent, targetStatus, paidAt);
         
         if (updated == 0) {
 			throw new OptimisticLockException(

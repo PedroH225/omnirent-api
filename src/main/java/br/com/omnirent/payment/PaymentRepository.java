@@ -18,10 +18,10 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     @Modifying
     @Query("""
     		UPDATE Payment p 
-    		SET p.status = :targetStatus, p.paidAt = :paidAt
+    		SET p.status = :targetStatus, p.externalReference.paymentIntent = :paymentIntent, p.paidAt = :paidAt
     		WHERE p.id = :id AND p.status = :pending
     		""")
-	int confirmPayment(@Param("id")String paymentId, PaymentStatus pending,
-			PaymentStatus targetStatus, Instant paidAt);
+	int confirmPayment(@Param("id")String paymentId, PaymentStatus pending, 
+			String paymentIntent, PaymentStatus targetStatus, Instant paidAt);
 
 }

@@ -157,6 +157,7 @@ CREATE TABLE IF NOT EXISTS `payments`(
 	`id` CHAR(36) NOT NULL,
 	`payment_provider` VARCHAR(255),
 	`external_payment_id` VARCHAR(255),
+	`payment_intent` VARCHAR(255),
 	`amount` DECIMAL(10,2) NOT NULL,
 	`currency` VARCHAR(3) NOT NULL,
 	`status` VARCHAR(20) NOT NULL,

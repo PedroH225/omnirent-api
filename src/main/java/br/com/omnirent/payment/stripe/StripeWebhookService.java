@@ -51,7 +51,11 @@ public class StripeWebhookService {
 	            .getAsJsonObject("metadata")
 	            .get("payment_reference")
 	            .getAsString();
+	    
+	    String paymentIntent = data
+	            .get("payment_intent")
+	            .getAsString();
 
-	    paymentService.confirmPayment(paymentId);
+	    paymentService.confirmPayment(paymentId, paymentIntent);
 	}
 }

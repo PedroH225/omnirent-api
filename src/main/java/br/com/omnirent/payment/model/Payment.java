@@ -76,13 +76,14 @@ public class Payment {
 	    return payment;
 	}
 	
-	public void attachExternalReference(PaymentProvider provider, String externalPaymentId) {
+	public void attachExternalReference(
+			PaymentProvider provider, String externalPaymentId) {
 	    if (this.status != PaymentStatus.PENDING) {
 	        throw new PaymentReferenceAlreadyLockedException();
 	    }
 	    
 		this.externalReference = 
-	    		new ExternalPaymentReference(provider, externalPaymentId);
+	    		new ExternalPaymentReference(provider, externalPaymentId, null);
 	}
 	
     public void markAsPaid(Instant paidAt) {

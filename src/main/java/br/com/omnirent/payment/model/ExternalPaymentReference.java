@@ -17,9 +17,13 @@ public class ExternalPaymentReference {
 	private PaymentProvider paymentProvider;
 	
 	private String externalPaymentId;
+	
+	private String paymentIntent;
 
-	protected ExternalPaymentReference(PaymentProvider provider, String externalPaymentId) {
+	protected ExternalPaymentReference(
+			PaymentProvider provider, String externalPaymentId, String paymentIntent) {
 		this.paymentProvider = provider;
 		this.externalPaymentId = externalPaymentId;
+		this.paymentIntent = paymentIntent;
 	}
 }
