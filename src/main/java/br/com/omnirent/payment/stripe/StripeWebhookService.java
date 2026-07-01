@@ -31,6 +31,10 @@ public class StripeWebhookService {
 		        handleCheckoutCompleted(payload);
 		    }
 			
+			if (event.getType().equals("refund.updated")) {
+		        handleRefundCompleted(payload);
+		    }
+			
 		} catch (SignatureVerificationException e) {
 			log.error("""
 					Cause: {}
@@ -38,6 +42,21 @@ public class StripeWebhookService {
 					""", e.getCause(), e.getMessage());
 		}
 
+	}
+
+	private void handleRefundCompleted(String payload) {
+		JsonObject root = JsonParser.parseString(payload).getAsJsonObject();
+
+	    JsonObject data = root
+	            .getAsJsonObject("data")
+	            .getAsJsonObject("object");
+	    
+	    String paymentId = data
+	            .getAsJsonObject("metadata")
+	            .get("payment_reference")
+	            .getAsString();
+	    
+	    paymentService.refundPayment(paymentId);
 	}
 
 	private void handleCheckoutCompleted(String payload) {

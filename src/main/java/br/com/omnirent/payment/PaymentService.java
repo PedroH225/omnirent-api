@@ -131,7 +131,7 @@ public class PaymentService {
 		PaymentStatus currStatus = context.paymentStatus();
 		validatePaymentTransition(context.paymentStatus(), targetStatus);
 		
-		stripeService.requestRefund(context.paymentIntent());
+		stripeService.requestRefund(context.paymentId(), context.paymentIntent());
 		
 		int updated = paymentRepository.updateStatus(context.paymentId(), currStatus, targetStatus);
 
