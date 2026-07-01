@@ -3,7 +3,10 @@ package br.com.omnirent.payment.stripe;
 import org.springframework.stereotype.Service;
 
 import com.stripe.Stripe;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Refund;
 import com.stripe.model.checkout.Session;
+import com.stripe.param.RefundCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 
 import br.com.omnirent.config.properties.StripeProperties;
@@ -57,5 +60,17 @@ public class StripeService {
         } catch (Exception e) {
             throw new RuntimeException("Error creating Stripe checkout session", e);
         }
+    }
+    
+    public void requestRefund(String paymentIntentId) {
+        try {
+        RefundCreateParams params = RefundCreateParams.builder()
+                .setPaymentIntent(paymentIntentId)
+                .build();
+
+			Refund.create(params);
+		} catch (StripeException e) {
+			e.printStackTrace();
+		}
     }
 }

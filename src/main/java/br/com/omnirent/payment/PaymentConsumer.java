@@ -36,7 +36,7 @@ public class PaymentConsumer {
 			paymentService.cancelPayment(event.entityId());
     	}
     	if (oldStatus == RentalStatus.CONFIRMED) {
-			
+			paymentService.requestRefund(event.entityId());
 		}
     }
 }

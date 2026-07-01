@@ -28,8 +28,8 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     @Modifying
     @Query("""
     		UPDATE Payment p
-    		SET p.status = :cancelled
+    		SET p.status = :status
     		WHERE p.id = :paymentId AND p.status = :currStatus
     		""")
-    int	cancelPayment(String paymentId, PaymentStatus currStatus, PaymentStatus cancelled);
+    int	updateStatus(String paymentId, PaymentStatus currStatus, PaymentStatus status);
 }

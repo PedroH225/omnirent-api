@@ -103,6 +103,7 @@ public class PaymentService {
         rentalService.confirm(context.rentalId(), currentRentalStatus);
     }
     
+    @Transactional
 	public void cancelPayment(String rentalId) {
 		PaymentStatus targetStatus = PaymentStatus.CANCELLED;
 		PaymentCanceledContext context = queryRepository.findCanceledContext(rentalId)
@@ -112,14 +113,34 @@ public class PaymentService {
 		PaymentStatus currStatus = context.paymentStatus();
 		validatePaymentTransition(context.paymentStatus(), targetStatus);
 		
-		int updated = paymentRepository.cancelPayment(context.paymentId(), currStatus, targetStatus);
+		int updated = paymentRepository.updateStatus(context.paymentId(), currStatus, targetStatus);
         
 		if (updated == 0) {
 			throw new OptimisticLockException(
 					PaymentCanceledContext.class, rentalId);
 		}
 	}
-    
+	
+    @Transactional
+	public void requestRefund(String rentalId) {
+		PaymentStatus targetStatus = PaymentStatus.REFUND_REQUESTED;
+		PaymentCanceledContext context = queryRepository.findCanceledContext(rentalId)
+				.orElseThrow(() -> new PaymentNotFoundException(
+						"rentalId: " + rentalId)); 
+		
+		PaymentStatus currStatus = context.paymentStatus();
+		validatePaymentTransition(context.paymentStatus(), targetStatus);
+		
+		stripeService.requestRefund(context.paymentIntent());
+		
+		int updated = paymentRepository.updateStatus(context.paymentId(), currStatus, targetStatus);
+
+	    if (updated == 0) {
+			throw new OptimisticLockException(
+					PaymentCanceledContext.class, rentalId);
+	    }
+	}
+	
 	private void validatePaymentTransition(PaymentStatus currentStatus, PaymentStatus target) {
 	    if (!currentStatus.canTransition(target)) {
 	        throw new InvalidPaymentStateTransitionException(currentStatus, target);
