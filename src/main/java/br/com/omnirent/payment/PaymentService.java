@@ -113,11 +113,12 @@ public class PaymentService {
 		PaymentStatus currStatus = context.paymentStatus();
 		validatePaymentTransition(context.paymentStatus(), targetStatus);
 		
-		int updated = paymentRepository.updateStatus(context.paymentId(), currStatus, targetStatus);
+		String paymentId = context.paymentId();
+		int updated = paymentRepository.updateStatus(paymentId, currStatus, targetStatus);
         
 		if (updated == 0) {
 			throw new OptimisticLockException(
-					PaymentCanceledContext.class.getSimpleName(), rentalId);
+					PaymentCanceledContext.class.getSimpleName(), paymentId);
 		}
 	}
 	
@@ -131,16 +132,28 @@ public class PaymentService {
 		PaymentStatus currStatus = context.paymentStatus();
 		validatePaymentTransition(context.paymentStatus(), targetStatus);
 		
-		stripeService.requestRefund(context.paymentId(), context.paymentIntent());
+		String paymentId = context.paymentId();
+		stripeService.requestRefund(paymentId, context.paymentIntent());
 		
-		int updated = paymentRepository.updateStatus(context.paymentId(), currStatus, targetStatus);
+		int updated = paymentRepository.updateStatus(paymentId, currStatus, targetStatus);
 
 	    if (updated == 0) {
 			throw new OptimisticLockException(
-					"PaymentRefundRequested", rentalId);
+					"PaymentRefundRequested", paymentId);
 	    }
 	}
+    
+    @Transactional
+	public void refundPayment(String paymentId) {
+		PaymentStatus targetStatus = PaymentStatus.REFUNDED;
 
+		int updated = paymentRepository.updateStatus(paymentId, targetStatus);
+
+	    if (updated == 0) {
+			throw new OptimisticLockException(
+					"PaymentRefunded", paymentId);
+	    }
+	}
 	
 	private void validatePaymentTransition(PaymentStatus currentStatus, PaymentStatus target) {
 	    if (!currentStatus.canTransition(target)) {

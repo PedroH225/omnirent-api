@@ -62,10 +62,11 @@ public class StripeService {
         }
     }
     
-    public void requestRefund(String paymentIntentId) {
+    public void requestRefund(String paymentId, String paymentIntentId) {
         try {
         RefundCreateParams params = RefundCreateParams.builder()
                 .setPaymentIntent(paymentIntentId)
+                .putMetadata("payment_reference", paymentId)
                 .build();
 
 			Refund.create(params);

@@ -32,4 +32,12 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     		WHERE p.id = :paymentId AND p.status = :currStatus
     		""")
     int	updateStatus(String paymentId, PaymentStatus currStatus, PaymentStatus status);
+    
+    @Modifying
+    @Query("""
+    		UPDATE Payment p
+    		SET p.status = :status
+    		WHERE p.id = :paymentId
+    		""")
+    int updateStatus(String paymentId, PaymentStatus status);
 }
