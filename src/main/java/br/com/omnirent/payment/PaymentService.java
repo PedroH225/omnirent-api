@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.PaymentStatus;
@@ -15,6 +16,7 @@ import br.com.omnirent.exception.domain.OptimisticLockException;
 import br.com.omnirent.exception.domain.PaymentNotFoundException;
 import br.com.omnirent.payment.context.PaymentCanceledContext;
 import br.com.omnirent.payment.context.PaymentConfirmedContext;
+import br.com.omnirent.payment.dto.CheckoutCompletedDTO;
 import br.com.omnirent.payment.dto.StripeCheckoutSession;
 import br.com.omnirent.payment.enums.PaymentProvider;
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
@@ -36,6 +38,8 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     
     private final PaymentQueryRepository queryRepository;
+    
+    private final SimpMessagingTemplate simpMessagingTemplate;
     
     private final RentalService rentalService;
     
@@ -67,6 +71,11 @@ public class PaymentService {
         payment.attachExternalReference(PaymentProvider.STRIPE, session.sessionId());
         
         paymentRepository.save(payment);
+
+        simpMessagingTemplate.convertAndSend(
+        		"/topic/rental/payment/" + event.rentalId(), 
+        		new CheckoutCompletedDTO(
+        				event.rentalId(), session.url(), "CHECKOUT_CREATED"));
         
         log.debug("Session URL: {}", session.url());;
     }
