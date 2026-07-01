@@ -97,7 +97,7 @@ public class PaymentService {
         
         if (updated == 0) {
 			throw new OptimisticLockException(
-					PaymentConfirmedContext.class, paymentId);
+					PaymentConfirmedContext.class.getSimpleName(), paymentId);
 		}
         
         rentalService.confirm(context.rentalId(), currentRentalStatus);
@@ -117,7 +117,7 @@ public class PaymentService {
         
 		if (updated == 0) {
 			throw new OptimisticLockException(
-					PaymentCanceledContext.class, rentalId);
+					PaymentCanceledContext.class.getSimpleName(), rentalId);
 		}
 	}
 	
@@ -137,9 +137,10 @@ public class PaymentService {
 
 	    if (updated == 0) {
 			throw new OptimisticLockException(
-					PaymentCanceledContext.class, rentalId);
+					"PaymentRefundRequested", rentalId);
 	    }
 	}
+
 	
 	private void validatePaymentTransition(PaymentStatus currentStatus, PaymentStatus target) {
 	    if (!currentStatus.canTransition(target)) {
