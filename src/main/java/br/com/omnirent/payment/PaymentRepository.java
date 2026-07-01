@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import br.com.omnirent.common.enums.PaymentStatus;
+import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.payment.model.Payment;
 
 public interface PaymentRepository extends JpaRepository<Payment, String> {
@@ -24,4 +25,11 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
 	int confirmPayment(@Param("id")String paymentId, PaymentStatus pending, 
 			String paymentIntent, PaymentStatus targetStatus, Instant paidAt);
 
+    @Modifying
+    @Query("""
+    		UPDATE Payment p
+    		SET p.status = :cancelled
+    		WHERE p.id = :paymentId AND p.status = :currStatus
+    		""")
+    int	cancelPayment(String paymentId, PaymentStatus currStatus, PaymentStatus cancelled);
 }

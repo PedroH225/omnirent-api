@@ -262,7 +262,7 @@ public class RentalService {
 		RentalStatus targetStatus = RentalStatus.CANCELLED;
 		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
-		
+
 		RentalStatus currStatus = context.getRentalStatus();
 		Set<String> actors = Set.of(context.getOwnerId(), context.getRenterId());
 		

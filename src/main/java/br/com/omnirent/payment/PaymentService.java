@@ -12,12 +12,17 @@ import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.domain.InvalidPaymentStateTransitionException;
 import br.com.omnirent.exception.domain.InvalidRentalStatusTransitionException;
 import br.com.omnirent.exception.domain.OptimisticLockException;
+import br.com.omnirent.exception.domain.PaymentNotFoundException;
+import br.com.omnirent.payment.context.PaymentCanceledContext;
+import br.com.omnirent.payment.context.PaymentConfirmedContext;
 import br.com.omnirent.payment.dto.StripeCheckoutSession;
 import br.com.omnirent.payment.enums.PaymentProvider;
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
 import br.com.omnirent.payment.model.Payment;
 import br.com.omnirent.payment.stripe.StripeService;
 import br.com.omnirent.rental.RentalService;
+import br.com.omnirent.rental.domain.Rental;
+import br.com.omnirent.rental.event.RentalCanceledEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +75,7 @@ public class PaymentService {
     public void confirmPayment(String paymentId, String paymentIntent) {
     	PaymentConfirmedContext context = queryRepository.
     			findConfirmedContext(paymentId)
-    			.orElseThrow();
+    			.orElseThrow(() -> new PaymentNotFoundException(paymentId));
 
     	PaymentStatus currentStatus = context.status();
     	PaymentStatus targetStatus = PaymentStatus.PAID;
@@ -92,11 +97,28 @@ public class PaymentService {
         
         if (updated == 0) {
 			throw new OptimisticLockException(
-					PaymentConfirmedContext.class.getSimpleName(), paymentId);
+					PaymentConfirmedContext.class, paymentId);
 		}
         
         rentalService.confirm(context.rentalId(), currentRentalStatus);
     }
+    
+	public void cancelPayment(String rentalId) {
+		PaymentStatus targetStatus = PaymentStatus.CANCELLED;
+		PaymentCanceledContext context = queryRepository.findCanceledContext(rentalId)
+				.orElseThrow(() -> new PaymentNotFoundException(
+						"rentalId: " + rentalId)); 
+		
+		PaymentStatus currStatus = context.paymentStatus();
+		validatePaymentTransition(context.paymentStatus(), targetStatus);
+		
+		int updated = paymentRepository.cancelPayment(context.paymentId(), currStatus, targetStatus);
+        
+		if (updated == 0) {
+			throw new OptimisticLockException(
+					PaymentCanceledContext.class, rentalId);
+		}
+	}
     
 	private void validatePaymentTransition(PaymentStatus currentStatus, PaymentStatus target) {
 	    if (!currentStatus.canTransition(target)) {

@@ -5,6 +5,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
 import br.com.omnirent.rental.event.RentalCanceledEvent;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,12 @@ public class PaymentConsumer {
     
     @RabbitHandler
     public void handle(RentalCanceledEvent event) {
-    	log.debug("Payment: canceled event recieved");
+    	RentalStatus oldStatus = event.oldStatus();
+    	if (oldStatus == RentalStatus.CREATED) {
+			paymentService.cancelPayment(event.entityId());
+    	}
+    	if (oldStatus == RentalStatus.CONFIRMED) {
+			
+		}
     }
 }
