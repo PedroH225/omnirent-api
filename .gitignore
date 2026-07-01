@@ -38,3 +38,6 @@ build/
 ### Astah lock files ###
 *.asta.lock
 *.png.bak
+
+### Dev ###
+/scripts
