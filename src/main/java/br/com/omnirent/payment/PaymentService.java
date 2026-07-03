@@ -16,6 +16,7 @@ import br.com.omnirent.exception.domain.OptimisticLockException;
 import br.com.omnirent.exception.domain.PaymentNotFoundException;
 import br.com.omnirent.payment.context.PaymentCanceledContext;
 import br.com.omnirent.payment.context.PaymentConfirmedContext;
+import br.com.omnirent.payment.context.PaymentExpiredContext;
 import br.com.omnirent.payment.dto.CheckoutCompletedDTO;
 import br.com.omnirent.payment.dto.StripeCheckoutSession;
 import br.com.omnirent.payment.enums.PaymentProvider;
@@ -162,6 +163,25 @@ public class PaymentService {
 			throw new OptimisticLockException(
 					"PaymentRefunded", paymentId);
 	    }
+	}
+    
+    @Transactional
+	public void expirePayment(String paymentId) {
+		PaymentStatus targetStatus = PaymentStatus.EXPIRED;
+		PaymentExpiredContext context = queryRepository.findExpiredPayment(paymentId)
+				.orElseThrow(() -> new PaymentNotFoundException(paymentId));
+		
+		PaymentStatus currStatus = context.status();
+		validatePaymentTransition(currStatus, targetStatus);
+		
+		stripeService.expirePayment(context.sessionId());
+		
+		int updated = paymentRepository.updateStatus(paymentId, currStatus, targetStatus);
+		
+	    if (updated == 0) {
+			throw new OptimisticLockException(
+					PaymentExpiredContext.class.getSimpleName(), paymentId);
+	    }	
 	}
 	
 	private void validatePaymentTransition(PaymentStatus currentStatus, PaymentStatus target) {

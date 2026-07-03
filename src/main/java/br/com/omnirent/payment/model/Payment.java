@@ -5,6 +5,7 @@ import java.time.Instant;
 
 import com.stripe.model.PaymentMethod;
 
+import br.com.omnirent.common.BaseEntity;
 import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.exception.domain.InvalidPaymentStateTransitionException;
 import br.com.omnirent.exception.domain.PaymentReferenceAlreadyLockedException;
@@ -31,11 +32,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "payments")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Payment {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
-	private String id;
+public class Payment extends BaseEntity {
+	private static final long serialVersionUID = 1L;
 	
 	@ManyToOne
 	@JoinColumn(name = "rental_id", insertable=false, updatable=false)

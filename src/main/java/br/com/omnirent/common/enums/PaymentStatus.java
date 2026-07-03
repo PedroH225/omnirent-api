@@ -6,19 +6,17 @@ public enum PaymentStatus {
 	PENDING,
 	PAID,
 	FAILED,
+	EXPIRED,
 	CANCELLED,
 	REFUND_REQUESTED,
 	REFUNDED;
 	
-	private Set<PaymentStatus> allowedTransitions;
+	private Set<PaymentStatus> allowedTransitions = Set.of();
 	
 	static {
-		PENDING.allowedTransitions = Set.of(PAID, FAILED, CANCELLED);
+		PENDING.allowedTransitions = Set.of(PAID, FAILED, CANCELLED, EXPIRED);
 		PAID.allowedTransitions = Set.of(REFUND_REQUESTED);
-		FAILED.allowedTransitions = Set.of();
-		CANCELLED.allowedTransitions = Set.of();
-		REFUND_REQUESTED.allowedTransitions = Set.of();
-		REFUNDED.allowedTransitions = Set.of(REFUNDED);
+		REFUND_REQUESTED.allowedTransitions = Set.of(REFUNDED);
 	}
 	
 	public Set<PaymentStatus> getAllowedTransitions() {

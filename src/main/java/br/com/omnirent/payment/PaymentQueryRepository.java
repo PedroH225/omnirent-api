@@ -1,13 +1,17 @@
 package br.com.omnirent.payment;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
+import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.payment.context.PaymentCanceledContext;
 import br.com.omnirent.payment.context.PaymentConfirmedContext;
+import br.com.omnirent.payment.context.PaymentExpiredContext;
 import br.com.omnirent.payment.model.Payment;
 
 public interface PaymentQueryRepository extends Repository<Payment, String> {
@@ -29,4 +33,18 @@ public interface PaymentQueryRepository extends Repository<Payment, String> {
 	Optional<PaymentCanceledContext> findCanceledContext(String rentalId);
 
 	
+	@Query("""
+			SELECT p.id FROM Payment p
+			WHERE p.status = :pending AND p.createdAt <= :threshold
+			""")
+	List<String> findExpiredIds(
+			PaymentStatus pending, Instant threshold);
+	
+	@Query("""
+			SELECT new br.com.omnirent.payment.context.PaymentExpiredContext(
+			p.id, p.externalReference.externalPaymentId, p.status, p.rentalId)
+			FROM Payment p 
+			WHERE p.id = :id
+			""")
+	Optional<PaymentExpiredContext> findExpiredPayment(@Param("id")String paymentId); 
 }

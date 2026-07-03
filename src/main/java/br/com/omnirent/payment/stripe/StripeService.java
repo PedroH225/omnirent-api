@@ -4,8 +4,10 @@ import org.springframework.stereotype.Service;
 
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
+import com.stripe.model.PaymentIntent;
 import com.stripe.model.Refund;
 import com.stripe.model.checkout.Session;
+import com.stripe.param.PaymentIntentCancelParams;
 import com.stripe.param.RefundCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 
@@ -73,5 +75,18 @@ public class StripeService {
 		} catch (StripeException e) {
 			e.printStackTrace();
 		}
+    }
+    
+    public void expirePayment(String sessionId) {
+        try {
+            Session session = Session.retrieve(sessionId);
+
+            if ("open".equals(session.getStatus())) {
+                session.expire();
+            }
+
+        } catch (StripeException e) {
+            e.printStackTrace();
+        }
     }
 }

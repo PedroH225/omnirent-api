@@ -163,6 +163,8 @@ CREATE TABLE IF NOT EXISTS `payments`(
 	`status` VARCHAR(20) NOT NULL,
 	`rental_id` CHAR(36) NOT NULL,
 	`paid_at` TIMESTAMP,
+	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  	`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
    CONSTRAINT `fk_rentals_payment`
     FOREIGN KEY (`rental_id`)
     REFERENCES `rentals` (`id`)
