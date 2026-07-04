@@ -25,9 +25,10 @@ public class PaymentScheduler {
 	private final Clock clock;
 
 	@Transactional
-	@Scheduled(fixedRate = 10000)
+	@Scheduled(fixedRate = 30000)
 	public void markExpiredPayments() {
-		Instant threshold = ZonedDateTime.now(clock).minusSeconds(1).toInstant();
+		//Instant threshold = ZonedDateTime.now(clock).minusSeconds(1).toInstant();
+		Instant threshold = ZonedDateTime.now(clock).minusMinutes(30).toInstant();
 
 		List<String> expiredIds = 
 				queryRepository.findExpiredIds(PaymentStatus.PENDING, threshold);
