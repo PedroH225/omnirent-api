@@ -6,8 +6,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.payment.event.PaymentExpirationRequestEvent;
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
 import br.com.omnirent.rental.event.RentalCanceledEvent;
+import br.com.omnirent.rental.event.RentalExpiredEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,5 +40,10 @@ public class PaymentConsumer {
     	if (oldStatus == RentalStatus.CONFIRMED) {
 			paymentService.requestRefund(event.entityId());
 		}
+    }
+    
+    @RabbitHandler
+    public void handle(PaymentExpirationRequestEvent expirationRequest) {
+    	paymentService.expirePayment(expirationRequest.paymentId());
     }
 }

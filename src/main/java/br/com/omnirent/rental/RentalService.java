@@ -30,6 +30,7 @@ import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.rental.dto.RentalRequestDTO;
 import br.com.omnirent.rental.event.RentalCanceledEvent;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
+import br.com.omnirent.rental.event.RentalExpiredEvent;
 import br.com.omnirent.rental.event.RentalInUseEvent;
 import br.com.omnirent.rental.event.RentalStatusChangedEvent;
 import br.com.omnirent.security.CurrentUserProvider;
@@ -275,6 +276,21 @@ public class RentalService {
 		eventPublisher.publish(new RentalCanceledEvent(
 				currentUserId, rentId, currStatus, 
 				targetStatus, Instant.now(clock)));		
+	}
+	
+	@Transactional
+	public void expire(String rentId) {
+		RentalStatus targetStatus = RentalStatus.EXPIRED;
+		RentalStatusChangeContext context = getStatusChangeContext(rentId);
+		
+		RentalStatus currStatus = context.getRentalStatus();
+		validateTransition(currStatus, targetStatus);
+		
+		rentalRepository.updateRentalStatus(rentId, targetStatus);
+		
+		eventPublisher.publish(new RentalExpiredEvent(
+				"SERVER_EXPIRATION", rentId, currStatus, 
+				targetStatus, Instant.now(clock)));
 	}
 
 	@Transactional

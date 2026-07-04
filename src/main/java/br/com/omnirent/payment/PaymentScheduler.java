@@ -3,15 +3,14 @@ package br.com.omnirent.payment;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import br.com.omnirent.common.enums.PaymentStatus;
-import br.com.omnirent.payment.context.PaymentExpiredContext;
-import br.com.omnirent.rental.RentalService;
+import br.com.omnirent.common.event.SpringDomainEventPublisher;
+import br.com.omnirent.payment.event.PaymentExpirationRequestEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -19,8 +18,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PaymentScheduler {
 	
-	private final PaymentService paymentService;
-			
+	private final SpringDomainEventPublisher eventPublisher;
+	
 	private final PaymentQueryRepository queryRepository;
 	
 	private final Clock clock;
@@ -34,7 +33,7 @@ public class PaymentScheduler {
 				queryRepository.findExpiredIds(PaymentStatus.PENDING, threshold);
 		
 		for (String id : expiredIds) {
-			paymentService.expirePayment(id);
+			eventPublisher.publish(new PaymentExpirationRequestEvent(id));
 		}
 	}
 }

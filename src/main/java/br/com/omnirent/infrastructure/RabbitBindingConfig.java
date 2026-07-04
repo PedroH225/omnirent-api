@@ -83,6 +83,17 @@ public class RabbitBindingConfig {
     }
     
     @Bean
+    Binding paymentExpirationRequestedBinding(
+            Queue paymentQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(paymentQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.PAYMENT_EXPIRATION.getKey());
+    }
+    
+    @Bean
     Binding rentalStatusChangeBinding(
             Queue emailQueue,
             TopicExchange domainExchange
@@ -124,6 +135,17 @@ public class RabbitBindingConfig {
                 .bind(emailQueue)
                 .to(domainExchange)
                 .with(IntegrationEventRouting.RENTAL_IN_USE.getKey());
+    }
+    
+    @Bean
+    Binding rentalExpiredBinding(
+            Queue emailQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(emailQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.RENTAL_EXPIRED.getKey());
     }
     
     @Bean

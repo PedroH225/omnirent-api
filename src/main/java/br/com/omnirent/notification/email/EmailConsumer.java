@@ -14,6 +14,7 @@ import br.com.omnirent.notification.context.RentalLateNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
 import br.com.omnirent.rental.event.RentalCanceledEvent;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
+import br.com.omnirent.rental.event.RentalExpiredEvent;
 import br.com.omnirent.rental.event.RentalInUseEvent;
 import br.com.omnirent.rental.event.RentalLateEvent;
 import br.com.omnirent.rental.event.RentalStatusChangedEvent;
@@ -87,6 +88,11 @@ public class EmailConsumer {
     @RabbitHandler
     public void handle(RentalCanceledEvent event) {
     	log.debug("Email: canceled event recieved");
+    }
+    
+    @RabbitHandler
+    public void handle(RentalExpiredEvent event) {
+    	log.debug("Email: expired event recieved");
     }
     
     @RabbitHandler

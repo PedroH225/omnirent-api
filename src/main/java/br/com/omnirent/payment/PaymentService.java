@@ -181,7 +181,8 @@ public class PaymentService {
 	    if (updated == 0) {
 			throw new OptimisticLockException(
 					PaymentExpiredContext.class.getSimpleName(), paymentId);
-	    }	
+	    }
+	    rentalService.expire(context.rentalId());
 	}
 	
 	private void validatePaymentTransition(PaymentStatus currentStatus, PaymentStatus target) {
