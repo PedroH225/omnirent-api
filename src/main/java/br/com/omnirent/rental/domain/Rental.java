@@ -61,11 +61,15 @@ public class Rental extends BaseEntity {
 	@OneToOne(mappedBy = "rental", cascade = CascadeType.ALL, orphanRemoval = true)
 	private ItemSnapshot itemSnapshot;
 	
+	private String itemId;
+	
 	@OneToOne(mappedBy = "rental", cascade = CascadeType.ALL, orphanRemoval = true)
 	private AddressSnapshot addressSnapshot;
 	
 	@OneToMany(mappedBy = "rental")
 	private List<Payment> payments;
+	
+	private Instant expiredAt;
 	
 	public void assignOwner(User owner) {
 		this.owner = owner;

@@ -96,10 +96,12 @@ public class RentalService {
 	public RentalCreatedDTO addRent(RentalRequestDTO rentalRequestDTO) {
 		String userId = currentUserProvider.currentUserId();
 		User renter = userService.getValidReference(userId);
-		
+				
 		ItemRentedContext context = itemService.getItemRentedContext(rentalRequestDTO.itemId());
 				
 		ItemInfo itemInfo = context.getItemInfo();
+		
+		authorizationService.canCreateRental(userId, itemInfo.getId());
 		
 		RentalStatus rentalStatus = RentalStatus.CREATED;
 		RentalPeriod rentalPeriod = rentalRequestDTO.rentalPeriod();
@@ -280,17 +282,18 @@ public class RentalService {
 	
 	@Transactional
 	public void expire(String rentId) {
+		Instant currTime = Instant.now(clock);
 		RentalStatus targetStatus = RentalStatus.EXPIRED;
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
 		RentalStatus currStatus = context.getRentalStatus();
 		validateTransition(currStatus, targetStatus);
 		
-		rentalRepository.updateRentalStatus(rentId, targetStatus);
+		rentalRepository.markExpired(rentId, targetStatus, currTime);
 		
 		eventPublisher.publish(new RentalExpiredEvent(
 				"SERVER_EXPIRATION", rentId, currStatus, 
-				targetStatus, Instant.now(clock)));
+				targetStatus, currTime));
 	}
 
 	@Transactional

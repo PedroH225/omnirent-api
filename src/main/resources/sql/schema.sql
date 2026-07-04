@@ -133,7 +133,9 @@ CREATE TABLE IF NOT EXISTS `rentals` (
   `end_date` TIMESTAMP,
   `final_price` DECIMAL(10,2) NOT NULL,
   `renter_id` CHAR(36) NOT NULL,
+  `item_id` CHAR(36) NOT NULL,
   `owner_id` CHAR(36) NOT NULL,
+  `expired_at` TIMESTAMP,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -146,6 +148,11 @@ CREATE TABLE IF NOT EXISTS `rentals` (
   CONSTRAINT `fk_rentals_owner`
     FOREIGN KEY (`owner_id`)
     REFERENCES `users` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_rentals_item`
+    FOREIGN KEY (`item_id`)
+    REFERENCES `items`(`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
 ) ENGINE=InnoDB;

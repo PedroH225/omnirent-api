@@ -28,6 +28,14 @@ public interface RentalRepository extends JpaRepository<Rental, String> {
 	@Modifying
 	@Query("""
 			UPDATE Rental r
+			SET r.rentalStatus = :status, r.expiredAt = :expiredAt
+			WHERE r.id = :id
+			""")
+	void markExpired(@Param("id")String rentalId, RentalStatus status, Instant expiredAt);
+	
+	@Modifying
+	@Query("""
+			UPDATE Rental r
 			SET r.rentalStatus = :status, r.startDate = :startDate, r.endDate = :endDate
 			WHERE r.id = :id
 			""")
