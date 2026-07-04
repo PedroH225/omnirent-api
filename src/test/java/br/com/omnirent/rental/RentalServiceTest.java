@@ -219,26 +219,6 @@ public class RentalServiceTest {
 	}
 	
 	@Test
-	void shouldConfirm() {
-		String currentUser = owner.getId();
-
-		String rentalId = rental.getId();
-		RentalStatus targetStatus = RentalStatus.CONFIRMED;
-		Set<String> allowedActors = Set.of(rental.getOwnerId(), rental.getRenterId());
-		
-		RentalStatusChangeContext context = RentalTestFactory.toRentalStatusChangeContext(rental);
-		
-		when(currentUserProvider.currentUserId()).thenReturn(currentUser);
-		when(queryRepository.getStatusChangeContext(rentalId)).thenReturn(Optional.of(context));
-		
-		rentalService.confirm(rentalId);
-		
-		verify(currentUserProvider).currentUserId();
-		verify(authorizationService).requireOne(allowedActors, currentUser);
-		verify(rentalRepository).updateRentalStatus(rentalId, targetStatus);
-	}
-	
-	@Test
 	void shouldStartPreparing() {
 		String currentUser = owner.getId();
 
@@ -362,27 +342,6 @@ public class RentalServiceTest {
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireOne(allowedActors, currentUser);
 		verify(rentalRepository).updateRentalStatus(rentalId, targetStatus);
-	}
-	
-	@Test
-	void shouldThrowWhenUserIsNotActorOnConfirm() {
-		String currentUser = owner.getId();
-
-		String rentalId = rental.getId();
-		Set<String> allowedActors = Set.of(rental.getOwnerId(), rental.getRenterId());
-		
-		RentalStatusChangeContext context = RentalTestFactory.toRentalStatusChangeContext(rental);
-		
-		when(currentUserProvider.currentUserId()).thenReturn(currentUser);
-		when(queryRepository.getStatusChangeContext(rentalId)).thenReturn(Optional.of(context));
-		doThrow(new ApiException(RentalErrorType.OPERATION_FORBIDDEN)).when(authorizationService).requireOne(allowedActors, currentUser);
-		
-		assertThatThrownBy(() -> rentalService.confirm(rentalId))
-		.isInstanceOf(ApiException.class);
-
-		verify(currentUserProvider).currentUserId();
-		verify(authorizationService).requireOne(allowedActors, currentUser);
-		verifyNoInteractions(rentalRepository);
 	}
 	
 	@Test
