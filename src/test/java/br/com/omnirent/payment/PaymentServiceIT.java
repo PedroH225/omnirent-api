@@ -35,6 +35,7 @@ import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.exception.domain.InvalidPaymentStateTransitionException;
+import br.com.omnirent.exception.domain.OptimisticLockException;
 import br.com.omnirent.exception.domain.PaymentNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
@@ -299,6 +300,13 @@ public class PaymentServiceIT extends SpringIntegrationTest {
     }
     
     @Test
+    public void refundPayment_ShouldThrowExceptionWhenPaymentNotFound() {
+        assertThrows(OptimisticLockException.class, () -> {
+            paymentService.refundPayment("nonexistent-payment");
+        });
+    }
+    
+    @Test
     public void expirePayment_ShouldCallStripeAndSetStatusToExpired() {
         paymentRepository.updateStatus(payment.getId(), PaymentStatus.PENDING);
 
@@ -314,6 +322,26 @@ public class PaymentServiceIT extends SpringIntegrationTest {
 
         Rental updatedRental = rentalRepository.findById(rental.getId()).orElseThrow();
         assertEquals(RentalStatus.EXPIRED, updatedRental.getRentalStatus());
+    }
+    
+    @Test
+    public void expirePayment_ShouldThrowExceptionWhenPaymentNotFound() {
+        assertThrows(PaymentNotFoundException.class, () -> {
+            paymentService.expirePayment("nonexistent-payment");
+        });
+        
+        verifyNoInteractions(stripeService);
+    }
+
+    @Test
+    public void expirePayment_ShouldThrowExceptionWhenStatusCannotExpireAndNotCallStripe() {
+        paymentRepository.updateStatus(payment.getId(), PaymentStatus.PAID);
+
+        assertThrows(InvalidPaymentStateTransitionException.class, () -> {
+            paymentService.expirePayment(payment.getId());
+        });
+
+        verify(stripeService, never()).expirePayment(anyString());
     }
     
 }
