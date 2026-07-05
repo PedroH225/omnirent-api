@@ -247,4 +247,17 @@ public class PaymentServiceIT extends SpringIntegrationTest {
         assertEquals(PaymentStatus.REFUND_REQUESTED, updatedPayment.getStatus());
     }
     
+    @Test
+    public void refundPayment_ShouldUpdateStatusToRefunded() {
+        paymentRepository.updateStatus(payment.getId(), PaymentStatus.REFUND_REQUESTED);
+
+        paymentService.refundPayment(payment.getId());
+        
+        entityManager.flush();
+        entityManager.clear();
+        
+        Payment updatedPayment = paymentRepository.findById(payment.getId()).orElseThrow();
+        assertEquals(PaymentStatus.REFUNDED, updatedPayment.getStatus());
+    }
+    
 }
