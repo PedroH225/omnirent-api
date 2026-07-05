@@ -260,4 +260,22 @@ public class PaymentServiceIT extends SpringIntegrationTest {
         assertEquals(PaymentStatus.REFUNDED, updatedPayment.getStatus());
     }
     
+    @Test
+    public void expirePayment_ShouldCallStripeAndSetStatusToExpired() {
+        paymentRepository.updateStatus(payment.getId(), PaymentStatus.PENDING);
+
+        paymentService.expirePayment(payment.getId());
+
+        verify(stripeService).expirePayment("cs_test_123");
+        
+        entityManager.flush();
+        entityManager.clear();
+
+        Payment updatedPayment = paymentRepository.findById(payment.getId()).orElseThrow();
+        assertEquals(PaymentStatus.EXPIRED, updatedPayment.getStatus());
+
+        Rental updatedRental = rentalRepository.findById(rental.getId()).orElseThrow();
+        assertEquals(RentalStatus.EXPIRED, updatedRental.getRentalStatus());
+    }
+    
 }
