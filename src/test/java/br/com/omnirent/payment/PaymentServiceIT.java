@@ -1,16 +1,24 @@
 package br.com.omnirent.payment;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.math.BigDecimal;
 import java.time.Clock;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import br.com.omnirent.address.AddressRepository;
 import br.com.omnirent.address.domain.Address;
@@ -22,20 +30,15 @@ import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
-import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
-import br.com.omnirent.factory.PaymentTestFactory;
 import br.com.omnirent.factory.RentalTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringIntegrationTest;
 import br.com.omnirent.item.ItemRepository;
 import br.com.omnirent.item.domain.Item;
-import br.com.omnirent.payment.context.PaymentCanceledContext;
-import br.com.omnirent.payment.context.PaymentConfirmedContext;
-import br.com.omnirent.payment.context.PaymentExpiredContext;
 import br.com.omnirent.payment.dto.CheckoutCompletedDTO;
 import br.com.omnirent.payment.dto.StripeCheckoutSession;
 import br.com.omnirent.payment.enums.PaymentProvider;
@@ -51,6 +54,7 @@ import br.com.omnirent.utils.SecurityTestUtils;
 import jakarta.transaction.Transactional;
 
 @Transactional
+@ExtendWith(MockitoExtension.class)
 public class PaymentServiceIT extends SpringIntegrationTest {
 
 	@Autowired
@@ -83,17 +87,14 @@ public class PaymentServiceIT extends SpringIntegrationTest {
 	@Autowired
     private PaymentQueryRepository queryRepository;
 
-	@Autowired
+	@MockitoBean
     private SimpMessagingTemplate simpMessagingTemplate;
 
-	@Mock
+	@MockitoBean
     private StripeService stripeService;
 
 	@Autowired
     private Clock clock;
-
-	@Autowired
-    private AppProperties appProperties;
     
 	private User owner;
 	private User renter;
@@ -148,8 +149,31 @@ public class PaymentServiceIT extends SpringIntegrationTest {
 	}
     
     @Test
-    public void test() {
-    	System.out.println("PaymentId: " +  payment.getId());
+    public void createPayment_ShouldCreatePaymentAndSendWebSocketMessage() {
+        BigDecimal amount = new BigDecimal("150.00");
+        PaymentRequestedEvent event = new PaymentRequestedEvent(rental2.getId(), renter.getId(), amount, "brl");
+        
+        StripeCheckoutSession mockSession = new StripeCheckoutSession("cs_test_mock123", "http://mock-url.com");
+        when(stripeService.createCheckoutSession(anyLong(), anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(mockSession);
+
+        paymentService.createPayment(event);
+
+        verify(stripeService).createCheckoutSession(
+                eq(15000L), eq("brl"), anyString(), anyString(), anyString()
+        );
+
+        ArgumentCaptor<CheckoutCompletedDTO> dtoCaptor = ArgumentCaptor.forClass(CheckoutCompletedDTO.class);
+        verify(simpMessagingTemplate).convertAndSend(
+                eq("/topic/rental/payment/" + rental2.getId()), 
+                dtoCaptor.capture()
+        );
+        
+        CheckoutCompletedDTO sentDto = dtoCaptor.getValue();
+        assertEquals(rental2.getId(), sentDto.rentalId());
+        assertEquals("http://mock-url.com", sentDto.checkoutUrl());
     }
+    
+
     
 }
