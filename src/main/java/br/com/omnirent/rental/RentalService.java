@@ -14,6 +14,7 @@ import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.apptype.CommonErrorType;
 import br.com.omnirent.exception.domain.apptype.RentalErrorType;
 import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.context.ItemInfo;
@@ -166,6 +167,11 @@ public class RentalService {
 		Set<String> actors = Set.of(context.getOwnerId(), context.getRenterId());
 		
 		authorizationService.requireOne(actors, currentUserId);
+		
+		if (currStatus.equals(RentalStatus.LATE)) {
+			throw new ApiException(CommonErrorType.FORBIDDEN);
+		}
+		
 		validateTransition(currStatus, RentalStatus.IN_USE);
 		
 		Instant startDate = Instant.now(clock);
@@ -198,7 +204,24 @@ public class RentalService {
 					context.getRentalStatus(), startDate, endDateTime, Instant.now(clock)));
 		}
 	}
+	
+	@Transactional
+	public void renewRental(String rentalId) {
+		RentalStatusChangeContext context = getStatusChangeContext(rentalId);
 
+		Instant startDate = Instant.now(clock);			
+		Instant endDateTime = rentalDateService.
+				calculateEndDate(startDate, context.getRentalPeriod());
+		
+		rentalRepository
+		.updateRentalPeriodAndStatus(rentalId, RentalStatus.IN_USE,
+				startDate, endDateTime);
+		
+		eventPublisher.publish(new RentalInUseEvent(
+				"SYSTEM_RENEWAL", rentalId,
+				context.getRentalStatus(), startDate, endDateTime, Instant.now(clock)));
+	}
+	
 	@Transactional
 	public void requestReturn(String rentId) {
 		RentalStatus targetStatus = RentalStatus.RETURN_REQUESTED;
