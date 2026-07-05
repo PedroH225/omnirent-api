@@ -31,6 +31,7 @@ import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.exception.domain.InvalidPaymentStateTransitionException;
 import br.com.omnirent.exception.domain.PaymentNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
@@ -203,6 +204,15 @@ public class PaymentServiceIT extends SpringIntegrationTest {
     public void confirmPayment_ShouldThrowExceptionWhenPaymentNotFound() {
         assertThrows(PaymentNotFoundException.class, () -> {
             paymentService.confirmPayment("nonexistent-id", "pi_test_123");
+        });
+    }
+    
+    @Test
+    public void confirmPayment_ShouldThrowExceptionOnInvalidTransition() {
+        paymentRepository.updateStatus(payment.getId(), PaymentStatus.CANCELLED);
+
+        assertThrows(InvalidPaymentStateTransitionException.class, () -> {
+            paymentService.confirmPayment(payment.getId(), "pi_test_123");
         });
     }
     
