@@ -12,6 +12,7 @@ import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.payment.context.PaymentCanceledContext;
 import br.com.omnirent.payment.context.PaymentConfirmedContext;
 import br.com.omnirent.payment.context.PaymentExpiredContext;
+import br.com.omnirent.payment.context.ReopenPaymentContext;
 import br.com.omnirent.payment.model.Payment;
 
 public interface PaymentQueryRepository extends Repository<Payment, String> {
@@ -47,4 +48,12 @@ public interface PaymentQueryRepository extends Repository<Payment, String> {
 			WHERE p.id = :id
 			""")
 	Optional<PaymentExpiredContext> findExpiredPayment(@Param("id")String paymentId); 
+
+	@Query("""
+			SELECT new br.com.omnirent.payment.context.ReopenPaymentContext(
+			p.id, r.id, r.finalPrice, p.status)
+			FROM Payment p JOIN p.rental r
+			WHERE r.id = :rentalId
+			""")
+	Optional<ReopenPaymentContext> findRopenPaymentContext(String rentalId);
 }

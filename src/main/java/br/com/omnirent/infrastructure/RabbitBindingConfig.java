@@ -158,4 +158,15 @@ public class RabbitBindingConfig {
                 .to(domainExchange)
                 .with(IntegrationEventRouting.RENTAL_LATE.getKey());
     }
+    
+    @Bean
+    Binding rentalLatePaymentBinding(
+            Queue paymentQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(paymentQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.RENTAL_LATE.getKey());
+    }
 }

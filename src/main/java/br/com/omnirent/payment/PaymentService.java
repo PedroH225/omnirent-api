@@ -3,6 +3,9 @@ package br.com.omnirent.payment;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -17,6 +20,7 @@ import br.com.omnirent.exception.domain.PaymentNotFoundException;
 import br.com.omnirent.payment.context.PaymentCanceledContext;
 import br.com.omnirent.payment.context.PaymentConfirmedContext;
 import br.com.omnirent.payment.context.PaymentExpiredContext;
+import br.com.omnirent.payment.context.ReopenPaymentContext;
 import br.com.omnirent.payment.dto.CheckoutCompletedDTO;
 import br.com.omnirent.payment.dto.StripeCheckoutSession;
 import br.com.omnirent.payment.enums.PaymentProvider;
@@ -24,8 +28,6 @@ import br.com.omnirent.payment.event.PaymentRequestedEvent;
 import br.com.omnirent.payment.model.Payment;
 import br.com.omnirent.payment.stripe.StripeService;
 import br.com.omnirent.rental.RentalService;
-import br.com.omnirent.rental.domain.Rental;
-import br.com.omnirent.rental.event.RentalCanceledEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,21 +55,13 @@ public class PaymentService {
     @Transactional
     public void createPayment(
             PaymentRequestedEvent event) {
-    	String frontUrl = appProperties.frontUrl();
     	BigDecimal amount = event.amount();
     	
         Payment payment = Payment.create(event.rentalId(), amount, "brl");
 
         paymentRepository.save(payment);
 
-        StripeCheckoutSession session =
-                stripeService.createCheckoutSession(
-                        amount.longValue() * 100,
-                        "brl",
-                        frontUrl + "/success",
-                        frontUrl + "/cancel",
-                        payment.getId()
-                );
+        StripeCheckoutSession session = createCheckoutSession(amount, "brl", payment.getId());
 
         payment.attachExternalReference(PaymentProvider.STRIPE, session.sessionId());
         
@@ -90,27 +84,28 @@ public class PaymentService {
     	PaymentStatus currentStatus = context.status();
     	PaymentStatus targetStatus = PaymentStatus.PAID;
     	RentalStatus currentRentalStatus = context.rentalStatus();
+    	 
+    	if (currentStatus == targetStatus) {
+    	    return;
+    	}
     	
-        if (currentStatus == targetStatus) {
-            return;
-        }
-        
-        if (!currentRentalStatus.canTransition(RentalStatus.CONFIRMED)) {
-			throw new InvalidRentalStatusTransitionException(
-					currentRentalStatus, currentRentalStatus);
-		}
+        validateRentalStatus(currentRentalStatus);
         validatePaymentTransition(currentStatus, targetStatus);
-        
+
         Instant paidAt = Instant.now(clock);
         int updated = paymentRepository.confirmPayment
         		(paymentId, PaymentStatus.PENDING, paymentIntent, targetStatus, paidAt);
-        
+
         if (updated == 0) {
 			throw new OptimisticLockException(
 					PaymentConfirmedContext.class.getSimpleName(), paymentId);
 		}
         
-        rentalService.confirm(context.rentalId(), currentRentalStatus);
+        if (currentRentalStatus.equals(RentalStatus.LATE)) {
+			rentalService.renewRental(context.rentalId());
+		} else if (currentRentalStatus.equals(RentalStatus.CREATED)) {
+	        rentalService.confirm(context.rentalId(), currentRentalStatus);
+		}
     }
     
     @Transactional
@@ -185,9 +180,49 @@ public class PaymentService {
 	    rentalService.expire(context.rentalId());
 	}
 	
+
+	@Transactional
+	public void restartPaymentFlow(String rentalId) {
+		ReopenPaymentContext context = queryRepository.findRopenPaymentContext(rentalId)
+				.orElseThrow(() -> new PaymentNotFoundException("rentalId: " + rentalId));
+		
+		StripeCheckoutSession session = createCheckoutSession(
+				context.finalPrice(), "brl", context.paymentId());
+		
+		paymentRepository.reinitializePayment(context.paymentId(), context.currentPaymentStatus(),
+				session.sessionId(), PaymentProvider.STRIPE, PaymentStatus.PENDING,
+				context.finalPrice(), "brl");
+		
+        log.debug("Session URL: {}", session.url());
+	}
+	
+	private StripeCheckoutSession createCheckoutSession(
+			BigDecimal amount, String currency, String paymentId) {
+        String frontUrl = appProperties.frontUrl();
+		return stripeService.createCheckoutSession(
+                        amount.longValue() * 100,
+                        currency,
+                        frontUrl + "/success",
+                        frontUrl + "/cancel",
+                        paymentId);
+	}
+	
 	private void validatePaymentTransition(PaymentStatus currentStatus, PaymentStatus target) {
 	    if (!currentStatus.canTransition(target)) {
 	        throw new InvalidPaymentStateTransitionException(currentStatus, target);
 	    }
+	}
+	
+	private void validateRentalStatus(RentalStatus currentRentalStatus) { 
+		Map<RentalStatus, RentalStatus> transitions = Map.of(
+			    RentalStatus.CREATED, RentalStatus.CONFIRMED,
+			    RentalStatus.LATE, RentalStatus.IN_USE
+			);
+
+			RentalStatus target = transitions.get(currentRentalStatus);
+
+			if (target == null) {
+			    throw new InvalidRentalStatusTransitionException(currentRentalStatus, null);
+			}
 	}
 }

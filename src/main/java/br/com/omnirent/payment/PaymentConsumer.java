@@ -9,7 +9,7 @@ import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.payment.event.PaymentExpirationRequestEvent;
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
 import br.com.omnirent.rental.event.RentalCanceledEvent;
-import br.com.omnirent.rental.event.RentalExpiredEvent;
+import br.com.omnirent.rental.event.RentalLateEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,5 +45,10 @@ public class PaymentConsumer {
     @RabbitHandler
     public void handle(PaymentExpirationRequestEvent expirationRequest) {
     	paymentService.expirePayment(expirationRequest.paymentId());
+    }
+    
+    @RabbitHandler
+    public void handle(RentalLateEvent event) {
+    	paymentService.restartPaymentFlow(event.rentalId());
     }
 }

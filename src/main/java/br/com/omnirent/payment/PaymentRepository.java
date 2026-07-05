@@ -1,5 +1,6 @@
 package br.com.omnirent.payment;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -10,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.payment.enums.PaymentProvider;
 import br.com.omnirent.payment.model.Payment;
 
 public interface PaymentRepository extends JpaRepository<Payment, String> {
@@ -40,4 +42,16 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     		WHERE p.id = :paymentId
     		""")
     int updateStatus(String paymentId, PaymentStatus status);
+    
+    @Modifying
+    @Query("""
+    		UPDATE Payment p
+    		SET p.status = :pending, p.externalReference.externalPaymentId = :sessionId,
+    		p.externalReference.paymentIntent = null, p.externalReference.paymentProvider = :provider,
+    		p.paidAt = null, p.amount = :amount, p.currency = :currency
+    		WHERE p.id = :id AND p.status = :currStatus
+    		""")
+    int reinitializePayment(String id, PaymentStatus currStatus, String sessionId,
+    		PaymentProvider provider, PaymentStatus pending, BigDecimal amount,
+    		String currency);
 }
