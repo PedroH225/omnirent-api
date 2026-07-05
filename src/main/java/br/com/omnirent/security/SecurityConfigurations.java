@@ -45,6 +45,7 @@ public class SecurityConfigurations {
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/rental/enums").permitAll()
+                        .requestMatchers("/webhooks/**").permitAll()
                         .requestMatchers("/**").authenticated()
                         .anyRequest().permitAll()
                 )
