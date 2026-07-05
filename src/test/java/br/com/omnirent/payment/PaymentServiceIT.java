@@ -51,6 +51,7 @@ import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.utils.SecurityTestUtils;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 @Transactional
@@ -86,6 +87,9 @@ public class PaymentServiceIT extends SpringIntegrationTest {
 	
 	@Autowired
     private PaymentQueryRepository queryRepository;
+	
+	@Autowired
+	private EntityManager entityManager;
 
 	@MockitoBean
     private SimpMessagingTemplate simpMessagingTemplate;
@@ -174,6 +178,23 @@ public class PaymentServiceIT extends SpringIntegrationTest {
         assertEquals("http://mock-url.com", sentDto.checkoutUrl());
     }
     
+    @Test
+    public void confirmPayment_ShouldUpdateStatusToPaidAndConfirmRental() {
+        String paymentIntent = "pi_test_123";
+        paymentRepository.updateStatus(payment.getId(), PaymentStatus.PENDING);
+        
+        paymentService.confirmPayment(payment.getId(), paymentIntent);
+        
+        entityManager.flush();
+        entityManager.clear();
+        
+        Payment updatedPayment = paymentRepository.findById(payment.getId()).orElseThrow();
 
+        assertEquals(PaymentStatus.PAID, updatedPayment.getStatus());
+        assertEquals(paymentIntent, updatedPayment.getExternalReference().getPaymentIntent());
+
+        Rental updatedRental = rentalRepository.findById(rental.getId()).orElseThrow();
+        assertEquals(RentalStatus.CONFIRMED, updatedRental.getRentalStatus());
+    }
     
 }
