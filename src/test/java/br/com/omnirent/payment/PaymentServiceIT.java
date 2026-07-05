@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.Clock;
+import java.time.Instant;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -227,6 +228,23 @@ public class PaymentServiceIT extends SpringIntegrationTest {
         
         Payment updatedPayment = paymentRepository.findById(payment.getId()).orElseThrow();
         assertEquals(PaymentStatus.CANCELLED, updatedPayment.getStatus());
+    }
+    
+    @Test
+    public void requestRefund_ShouldCallStripeAndUpdateStatusToRefundRequested() {
+    	paymentRepository.confirmPayment(
+    			payment.getId(), PaymentStatus.PENDING, "pi_test_123",
+    			PaymentStatus.PAID, Instant.now(clock));
+
+        paymentService.requestRefund(rental.getId());
+
+        verify(stripeService).requestRefund(payment.getId(), "pi_test_123");
+        
+        entityManager.flush();
+        entityManager.clear();
+        
+        Payment updatedPayment = paymentRepository.findById(payment.getId()).orElseThrow();
+        assertEquals(PaymentStatus.REFUND_REQUESTED, updatedPayment.getStatus());
     }
     
 }
