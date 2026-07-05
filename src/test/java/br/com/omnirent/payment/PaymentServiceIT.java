@@ -216,4 +216,17 @@ public class PaymentServiceIT extends SpringIntegrationTest {
         });
     }
     
+    @Test
+    public void cancelPayment_ShouldUpdateStatusToCancelled() {
+        paymentRepository.updateStatus(payment.getId(), PaymentStatus.PENDING);
+
+        paymentService.cancelPayment(rental.getId());
+
+        entityManager.flush();
+        entityManager.clear();
+        
+        Payment updatedPayment = paymentRepository.findById(payment.getId()).orElseThrow();
+        assertEquals(PaymentStatus.CANCELLED, updatedPayment.getStatus());
+    }
+    
 }
