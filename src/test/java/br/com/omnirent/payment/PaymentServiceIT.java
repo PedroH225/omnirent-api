@@ -148,7 +148,7 @@ public class PaymentServiceIT extends SpringIntegrationTest {
         		RentalStatus.SHIPPED, RentalPeriod.MONTHLY, null, null));
                 
         payment = Payment.create(rental.getId(), rental.getFinalPrice(), "brl");
-        payment.attachExternalReference(PaymentProvider.STRIPE, "cs_test_123");
+        payment.attachExternalReference(PaymentProvider.STRIPE, "cs_test_123", "https://mock-session-url.com");
         payment = paymentRepository.save(payment);
         
 		SecurityTestUtils.setAuthenticatedUser(owner.getId());
