@@ -283,7 +283,6 @@ class PaymentServiceTest {
 
     @Test
     void createPayment_ShouldThrowException_WhenRepositoryFails() {
-        when(appProperties.frontUrl()).thenReturn("http://localhost");
         when(paymentRepository.save(any(Payment.class))).thenThrow(new DataIntegrityViolationException("DB Error"));
 
         assertThrows(DataIntegrityViolationException.class, () -> paymentService.createPayment(paymentRequestedEvent));
@@ -354,7 +353,7 @@ class PaymentServiceTest {
     @Test
     void confirmPayment_ShouldThrowException_WhenInvalidRentalTransition() {
         PaymentConfirmedContext context = PaymentTestFactory.createConfirmedContext(
-                paymentId, PaymentStatus.PENDING, rental.getId(), RentalStatus.LATE);
+                paymentId, PaymentStatus.PENDING, rental.getId(), RentalStatus.CANCELLED);
         when(queryRepository.findConfirmedContext(paymentId)).thenReturn(Optional.of(context));
 
         assertThrows(InvalidRentalStatusTransitionException.class, 
