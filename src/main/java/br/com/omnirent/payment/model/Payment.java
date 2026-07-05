@@ -75,13 +75,13 @@ public class Payment extends BaseEntity {
 	}
 	
 	public void attachExternalReference(
-			PaymentProvider provider, String externalPaymentId) {
+			PaymentProvider provider, String externalPaymentId, String sessionUrl) {
 	    if (this.status != PaymentStatus.PENDING) {
 	        throw new PaymentReferenceAlreadyLockedException();
 	    }
 	    
 		this.externalReference = 
-	    		new ExternalPaymentReference(provider, externalPaymentId, null);
+	    		new ExternalPaymentReference(provider, externalPaymentId, sessionUrl, null);
 	}
 	
     public void markAsPaid(Instant paidAt) {

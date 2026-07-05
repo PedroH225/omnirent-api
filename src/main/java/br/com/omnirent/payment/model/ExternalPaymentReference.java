@@ -1,6 +1,7 @@
 package br.com.omnirent.payment.model;
 
 import br.com.omnirent.payment.enums.PaymentProvider;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -18,12 +19,15 @@ public class ExternalPaymentReference {
 	
 	private String externalPaymentId;
 	
+	private String sessionUrl;
+	
 	private String paymentIntent;
 
 	protected ExternalPaymentReference(
-			PaymentProvider provider, String externalPaymentId, String paymentIntent) {
+			PaymentProvider provider, String externalPaymentId, String sessionUrl, String paymentIntent) {
 		this.paymentProvider = provider;
 		this.externalPaymentId = externalPaymentId;
+		this.sessionUrl = sessionUrl;
 		this.paymentIntent = paymentIntent;
 	}
 }

@@ -63,7 +63,7 @@ public class PaymentService {
 
         StripeCheckoutSession session = createCheckoutSession(amount, "brl", payment.getId());
 
-        payment.attachExternalReference(PaymentProvider.STRIPE, session.sessionId());
+        payment.attachExternalReference(PaymentProvider.STRIPE, session.sessionId(), session.url());
         
         paymentRepository.save(payment);
 
