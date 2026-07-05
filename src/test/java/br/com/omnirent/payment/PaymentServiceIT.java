@@ -231,6 +231,22 @@ public class PaymentServiceIT extends SpringIntegrationTest {
     }
     
     @Test
+    public void cancelPayment_ShouldThrowExceptionWhenPaymentNotFound() {
+        assertThrows(PaymentNotFoundException.class, () -> {
+            paymentService.cancelPayment("rental-inexistente");
+        });
+    }
+
+    @Test
+    public void cancelPayment_ShouldThrowExceptionOnInvalidTransition() {
+        paymentRepository.updateStatus(payment.getId(), PaymentStatus.PAID);
+
+        assertThrows(InvalidPaymentStateTransitionException.class, () -> {
+            paymentService.cancelPayment(rental.getId());
+        });
+    }
+    
+    @Test
     public void requestRefund_ShouldCallStripeAndUpdateStatusToRefundRequested() {
     	paymentRepository.confirmPayment(
     			payment.getId(), PaymentStatus.PENDING, "pi_test_123",
