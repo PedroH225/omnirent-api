@@ -40,9 +40,9 @@ INSERT IGNORE INTO items VALUES
 -- =========================
 -- RENTALS
 -- =========================
-INSERT IGNORE INTO rentals (id, rental_status, rental_period, final_price, renter_id, owner_id) VALUES
-('5f54c279-9ad6-40c2-8a32-22216d48ca39','CREATED','DAILY',160.00,'d101df10-ca1d-446a-a897-8ffed7950acb','ab6c0937-17ac-434e-80dd-c8b581d55935'),
-('b24fca5b-648a-44e2-ba89-2223d8ab57b0','CONFIRMED','DAILY',240.00,'ab6c0937-17ac-434e-80dd-c8b581d55935','d101df10-ca1d-446a-a897-8ffed7950acb');
+INSERT IGNORE INTO rentals (id, rental_status, rental_period, final_price, renter_id, owner_id, item_id) VALUES
+('5f54c279-9ad6-40c2-8a32-22216d48ca39','CREATED','DAILY',160.00,'d101df10-ca1d-446a-a897-8ffed7950acb','ab6c0937-17ac-434e-80dd-c8b581d55935', '2e6fbb11-bbdf-426c-85d7-4ac0d52e81b2'),
+('b24fca5b-648a-44e2-ba89-2223d8ab57b0','CONFIRMED','DAILY',240.00,'ab6c0937-17ac-434e-80dd-c8b581d55935','d101df10-ca1d-446a-a897-8ffed7950acb', 'efbeb34f-203b-4609-826f-ef49ffdb9c20');
 
 -- =========================
 -- ITEM SNAPSHOTS

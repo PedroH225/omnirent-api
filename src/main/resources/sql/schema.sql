@@ -1,3 +1,6 @@
+-- -----------------------------------------------------
+-- Table `global_configurations``
+-- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `global_configurations` (
   `id` INT NOT NULL,
   `global_token_version` INT NOT NULL,
@@ -130,7 +133,9 @@ CREATE TABLE IF NOT EXISTS `rentals` (
   `end_date` TIMESTAMP,
   `final_price` DECIMAL(10,2) NOT NULL,
   `renter_id` CHAR(36) NOT NULL,
+  `item_id` CHAR(36) NOT NULL,
   `owner_id` CHAR(36) NOT NULL,
+  `expired_at` TIMESTAMP,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -144,9 +149,40 @@ CREATE TABLE IF NOT EXISTS `rentals` (
     FOREIGN KEY (`owner_id`)
     REFERENCES `users` (`id`)
     ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_rentals_item`
+    FOREIGN KEY (`item_id`)
+    REFERENCES `items`(`id`)
+    ON DELETE NO ACTION
     ON UPDATE NO ACTION
 ) ENGINE=InnoDB;
 
+-- -----------------------------------------------------
+-- Table `payments`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `payments`(
+	`id` CHAR(36) NOT NULL,
+	`payment_provider` VARCHAR(255),
+	`external_payment_id` VARCHAR(255),
+	`session_url` VARCHAR(512),
+	`payment_intent` VARCHAR(255),
+	`amount` DECIMAL(10,2) NOT NULL,
+	`currency` VARCHAR(3) NOT NULL,
+	`status` VARCHAR(20) NOT NULL,
+	`rental_id` CHAR(36) NOT NULL,
+	`paid_at` TIMESTAMP,
+	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  	`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+   CONSTRAINT `fk_rentals_payment`
+    FOREIGN KEY (`rental_id`)
+    REFERENCES `rentals` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Table `address_snapshots`
+-- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `address_snapshots` (
   `id` CHAR(36) NOT NULL,
   `street` VARCHAR(120) NOT NULL,
@@ -167,6 +203,9 @@ CREATE TABLE IF NOT EXISTS `address_snapshots` (
     ON UPDATE NO ACTION
 ) ENGINE=InnoDB;
 
+-- -----------------------------------------------------
+-- Table `item_snapshots``
+-- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `item_snapshots` (
   `id` CHAR(36) NOT NULL,
   `name` VARCHAR(100) NOT NULL,
@@ -185,6 +224,9 @@ CREATE TABLE IF NOT EXISTS `item_snapshots` (
     ON UPDATE NO ACTION
 ) ENGINE=InnoDB;
 
+-- -----------------------------------------------------
+-- Table `audit_log``
+-- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `audit_log` (
   `id` CHAR(36) NOT NULL,
   `event_type` VARCHAR(50) NOT NULL,

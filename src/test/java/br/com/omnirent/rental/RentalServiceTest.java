@@ -28,8 +28,8 @@ import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
-import br.com.omnirent.exception.domain.RentalErrorType;
-import br.com.omnirent.exception.domain.UserErrorType;
+import br.com.omnirent.exception.domain.apptype.RentalErrorType;
+import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
@@ -219,26 +219,6 @@ public class RentalServiceTest {
 	}
 	
 	@Test
-	void shouldConfirm() {
-		String currentUser = owner.getId();
-
-		String rentalId = rental.getId();
-		RentalStatus targetStatus = RentalStatus.CONFIRMED;
-		Set<String> allowedActors = Set.of(rental.getOwnerId(), rental.getRenterId());
-		
-		RentalStatusChangeContext context = RentalTestFactory.toRentalStatusChangeContext(rental);
-		
-		when(currentUserProvider.currentUserId()).thenReturn(currentUser);
-		when(queryRepository.getStatusChangeContext(rentalId)).thenReturn(Optional.of(context));
-		
-		rentalService.confirm(rentalId);
-		
-		verify(currentUserProvider).currentUserId();
-		verify(authorizationService).requireOne(allowedActors, currentUser);
-		verify(rentalRepository).updateRentalStatus(rentalId, targetStatus);
-	}
-	
-	@Test
 	void shouldStartPreparing() {
 		String currentUser = owner.getId();
 
@@ -362,27 +342,6 @@ public class RentalServiceTest {
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireOne(allowedActors, currentUser);
 		verify(rentalRepository).updateRentalStatus(rentalId, targetStatus);
-	}
-	
-	@Test
-	void shouldThrowWhenUserIsNotActorOnConfirm() {
-		String currentUser = owner.getId();
-
-		String rentalId = rental.getId();
-		Set<String> allowedActors = Set.of(rental.getOwnerId(), rental.getRenterId());
-		
-		RentalStatusChangeContext context = RentalTestFactory.toRentalStatusChangeContext(rental);
-		
-		when(currentUserProvider.currentUserId()).thenReturn(currentUser);
-		when(queryRepository.getStatusChangeContext(rentalId)).thenReturn(Optional.of(context));
-		doThrow(new ApiException(RentalErrorType.OPERATION_FORBIDDEN)).when(authorizationService).requireOne(allowedActors, currentUser);
-		
-		assertThatThrownBy(() -> rentalService.confirm(rentalId))
-		.isInstanceOf(ApiException.class);
-
-		verify(currentUserProvider).currentUserId();
-		verify(authorizationService).requireOne(allowedActors, currentUser);
-		verifyNoInteractions(rentalRepository);
 	}
 	
 	@Test

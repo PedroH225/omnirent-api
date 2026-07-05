@@ -52,6 +52,7 @@ public final class RentalTestFactory {
 		
 		rental.setRenter(renter);
 		rental.setRenterId(renter.getId());
+		rental.setItemId(item.getId());
 		
 		return rental;
 	}

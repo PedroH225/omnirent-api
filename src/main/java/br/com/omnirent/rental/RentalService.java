@@ -14,10 +14,12 @@ import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.common.ApiException;
-import br.com.omnirent.exception.domain.RentalErrorType;
+import br.com.omnirent.exception.domain.apptype.CommonErrorType;
+import br.com.omnirent.exception.domain.apptype.RentalErrorType;
 import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.payment.event.PaymentRequestedEvent;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.domain.RentalAuthorizationService;
@@ -27,7 +29,9 @@ import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.rental.dto.RentalRequestDTO;
+import br.com.omnirent.rental.event.RentalCanceledEvent;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
+import br.com.omnirent.rental.event.RentalExpiredEvent;
 import br.com.omnirent.rental.event.RentalInUseEvent;
 import br.com.omnirent.rental.event.RentalStatusChangedEvent;
 import br.com.omnirent.security.CurrentUserProvider;
@@ -61,7 +65,7 @@ public class RentalService {
 	private MessageService messageService;
 	
 	private SpringDomainEventPublisher eventPublisher;
-	
+		
 	private void validateTransition(RentalStatus currStatus, RentalStatus targetStatus) {
 		if (!currStatus.canTransition(targetStatus)) {
 			throw new ApiException(RentalErrorType.ILLEGAL_STATE_TRANSITION,
@@ -89,13 +93,16 @@ public class RentalService {
 				.orElseThrow(() -> new ApiException(RentalErrorType.NOT_FOUND));
 	}
 
+	@Transactional
 	public RentalCreatedDTO addRent(RentalRequestDTO rentalRequestDTO) {
 		String userId = currentUserProvider.currentUserId();
 		User renter = userService.getValidReference(userId);
-		
+				
 		ItemRentedContext context = itemService.getItemRentedContext(rentalRequestDTO.itemId());
 				
 		ItemInfo itemInfo = context.getItemInfo();
+		
+		authorizationService.canCreateRental(userId, itemInfo.getId());
 		
 		RentalStatus rentalStatus = RentalStatus.CREATED;
 		RentalPeriod rentalPeriod = rentalRequestDTO.rentalPeriod();
@@ -112,6 +119,9 @@ public class RentalService {
 				new RentalCreatedEvent(userId, persistedRental.getId(),
 						mapper.toAuditSnapshot(persistedRental)));
 		
+		eventPublisher.publish(
+				new PaymentRequestedEvent(rental.getId(), userId, finalPrice, "brl"));
+				
 		return mapper.toCreatedDto(persistedRental);
 	}
 
@@ -157,6 +167,11 @@ public class RentalService {
 		Set<String> actors = Set.of(context.getOwnerId(), context.getRenterId());
 		
 		authorizationService.requireOne(actors, currentUserId);
+		
+		if (currStatus.equals(RentalStatus.LATE)) {
+			throw new ApiException(CommonErrorType.FORBIDDEN);
+		}
+		
 		validateTransition(currStatus, RentalStatus.IN_USE);
 		
 		Instant startDate = Instant.now(clock);
@@ -189,7 +204,24 @@ public class RentalService {
 					context.getRentalStatus(), startDate, endDateTime, Instant.now(clock)));
 		}
 	}
+	
+	@Transactional
+	public void renewRental(String rentalId) {
+		RentalStatusChangeContext context = getStatusChangeContext(rentalId);
 
+		Instant startDate = Instant.now(clock);			
+		Instant endDateTime = rentalDateService.
+				calculateEndDate(startDate, context.getRentalPeriod());
+		
+		rentalRepository
+		.updateRentalPeriodAndStatus(rentalId, RentalStatus.IN_USE,
+				startDate, endDateTime);
+		
+		eventPublisher.publish(new RentalInUseEvent(
+				"SYSTEM_RENEWAL", rentalId,
+				context.getRentalStatus(), startDate, endDateTime, Instant.now(clock)));
+	}
+	
 	@Transactional
 	public void requestReturn(String rentId) {
 		RentalStatus targetStatus = RentalStatus.RETURN_REQUESTED;
@@ -256,7 +288,7 @@ public class RentalService {
 		RentalStatus targetStatus = RentalStatus.CANCELLED;
 		String currentUserId = currentUserProvider.currentUserId();
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
-		
+
 		RentalStatus currStatus = context.getRentalStatus();
 		Set<String> actors = Set.of(context.getOwnerId(), context.getRenterId());
 		
@@ -266,25 +298,34 @@ public class RentalService {
 		
 		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
-		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), targetStatus);
+		eventPublisher.publish(new RentalCanceledEvent(
+				currentUserId, rentId, currStatus, 
+				targetStatus, Instant.now(clock)));		
 	}
-
+	
 	@Transactional
-	public void confirm(String rentId) {
-		RentalStatus targetStatus = RentalStatus.CONFIRMED;
-		String currentUserId = currentUserProvider.currentUserId();
+	public void expire(String rentId) {
+		Instant currTime = Instant.now(clock);
+		RentalStatus targetStatus = RentalStatus.EXPIRED;
 		RentalStatusChangeContext context = getStatusChangeContext(rentId);
 		
 		RentalStatus currStatus = context.getRentalStatus();
-		Set<String> actors = Set.of(context.getOwnerId(), context.getRenterId());
-		
-		// TEMPORARY
-		authorizationService.requireOne(actors, currentUserId);
 		validateTransition(currStatus, targetStatus);
+		
+		rentalRepository.markExpired(rentId, targetStatus, currTime);
+		
+		eventPublisher.publish(new RentalExpiredEvent(
+				"SERVER_EXPIRATION", rentId, currStatus, 
+				targetStatus, currTime));
+	}
+
+	@Transactional
+	public void confirm(String rentId, RentalStatus currentStatus) {
+		RentalStatus targetStatus = RentalStatus.CONFIRMED;
 		
 		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
-		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), targetStatus);
+		publishDefaultTransition("SERVER_CONFIRMATION", rentId, currentStatus, targetStatus);
 	}
 
 	public List<RentalDisplayDTO> findUserRented() {

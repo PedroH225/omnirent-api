@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.exception.common.ApiException;
-import br.com.omnirent.exception.domain.AuthenticationErrorType;
+import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
 import br.com.omnirent.security.context.LoginContext;
 import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;

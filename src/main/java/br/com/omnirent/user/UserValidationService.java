@@ -7,8 +7,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.exception.common.ValidationException;
-import br.com.omnirent.exception.domain.CommonErrorType;
-import br.com.omnirent.exception.domain.FieldErrorResponse;
+import br.com.omnirent.exception.domain.apptype.CommonErrorType;
+import br.com.omnirent.exception.domain.apptype.FieldErrorResponse;
 import br.com.omnirent.user.context.UserTakenContext;
 import br.com.omnirent.user.domain.UserIdentityInput;
 import lombok.RequiredArgsConstructor;

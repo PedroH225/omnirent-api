@@ -2,12 +2,14 @@ package br.com.omnirent.rental.domain;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 import br.com.omnirent.address.domain.AddressSnapshot;
 import br.com.omnirent.common.BaseEntity;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.item.domain.ItemSnapshot;
+import br.com.omnirent.payment.model.Payment;
 import br.com.omnirent.user.domain.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -17,6 +19,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -58,8 +61,15 @@ public class Rental extends BaseEntity {
 	@OneToOne(mappedBy = "rental", cascade = CascadeType.ALL, orphanRemoval = true)
 	private ItemSnapshot itemSnapshot;
 	
+	private String itemId;
+	
 	@OneToOne(mappedBy = "rental", cascade = CascadeType.ALL, orphanRemoval = true)
 	private AddressSnapshot addressSnapshot;
+	
+	@OneToMany(mappedBy = "rental")
+	private List<Payment> payments;
+	
+	private Instant expiredAt;
 	
 	public void assignOwner(User owner) {
 		this.owner = owner;

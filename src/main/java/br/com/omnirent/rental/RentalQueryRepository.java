@@ -82,4 +82,14 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 		    WHERE r.rentalStatus = :status AND r.updatedAt <= :threshold
 		    """)
 	List<RentalStatusChangeContext> findShippedAfterThreshold(RentalStatus status, Instant threshold);
+
+	@Query("""
+		    SELECT r.expiredAt
+		    FROM Rental r
+		    WHERE r.renterId = :userId
+		      AND r.itemId = :itemId
+		      AND r.rentalStatus = :expired
+		      AND r.expiredAt >= :threshold
+		""")
+	Optional<Instant> canCreateRental(String userId, String itemId, RentalStatus expired, Instant threshold);
 }

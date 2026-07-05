@@ -12,8 +12,8 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.category.dto.CategoryResponseDTO;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.exception.common.ApiException;
-import br.com.omnirent.exception.domain.CategoryErrorType;
-import br.com.omnirent.exception.domain.SubCategoryErrorType;
+import br.com.omnirent.exception.domain.apptype.CategoryErrorType;
+import br.com.omnirent.exception.domain.apptype.SubCategoryErrorType;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor

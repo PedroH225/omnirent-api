@@ -12,13 +12,16 @@ import br.com.omnirent.notification.JpaNotificationQueryRepository;
 import br.com.omnirent.notification.context.RentalInUseNotificationData;
 import br.com.omnirent.notification.context.RentalLateNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
+import br.com.omnirent.rental.event.RentalCanceledEvent;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
+import br.com.omnirent.rental.event.RentalExpiredEvent;
 import br.com.omnirent.rental.event.RentalInUseEvent;
 import br.com.omnirent.rental.event.RentalLateEvent;
 import br.com.omnirent.rental.event.RentalStatusChangedEvent;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @ConditionalOnProperty(
 	    value = "app.mail.consumers.enabled",
@@ -28,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 @RabbitListener(queues = "email.queue")
-
+@Slf4j
 public class EmailConsumer {
 
     private final EmailService emailService;
@@ -80,6 +83,16 @@ public class EmailConsumer {
     	
     	rentalEmailService.sendRentalLateToOwner(notificationData);
     	rentalEmailService.sendRentalLateToRenter(notificationData);
+    }
+    
+    @RabbitHandler
+    public void handle(RentalCanceledEvent event) {
+    	log.debug("Email: canceled event recieved");
+    }
+    
+    @RabbitHandler
+    public void handle(RentalExpiredEvent event) {
+    	log.debug("Email: expired event recieved");
     }
     
     @RabbitHandler

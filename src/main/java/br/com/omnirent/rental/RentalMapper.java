@@ -71,6 +71,7 @@ public class RentalMapper {
 		
 		rental.setAddressSnapshot(addressMapper.fromRentContext(addressInfo, rental));
 		rental.setItemSnapshot(itemMapper.fromRentContext(item, rental));
+		rental.setItemId(item.getId());
 		
 		return rental;
 	}

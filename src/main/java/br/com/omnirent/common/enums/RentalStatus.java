@@ -12,24 +12,23 @@ public enum RentalStatus {
 	RETURN_SHIPPED,
 	RETURNED,
 	CANCELLED,
+	EXPIRED,
 	LATE;
 	
 	public String getMessageKey() {
 		return "rental.status." + name();
 	}
 	
-	private Set<RentalStatus> allowedTransitions;
+	private Set<RentalStatus> allowedTransitions = Set.of();
 	
 	static {
-		CREATED.allowedTransitions = Set.of(CONFIRMED, CANCELLED);
+		CREATED.allowedTransitions = Set.of(CONFIRMED, CANCELLED, EXPIRED);
 		CONFIRMED.allowedTransitions = Set.of(PREPARING, CANCELLED);
         PREPARING.allowedTransitions = Set.of(SHIPPED);
         SHIPPED.allowedTransitions = Set.of(IN_USE);
         IN_USE.allowedTransitions = Set.of(RETURN_REQUESTED, LATE);
         RETURN_REQUESTED.allowedTransitions = Set.of(RETURN_SHIPPED);
         RETURN_SHIPPED.allowedTransitions = Set.of(RETURNED);
-        RETURNED.allowedTransitions = Set.of();
-        CANCELLED.allowedTransitions = Set.of();
         LATE.allowedTransitions = Set.of(IN_USE);
     }
 	

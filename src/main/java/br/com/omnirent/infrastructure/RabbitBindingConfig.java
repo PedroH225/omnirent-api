@@ -21,6 +21,11 @@ public class RabbitBindingConfig {
     Queue emailQueue() {
         return new Queue("email.queue");
     }
+    
+    @Bean
+    Queue paymentQueue() {
+        return new Queue("payment.queue");
+    }
 
     @Bean
     Binding userRegisteredBinding(
@@ -67,6 +72,28 @@ public class RabbitBindingConfig {
     }
     
     @Bean
+    Binding paymentRequestedBinding(
+            Queue paymentQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(paymentQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.PAYMENT_REQUESTED.getKey());
+    }
+    
+    @Bean
+    Binding paymentExpirationRequestedBinding(
+            Queue paymentQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(paymentQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.PAYMENT_EXPIRATION.getKey());
+    }
+    
+    @Bean
     Binding rentalStatusChangeBinding(
             Queue emailQueue,
             TopicExchange domainExchange
@@ -77,6 +104,28 @@ public class RabbitBindingConfig {
                 .with(IntegrationEventRouting.RENTAL_STATUS_CHANGED.getKey());
     }
     
+    @Bean
+    Binding rentalCanceledBinding(
+            Queue emailQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(emailQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.RENTAL_CANCELED.getKey());
+    }
+    
+    @Bean
+    Binding rentalCanceledPaymentBinding(
+            Queue paymentQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(paymentQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.RENTAL_CANCELED.getKey());
+    }
+
     @Bean
     Binding rentalInUseBinding(
             Queue emailQueue,
@@ -89,12 +138,34 @@ public class RabbitBindingConfig {
     }
     
     @Bean
+    Binding rentalExpiredBinding(
+            Queue emailQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(emailQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.RENTAL_EXPIRED.getKey());
+    }
+    
+    @Bean
     Binding rentalLateBinding(
             Queue emailQueue,
             TopicExchange domainExchange
     ) {
         return BindingBuilder
                 .bind(emailQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.RENTAL_LATE.getKey());
+    }
+    
+    @Bean
+    Binding rentalLatePaymentBinding(
+            Queue paymentQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(paymentQueue)
                 .to(domainExchange)
                 .with(IntegrationEventRouting.RENTAL_LATE.getKey());
     }

@@ -22,8 +22,8 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 
 import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.exception.common.ApiException;
-import br.com.omnirent.exception.domain.AuthenticationErrorType;
-import br.com.omnirent.exception.domain.CommonErrorType;
+import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
+import br.com.omnirent.exception.domain.apptype.CommonErrorType;
 import br.com.omnirent.security.domain.AuthenticatedUser;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.AuthMetadata;

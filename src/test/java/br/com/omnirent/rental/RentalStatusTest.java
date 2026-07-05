@@ -17,7 +17,7 @@ public class RentalStatusTest {
 	@Test
 	void shouldMatchExpectedTransitionsExactly() {
 		Map<RentalStatus, Set<RentalStatus>> expected = Map.ofEntries(
-			    Map.entry(CREATED, Set.of(CONFIRMED, CANCELLED)),
+			    Map.entry(CREATED, Set.of(CONFIRMED, CANCELLED, EXPIRED)),
 			    Map.entry(CONFIRMED, Set.of(PREPARING, CANCELLED)),
 			    Map.entry(PREPARING, Set.of(SHIPPED)),
 			    Map.entry(SHIPPED, Set.of(IN_USE)),
@@ -26,7 +26,8 @@ public class RentalStatusTest {
 			    Map.entry(RETURN_SHIPPED, Set.of(RETURNED)),
 			    Map.entry(RETURNED, Set.<RentalStatus>of()),
 			    Map.entry(CANCELLED, Set.<RentalStatus>of()),
-			    Map.entry(LATE, Set.of(IN_USE))
+			    Map.entry(LATE, Set.of(IN_USE)),
+			    Map.entry(EXPIRED, Set.of())
 			);
 
 	    for (RentalStatus status : RentalStatus.values()) {

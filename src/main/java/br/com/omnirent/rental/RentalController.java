@@ -82,10 +82,4 @@ public class RentalController {
 	public void cancel(@PathVariable String rentId) {
 		rentalService.cancel(rentId);
 	}
-	
-	@PatchMapping("/{rentId}/confirm")
-	public void confirm(@PathVariable String rentId) {
-		rentalService.confirm(rentId);
-	}
-	
 }

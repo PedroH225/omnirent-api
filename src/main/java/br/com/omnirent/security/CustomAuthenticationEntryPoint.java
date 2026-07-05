@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.common.ApiErrorResponse;
 import br.com.omnirent.exception.common.ApiException;
-import br.com.omnirent.exception.domain.AuthenticationErrorType;
+import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
