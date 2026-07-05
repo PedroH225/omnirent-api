@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -261,6 +263,26 @@ public class PaymentServiceIT extends SpringIntegrationTest {
         
         Payment updatedPayment = paymentRepository.findById(payment.getId()).orElseThrow();
         assertEquals(PaymentStatus.REFUND_REQUESTED, updatedPayment.getStatus());
+    }
+    
+    @Test
+    public void requestRefund_ShouldThrowExceptionWhenPaymentNotFound() {
+        assertThrows(PaymentNotFoundException.class, () -> {
+            paymentService.requestRefund("rental-inexistente");
+        });
+        
+        verifyNoInteractions(stripeService);
+    }
+
+    @Test
+    public void requestRefund_ShouldThrowExceptionWhenStatusIsNotPaidAndNotCallStripe() {
+        paymentRepository.updateStatus(payment.getId(), PaymentStatus.PENDING);
+
+        assertThrows(InvalidPaymentStateTransitionException.class, () -> {
+            paymentService.requestRefund(rental.getId());
+        });
+
+        verify(stripeService, never()).requestRefund(anyString(), anyString());
     }
     
     @Test
