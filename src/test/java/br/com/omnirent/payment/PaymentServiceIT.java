@@ -1,6 +1,7 @@
 package br.com.omnirent.payment;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -30,6 +31,7 @@ import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.exception.domain.PaymentNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
@@ -195,6 +197,13 @@ public class PaymentServiceIT extends SpringIntegrationTest {
 
         Rental updatedRental = rentalRepository.findById(rental.getId()).orElseThrow();
         assertEquals(RentalStatus.CONFIRMED, updatedRental.getRentalStatus());
+    }
+    
+    @Test
+    public void confirmPayment_ShouldThrowExceptionWhenPaymentNotFound() {
+        assertThrows(PaymentNotFoundException.class, () -> {
+            paymentService.confirmPayment("nonexistent-id", "pi_test_123");
+        });
     }
     
 }
