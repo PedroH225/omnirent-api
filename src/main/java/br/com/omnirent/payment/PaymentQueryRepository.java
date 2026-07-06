@@ -19,7 +19,8 @@ public interface PaymentQueryRepository extends Repository<Payment, String> {
 
 	@Query("""
 			SELECT new br.com.omnirent.payment.context.PaymentConfirmedContext(
-			p.id, p.status, r.id, r.rentalStatus)
+			p.id, p.status, r.id, r.rentalStatus, p.externalReference.paymentIntent,
+			p.paidAt)
 			FROM Payment p JOIN p.rental r
 			WHERE p.id = :id
 			""")

@@ -4,6 +4,7 @@ import br.com.omnirent.address.context.AddressAuditSnapshot;
 import br.com.omnirent.item.context.ItemAuditSnapshot;
 import br.com.omnirent.item.context.ItemReassignedAuditSnapshot;
 import br.com.omnirent.item.context.ItemStatusChangedAuditSnapshot;
+import br.com.omnirent.payment.context.audit.PaymentConfirmedAuditSnapshot;
 import br.com.omnirent.payment.context.audit.PaymentCreatedAuditSnapshot;
 import br.com.omnirent.rental.context.RentalAuditSnapshot;
 import br.com.omnirent.rental.context.RentalInUseAuditSnapshot;
@@ -16,6 +17,7 @@ import lombok.Getter;
 @Getter
 public enum AuditAction {
 	PAYMENT_CREATED(PaymentCreatedAuditSnapshot.class),
+	PAYMENT_CONFIRMED(PaymentConfirmedAuditSnapshot.class),
 	RENTAL_CREATED(RentalAuditSnapshot.class),
 	RENTAL_STATUS_CHANGED(RentalStatusChangedAuditSnapshot.class),
 	RENTAL_IN_USE(RentalInUseAuditSnapshot.class),

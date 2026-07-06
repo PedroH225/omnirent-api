@@ -26,8 +26,8 @@ import br.com.omnirent.payment.context.ReopenPaymentContext;
 import br.com.omnirent.payment.dto.CheckoutCompletedDTO;
 import br.com.omnirent.payment.dto.StripeCheckoutSession;
 import br.com.omnirent.payment.enums.PaymentProvider;
+import br.com.omnirent.payment.event.PaymentConfirmedEvent;
 import br.com.omnirent.payment.event.PaymentCreatedEvent;
-import br.com.omnirent.payment.event.PaymentMapper;
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
 import br.com.omnirent.payment.model.Payment;
 import br.com.omnirent.payment.stripe.StripeService;
@@ -112,6 +112,12 @@ public class PaymentService {
 			throw new OptimisticLockException(
 					PaymentConfirmedContext.class.getSimpleName(), paymentId);
 		}
+        
+        eventPublisher.publish(new PaymentConfirmedEvent(
+        		AuditAction.PAYMENT_CONFIRMED, "SYSTEM_WEBHOOK", paymentId,
+        		mapper.toConfirmedSnapshot(context.rentalId(), targetStatus, paymentIntent, paidAt), 
+        		mapper.toConfirmedSnapshot(context), 
+        		Instant.now(clock)));
         
         if (currentRentalStatus.equals(RentalStatus.LATE)) {
 			rentalService.renewRental(context.rentalId());
