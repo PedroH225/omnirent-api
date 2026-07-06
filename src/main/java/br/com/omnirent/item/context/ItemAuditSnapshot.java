@@ -2,6 +2,7 @@ package br.com.omnirent.item.context;
 
 import java.math.BigDecimal;
 
+import br.com.omnirent.common.audit.AuditBody;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 
@@ -17,4 +18,4 @@ public record ItemAuditSnapshot(
         String ownerId,
         String categoryId,
         String addressId
-) {}
+		) implements AuditBody {}
