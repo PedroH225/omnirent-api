@@ -59,7 +59,9 @@ public interface PaymentQueryRepository extends Repository<Payment, String> {
 
 	@Query("""
 			SELECT new br.com.omnirent.payment.context.ReopenPaymentContext(
-			p.id, r.id, r.finalPrice, p.status)
+			p.id, r.id, r.finalPrice, p.currency, p.status, 
+			p.externalReference.paymentProvider, p.externalReference.externalPaymentId,
+			p.externalReference.paymentIntent)
 			FROM Payment p JOIN p.rental r
 			WHERE r.id = :rentalId
 			""")

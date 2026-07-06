@@ -28,6 +28,7 @@ import br.com.omnirent.payment.dto.StripeCheckoutSession;
 import br.com.omnirent.payment.enums.PaymentProvider;
 import br.com.omnirent.payment.event.PaymentConfirmedEvent;
 import br.com.omnirent.payment.event.PaymentCreatedEvent;
+import br.com.omnirent.payment.event.PaymentReinitializedEvent;
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
 import br.com.omnirent.payment.event.PaymentStatusChangedEvent;
 import br.com.omnirent.payment.model.Payment;
@@ -85,7 +86,7 @@ public class PaymentService {
         
         eventPublisher.publish(new PaymentCreatedEvent(
         		AuditAction.PAYMENT_CREATED, event.userId(), payment.getId(),
-        		mapper.toCreatedSnapshot(payment), Instant.now(clock)));
+        		mapper.toAuditSnapshot(payment), Instant.now(clock)));
     }
 
     @Transactional
@@ -222,14 +223,25 @@ public class PaymentService {
 		ReopenPaymentContext context = queryRepository.findRopenPaymentContext(rentalId)
 				.orElseThrow(() -> new PaymentNotFoundException("rentalId: " + rentalId));
 		
+		PaymentStatus targetStatus = PaymentStatus.PENDING;
+		String currency = "brl";
+		
 		StripeCheckoutSession session = createCheckoutSession(
-				context.finalPrice(), "brl", context.paymentId());
+				context.finalPrice(), currency, context.paymentId());
 		
 		paymentRepository.reinitializePayment(context.paymentId(), context.currentPaymentStatus(),
-				session.sessionId(), PaymentProvider.STRIPE, PaymentStatus.PENDING,
-				context.finalPrice(), "brl");
+				session.sessionId(), PaymentProvider.STRIPE, targetStatus,
+				context.finalPrice(), currency);
 		
         log.debug("Session URL: {}", session.url());
+        
+        eventPublisher.publish(new PaymentReinitializedEvent(
+        		AuditAction.PAYMENT_REINITIALIZED, "SYSTEM_SCHEDULER", context.paymentId(),
+        		mapper.toAuditSnapshot(
+        				context, targetStatus, currency, PaymentProvider.STRIPE,
+        				session.sessionId(), null),
+        		mapper.toAuditSnapshot(context),
+        		Instant.now(clock)));
 	}
 	
 	private void publishDefaultStatusChangedEvent(String actorId, String paymentId,

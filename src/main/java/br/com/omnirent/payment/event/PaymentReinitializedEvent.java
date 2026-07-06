@@ -7,16 +7,11 @@ import br.com.omnirent.common.audit.AuditableEvent;
 import br.com.omnirent.common.event.DomainEvent;
 import br.com.omnirent.payment.context.audit.PaymentAuditSnapshot;
 
-public record PaymentCreatedEvent(
+public record PaymentReinitializedEvent(
 		AuditAction action,
 		String actorId,
 		String entityId,
 		PaymentAuditSnapshot currentBody,
+		PaymentAuditSnapshot previousBody,
 		Instant occurredAt
-		) implements DomainEvent, AuditableEvent<PaymentAuditSnapshot> {
-
-		@Override
-		public PaymentAuditSnapshot previousBody() {
-			return null;
-		}
-	}
+		) implements DomainEvent, AuditableEvent<PaymentAuditSnapshot> {}
