@@ -1,5 +1,6 @@
 package br.com.omnirent.common.audit;
 
+import java.time.Clock;
 import java.time.Instant;
 
 import org.springframework.context.event.EventListener;
@@ -16,20 +17,16 @@ import lombok.RequiredArgsConstructor;
 public class AuditEventListener {
 
 	private final AuditLogRepository auditRepository;
-	
+		
 	private static final ObjectMapper objectMapper = new ObjectMapper()
 			.registerModule(new JavaTimeModule());
 	
 	@EventListener
-	public void handle(AuditableEvent event) {
+	public void handle(AuditableEvent<?> event) {
         AuditLog auditLog = new AuditLog(
-                null,
-                event.eventType(),
-                event.entityId(),
-                event.actorId(),
-                toJson(event.oldData()),
-                toJson(event.newData()),
-                Instant.now()
+                null, event.action(), event.entityId(), event.actorId(),
+                toJson(event.currentBody()), toJson(event.previousBody()),
+                event.occurredAt()
         );
 
         auditRepository.save(auditLog);

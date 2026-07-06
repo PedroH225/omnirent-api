@@ -1,12 +1,19 @@
 package br.com.omnirent.common.audit;
 
-import br.com.omnirent.common.event.DomainEvent;
+import java.time.Instant;
 
-public interface AuditableEvent extends DomainEvent {
-	
+public interface AuditableEvent<T extends AuditBody> {
+
+	AuditAction action();
+
 	String actorId();
 	
-	Object oldData();
+	String entityId();
 	
-	Object newData();
+	Instant occurredAt();
+
+	T currentBody();
+	
+	T previousBody();
+	
 }

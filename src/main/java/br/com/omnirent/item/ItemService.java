@@ -1,5 +1,6 @@
 package br.com.omnirent.item;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import br.com.omnirent.address.AddressService;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.SubCategory;
+import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
@@ -18,6 +20,7 @@ import br.com.omnirent.exception.domain.apptype.ItemErrorType;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.item.context.ItemStatusChangedAuditSnapshot;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
@@ -59,6 +62,8 @@ public class ItemService {
 	private ItemMapper itemMapper;
 	
 	private SpringDomainEventPublisher eventPublisher;
+	
+	private Clock clock;
 		
 	public ItemDetailDTO getItemById(String id) {
 		ItemDetailDTO result = queryRepository.findItemDetailDTO(id)
@@ -113,8 +118,8 @@ public class ItemService {
 		Item persistedItem = itemRepository.save(item);
 		
 		eventPublisher.publish(new ItemCreatedEvent(
-				currentUserId, item.getId(), 
-				itemMapper.toAuditSnapshot(persistedItem)));
+				AuditAction.ITEM_CREATED, currentUserId, item.getId(), 
+				itemMapper.toAuditSnapshot(persistedItem), Instant.now(clock)));
 		
 		return itemMapper.toCreatedDto(persistedItem);
 	}
@@ -141,8 +146,10 @@ public class ItemService {
 		ItemUpdatedDTO itemUpdatedDTO = itemMapper.toItemUpdatedDTO(context, request);
 		
 		eventPublisher.publish(new ItemUpdatedEvent(
-				currentUserId, itemUpdatedDTO.getId(), 
-				itemMapper.toAuditSnapshot(itemUpdatedDTO), Instant.now()));
+				AuditAction.ITEM_UPDATED, currentUserId, itemUpdatedDTO.getId(), 
+				itemMapper.toAuditSnapshot(itemUpdatedDTO),
+				itemMapper.buildPreviousSnapshot(context),
+				Instant.now(clock)));
 		
 		return itemUpdatedDTO;
 	}
@@ -155,7 +162,8 @@ public class ItemService {
 	    authorizationService.requireNotBlocked(context.status());
 	    authorizationService.requireOwner(context.ownerId(), currentUserId);
 	    
-	    if (context.currentAddressId().equals(newAddressId)) {
+	    String previousAddressId = context.currentAddressId();
+	    if (previousAddressId.equals(newAddressId)) {
 	        return;
 	    }
 	    
@@ -163,15 +171,17 @@ public class ItemService {
 	        .getValidReference(newAddressId, currentUserId).getId();
 	    
 	    int updated = itemRepository.updatePickupAddress(
-	        itemId, validatedNewAddressId, context.currentAddressId(), context.status());
+	        itemId, validatedNewAddressId, previousAddressId, context.status());
 
 	    if (updated == 0) {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 	    }
 	    
 	    eventPublisher.publish(new ItemAddressChangedEvent(
-				currentUserId, context.id(), 
-				validatedNewAddressId, Instant.now()));
+	    		AuditAction.ITEM_ADDRESS_CHANGED, currentUserId, context.id(), 
+				itemMapper.toReassignedAuditSnapshot(validatedNewAddressId),
+				itemMapper.toReassignedAuditSnapshot(previousAddressId),
+				Instant.now(clock)));
 	}
 	
 	@Transactional
@@ -182,7 +192,8 @@ public class ItemService {
 	    authorizationService.requireNotBlocked(context.status());
 	    authorizationService.requireOwner(context.ownerId(), currentUserId);
 	    
-	    if (context.currentSubCategoryId().equals(newSubCategory)) {
+	    String previousSubCategoryId = context.currentSubCategoryId();
+	    if (previousSubCategoryId.equals(newSubCategory)) {
 	        return;
 	    }
 	    
@@ -190,15 +201,17 @@ public class ItemService {
 	        .getValidSubReference(newSubCategory).getId();
 	    
 	    int updated = itemRepository.updateItemSubCategory(
-	        itemId, validatedNewSubCatId, context.currentSubCategoryId(), context.status());
+	        itemId, validatedNewSubCatId, previousSubCategoryId, context.status());
 
 	    if (updated == 0) {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 	    }
 	    
 	    eventPublisher.publish(new ItemSubcategoryChangedEvent(
-				currentUserId, context.id(), 
-				validatedNewSubCatId, Instant.now()));
+	    		AuditAction.ITEM_CATEGORY_CHANGED, currentUserId, context.id(), 
+				itemMapper.toReassignedAuditSnapshot(validatedNewSubCatId),
+				itemMapper.toReassignedAuditSnapshot(previousSubCategoryId),
+				Instant.now(clock)));
 	}
 
 	@Transactional
@@ -221,8 +234,11 @@ public class ItemService {
 		}
 		
 		eventPublisher.publish(new ItemStatusUpdatedEvent(
-				currentUserId, context.id(), 
-				newStatus, Instant.now()));
+				AuditAction.ITEM_STATUS_UPDATED, currentUserId, context.id(), 
+				itemMapper.toStatusChangedAuditSnapshot(newStatus),
+				itemMapper.toStatusChangedAuditSnapshot(currentStatus), 
+				Instant.now(clock)));
+		
 	}
 
 	public ItemEnums getEnums() {

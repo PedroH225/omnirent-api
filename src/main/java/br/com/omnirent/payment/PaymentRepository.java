@@ -38,14 +38,6 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     @Modifying
     @Query("""
     		UPDATE Payment p
-    		SET p.status = :status
-    		WHERE p.id = :paymentId
-    		""")
-    int updateStatus(String paymentId, PaymentStatus status);
-    
-    @Modifying
-    @Query("""
-    		UPDATE Payment p
     		SET p.status = :pending, p.externalReference.externalPaymentId = :sessionId,
     		p.externalReference.paymentIntent = null, p.externalReference.paymentProvider = :provider,
     		p.paidAt = null, p.amount = :amount, p.currency = :currency

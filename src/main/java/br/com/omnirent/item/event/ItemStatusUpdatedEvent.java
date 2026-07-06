@@ -1,26 +1,17 @@
 package br.com.omnirent.item.event;
 
 import java.time.Instant;
-import java.util.Map;
 
+import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.audit.AuditableEvent;
-import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.common.event.DomainEvent;
+import br.com.omnirent.item.context.ItemStatusChangedAuditSnapshot;
 
 public record ItemStatusUpdatedEvent(
+		AuditAction action,
 		String actorId,
 		String entityId,
-		ItemStatus newStatus,
+		ItemStatusChangedAuditSnapshot currentBody,
+		ItemStatusChangedAuditSnapshot previousBody,
 		Instant occurredAt
-) implements DomainEvent, AuditableEvent {
-
-	@Override
-	public Object oldData() {
-		return null;
-	}
-
-	@Override
-	public Object newData() {
-		return Map.of("newStatus", newStatus);
-	}
-}
+		) implements DomainEvent, AuditableEvent<ItemStatusChangedAuditSnapshot> {}

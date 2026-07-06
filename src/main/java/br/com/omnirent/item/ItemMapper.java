@@ -17,6 +17,8 @@ import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.item.context.ItemAuditSnapshot;
 import br.com.omnirent.item.context.ItemInfo;
+import br.com.omnirent.item.context.ItemReassignedAuditSnapshot;
+import br.com.omnirent.item.context.ItemStatusChangedAuditSnapshot;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
@@ -194,5 +196,24 @@ public class ItemMapper {
 	            itemData.getBasePrice(),
 	            itemData.getItemCondition(),
 	            null, null, null, null);
+	}
+	
+	public ItemAuditSnapshot buildPreviousSnapshot(UpdateItemContext context) {
+		ItemInfo item = context.itemInfo();
+		return new ItemAuditSnapshot(
+	            item.getId(), item.getItemName(), 
+	            item.getBrand(),  item.getModel(), 
+	            item.getDescription(), item.getBasePrice(),
+	            item.getItemCondition(), context.status(), 
+	            context.ownerId(), context.subCategoryId(), context.addressId()
+	    );
+	}
+	
+	public ItemReassignedAuditSnapshot toReassignedAuditSnapshot(String id) {
+		return new ItemReassignedAuditSnapshot(id);
+	}
+	
+	public ItemStatusChangedAuditSnapshot toStatusChangedAuditSnapshot(ItemStatus status) {
+		return new ItemStatusChangedAuditSnapshot(status);
 	}
 } 

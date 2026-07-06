@@ -12,6 +12,7 @@ import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.payment.context.PaymentCanceledContext;
 import br.com.omnirent.payment.context.PaymentConfirmedContext;
 import br.com.omnirent.payment.context.PaymentExpiredContext;
+import br.com.omnirent.payment.context.PaymentRefundContext;
 import br.com.omnirent.payment.context.ReopenPaymentContext;
 import br.com.omnirent.payment.model.Payment;
 
@@ -19,7 +20,8 @@ public interface PaymentQueryRepository extends Repository<Payment, String> {
 
 	@Query("""
 			SELECT new br.com.omnirent.payment.context.PaymentConfirmedContext(
-			p.id, p.status, r.id, r.rentalStatus)
+			p.id, p.status, r.id, r.rentalStatus, p.externalReference.paymentIntent,
+			p.paidAt)
 			FROM Payment p JOIN p.rental r
 			WHERE p.id = :id
 			""")
@@ -33,6 +35,12 @@ public interface PaymentQueryRepository extends Repository<Payment, String> {
 			""")
 	Optional<PaymentCanceledContext> findCanceledContext(String rentalId);
 
+	@Query("""
+			SELECT new br.com.omnirent.payment.context.PaymentRefundContext(p.status)
+			FROM Payment p
+			WHERE p.id = :id
+			""")
+	Optional<PaymentRefundContext> findRefundContext(String id);
 	
 	@Query("""
 			SELECT p.id FROM Payment p
@@ -51,9 +59,18 @@ public interface PaymentQueryRepository extends Repository<Payment, String> {
 
 	@Query("""
 			SELECT new br.com.omnirent.payment.context.ReopenPaymentContext(
-			p.id, r.id, r.finalPrice, p.status)
+			p.id, r.id, r.finalPrice, p.currency, p.status, 
+			p.externalReference.paymentProvider, p.externalReference.externalPaymentId,
+			p.externalReference.paymentIntent)
 			FROM Payment p JOIN p.rental r
 			WHERE r.id = :rentalId
 			""")
 	Optional<ReopenPaymentContext> findRopenPaymentContext(String rentalId);
+
+	@Query("""
+			SELECT p.id
+			FROM Payment p
+			WHERE p.rentalId = :rentalId
+			""")
+	Optional<String> getPaymentId(String rentalId);
 }

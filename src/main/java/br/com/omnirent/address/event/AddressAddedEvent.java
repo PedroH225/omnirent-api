@@ -3,15 +3,17 @@ package br.com.omnirent.address.event;
 import java.time.Instant;
 
 import br.com.omnirent.address.context.AddressAuditSnapshot;
+import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.audit.AuditableEvent;
 import br.com.omnirent.common.event.DomainEvent;
 
-public record AddressAddedEvent(		
+public record AddressAddedEvent(	
+		AuditAction action,
 		String actorId,
 		String addressId,
-		AddressAuditSnapshot data,
+		AddressAuditSnapshot currentBody,
 		Instant occurredAt
-		) implements DomainEvent, AuditableEvent {
+		) implements DomainEvent, AuditableEvent<AddressAuditSnapshot> {
 		
 		@Override
 		public String entityId() {
@@ -19,12 +21,7 @@ public record AddressAddedEvent(
 		}
 
 		@Override
-		public Object oldData() {
+		public AddressAuditSnapshot previousBody() {
 			return null;
-		}
-
-		@Override
-		public Object newData() {
-			return data;
 		}
 } 

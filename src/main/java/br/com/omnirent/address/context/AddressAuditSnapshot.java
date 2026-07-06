@@ -1,5 +1,7 @@
 package br.com.omnirent.address.context;
 
+import br.com.omnirent.common.audit.AuditBody;
+
 public record AddressAuditSnapshot(
         String id,
         String street,
@@ -10,4 +12,4 @@ public record AddressAuditSnapshot(
         String state,
         String country,
         String zipCode
-) {}
+		) implements AuditBody {}

@@ -21,6 +21,8 @@ import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.dto.ItemSnapshotDTO;
 import br.com.omnirent.rental.context.RentalAuditSnapshot;
+import br.com.omnirent.rental.context.RentalInUseAuditSnapshot;
+import br.com.omnirent.rental.context.RentalStatusChangedAuditSnapshot;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
@@ -131,5 +133,13 @@ public class RentalMapper {
 	            addressMapper.toAuditSnapshot(rental.getAddressSnapshot()), 
 	            rental.getRenterId(), rental.getOwnerId()
 	    );
+	}
+	
+	public RentalStatusChangedAuditSnapshot toStatusChangedSnapshot(RentalStatus status) {
+		return new RentalStatusChangedAuditSnapshot(status);
+	}
+
+	public RentalInUseAuditSnapshot toInUseSnapshot(RentalStatus targetStatus, Instant startDate, Instant endDateTime) {
+		return new RentalInUseAuditSnapshot(targetStatus, startDate, endDateTime);
 	}
 }

@@ -2,28 +2,22 @@ package br.com.omnirent.item.event;
 
 import java.time.Instant;
 
+import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.audit.AuditableEvent;
+import br.com.omnirent.common.event.DomainEvent;
 import br.com.omnirent.infrastructure.IntegrationEvent;
 import br.com.omnirent.item.context.ItemAuditSnapshot;
 
 public record ItemCreatedEvent(
+		AuditAction action,
 		String actorId,
 		String entityId,
-		ItemAuditSnapshot data
-) implements AuditableEvent, IntegrationEvent {
+		ItemAuditSnapshot currentBody,
+		Instant occurredAt
+		) implements DomainEvent, AuditableEvent<ItemAuditSnapshot>, IntegrationEvent {
 
-	@Override
-	public Object oldData() {
-		return null;
+		@Override
+		public ItemAuditSnapshot previousBody() {
+			return null;
+		}
 	}
-
-	@Override
-	public Object newData() {
-		return data;
-	}
-	
-	@Override
-	public Instant occurredAt() {
-		return Instant.now();
-	}
-}

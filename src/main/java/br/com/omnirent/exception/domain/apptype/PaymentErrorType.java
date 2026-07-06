@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public enum PaymentErrorType implements AppErrorType {
 
-    ERROR("", "", "", HttpStatus.CONFLICT);
+    NOT_FOUND("NOT_FOUND", "PAYMENT_NOT_FOUND", "not.found", HttpStatus.NOT_FOUND);
     	
     private String errorType;
 	

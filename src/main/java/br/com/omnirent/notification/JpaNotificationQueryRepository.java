@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
+import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.notification.context.RentalInUseNotificationData;
 import br.com.omnirent.notification.context.RentalLateNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
@@ -22,7 +23,7 @@ public class JpaNotificationQueryRepository implements NotificationQueryReposito
 	public Optional<UserNotificationData> findNotificationData(String userId) {
 	    return em.createQuery("""
 	        SELECT new br.com.omnirent.notification.context.UserNotificationData(
-	            u.id, u.username, u.email, u.locale)
+	            u.id, u.username, u.email, u.userStatus, u.locale)
 	        FROM User u
 	        WHERE u.id = :id
 	        """, UserNotificationData.class)
@@ -100,6 +101,7 @@ public class JpaNotificationQueryRepository implements NotificationQueryReposito
 	            (String) result[offset + 1],
 
 	            (String) result[offset + 2],
+	            null,
 	            (String) result[offset + 3]
 	    );
 	}

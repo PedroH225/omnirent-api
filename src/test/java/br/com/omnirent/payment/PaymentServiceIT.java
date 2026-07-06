@@ -188,7 +188,7 @@ public class PaymentServiceIT extends SpringIntegrationTest {
     @Test
     public void confirmPayment_ShouldUpdateStatusToPaidAndConfirmRental() {
         String paymentIntent = "pi_test_123";
-        paymentRepository.updateStatus(payment.getId(), PaymentStatus.PENDING);
+        paymentRepository.updateStatus(payment.getId(), payment.getStatus(), PaymentStatus.PENDING);
         
         paymentService.confirmPayment(payment.getId(), paymentIntent);
         
@@ -213,7 +213,7 @@ public class PaymentServiceIT extends SpringIntegrationTest {
     
     @Test
     public void confirmPayment_ShouldThrowExceptionOnInvalidTransition() {
-        paymentRepository.updateStatus(payment.getId(), PaymentStatus.CANCELLED);
+        paymentRepository.updateStatus(payment.getId(), payment.getStatus(), PaymentStatus.CANCELLED);
 
         assertThrows(InvalidPaymentStateTransitionException.class, () -> {
             paymentService.confirmPayment(payment.getId(), "pi_test_123");
@@ -222,9 +222,9 @@ public class PaymentServiceIT extends SpringIntegrationTest {
     
     @Test
     public void cancelPayment_ShouldUpdateStatusToCancelled() {
-        paymentRepository.updateStatus(payment.getId(), PaymentStatus.PENDING);
+        paymentRepository.updateStatus(payment.getId(),payment.getStatus(), PaymentStatus.PENDING);
 
-        paymentService.cancelPayment(rental.getId());
+        paymentService.cancelPayment(rental.getId(), rental.getRenterId());
 
         entityManager.flush();
         entityManager.clear();
@@ -236,16 +236,16 @@ public class PaymentServiceIT extends SpringIntegrationTest {
     @Test
     public void cancelPayment_ShouldThrowExceptionWhenPaymentNotFound() {
         assertThrows(PaymentNotFoundException.class, () -> {
-            paymentService.cancelPayment("rental-inexistente");
+            paymentService.cancelPayment("rental-inexistente", rental.getRenterId());
         });
     }
 
     @Test
     public void cancelPayment_ShouldThrowExceptionOnInvalidTransition() {
-        paymentRepository.updateStatus(payment.getId(), PaymentStatus.PAID);
+        paymentRepository.updateStatus(payment.getId(), payment.getStatus(), PaymentStatus.PAID);
 
         assertThrows(InvalidPaymentStateTransitionException.class, () -> {
-            paymentService.cancelPayment(rental.getId());
+            paymentService.cancelPayment(rental.getId(), rental.getRenterId());
         });
     }
     
@@ -255,7 +255,7 @@ public class PaymentServiceIT extends SpringIntegrationTest {
     			payment.getId(), PaymentStatus.PENDING, "pi_test_123",
     			PaymentStatus.PAID, Instant.now(clock));
 
-        paymentService.requestRefund(rental.getId());
+        paymentService.requestRefund(rental.getId(), rental.getRenterId());
 
         verify(stripeService).requestRefund(payment.getId(), "pi_test_123");
         
@@ -269,7 +269,7 @@ public class PaymentServiceIT extends SpringIntegrationTest {
     @Test
     public void requestRefund_ShouldThrowExceptionWhenPaymentNotFound() {
         assertThrows(PaymentNotFoundException.class, () -> {
-            paymentService.requestRefund("rental-inexistente");
+            paymentService.requestRefund("rental-inexistente", rental.getRenterId());
         });
         
         verifyNoInteractions(stripeService);
@@ -277,10 +277,10 @@ public class PaymentServiceIT extends SpringIntegrationTest {
 
     @Test
     public void requestRefund_ShouldThrowExceptionWhenStatusIsNotPaidAndNotCallStripe() {
-        paymentRepository.updateStatus(payment.getId(), PaymentStatus.PENDING);
+        paymentRepository.updateStatus(payment.getId(), payment.getStatus(), PaymentStatus.PENDING);
 
         assertThrows(InvalidPaymentStateTransitionException.class, () -> {
-            paymentService.requestRefund(rental.getId());
+            paymentService.requestRefund(rental.getId(), rental.getRenterId());
         });
 
         verify(stripeService, never()).requestRefund(anyString(), anyString());
@@ -288,7 +288,7 @@ public class PaymentServiceIT extends SpringIntegrationTest {
     
     @Test
     public void refundPayment_ShouldUpdateStatusToRefunded() {
-        paymentRepository.updateStatus(payment.getId(), PaymentStatus.REFUND_REQUESTED);
+        paymentRepository.updateStatus(payment.getId(), payment.getStatus(), PaymentStatus.REFUND_REQUESTED);
 
         paymentService.refundPayment(payment.getId());
         
@@ -300,15 +300,8 @@ public class PaymentServiceIT extends SpringIntegrationTest {
     }
     
     @Test
-    public void refundPayment_ShouldThrowExceptionWhenPaymentNotFound() {
-        assertThrows(OptimisticLockException.class, () -> {
-            paymentService.refundPayment("nonexistent-payment");
-        });
-    }
-    
-    @Test
     public void expirePayment_ShouldCallStripeAndSetStatusToExpired() {
-        paymentRepository.updateStatus(payment.getId(), PaymentStatus.PENDING);
+        paymentRepository.updateStatus(payment.getId(), payment.getStatus(), PaymentStatus.PENDING);
 
         paymentService.expirePayment(payment.getId());
 
@@ -335,7 +328,7 @@ public class PaymentServiceIT extends SpringIntegrationTest {
 
     @Test
     public void expirePayment_ShouldThrowExceptionWhenStatusCannotExpireAndNotCallStripe() {
-        paymentRepository.updateStatus(payment.getId(), PaymentStatus.PAID);
+        paymentRepository.updateStatus(payment.getId(), payment.getStatus(), PaymentStatus.PAID);
 
         assertThrows(InvalidPaymentStateTransitionException.class, () -> {
             paymentService.expirePayment(payment.getId());

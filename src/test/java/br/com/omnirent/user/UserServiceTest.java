@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,6 +59,9 @@ public class UserServiceTest {
 	
 	@Mock
 	private SpringDomainEventPublisher eventPublisher;
+	
+	@Mock
+	private Clock clock;
 
 	@Test
 	void shouldThrowExceptionWhenUserDoesNotExist() {
@@ -211,7 +215,6 @@ public class UserServiceTest {
 		when(queryRepository.getUserStatusChangeContext(userId)).thenReturn(Optional.of(context));
 		when(context.currentUserStatus()).thenReturn(UserStatus.ACTIVE);
 		when(userRepository.updateUserStatus(userId, UserStatus.ACTIVE, UserStatus.INACTIVE)).thenReturn(1);
-		when(context.locale()).thenReturn("pt-BR");
 
 		userService.changeUserStatus();
 
@@ -228,7 +231,6 @@ public class UserServiceTest {
 		when(queryRepository.getUserStatusChangeContext(userId)).thenReturn(Optional.of(context));
 		when(context.currentUserStatus()).thenReturn(UserStatus.INACTIVE);
 		when(userRepository.updateUserStatus(userId, UserStatus.INACTIVE, UserStatus.ACTIVE)).thenReturn(1);
-		when(context.locale()).thenReturn("pt-BR");
 		
 		userService.changeUserStatus();
 
