@@ -3,6 +3,8 @@ package br.com.omnirent.common.audit;
 import java.time.Instant;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,15 +24,16 @@ public class AuditLog {
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private String id;
 	
-	private String eventType;
+	@Enumerated(EnumType.STRING)
+	private AuditAction action;
 	
 	private String entityId;
 	
 	private String actorId;
 	
-	private String oldData;
-
-	private String newData;
+	private String currentBody;
+	
+	private String previousBody;
 	
 	private Instant occurredAt;
 }
