@@ -148,7 +148,7 @@ public class PaymentService {
 	}
 	
     @Transactional
-	public void requestRefund(String rentalId) {
+	public void requestRefund(String rentalId, String actorId) {
 		PaymentStatus targetStatus = PaymentStatus.REFUND_REQUESTED;
 		PaymentCanceledContext context = queryRepository.findCanceledContext(rentalId)
 				.orElseThrow(() -> new PaymentNotFoundException(
@@ -166,6 +166,8 @@ public class PaymentService {
 			throw new OptimisticLockException(
 					"PaymentRefundRequested", paymentId);
 	    }
+	    
+		publishDefaultStatusChangedEvent(actorId, paymentId, targetStatus, currStatus);
 	}
     
     @Transactional
