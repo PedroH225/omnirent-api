@@ -66,4 +66,11 @@ public interface PaymentQueryRepository extends Repository<Payment, String> {
 			WHERE r.id = :rentalId
 			""")
 	Optional<ReopenPaymentContext> findRopenPaymentContext(String rentalId);
+
+	@Query("""
+			SELECT p.id
+			FROM Payment p
+			WHERE p.rentalId = :rentalId
+			""")
+	Optional<String> getPaymentId(String rentalId);
 }

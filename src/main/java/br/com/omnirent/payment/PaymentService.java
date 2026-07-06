@@ -3,27 +3,42 @@ package br.com.omnirent.payment;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.audit.AuditAction;
+import br.com.omnirent.common.audit.AuditBody;
+import br.com.omnirent.common.audit.AuditEntry;
+import br.com.omnirent.common.audit.AuditService;
 import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.config.properties.AppProperties;
+import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.InvalidPaymentStateTransitionException;
 import br.com.omnirent.exception.domain.InvalidRentalStatusTransitionException;
 import br.com.omnirent.exception.domain.OptimisticLockException;
 import br.com.omnirent.exception.domain.PaymentNotFoundException;
+import br.com.omnirent.exception.domain.apptype.PaymentErrorType;
 import br.com.omnirent.payment.context.PaymentCanceledContext;
 import br.com.omnirent.payment.context.PaymentConfirmedContext;
 import br.com.omnirent.payment.context.PaymentExpiredContext;
 import br.com.omnirent.payment.context.PaymentRefundContext;
 import br.com.omnirent.payment.context.ReopenPaymentContext;
+import br.com.omnirent.payment.context.audit.PaymentAuditSnapshot;
+import br.com.omnirent.payment.context.audit.PaymentConfirmedAuditSnapshot;
 import br.com.omnirent.payment.context.audit.PaymentStatusChangedAuditSnapshot;
 import br.com.omnirent.payment.dto.CheckoutCompletedDTO;
+import br.com.omnirent.payment.dto.PaymentConfirmedResponse;
+import br.com.omnirent.payment.dto.PaymentCreatedResponse;
+import br.com.omnirent.payment.dto.PaymentHistoryEntryResponse;
+import br.com.omnirent.payment.dto.PaymentHistoryResponse;
+import br.com.omnirent.payment.dto.PaymentStatusChangeResponse;
 import br.com.omnirent.payment.dto.StripeCheckoutSession;
 import br.com.omnirent.payment.enums.PaymentProvider;
 import br.com.omnirent.payment.event.PaymentConfirmedEvent;
@@ -61,6 +76,8 @@ public class PaymentService {
     private final SpringDomainEventPublisher eventPublisher;
     
     private final PaymentMapper mapper;
+    
+    private final AuditService auditService;
     
     @Transactional
     public void createPayment(
@@ -252,6 +269,45 @@ public class PaymentService {
 				new PaymentStatusChangedAuditSnapshot(newStatus),
 				new PaymentStatusChangedAuditSnapshot(oldStatus),
 				Instant.now(clock)));
+	}
+	
+	public List<PaymentHistoryResponse> getPaymentHistory(String rentalId) {
+		String paymentId = queryRepository.getPaymentId(rentalId)
+				.orElseThrow(() -> new ApiException(PaymentErrorType.NOT_FOUND));
+		
+		List<AuditEntry> auditEntries = auditService.getAuditLog(paymentId);
+		
+		return auditEntries.stream()
+				.map(a -> new PaymentHistoryResponse(
+						a.action(), a.actorId(), 
+						resolveDto(a.currentBody(), a.action()), 
+						resolveDto(a.previousBody(), a.action()),
+						a.occurredAt()))
+				.collect(Collectors.toList());
+	}
+	
+	private PaymentHistoryEntryResponse resolveDto(AuditBody body, AuditAction action) {
+		if (body == null) {
+		    return null;
+		}
+		
+		return switch (action) {
+        case PAYMENT_CREATED -> {
+            PaymentAuditSnapshot snapshot = (PaymentAuditSnapshot) body;
+            yield mapper.toPaymentResponse(snapshot);
+        } case PAYMENT_REINITIALIZED -> {
+            PaymentAuditSnapshot snapshot = (PaymentAuditSnapshot) body;
+        	yield mapper.toPaymentResponse(snapshot);
+        } case PAYMENT_STATUS_CHANGED -> {
+            PaymentStatusChangedAuditSnapshot snapshot = (PaymentStatusChangedAuditSnapshot) body;
+            yield new PaymentStatusChangeResponse(snapshot.status());
+        } case PAYMENT_CONFIRMED -> {
+            PaymentConfirmedAuditSnapshot snapshot = (PaymentConfirmedAuditSnapshot) body;
+            yield new PaymentConfirmedResponse(snapshot.status(), snapshot.paidAt());
+        }
+		default -> throw new IllegalArgumentException("Unexpected value: " + action);
+    };
+		
 	}
 	
 	private StripeCheckoutSession createCheckoutSession(
