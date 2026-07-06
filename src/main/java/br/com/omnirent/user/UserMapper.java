@@ -13,6 +13,7 @@ import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.security.context.LoginContext;
 import br.com.omnirent.user.context.UserAuditSnapshot;
+import br.com.omnirent.user.context.UserStatusChangeAuditSnapshot;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
@@ -74,5 +75,9 @@ public class UserMapper {
 	    		user.getId(), user.getName(),
 	    		user.getDisplayUsername(), user.getEmail(),
 	            user.getBirthDate().toString());
+	}
+	
+	public UserStatusChangeAuditSnapshot toStatusChangeAuditSnapshot(UserStatus status) {
+		return new UserStatusChangeAuditSnapshot(status);
 	}
 }

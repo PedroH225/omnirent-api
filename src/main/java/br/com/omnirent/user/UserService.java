@@ -1,13 +1,14 @@
 package br.com.omnirent.user;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
-import java.util.Locale;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
@@ -24,7 +25,6 @@ import br.com.omnirent.user.dto.UserResponseDTO;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
 import br.com.omnirent.user.event.UserUpdatedEvent;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -44,6 +44,8 @@ public class UserService {
 	private UserAutorizationService autorizationService;
 	
 	private SpringDomainEventPublisher eventPublisher;
+	
+	private Clock clock;
 		
 	public void requireExistence(String userId) {
 		if (!queryRepository.verifyUser(userId)) {
@@ -90,9 +92,9 @@ public class UserService {
 
 		eventPublisher.publish(
 		    new UserUpdatedEvent(
-		        userId, updatedUser.getId(),
+		    	AuditAction.USER_UPDATED, userId, updatedUser.getId(),
 		        userMapper.toAuditSnapshot(updatedUser),
-		        Instant.now()));
+		        Instant.now(clock)));
 
 		return updatedUser;
 	}
@@ -105,11 +107,12 @@ public class UserService {
 		
 		autorizationService.requireNotBanned(context.currentUserStatus());
 		
-		UserStatus newStatus = context.currentUserStatus() == UserStatus.ACTIVE ?
+		UserStatus currentStatus = context.currentUserStatus();
+		UserStatus newStatus = currentStatus == UserStatus.ACTIVE ?
 				UserStatus.INACTIVE : UserStatus.ACTIVE;
 		
 		int updated =
-				userRepository.updateUserStatus(userId, context.currentUserStatus(), newStatus);
+				userRepository.updateUserStatus(userId, currentStatus, newStatus);
 		
 		if (updated == 0) {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
@@ -117,9 +120,10 @@ public class UserService {
 		
 		eventPublisher.publish(
 			    new UserStatusChangeEvent(
-			        userId, userId, newStatus, context.email(),
-			        context.username(), Locale.forLanguageTag(context.locale())
-			        ));	
+			    	AuditAction.USER_STATUS_CHANGED, userId, userId,
+			        userMapper.toStatusChangeAuditSnapshot(newStatus),
+			        userMapper.toStatusChangeAuditSnapshot(currentStatus),
+			        Instant.now(clock)));	
 	}
 	
 	public UserEnums getEnums() {

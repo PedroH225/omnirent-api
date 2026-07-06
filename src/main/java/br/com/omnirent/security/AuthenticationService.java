@@ -1,5 +1,6 @@
 package br.com.omnirent.security;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.exception.common.ApiException;
@@ -61,6 +63,9 @@ public class AuthenticationService implements UserDetailsService {
     
     @Autowired
 	private SpringDomainEventPublisher eventPublisher;
+    
+    @Autowired
+    private Clock clock;
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -107,9 +112,9 @@ public class AuthenticationService implements UserDetailsService {
 		
         eventPublisher.publish(
 			    new UserRegisteredEvent(
-			        persistedUser.getId(),
+			    	AuditAction.USER_REGISTERED, persistedUser.getId(),
 			        mapper.toAuditSnapshot(persistedUser),
-			        userLocale));
+			        Instant.now(clock), userLocale));
         
         return ResponseEntity.ok().build();
     }
