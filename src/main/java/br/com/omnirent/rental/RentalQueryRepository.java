@@ -9,6 +9,7 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.rental.context.RentalInUseContext;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
@@ -67,6 +68,17 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 			""")
 	 Optional<RentalStatusChangeContext> getStatusChangeContext(@Param("id")String rentalId);
 
+	
+	@Query("""
+			SELECT new br.com.omnirent.rental.context.RentalInUseContext(
+			r.id, r.ownerId, r.renterId, r.rentalStatus, r.rentalPeriod,
+			r.startDate, r.endDate)
+			FROM Rental r
+			WHERE r.id = :id
+			""")
+	 Optional<RentalInUseContext> getStatusInUseContext(@Param("id")String rentalId);
+
+	
 	@Query("""
 		    SELECT r.id
 		    FROM Rental r
@@ -81,8 +93,17 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 		    FROM Rental r
 		    WHERE r.rentalStatus = :status AND r.updatedAt <= :threshold
 		    """)
-	List<RentalStatusChangeContext> findShippedAfterThreshold(RentalStatus status, Instant threshold);
+	List<RentalStatusChangeContext> findReturnShippedAfterThreshold(RentalStatus status, Instant threshold);
 
+	@Query("""
+			SELECT new br.com.omnirent.rental.context.RentalInUseContext
+			(r.id, r.ownerId, r.renterId, r.rentalStatus, r.rentalPeriod,
+			r.startDate, r.endDate)
+		    FROM Rental r
+		    WHERE r.rentalStatus = :status AND r.updatedAt <= :threshold
+		    """)
+	List<RentalInUseContext> findShippedAfterThreshold(RentalStatus status, Instant threshold);
+	
 	@Query("""
 		    SELECT r.expiredAt
 		    FROM Rental r
@@ -92,4 +113,5 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 		      AND r.expiredAt >= :threshold
 		""")
 	Optional<Instant> canCreateRental(String userId, String itemId, RentalStatus expired, Instant threshold);
+
 }

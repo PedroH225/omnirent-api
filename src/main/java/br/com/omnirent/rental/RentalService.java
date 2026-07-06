@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.enums.RentalEnums;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
@@ -20,6 +21,7 @@ import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
+import br.com.omnirent.rental.context.RentalInUseContext;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.domain.RentalAuthorizationService;
@@ -92,6 +94,11 @@ public class RentalService {
 		return queryRepository.getStatusChangeContext(rentId)
 				.orElseThrow(() -> new ApiException(RentalErrorType.NOT_FOUND));
 	}
+	
+	private RentalInUseContext getInUseContext(String rentId) {
+		return queryRepository.getStatusInUseContext(rentId)
+				.orElseThrow(() -> new ApiException(RentalErrorType.NOT_FOUND));
+	}
 
 	@Transactional
 	public RentalCreatedDTO addRent(RentalRequestDTO rentalRequestDTO) {
@@ -116,8 +123,9 @@ public class RentalService {
 		Rental persistedRental = rentalRepository.save(rental);
 		
 		eventPublisher.publish(
-				new RentalCreatedEvent(userId, persistedRental.getId(),
-						mapper.toAuditSnapshot(persistedRental)));
+				new RentalCreatedEvent(
+						AuditAction.RENTAL_CREATED, userId, persistedRental.getId(),
+						mapper.toAuditSnapshot(persistedRental), Instant.now(clock)));
 		
 		eventPublisher.publish(
 				new PaymentRequestedEvent(rental.getId(), userId, finalPrice, "brl"));
@@ -161,10 +169,11 @@ public class RentalService {
 	public RentalDisplayDTO markInUse(String rentId) {
 		String currentUserId = currentUserProvider.currentUserId();
 
-		RentalStatusChangeContext context = getStatusChangeContext(rentId);
+		RentalStatus targetStatus = RentalStatus.IN_USE;
+		RentalInUseContext context = getInUseContext(rentId);
 		
-		RentalStatus currStatus = context.getRentalStatus();
-		Set<String> actors = Set.of(context.getOwnerId(), context.getRenterId());
+		RentalStatus currStatus = context.rentalStatus();
+		Set<String> actors = Set.of(context.ownerId(), context.renterId());
 		
 		authorizationService.requireOne(actors, currentUserId);
 		
@@ -172,54 +181,54 @@ public class RentalService {
 			throw new ApiException(CommonErrorType.FORBIDDEN);
 		}
 		
-		validateTransition(currStatus, RentalStatus.IN_USE);
+		validateTransition(currStatus, targetStatus);
 		
 		Instant startDate = Instant.now(clock);
 		Instant endDateTime = rentalDateService.
-				calculateEndDate(startDate, context.getRentalPeriod());
+				calculateEndDate(startDate, context.rentalPeriod());
 		
-		rentalRepository.updateRentalPeriodAndStatus(rentId, RentalStatus.IN_USE, startDate, endDateTime);
+		rentalRepository.updateRentalPeriodAndStatus(rentId, targetStatus, startDate, endDateTime);
 		
 		RentalDisplayDTO rentalDto = findRentalDisplayDTO(rentId);
 		
-		eventPublisher.publish(new RentalInUseEvent(
-				currentUserId, rentalDto.getId(),
-				context.getRentalStatus(), startDate, endDateTime, Instant.now()));
+		publishInUseTransition(context, currentUserId, targetStatus,
+				startDate, endDateTime);
 		
 		return rentalDto;
 	}
 	
 	@Transactional
-	public void markInUse(List<RentalStatusChangeContext> shippedRentals) {
+	public void markInUse(List<RentalInUseContext> shippedRentals) {
+		RentalStatus targetStatus = RentalStatus.IN_USE;
 		Instant startDate = Instant.now(clock);			
-		for(RentalStatusChangeContext context : shippedRentals) {
+		
+		for(RentalInUseContext context : shippedRentals) {
 			Instant endDateTime = rentalDateService.
-					calculateEndDate(startDate, context.getRentalPeriod());
+					calculateEndDate(startDate, context.rentalPeriod());
 			rentalRepository
-			.updateRentalPeriodAndStatus(context.getId(), RentalStatus.IN_USE,
+			.updateRentalPeriodAndStatus(context.id(), targetStatus,
 					startDate, endDateTime);
 			
-			eventPublisher.publish(new RentalInUseEvent(
-					"SYSTEM_SCHEDULER", context.getId(),
-					context.getRentalStatus(), startDate, endDateTime, Instant.now(clock)));
+			publishInUseTransition(context, "SYSTEM_SCHEDULER", 
+					targetStatus, startDate, endDateTime);
 		}
 	}
 	
 	@Transactional
 	public void renewRental(String rentalId) {
-		RentalStatusChangeContext context = getStatusChangeContext(rentalId);
+		RentalInUseContext context = getInUseContext(rentalId);
 
+		RentalStatus targetStatus = RentalStatus.IN_USE;
 		Instant startDate = Instant.now(clock);			
 		Instant endDateTime = rentalDateService.
-				calculateEndDate(startDate, context.getRentalPeriod());
+				calculateEndDate(startDate, context.rentalPeriod());
 		
 		rentalRepository
 		.updateRentalPeriodAndStatus(rentalId, RentalStatus.IN_USE,
 				startDate, endDateTime);
 		
-		eventPublisher.publish(new RentalInUseEvent(
-				"SYSTEM_RENEWAL", rentalId,
-				context.getRentalStatus(), startDate, endDateTime, Instant.now(clock)));
+		publishInUseTransition(context, "SYSTEM_RENEWAL", targetStatus,
+				startDate, endDateTime);
 	}
 	
 	@Transactional
@@ -299,8 +308,10 @@ public class RentalService {
 		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
 		eventPublisher.publish(new RentalCanceledEvent(
-				currentUserId, rentId, currStatus, 
-				targetStatus, Instant.now(clock)));		
+				AuditAction.RENTAL_CANCELED, "SERVER_EXPIRATION", rentId,
+				mapper.toStatusChangedSnapshot(targetStatus), 
+				mapper.toStatusChangedSnapshot(currStatus), 
+				Instant.now(clock)));
 	}
 	
 	@Transactional
@@ -315,8 +326,10 @@ public class RentalService {
 		rentalRepository.markExpired(rentId, targetStatus, currTime);
 		
 		eventPublisher.publish(new RentalExpiredEvent(
-				"SERVER_EXPIRATION", rentId, currStatus, 
-				targetStatus, currTime));
+				AuditAction.RENTAL_EXPIRED, "SERVER_EXPIRATION", rentId,
+				mapper.toStatusChangedSnapshot(targetStatus), 
+				mapper.toStatusChangedSnapshot(currStatus), 
+				currTime));
 	}
 
 	@Transactional
@@ -340,8 +353,24 @@ public class RentalService {
 	private void publishDefaultTransition(
 			String actorId, String entityId, RentalStatus oldStatus, RentalStatus newStatus) {
 		eventPublisher.publish(new RentalStatusChangedEvent(
-				actorId, entityId,
-				oldStatus, newStatus, Instant.now(clock)));
+				AuditAction.RENTAL_STATUS_CHANGED, actorId, entityId,
+				mapper.toStatusChangedSnapshot(newStatus), 
+				mapper.toStatusChangedSnapshot(oldStatus), 
+				Instant.now(clock)));
+	}
+	
+	private void publishInUseTransition(
+			RentalInUseContext context,
+			String actor,
+	        RentalStatus targetStatus,
+	        Instant startDate,
+	        Instant endDateTime) {
+
+	    eventPublisher.publish(new RentalInUseEvent(
+	            AuditAction.RENTAL_IN_USE, actor, context.id(),
+	            mapper.toInUseSnapshot(targetStatus, startDate, endDateTime),
+	            mapper.toInUseSnapshot(context.rentalStatus(), context.startDate(), context.endDate()),
+	            Instant.now(clock)));
 	}
 
 	public List<RentalDisplayDTO> findUserRentals() {

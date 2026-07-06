@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
+import br.com.omnirent.rental.context.RentalInUseAuditSnapshot;
+import br.com.omnirent.rental.context.RentalInUseContext;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.event.RentalLateEvent;
 import jakarta.transaction.Transactional;
@@ -48,13 +50,13 @@ public class RentalSchedule {
 	public void updateShippedRentals() {
 		Instant threshold = ZonedDateTime.now(clock).minusHours(1).toInstant();
 		
-		List<RentalStatusChangeContext> shippedRentals = queryRepository
+		List<RentalInUseContext> shippedRentals = queryRepository
 				.findShippedAfterThreshold(RentalStatus.SHIPPED, threshold);
 
 		rentalService.markInUse(shippedRentals);
 		
 		List<RentalStatusChangeContext> returnShippedRentals = queryRepository
-				.findShippedAfterThreshold(RentalStatus.RETURN_SHIPPED, threshold);
+				.findReturnShippedAfterThreshold(RentalStatus.RETURN_SHIPPED, threshold);
 		
 		rentalService.markReturned(returnShippedRentals);
 	}
