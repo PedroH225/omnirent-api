@@ -13,6 +13,7 @@ import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.notification.JpaNotificationQueryRepository;
 import br.com.omnirent.notification.context.UserNotificationData;
 import br.com.omnirent.security.event.UserRegisteredEvent;
+import br.com.omnirent.user.context.UserStatusChangeAuditSnapshot;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
 
 @Service
@@ -55,10 +56,10 @@ public class EmailService {
 	public void sendWelcomeEmail(UserRegisteredEvent event) {
 		String messageKey = "welcome";
 		Locale userLocale = event.locale();
-		String username = resolveUsername(event.newUser().username(), userLocale);
+		String username = resolveUsername(event.currentBody().username(), userLocale);
 		
 		EmailMessage message = new EmailMessage(
-				event.newUser().email(),
+				event.currentBody().email(),
 				messageService.get(buildSubject(messageKey), userLocale),
 				messageService.get(buildBody(messageKey), userLocale, username),
 				buildFooter(userLocale)
@@ -67,13 +68,13 @@ public class EmailService {
 		emailSender.send(message);		
 	}
 
-	public void sendUserStatusChanged(UserStatusChangeEvent event) {
-		UserStatus newStatus = event.newStatus();
-		Locale userLocale = event.locale();
-		String username = resolveUsername(event.username(), userLocale);
+	public void sendUserStatusChanged(UserNotificationData data) {
+		UserStatus newStatus = data.status();
+		Locale userLocale = Locale.forLanguageTag(data.locale());
+		String username = resolveUsername(data.username(), userLocale);
 				
 		EmailMessage message = new EmailMessage(
-				event.email(),
+				data.email(),
 				messageService.get(buildSubject(newStatus.getMessageKey() ), userLocale),
 				messageService.get(buildBody(newStatus.getMessageKey()), userLocale, username),
 				buildFooter(userLocale)
@@ -92,7 +93,7 @@ public class EmailService {
 		String username = 
 				resolveUsername(notificationData.username(), userLocale);
 		String email = notificationData.email();
-		String itemName = event.data().itemName();
+		String itemName = event.currentBody().itemName();
 		
 		EmailMessage message = new EmailMessage(
 				email,

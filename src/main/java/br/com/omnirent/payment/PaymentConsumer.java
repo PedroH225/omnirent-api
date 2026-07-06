@@ -33,7 +33,7 @@ public class PaymentConsumer {
     
     @RabbitHandler
     public void handle(RentalCanceledEvent event) {
-    	RentalStatus oldStatus = event.oldStatus();
+    	RentalStatus oldStatus = event.previousBody().status();
     	if (oldStatus == RentalStatus.CREATED) {
 			paymentService.cancelPayment(event.entityId());
     	}

@@ -12,6 +12,7 @@ import br.com.omnirent.notification.JpaNotificationQueryRepository;
 import br.com.omnirent.notification.context.RentalInUseNotificationData;
 import br.com.omnirent.notification.context.RentalLateNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
+import br.com.omnirent.notification.context.UserNotificationData;
 import br.com.omnirent.rental.event.RentalCanceledEvent;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
 import br.com.omnirent.rental.event.RentalExpiredEvent;
@@ -47,7 +48,10 @@ public class EmailConsumer {
     
     @RabbitHandler
     public void handle(UserStatusChangeEvent event) {
-        emailService.sendUserStatusChanged(event);
+    	UserNotificationData data = queryRepository.findNotificationData(event.userId())
+    			.orElseThrow(() -> new NotificationDataNotException());
+;
+        emailService.sendUserStatusChanged(data);
     }
     
     @RabbitHandler
@@ -97,7 +101,7 @@ public class EmailConsumer {
     
     @RabbitHandler
     public void handle(RentalStatusChangedEvent event) {
-    	RentalStatus newStatus = event.newStatus();
+    	RentalStatus newStatus = event.currentBody().status();
     	RentalNotificationData notificationData =
     			queryRepository.findRentalNotificationData(event.entityId())
     			.orElseThrow(() -> new NotificationDataNotException());
