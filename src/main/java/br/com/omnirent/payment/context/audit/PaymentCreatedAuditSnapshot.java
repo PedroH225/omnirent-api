@@ -7,7 +7,6 @@ import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.payment.enums.PaymentProvider;
 
 public record PaymentCreatedAuditSnapshot(
-	    String paymentId,
 	    String rentalId,
 	    PaymentStatus status,
 	    PaymentProvider provider,

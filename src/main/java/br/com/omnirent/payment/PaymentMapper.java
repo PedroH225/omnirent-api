@@ -14,7 +14,7 @@ public class PaymentMapper {
 	public PaymentCreatedAuditSnapshot toCreatedSnapshot(Payment payment) {
 		ExternalPaymentReference externalReference = payment.getExternalReference();
 		return new PaymentCreatedAuditSnapshot(
-				payment.getId(), payment.getRentalId(), payment.getStatus(),
+				payment.getRentalId(), payment.getStatus(),
 				externalReference.getPaymentProvider(), payment.getAmount(),
 				payment.getCurrency(), externalReference.getExternalPaymentId());
 	}
