@@ -20,6 +20,7 @@ import br.com.omnirent.exception.domain.PaymentNotFoundException;
 import br.com.omnirent.payment.context.PaymentCanceledContext;
 import br.com.omnirent.payment.context.PaymentConfirmedContext;
 import br.com.omnirent.payment.context.PaymentExpiredContext;
+import br.com.omnirent.payment.context.PaymentRefundContext;
 import br.com.omnirent.payment.context.ReopenPaymentContext;
 import br.com.omnirent.payment.context.audit.PaymentStatusChangedAuditSnapshot;
 import br.com.omnirent.payment.dto.CheckoutCompletedDTO;
@@ -144,7 +145,8 @@ public class PaymentService {
 					PaymentCanceledContext.class.getSimpleName(), paymentId);
 		}
 		
-		publishDefaultStatusChangedEvent(actorId, paymentId, targetStatus, currStatus);
+		publishDefaultStatusChangedEvent(
+				actorId, paymentId, targetStatus, currStatus);
 	}
 	
     @Transactional
@@ -167,19 +169,28 @@ public class PaymentService {
 					"PaymentRefundRequested", paymentId);
 	    }
 	    
-		publishDefaultStatusChangedEvent(actorId, paymentId, targetStatus, currStatus);
+		publishDefaultStatusChangedEvent(
+				actorId, paymentId, targetStatus, currStatus);
 	}
     
     @Transactional
 	public void refundPayment(String paymentId) {
+		PaymentRefundContext context = queryRepository.findRefundContext(paymentId)
+				.orElseThrow(() -> new PaymentNotFoundException(paymentId)); 
+		
+		PaymentStatus currStatus = context.currentStatus();
 		PaymentStatus targetStatus = PaymentStatus.REFUNDED;
 
-		int updated = paymentRepository.updateStatus(paymentId, targetStatus);
+		int updated = paymentRepository.updateStatus(
+				paymentId, currStatus, targetStatus);
 
 	    if (updated == 0) {
 			throw new OptimisticLockException(
 					"PaymentRefunded", paymentId);
 	    }
+	    
+		publishDefaultStatusChangedEvent(
+				"SYSTEM_WEBHOOK", paymentId, targetStatus, currStatus);
 	}
     
     @Transactional
