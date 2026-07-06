@@ -211,6 +211,9 @@ public class PaymentService {
 					PaymentExpiredContext.class.getSimpleName(), paymentId);
 	    }
 	    rentalService.expire(context.rentalId());
+	    
+	    publishDefaultStatusChangedEvent(
+				"SYSTEM_SCHEDULER", paymentId, targetStatus, currStatus);
 	}
 	
 

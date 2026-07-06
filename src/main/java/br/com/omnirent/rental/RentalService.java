@@ -326,7 +326,7 @@ public class RentalService {
 		rentalRepository.markExpired(rentId, targetStatus, currTime);
 		
 		eventPublisher.publish(new RentalExpiredEvent(
-				AuditAction.RENTAL_EXPIRED, "SERVER_EXPIRATION", rentId,
+				AuditAction.RENTAL_EXPIRED, "SYSTEM_SCHEDULER", rentId,
 				mapper.toStatusChangedSnapshot(targetStatus), 
 				mapper.toStatusChangedSnapshot(currStatus), 
 				currTime));
