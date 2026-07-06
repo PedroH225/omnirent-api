@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,6 +35,7 @@ import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.domain.InvalidPaymentStateTransitionException;
 import br.com.omnirent.exception.domain.InvalidRentalStatusTransitionException;
@@ -50,6 +52,7 @@ import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.payment.context.PaymentCanceledContext;
 import br.com.omnirent.payment.context.PaymentConfirmedContext;
 import br.com.omnirent.payment.context.PaymentExpiredContext;
+import br.com.omnirent.payment.context.PaymentRefundContext;
 import br.com.omnirent.payment.dto.CheckoutCompletedDTO;
 import br.com.omnirent.payment.dto.StripeCheckoutSession;
 import br.com.omnirent.payment.enums.PaymentProvider;
@@ -87,6 +90,12 @@ class PaymentServiceTest {
     @Mock
     private AppProperties appProperties;
     
+    @Mock
+    private SpringDomainEventPublisher eventPublisher;
+    
+    @Mock
+    private PaymentMapper mapper;
+    
 	private User owner;
 	private User renter;
 
@@ -113,6 +122,7 @@ class PaymentServiceTest {
     private PaymentConfirmedContext confirmedContext;
     private PaymentCanceledContext canceledContext;
     private PaymentExpiredContext expiredContext;
+    private PaymentRefundContext refundContext;
     
     @Captor
     private ArgumentCaptor<Payment> paymentCaptor;
@@ -148,13 +158,15 @@ class PaymentServiceTest {
         stripeSession = new StripeCheckoutSession(sessionId, "https://checkout.stripe.com/pay/cs_test_123");
 
         confirmedContext = PaymentTestFactory.createConfirmedContext(
-                paymentId, PaymentStatus.PENDING, rental.getId(), RentalStatus.CREATED);
+                paymentId, PaymentStatus.PENDING, rental.getId(), RentalStatus.CREATED, null, Instant.now(clock));
 
         canceledContext = PaymentTestFactory.createCanceledContext(
                 paymentId, PaymentStatus.PENDING, paymentIntent);
                 
         expiredContext = PaymentTestFactory.createExpiredContext(
                 paymentId, sessionId, PaymentStatus.PENDING, rental.getId());
+        
+        refundContext = PaymentTestFactory.createRefundContext(PaymentStatus.REFUND_REQUESTED);
     }
 
     @Test
@@ -163,7 +175,8 @@ class PaymentServiceTest {
         when(appProperties.frontUrl()).thenReturn(frontUrl);
         when(stripeService.createCheckoutSession(anyLong(), anyString(), anyString(), anyString(), any()))
                 .thenReturn(stripeSession);
-
+        when(paymentRepository.save(any(Payment.class))).thenReturn(mock(Payment.class));
+        
         paymentService.createPayment(paymentRequestedEvent);
 
         verify(paymentRepository, times(2)).save(any(Payment.class));
@@ -227,7 +240,7 @@ class PaymentServiceTest {
         when(paymentRepository.updateStatus(paymentId, PaymentStatus.PENDING, PaymentStatus.CANCELLED))
                 .thenReturn(1);
 
-        paymentService.cancelPayment(rental.getId());
+        paymentService.cancelPayment(rental.getId(), rental.getRenterId());
 
         verify(paymentRepository).updateStatus(paymentId, PaymentStatus.PENDING, PaymentStatus.CANCELLED);
     }
@@ -241,7 +254,7 @@ class PaymentServiceTest {
         when(paymentRepository.updateStatus(paymentId, PaymentStatus.PAID, PaymentStatus.REFUND_REQUESTED))
                 .thenReturn(1);
 
-        paymentService.requestRefund(rental.getId());
+        paymentService.requestRefund(rental.getId(), rental.getRenterId());
 
         verify(stripeService).requestRefund(paymentId, paymentIntent);
         verify(paymentRepository).updateStatus(paymentId, PaymentStatus.PAID, PaymentStatus.REFUND_REQUESTED);
@@ -249,11 +262,12 @@ class PaymentServiceTest {
 
     @Test
     void refundPayment_ShouldUpdateStatusToRefunded() {
-        when(paymentRepository.updateStatus(paymentId, PaymentStatus.REFUNDED)).thenReturn(1);
-
+        when(paymentRepository.updateStatus(paymentId, PaymentStatus.REFUND_REQUESTED, PaymentStatus.REFUNDED)).thenReturn(1);
+        when(queryRepository.findRefundContext(paymentId)).thenReturn(Optional.of(refundContext));
+        
         paymentService.refundPayment(paymentId);
 
-        verify(paymentRepository).updateStatus(paymentId, PaymentStatus.REFUNDED);
+        verify(paymentRepository).updateStatus(paymentId, PaymentStatus.REFUND_REQUESTED, PaymentStatus.REFUNDED);
     }
 
     @Test
@@ -297,7 +311,8 @@ class PaymentServiceTest {
         StripeCheckoutSession session = new StripeCheckoutSession(sessionId, "http://checkout.url");
         when(stripeService.createCheckoutSession(anyLong(), anyString(), anyString(), anyString(), any()))
                 .thenReturn(session);
-
+        when(paymentRepository.save(any(Payment.class))).thenReturn(mock(Payment.class));
+       
         paymentService.createPayment(paymentRequestedEvent);
 
         verify(paymentRepository, times(2)).save(paymentCaptor.capture());
@@ -314,6 +329,7 @@ class PaymentServiceTest {
         StripeCheckoutSession session = new StripeCheckoutSession(sessionId, checkoutUrl);
         when(stripeService.createCheckoutSession(anyLong(), anyString(), anyString(), anyString(), any()))
                 .thenReturn(session);
+        when(paymentRepository.save(any(Payment.class))).thenReturn(mock(Payment.class));
 
         paymentService.createPayment(paymentRequestedEvent);
 
@@ -328,7 +344,8 @@ class PaymentServiceTest {
     @Test
     void confirmPayment_ShouldReturnImmediately_WhenAlreadyPaid() {
         PaymentConfirmedContext context = PaymentTestFactory.createConfirmedContext(
-                paymentId, PaymentStatus.PAID, rental.getId(), RentalStatus.CONFIRMED);
+                paymentId, PaymentStatus.PAID, rental.getId(), RentalStatus.CONFIRMED,
+                "intent-id", Instant.now(clock));
         when(queryRepository.findConfirmedContext(paymentId)).thenReturn(Optional.of(context));
 
         paymentService.confirmPayment(paymentId, paymentIntent);
@@ -340,7 +357,8 @@ class PaymentServiceTest {
     @Test
     void confirmPayment_ShouldThrowException_WhenInvalidPaymentTransition() {
         PaymentConfirmedContext context = PaymentTestFactory.createConfirmedContext(
-                paymentId, PaymentStatus.CANCELLED, rental.getId(), RentalStatus.CREATED);
+                paymentId, PaymentStatus.CANCELLED, rental.getId(), RentalStatus.CREATED,
+                "intent-id", Instant.now(clock));
         when(queryRepository.findConfirmedContext(paymentId)).thenReturn(Optional.of(context));
 
         assertThrows(InvalidPaymentStateTransitionException.class, 
@@ -353,7 +371,8 @@ class PaymentServiceTest {
     @Test
     void confirmPayment_ShouldThrowException_WhenInvalidRentalTransition() {
         PaymentConfirmedContext context = PaymentTestFactory.createConfirmedContext(
-                paymentId, PaymentStatus.PENDING, rental.getId(), RentalStatus.CANCELLED);
+                paymentId, PaymentStatus.PENDING, rental.getId(), RentalStatus.CANCELLED,
+                "intent-id", Instant.now(clock));
         when(queryRepository.findConfirmedContext(paymentId)).thenReturn(Optional.of(context));
 
         assertThrows(InvalidRentalStatusTransitionException.class, 
@@ -369,7 +388,8 @@ class PaymentServiceTest {
         when(clock.instant()).thenReturn(fixedInstant);
 
         PaymentConfirmedContext context = PaymentTestFactory.createConfirmedContext(
-                paymentId, PaymentStatus.PENDING, rental.getId(), RentalStatus.CREATED);
+                paymentId, PaymentStatus.PENDING, rental.getId(), RentalStatus.CREATED,
+                "intent-id", Instant.now(clock));
         when(queryRepository.findConfirmedContext(paymentId)).thenReturn(Optional.of(context));
         when(paymentRepository.confirmPayment(anyString(), any(), anyString(), any(), any(Instant.class)))
                 .thenReturn(1);
@@ -384,7 +404,7 @@ class PaymentServiceTest {
     void cancelPayment_ShouldThrowException_WhenPaymentNotFound() {
         when(queryRepository.findCanceledContext(rental.getId())).thenReturn(Optional.empty());
 
-        assertThrows(PaymentNotFoundException.class, () -> paymentService.cancelPayment(rental.getId()));
+        assertThrows(PaymentNotFoundException.class, () -> paymentService.cancelPayment(rental.getId(), rental.getRenterId()));
 
         verify(paymentRepository, never()).updateStatus(anyString(), any(), any());
     }
@@ -395,7 +415,7 @@ class PaymentServiceTest {
                 paymentId, PaymentStatus.PAID, paymentIntent);
         when(queryRepository.findCanceledContext(rental.getId())).thenReturn(Optional.of(context));
 
-        assertThrows(InvalidPaymentStateTransitionException.class, () -> paymentService.cancelPayment(rental.getId()));
+        assertThrows(InvalidPaymentStateTransitionException.class, () -> paymentService.cancelPayment(rental.getId(), rental.getRenterId()));
 
         verify(paymentRepository, never()).updateStatus(anyString(), any(), any());
     }
@@ -407,14 +427,14 @@ class PaymentServiceTest {
         when(queryRepository.findCanceledContext(rental.getId())).thenReturn(Optional.of(context));
         when(paymentRepository.updateStatus(paymentId, PaymentStatus.PENDING, PaymentStatus.CANCELLED)).thenReturn(0);
 
-        assertThrows(OptimisticLockException.class, () -> paymentService.cancelPayment(rental.getId()));
+        assertThrows(OptimisticLockException.class, () -> paymentService.cancelPayment(rental.getId(), rental.getRenterId()));
     }
 
     @Test
     void requestRefund_ShouldThrowException_WhenPaymentNotFound() {
         when(queryRepository.findCanceledContext(rental.getId())).thenReturn(Optional.empty());
 
-        assertThrows(PaymentNotFoundException.class, () -> paymentService.requestRefund(rental.getId()));
+        assertThrows(PaymentNotFoundException.class, () -> paymentService.requestRefund(rental.getId(), rental.getRenterId()));
 
         verify(stripeService, never()).requestRefund(anyString(), anyString());
         verify(paymentRepository, never()).updateStatus(anyString(), any(), any());
@@ -426,7 +446,7 @@ class PaymentServiceTest {
                 paymentId, PaymentStatus.PENDING, paymentIntent);
         when(queryRepository.findCanceledContext(rental.getId())).thenReturn(Optional.of(context));
 
-        assertThrows(InvalidPaymentStateTransitionException.class, () -> paymentService.requestRefund(rental.getId()));
+        assertThrows(InvalidPaymentStateTransitionException.class, () -> paymentService.requestRefund(rental.getId(), rental.getRenterId()));
 
         verify(stripeService, never()).requestRefund(anyString(), anyString());
         verify(paymentRepository, never()).updateStatus(anyString(), any(), any());
@@ -439,7 +459,7 @@ class PaymentServiceTest {
         when(queryRepository.findCanceledContext(rental.getId())).thenReturn(Optional.of(context));
         doThrow(new RuntimeException("Stripe error")).when(stripeService).requestRefund(paymentId, paymentIntent);
 
-        assertThrows(RuntimeException.class, () -> paymentService.requestRefund(rental.getId()));
+        assertThrows(RuntimeException.class, () -> paymentService.requestRefund(rental.getId(), rental.getRenterId()));
 
         verify(paymentRepository, never()).updateStatus(anyString(), any(), any());
     }
@@ -451,15 +471,16 @@ class PaymentServiceTest {
         when(queryRepository.findCanceledContext(rental.getId())).thenReturn(Optional.of(context));
         when(paymentRepository.updateStatus(paymentId, PaymentStatus.PAID, PaymentStatus.REFUND_REQUESTED)).thenReturn(0);
 
-        assertThrows(OptimisticLockException.class, () -> paymentService.requestRefund(rental.getId()));
+        assertThrows(OptimisticLockException.class, () -> paymentService.requestRefund(rental.getId(), rental.getRenterId()));
 
         verify(stripeService).requestRefund(paymentId, paymentIntent);
     }
 
     @Test
     void refundPayment_ShouldThrowOptimisticLockException_WhenUpdateFails() {
-        when(paymentRepository.updateStatus(paymentId, PaymentStatus.REFUNDED)).thenReturn(0);
-
+        when(paymentRepository.updateStatus(paymentId, PaymentStatus.REFUND_REQUESTED, PaymentStatus.REFUNDED)).thenReturn(0);
+        when(queryRepository.findRefundContext(paymentId)).thenReturn(Optional.of(refundContext));
+        
         assertThrows(OptimisticLockException.class, () -> paymentService.refundPayment(paymentId));
     }
 
