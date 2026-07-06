@@ -10,8 +10,10 @@ import java.util.Set;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.domain.InvalidPaymentStateTransitionException;
 import br.com.omnirent.exception.domain.InvalidRentalStatusTransitionException;
@@ -24,6 +26,8 @@ import br.com.omnirent.payment.context.ReopenPaymentContext;
 import br.com.omnirent.payment.dto.CheckoutCompletedDTO;
 import br.com.omnirent.payment.dto.StripeCheckoutSession;
 import br.com.omnirent.payment.enums.PaymentProvider;
+import br.com.omnirent.payment.event.PaymentCreatedEvent;
+import br.com.omnirent.payment.event.PaymentMapper;
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
 import br.com.omnirent.payment.model.Payment;
 import br.com.omnirent.payment.stripe.StripeService;
@@ -52,6 +56,10 @@ public class PaymentService {
     
     private final AppProperties appProperties;
     
+    private final SpringDomainEventPublisher eventPublisher;
+    
+    private final PaymentMapper mapper;
+    
     @Transactional
     public void createPayment(
             PaymentRequestedEvent event) {
@@ -65,7 +73,7 @@ public class PaymentService {
 
         payment.attachExternalReference(PaymentProvider.STRIPE, session.sessionId(), session.url());
         
-        paymentRepository.save(payment);
+        payment = paymentRepository.save(payment);
 
         simpMessagingTemplate.convertAndSend(
         		"/topic/rental/payment/" + event.rentalId(), 
@@ -73,6 +81,10 @@ public class PaymentService {
         				event.rentalId(), session.url(), "CHECKOUT_CREATED"));
         
         log.debug("Session URL: {}", session.url());;
+        
+        eventPublisher.publish(new PaymentCreatedEvent(
+        		AuditAction.PAYMENT_CREATED, event.userId(), payment.getId(),
+        		mapper.toCreatedSnapshot(payment), Instant.now(clock)));
     }
 
     @Transactional
