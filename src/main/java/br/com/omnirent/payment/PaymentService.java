@@ -114,17 +114,17 @@ public class PaymentService {
 					PaymentConfirmedContext.class.getSimpleName(), paymentId);
 		}
         
-        eventPublisher.publish(new PaymentConfirmedEvent(
-        		AuditAction.PAYMENT_CONFIRMED, "SYSTEM_WEBHOOK", paymentId,
-        		mapper.toConfirmedSnapshot(context.rentalId(), targetStatus, paymentIntent, paidAt), 
-        		mapper.toConfirmedSnapshot(context), 
-        		Instant.now(clock)));
-        
         if (currentRentalStatus.equals(RentalStatus.LATE)) {
 			rentalService.renewRental(context.rentalId());
 		} else if (currentRentalStatus.equals(RentalStatus.CREATED)) {
 	        rentalService.confirm(context.rentalId(), currentRentalStatus);
 		}
+        
+        eventPublisher.publish(new PaymentConfirmedEvent(
+        		AuditAction.PAYMENT_CONFIRMED, "SYSTEM_WEBHOOK", paymentId,
+        		mapper.toConfirmedSnapshot(context.rentalId(), targetStatus, paymentIntent, paidAt), 
+        		mapper.toConfirmedSnapshot(context), 
+        		Instant.now(clock)));
     }
     
     @Transactional
