@@ -308,7 +308,7 @@ public class RentalService {
 		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
 		eventPublisher.publish(new RentalCanceledEvent(
-				AuditAction.RENTAL_CANCELED, "SERVER_EXPIRATION", rentId,
+				AuditAction.RENTAL_CANCELED, currentUserId, rentId,
 				mapper.toStatusChangedSnapshot(targetStatus), 
 				mapper.toStatusChangedSnapshot(currStatus), 
 				Instant.now(clock)));
