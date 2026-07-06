@@ -1,5 +1,6 @@
 package br.com.omnirent.address;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.address.event.AddressAddedEvent;
 import br.com.omnirent.address.event.AddressDeletedEvent;
 import br.com.omnirent.address.event.AddressUpdatedEvent;
+import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AddressErrorType;
@@ -32,6 +34,8 @@ public class AddressService {
 	private CurrentUserProvider currentUserProvider;
 	
 	private SpringDomainEventPublisher eventPublisher;
+	
+	private Clock clock;
 		
 	public Address findById(String id) {
 		return addressRepository.findById(id)
@@ -61,8 +65,8 @@ public class AddressService {
 		AddressResponseDTO result = mapper.toDto(addressRepository.save(address));
 		
 		eventPublisher.publish(new AddressAddedEvent(
-				currentUserProvider.currentUserId(),
-				result.getId(),mapper.toAuditSnapshot(result), Instant.now()));
+				AuditAction.ADDRESS_CREATED, userId, result.getId(),
+				mapper.toAuditSnapshot(result), Instant.now(clock)));
 		
 		return result;
 	}
@@ -79,9 +83,9 @@ public class AddressService {
 		AddressAuditSnapshot newData = mapper.toAuditSnapshot(result);
 		
 		eventPublisher.publish(new AddressUpdatedEvent(
-				currentUserProvider.currentUserId(),
-				addressDTO.id(),oldData,
-				newData, Instant.now()));
+				AuditAction.ADDRESS_UPDATED,
+				currentUserProvider.currentUserId(), addressDTO.id(),
+				oldData, newData, Instant.now(clock)));
 		
 		return result;
 	}
@@ -91,8 +95,9 @@ public class AddressService {
 		addressRepository.delete(address);
 		
 		eventPublisher.publish(new AddressDeletedEvent(
-				currentUserProvider.currentUserId(),
-				address.getId(),mapper.toAuditSnapshot(address), Instant.now()));
+				AuditAction.ADDRESS_DELETED,
+				currentUserProvider.currentUserId(), address.getId(),
+				mapper.toAuditSnapshot(address), Instant.now(clock)));
 	}
 
 }

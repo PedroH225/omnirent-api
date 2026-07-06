@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,6 +51,9 @@ public class AddressServiceTest {
 	
 	@Mock
 	private SpringDomainEventPublisher eventPublisher;
+	
+	@Mock
+	private Clock clock;
 	
 	private User user;
 
