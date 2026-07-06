@@ -35,7 +35,7 @@ public class PaymentConsumer {
     public void handle(RentalCanceledEvent event) {
     	RentalStatus oldStatus = event.previousBody().status();
     	if (oldStatus == RentalStatus.CREATED) {
-			paymentService.cancelPayment(event.entityId());
+			paymentService.cancelPayment(event.entityId(), event.actorId());
     	}
     	if (oldStatus == RentalStatus.CONFIRMED) {
 			paymentService.requestRefund(event.entityId());

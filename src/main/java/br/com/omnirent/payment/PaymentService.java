@@ -3,9 +3,7 @@ package br.com.omnirent.payment;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.EnumSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -23,12 +21,14 @@ import br.com.omnirent.payment.context.PaymentCanceledContext;
 import br.com.omnirent.payment.context.PaymentConfirmedContext;
 import br.com.omnirent.payment.context.PaymentExpiredContext;
 import br.com.omnirent.payment.context.ReopenPaymentContext;
+import br.com.omnirent.payment.context.audit.PaymentStatusChangedAuditSnapshot;
 import br.com.omnirent.payment.dto.CheckoutCompletedDTO;
 import br.com.omnirent.payment.dto.StripeCheckoutSession;
 import br.com.omnirent.payment.enums.PaymentProvider;
 import br.com.omnirent.payment.event.PaymentConfirmedEvent;
 import br.com.omnirent.payment.event.PaymentCreatedEvent;
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
+import br.com.omnirent.payment.event.PaymentStatusChangedEvent;
 import br.com.omnirent.payment.model.Payment;
 import br.com.omnirent.payment.stripe.StripeService;
 import br.com.omnirent.rental.RentalService;
@@ -127,7 +127,7 @@ public class PaymentService {
     }
     
     @Transactional
-	public void cancelPayment(String rentalId) {
+	public void cancelPayment(String rentalId, String actorId) {
 		PaymentStatus targetStatus = PaymentStatus.CANCELLED;
 		PaymentCanceledContext context = queryRepository.findCanceledContext(rentalId)
 				.orElseThrow(() -> new PaymentNotFoundException(
@@ -143,6 +143,8 @@ public class PaymentService {
 			throw new OptimisticLockException(
 					PaymentCanceledContext.class.getSimpleName(), paymentId);
 		}
+		
+		publishDefaultStatusChangedEvent(actorId, paymentId, targetStatus, currStatus);
 	}
 	
     @Transactional
@@ -212,6 +214,16 @@ public class PaymentService {
 				context.finalPrice(), "brl");
 		
         log.debug("Session URL: {}", session.url());
+	}
+	
+	private void publishDefaultStatusChangedEvent(String actorId, String paymentId,
+			PaymentStatus newStatus, PaymentStatus oldStatus) {
+		eventPublisher.publish(new PaymentStatusChangedEvent(
+				AuditAction.PAYMENT_STATUS_CHANGED,
+				actorId, paymentId, 
+				new PaymentStatusChangedAuditSnapshot(newStatus),
+				new PaymentStatusChangedAuditSnapshot(oldStatus),
+				Instant.now(clock)));
 	}
 	
 	private StripeCheckoutSession createCheckoutSession(
