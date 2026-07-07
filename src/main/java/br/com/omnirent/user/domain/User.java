@@ -60,7 +60,7 @@ public class User extends NamedEntity {
 	@OneToMany(mappedBy = "owner")
 	private List<Rental> rentals;
 	
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "user_roles",
 	    joinColumns = @JoinColumn(name = "user_id"),
 	    inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -72,15 +72,17 @@ public class User extends NamedEntity {
 	@OneToMany(mappedBy = "user")
 	private Set<ExternalIdentity> authProvider;
 	
-	public User(String id, String email, String password, Integer tokenVersion, Integer globalVersion) {
+	public User(String id, String name, String username, String email, String password, Integer tokenVersion, Integer globalVersion) {
 		this.id = id;
+		this.name = name;
+		this.username =  username;
 		this.email = email;
 		this.password = password;
 		
 		AuthMetadata authMetadata = new AuthMetadata();
         authMetadata.setTokenVersion(tokenVersion);
         authMetadata.setGlobalVersion(globalVersion);
-        
+                
         this.authMetadata = authMetadata;
 	}
 	
