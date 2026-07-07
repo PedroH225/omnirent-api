@@ -52,6 +52,29 @@ CREATE TABLE IF NOT EXISTS `user_roles` (
 ) ENGINE=InnoDB;
 
 -- -----------------------------------------------------
+-- Table `user_identities`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `user_identities` (
+	`id` CHAR(36) NOT NULL,
+	`provider` VARCHAR(20) NOT NULL,
+	`provider_user_id` VARCHAR(100) NOT NULL,
+	`email` VARCHAR(100) NOT NULL,
+	`email_verified` BOOLEAN DEFAULT FALSE,
+	`avatar_url` VARCHAR(1024),
+	`user_id` CHAR(36) NOT NULL,
+	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  	`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`),
+	UNIQUE INDEX `uk_provider_user` (`provider`, `provider_user_id`),
+	UNIQUE INDEX `uk_user_provider` (`user_id`, `provider`),
+    INDEX `idx_user_id` (`user_id`),
+	FOREIGN KEY (`user_id`)
+     REFERENCES `users` (`id`)
+     ON DELETE NO ACTION
+     ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
 -- Table `categories`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `categories` (
