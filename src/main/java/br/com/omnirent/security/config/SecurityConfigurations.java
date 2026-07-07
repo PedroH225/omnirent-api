@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,6 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import br.com.omnirent.config.properties.AppProperties;
+import br.com.omnirent.security.auth.provider.OAuth2AuthenticationSuccessHandler;
 import lombok.AllArgsConstructor;
 
 @Configuration
@@ -32,6 +34,8 @@ public class SecurityConfigurations {
     
     private CustomAccessDeniedHandler customAccessDeniedHandler;
     
+    private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    
     private AppProperties appProperties;
 
     @Bean 
@@ -39,6 +43,8 @@ public class SecurityConfigurations {
         return httpSecurity
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+                .oauth2Login(oauth -> oauth.
+                		successHandler(oAuth2AuthenticationSuccessHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                 		.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
@@ -46,6 +52,8 @@ public class SecurityConfigurations {
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/rental/enums").permitAll()
                         .requestMatchers("/webhooks/**").permitAll()
+                        .requestMatchers("/oauth2/**").permitAll()
+                        .requestMatchers("/login/oauth2/**").permitAll()
                         .requestMatchers("/**").authenticated()
                         .anyRequest().permitAll()
                 )
