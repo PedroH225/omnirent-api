@@ -142,7 +142,7 @@ public class UserRepositoryTest extends IntegrationTest {
         User updatedUser = userRepository.findById(user1.getId()).orElseThrow();
         
         assertThat(updatedUser.getName()).isEqualTo(newName);
-        assertThat(updatedUser.getDisplayUsername()).isEqualTo(newUsername);
+        assertThat(updatedUser.getUsername()).isEqualTo(newUsername);
         assertThat(updatedUser.getEmail()).isEqualTo(newEmail);
         assertThat(updatedUser.getBirthDate()).isEqualTo(newBirthDate);
     }

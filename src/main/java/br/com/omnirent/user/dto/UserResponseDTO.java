@@ -17,7 +17,7 @@ public class UserResponseDTO {
 	
 	public UserResponseDTO(User user) {
 		this.id = user.getId();
-		this.username = user.getDisplayUsername();
+		this.username = user.getUsername();
 	}
 	
 	

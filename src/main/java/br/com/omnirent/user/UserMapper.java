@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -11,9 +12,10 @@ import br.com.omnirent.common.enums.EnumOption;
 import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.config.i18n.MessageService;
-import br.com.omnirent.security.context.LoginContext;
+import br.com.omnirent.security.domain.AuthenticatedUser;
 import br.com.omnirent.user.context.UserAuditSnapshot;
 import br.com.omnirent.user.context.UserStatusChangeAuditSnapshot;
+import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
@@ -41,10 +43,15 @@ public class UserMapper {
 		return userDTO;
 	}
 	
-	public UserDetails toAuthUser(LoginContext context) {
-		User user = new User(context.getId(), context.getEmail(),
-				context.getPassword(), context.getTokenVersion(), context.getGlobalVersion());
-		return (UserDetails) user;
+	public UserDetails toAuthUser(User context) {
+		List<SimpleGrantedAuthority> authorities = context.getRoles().stream()
+				.map(a -> new SimpleGrantedAuthority(a.getName()))
+				.collect(Collectors.toList());
+
+		AuthMetadata authMetadata = context.getAuthMetadata();
+		return (UserDetails) new AuthenticatedUser(
+				context.getId(), context.getEmail(),context.getPassword(),authorities,
+				authMetadata.getTokenVersion(), authMetadata.getGlobalVersion());
 	}
 
 	public UserEnums getLocalizedEnums() {
@@ -73,7 +80,7 @@ public class UserMapper {
 	public UserAuditSnapshot toAuditSnapshot(User user) {
 	    return new UserAuditSnapshot(
 	    		user.getId(), user.getName(),
-	    		user.getDisplayUsername(), user.getEmail(),
+	    		user.getUsername(), user.getEmail(),
 	            user.getBirthDate().toString());
 	}
 	

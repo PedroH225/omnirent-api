@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
-import br.com.omnirent.security.context.LoginContext;
 import br.com.omnirent.user.context.ChangeUserStatusContext;
 import br.com.omnirent.user.context.UserTakenContext;
 import br.com.omnirent.user.domain.AuthMetadata;
@@ -18,12 +17,11 @@ import br.com.omnirent.user.dto.UserResponseDTO;
 public interface UserQueryRepository extends Repository<User, String> {
 	
 	@Query("""
-			SELECT new br.com.omnirent.security.context.LoginContext(u.id, u.email, u.password,
-			u.authMetadata.globalVersion, u.authMetadata.tokenVersion) 
-			FROM User u 
-			WHERE u.email = :email
+			SELECT u
+			FROM User u JOIN FETCH u.roles r
+			WHERE u.email = :email 
 			""")
-	Optional<LoginContext> findByEmail(String email);
+	Optional<User> findByEmail(String email);
 	
 	@Query("SELECT u.authMetadata FROM User u WHERE u.id = :id")
 	AuthMetadata findTokenVersionById(@Param("id") String id);

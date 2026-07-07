@@ -41,24 +41,21 @@ public class TokenService {
     
     private final GlobalConfigHolder globalConfigHolder;
     
-    public String generateToken(User userModel) {
-        try {
-        	
+    public String generateToken(AuthenticatedUser authUser) {
+        try {	
             Algorithm algorithm = Algorithm.HMAC256(tokenPass);
-
-            AuthMetadata authMetadata = userModel.getAuthMetadata();
 
             return JWT.create()
                 .withIssuer("auth")
-                .withSubject(userModel.getId())
+                .withSubject(authUser.getId())
                 .withClaim(
                     "roles",
-                    userModel.getAuthorities().stream()
+                    authUser.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .toList()
                 )
-                .withClaim("ver", authMetadata.getTokenVersion())
-                .withClaim("gver", authMetadata.getGlobalVersion())
+                .withClaim("ver", authUser.getTokenVersion())
+                .withClaim("gver", authUser.getGlobalVersion())
                 .withExpiresAt(getExpirationDate())
                 .sign(algorithm);
 
@@ -108,14 +105,11 @@ public class TokenService {
 					"", new ApiException(AuthenticationErrorType.INVALID_TOKEN));
 		}
         
-        AuthenticatedUser authenticatedUser = new AuthenticatedUser
-        		(id, authorities, tokenVer, globalVer);
+        AuthenticatedUser authenticatedUser = new AuthenticatedUser(
+        		id, null, null, authorities, tokenVer, globalVer);
 
-        var auth = new UsernamePasswordAuthenticationToken(
-            authenticatedUser, null, authorities
-        );
-        
-        return auth;
+        return new UsernamePasswordAuthenticationToken(
+                authenticatedUser, null, authorities);
     }
 
     private Instant getExpirationDate() {

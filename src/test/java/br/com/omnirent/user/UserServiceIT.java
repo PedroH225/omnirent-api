@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.common.ValidationException;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringIntegrationTest;
@@ -42,7 +41,7 @@ public class UserServiceIT extends SpringIntegrationTest {
 	void setUp() {
 		user1 = userRepository.save(UserTestFactory.user());
 	    user2 = userRepository.save(UserTestFactory.user());
-	    SecurityTestUtils.setAuthenticatedUser(user1.getId());
+	    SecurityTestUtils.setAuthenticatedUser(user1);
 	}
 	
 	@AfterEach
@@ -72,7 +71,7 @@ public class UserServiceIT extends SpringIntegrationTest {
 	@Test
 	void shouldThrowExceptionWhenUpdatingToDuplicateFields() {
 		UserRequestDTO requestDTO = UserTestFactory.requestDtoBuilder(
-				user1.getName(), user2.getDisplayUsername(), user2.getEmail(), user1.getBirthDate());
+				user1.getName(), user2.getUsername(), user2.getEmail(), user1.getBirthDate());
 
 		assertThatThrownBy(() -> userService.update(requestDTO))
         .isInstanceOf(ValidationException.class)

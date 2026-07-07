@@ -44,7 +44,7 @@ public class UserDetailsDTO {
 	public UserDetailsDTO(User user) {
 		this.id = user.getId();
 		this.name = user.getName();
-		this.username = user.getDisplayUsername();
+		this.username = user.getUsername();
 		this.email = user.getEmail();
 		this.birthDate = dtf.format(user.getBirthDate());
 		this.userStatus = user.getUserStatus();

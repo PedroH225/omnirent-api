@@ -2,11 +2,21 @@
 INSERT IGNORE INTO global_configurations (id, global_token_version) VALUES
 (1, 1);
 
+-- ROLES
+INSERT IGNORE INTO roles(id, name) VALUES
+(1, "ROLE_USER");
+
 -- USERS
 INSERT IGNORE INTO users (id, name, username, email, password, birth_date, user_status, created_at, updated_at) VALUES
 ('ab6c0937-17ac-434e-80dd-c8b581d55935','Pedro Alves','pedro','pedro@example.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1998-05-10','ACTIVE',NOW(),NOW()),
 ('d101df10-ca1d-446a-a897-8ffed7950acb','Maria Costa','maria','maria@example.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1995-03-22','ACTIVE',NOW(),NOW()),
 ('966fc885-5107-4466-aa9a-ab7366e56fab','Lucas Lima','lucas','lucas@example.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1992-11-01','ACTIVE',NOW(),NOW());
+
+-- USER_ROLES
+INSERT IGNORE INTO user_roles(user_id, role_id) VALUES
+('ab6c0937-17ac-434e-80dd-c8b581d55935', 1),
+('d101df10-ca1d-446a-a897-8ffed7950acb', 1),
+('966fc885-5107-4466-aa9a-ab7366e56fab', 1);
 
 -- CATEGORIES
 INSERT IGNORE INTO categories VALUES

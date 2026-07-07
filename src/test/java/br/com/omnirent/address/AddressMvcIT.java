@@ -56,7 +56,7 @@ public class AddressMvcIT extends SpringMvcIntegration {
 	void setUp() {
 		user1 = userRepository.save(UserTestFactory.owner());
 		address1 = addressRepository.save(AddressTestFactory.forUser(user1));
-	    SecurityTestUtils.setAuthenticatedUser(user1.getId());
+	    SecurityTestUtils.setAuthenticatedUser(user1);
 	}
 	
 	@AfterEach
@@ -81,7 +81,7 @@ public class AddressMvcIT extends SpringMvcIntegration {
 		String payload = objectMapper.writeValueAsString(dirty);
 
 		String response = mockMvc.perform(post(ADDRESS_PREFIX)
-				.with(SecurityTestUtils.auth(user1.getId()))
+				.with(SecurityTestUtils.auth(user1))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isOk())
@@ -138,7 +138,7 @@ public class AddressMvcIT extends SpringMvcIntegration {
 		String payload = objectMapper.writeValueAsString(dirty);
 
 		mockMvc.perform(post(ADDRESS_PREFIX)
-				.with(SecurityTestUtils.auth(user1.getId()))
+				.with(SecurityTestUtils.auth(user1))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isConflict());
@@ -161,7 +161,7 @@ public class AddressMvcIT extends SpringMvcIntegration {
 		String payload = objectMapper.writeValueAsString(dirty);
 
 		String response = mockMvc.perform(put(ADDRESS_PREFIX)
-				.with(SecurityTestUtils.auth(user1.getId()))
+				.with(SecurityTestUtils.auth(user1))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isOk())
@@ -220,7 +220,7 @@ public class AddressMvcIT extends SpringMvcIntegration {
 		String payload = objectMapper.writeValueAsString(dirty);
 
 		mockMvc.perform(put(ADDRESS_PREFIX)
-				.with(SecurityTestUtils.auth(user1.getId()))
+				.with(SecurityTestUtils.auth(user1))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isConflict());
