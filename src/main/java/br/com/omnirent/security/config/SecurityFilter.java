@@ -1,4 +1,4 @@
-package br.com.omnirent.security;
+package br.com.omnirent.security.config;
 
 import java.io.IOException;
 
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.security.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
