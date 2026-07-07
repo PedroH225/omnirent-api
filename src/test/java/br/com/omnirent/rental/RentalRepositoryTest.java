@@ -156,10 +156,10 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
 
 	    assertThat(renterDto.getId()).isEqualTo(renter.getId());
-	    assertThat(renterDto.getUsername()).isEqualTo(renter.getDisplayUsername());
+	    assertThat(renterDto.getUsername()).isEqualTo(renter.getUsername());
 
 	    assertThat(ownerDTO.getId()).isEqualTo(owner.getId());
-	    assertThat(ownerDTO.getUsername()).isEqualTo(owner.getDisplayUsername());
+	    assertThat(ownerDTO.getUsername()).isEqualTo(owner.getUsername());
 
 	    assertThat(itemSnpDto.getId()).isEqualTo(itemSnp.getId());
 	    assertThat(itemSnpDto.getName()).isEqualTo(itemSnp.getName());

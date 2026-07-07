@@ -149,7 +149,7 @@ public class UserMvcIT extends SpringMvcIntegration {
 	    User user = userRepository.findById(user1.getId()).orElseThrow();
 
 	    assertThat(user.getName()).isEqualTo("John Doe");
-	    assertThat(user.getDisplayUsername()).isEqualTo("johndoe");
+	    assertThat(user.getUsername()).isEqualTo("johndoe");
 	    assertThat(user.getEmail()).isEqualTo("johndoe@email.com");
 	}
 	
