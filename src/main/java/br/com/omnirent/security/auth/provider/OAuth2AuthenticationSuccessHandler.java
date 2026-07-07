@@ -10,6 +10,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import br.com.omnirent.security.TokenService;
+import br.com.omnirent.security.auth.ProviderUserMetadata;
 import br.com.omnirent.security.auth.UserIdentityService;
 import br.com.omnirent.security.domain.AuthenticatedUser;
 import br.com.omnirent.user.UserMapper;
@@ -37,20 +38,22 @@ public class OAuth2AuthenticationSuccessHandler
         OAuth2AuthenticationToken oauth = (OAuth2AuthenticationToken) authentication;
 
         OAuth2User principal = oauth.getPrincipal();
+        
+        ProviderUserMetadata userInfo = new ProviderUserMetadata(
+        		AuthProvider.valueOf(oauth.getAuthorizedClientRegistrationId().toUpperCase()),
+        		principal.getAttribute("sub"),
+        		principal.getAttribute("email"),
+                Boolean.TRUE.equals(principal.getAttribute("email_verified")),
+                principal.getAttribute("name"),
+                principal.getAttribute("picture"),
+                principal.getAttribute("locale")
+        );
 
-        String provider = oauth.getAuthorizedClientRegistrationId();
+        User user = userIdentityService.resolveUser(userInfo);
 
-        String providerUserId = principal.getAttribute("sub");
+        UserDetails authenticatedUser = userMapper.toAuthUser(user);
 
-        String email = principal.getAttribute("email");
-
-        User user = userIdentityService.resolveUser(provider, providerUserId, email);
-
-        UserDetails authenticatedUser =
-                userMapper.toAuthUser(user);
-
-        String token =
-                tokenService.generateToken((AuthenticatedUser)authenticatedUser);
+        String token = tokenService.generateToken((AuthenticatedUser)authenticatedUser);
 
         try {
 			response.sendRedirect(

@@ -2,20 +2,28 @@ package br.com.omnirent.user;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.rabbitmq.client.RpcClient;
+
 import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
+import br.com.omnirent.common.formatter.IdentityGeneratorUtil;
+import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.RoleNotFoundException;
 import br.com.omnirent.exception.domain.apptype.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import br.com.omnirent.security.CurrentUserProvider;
+import br.com.omnirent.security.auth.RoleRepository;
+import br.com.omnirent.security.domain.Role;
 import br.com.omnirent.user.context.ChangeUserStatusContext;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
@@ -36,6 +44,10 @@ public class UserService {
 	private UserRepository userRepository;
 	
 	private UserQueryRepository queryRepository;
+	
+	private final RoleRepository roleRepository;
+	
+	private final GlobalConfigHolder globalConfigHolder;
 	
 	private CurrentUserProvider currentUserProvider;
 	
@@ -72,6 +84,27 @@ public class UserService {
 
 	public List<UserResponseDTO> findAll() {
 		return queryRepository.findAllUser();
+	}
+	
+	public User createUser(String name, String username, String email, String password, LocalDate birthDate, String locale) {
+		String validName = name != null 
+				? name : IdentityGeneratorUtil.generateNameFromEmail(email);
+		
+		String validUsername = username != null
+				? username : IdentityGeneratorUtil.generateUniqueUsername(email);
+		
+		while (userRepository.existsByUsername(validUsername)) {
+			validUsername = IdentityGeneratorUtil.generateUniqueUsername(email);
+		}
+		
+		Integer currentVersion = globalConfigHolder.getGlobalTokenVersion();
+		User newUser = new User(null, validName, validUsername, email, password, 1, currentVersion);
+		
+		Role role = roleRepository.findByName("ROLE_USER")
+				.orElseThrow(() -> new RoleNotFoundException("ROLE_USER"));
+		newUser.getRoles().add(role);
+		
+		return userRepository.save(newUser);
 	}
 
 	@Transactional
