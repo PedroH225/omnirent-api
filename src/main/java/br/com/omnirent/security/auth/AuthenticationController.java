@@ -1,4 +1,4 @@
-package br.com.omnirent.security;
+package br.com.omnirent.security.auth;
 
 import java.util.Map;
 

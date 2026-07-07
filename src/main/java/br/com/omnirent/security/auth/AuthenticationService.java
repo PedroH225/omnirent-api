@@ -1,4 +1,4 @@
-package br.com.omnirent.security;
+package br.com.omnirent.security.auth;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -23,6 +23,7 @@ import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
+import br.com.omnirent.security.TokenService;
 import br.com.omnirent.security.domain.AuthenticatedUser;
 import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;

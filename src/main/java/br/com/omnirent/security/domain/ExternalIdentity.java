@@ -1,6 +1,7 @@
 package br.com.omnirent.security.domain;
 
 import br.com.omnirent.common.BaseEntity;
+import br.com.omnirent.security.auth.provider.AuthProvider;
 import br.com.omnirent.user.domain.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
