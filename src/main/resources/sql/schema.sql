@@ -30,6 +30,28 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=InnoDB;
 
 -- -----------------------------------------------------
+-- Table `roles`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `roles` (
+  `id` INT PRIMARY KEY,
+  `name` VARCHAR(20)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS `user_roles` (
+  `user_id` CHAR(36) NOT NULL,
+  `role_id` INT NOT NULL,
+  PRIMARY KEY (`user_id`, `role_id`),
+  FOREIGN KEY (`user_id`)
+    REFERENCES `users` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  FOREIGN KEY (`role_id`)
+    REFERENCES `roles` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
 -- Table `categories`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `categories` (
