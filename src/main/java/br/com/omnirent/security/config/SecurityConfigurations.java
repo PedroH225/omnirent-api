@@ -44,18 +44,24 @@ public class SecurityConfigurations {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .oauth2Login(oauth -> oauth.
-                		successHandler(oAuth2AuthenticationSuccessHandler))
+                		successHandler(oAuth2AuthenticationSuccessHandler)
+                		.failureUrl("/login"))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                		.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
-                        .requestMatchers("/rental/enums").permitAll()
-                        .requestMatchers("/webhooks/**").permitAll()
-                        .requestMatchers("/oauth2/**").permitAll()
-                        .requestMatchers("/login/oauth2/**").permitAll()
-                        .requestMatchers("/**").authenticated()
-                        .anyRequest().permitAll()
+                		.requestMatchers(
+                                HttpMethod.POST,
+                                "/auth/login",
+                                "/auth/register"
+                        ).permitAll()
+                        .requestMatchers(
+                                "/ws/**",
+                                "/rental/enums",
+                                "/webhooks/**",
+                                "/oauth2/**",
+                                "/login/oauth2/**",
+                                "/login"
+                        ).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
