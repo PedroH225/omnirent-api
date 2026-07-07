@@ -88,7 +88,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 		
 		item1 = itemRepository.save(ItemTestFactory.create(user1, address1, notebook, "200", ItemCondition.NEW));
 	    
-		SecurityTestUtils.setAuthenticatedUser(user1.getId());
+		SecurityTestUtils.setAuthenticatedUser(user1);
 	}
 	
 	@AfterEach
@@ -113,7 +113,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 		String payload = objectMapper.writeValueAsString(dirty);
 
 		String response = mockMvc.perform(post(ITEM_PREFIX)
-				.with(SecurityTestUtils.auth(user1.getId()))
+				.with(SecurityTestUtils.auth(user1))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isOk())
@@ -169,7 +169,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 		String payload = objectMapper.writeValueAsString(dirty);
 
 		mockMvc.perform(post(ITEM_PREFIX)
-				.with(SecurityTestUtils.auth(user1.getId()))
+				.with(SecurityTestUtils.auth(user1))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isConflict());
@@ -190,7 +190,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 		String payload = objectMapper.writeValueAsString(dirty);
 
 		mockMvc.perform(put(ITEM_PREFIX)
-				.with(SecurityTestUtils.auth(user1.getId()))
+				.with(SecurityTestUtils.auth(user1))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isOk());
@@ -242,7 +242,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 		String payload = objectMapper.writeValueAsString(dirty);
 
 		mockMvc.perform(put(ITEM_PREFIX)
-				.with(SecurityTestUtils.auth(user1.getId()))
+				.with(SecurityTestUtils.auth(user1))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isConflict());

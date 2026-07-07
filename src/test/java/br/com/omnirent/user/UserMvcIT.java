@@ -54,7 +54,7 @@ public class UserMvcIT extends SpringMvcIntegration {
 	@BeforeEach
 	void setUp() {
 		user1 = userRepository.save(UserTestFactory.owner());
-	    SecurityTestUtils.setAuthenticatedUser(user1.getId());
+	    SecurityTestUtils.setAuthenticatedUser(user1);
 	    globalConfigHolder.setGlobalTokenVersion(1);
 	}
 	
@@ -138,7 +138,7 @@ public class UserMvcIT extends SpringMvcIntegration {
 		String payload = objectMapper.writeValueAsString(dirty);
 		
 	    mockMvc.perform(put(USER_PREFIX + "/update")
-	    		.with(SecurityTestUtils.auth(user1.getId()))
+	    		.with(SecurityTestUtils.auth(user1))
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .content(payload))
 	        .andExpect(status().isOk());
@@ -169,7 +169,7 @@ public class UserMvcIT extends SpringMvcIntegration {
 	    String payload = objectMapper.writeValueAsString(dirty);
 
 	    mockMvc.perform(put(USER_PREFIX + "/update")
-	            .with(SecurityTestUtils.auth(user1.getId()))
+	            .with(SecurityTestUtils.auth(user1))
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .content(payload))
 	        .andExpect(status().isConflict());
@@ -191,7 +191,7 @@ public class UserMvcIT extends SpringMvcIntegration {
 	    String payload = objectMapper.writeValueAsString(dirty);
 
 	    mockMvc.perform(put(USER_PREFIX + "/update")
-	            .with(SecurityTestUtils.auth(user1.getId()))
+	            .with(SecurityTestUtils.auth(user1))
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .content(payload))
 	        .andExpect(status().isConflict());

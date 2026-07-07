@@ -35,7 +35,6 @@ import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.exception.domain.InvalidPaymentStateTransitionException;
-import br.com.omnirent.exception.domain.OptimisticLockException;
 import br.com.omnirent.exception.domain.PaymentNotFoundException;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
@@ -151,7 +150,7 @@ public class PaymentServiceIT extends SpringIntegrationTest {
         payment.attachExternalReference(PaymentProvider.STRIPE, "cs_test_123", "https://mock-session-url.com");
         payment = paymentRepository.save(payment);
         
-		SecurityTestUtils.setAuthenticatedUser(owner.getId());
+		SecurityTestUtils.setAuthenticatedUser(owner);
     }
     
 	@AfterEach

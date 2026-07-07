@@ -41,7 +41,7 @@ public class UserServiceIT extends SpringIntegrationTest {
 	void setUp() {
 		user1 = userRepository.save(UserTestFactory.user());
 	    user2 = userRepository.save(UserTestFactory.user());
-	    SecurityTestUtils.setAuthenticatedUser(user1.getId());
+	    SecurityTestUtils.setAuthenticatedUser(user1);
 	}
 	
 	@AfterEach

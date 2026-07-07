@@ -97,7 +97,7 @@ public class ItemServiceIT extends SpringIntegrationTest {
         item = itemRepository.save(ItemTestFactory.create(owner, ownerAddress, mouse, "200", ItemCondition.NEW));
         item2 = itemRepository.save(ItemTestFactory.create(owner, ownerAddress2, notebook, "200", ItemCondition.USED));
 
-		SecurityTestUtils.setAuthenticatedUser(owner.getId());
+		SecurityTestUtils.setAuthenticatedUser(owner);
 	}
 	
 	@AfterEach
@@ -163,7 +163,7 @@ public class ItemServiceIT extends SpringIntegrationTest {
 	
 	@Test
 	void shouldThrowWhenUserIsNotOwnerOnUpdateItem() {
-		SecurityTestUtils.setAuthenticatedUser(owner2.getId());
+		SecurityTestUtils.setAuthenticatedUser(owner2);
 	    UpdateItemRequestDTO request = ItemTestFactory.updateItemRequest(item.getId(), "300", ItemCondition.USED);
 	    
 	    assertThatThrownBy(() -> itemService.updateItem(request))

@@ -44,7 +44,7 @@ public class AddressServiceIT extends SpringIntegrationTest {
 		user = userRepository.save(UserTestFactory.user());
 		userAddress = addressRepository.save(AddressTestFactory.forUser(user));
 
-		SecurityTestUtils.setAuthenticatedUser(user.getId());
+		SecurityTestUtils.setAuthenticatedUser(user);
 	}
 	
 	@AfterEach
@@ -85,8 +85,9 @@ public class AddressServiceIT extends SpringIntegrationTest {
 	@Test
 	void shouldThrowWhenInvalidUser() {
 		AddressRequestDTO addressRequestDTO = AddressTestFactory.toRequestDTO(userAddress);
+		User invalidUser = UserTestFactory.user();
 		
-		SecurityTestUtils.setAuthenticatedUser("invalid-id");
+		SecurityTestUtils.setAuthenticatedUser(invalidUser);
 		assertThatThrownBy(() -> addressService.addAddress(addressRequestDTO))
 		.isInstanceOf(ApiException.class);
 	}

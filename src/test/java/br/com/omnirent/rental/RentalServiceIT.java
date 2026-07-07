@@ -30,7 +30,6 @@ import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalCreatedDTO;
-import br.com.omnirent.rental.dto.RentalDisplayDTO;
 import br.com.omnirent.rental.dto.RentalRequestDTO;
 import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserService;
@@ -110,7 +109,7 @@ public class RentalServiceIT extends SpringIntegrationTest {
         rental2 = rentalRepository.save(RentalTestFactory.create(item2, owner, renter, ownerAddress2, "4400", 
         		RentalStatus.SHIPPED, RentalPeriod.MONTHLY, null, null));
         
-		SecurityTestUtils.setAuthenticatedUser(owner.getId());
+		SecurityTestUtils.setAuthenticatedUser(owner);
 	}
 	
 	@AfterEach
@@ -120,7 +119,7 @@ public class RentalServiceIT extends SpringIntegrationTest {
 	
 	@Test
 	void shouldAddRental() {
-		SecurityTestUtils.setAuthenticatedUser(renter.getId());
+		SecurityTestUtils.setAuthenticatedUser(renter);
 		String itemId = item2.getId();
 		RentalPeriod period = RentalPeriod.MONTHLY;
 		

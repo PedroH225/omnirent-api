@@ -2,7 +2,6 @@ package br.com.omnirent.utils;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,12 +11,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import br.com.omnirent.security.domain.AuthenticatedUser;
+import br.com.omnirent.user.domain.User;
 
 public final class SecurityTestUtils {
 
-    public static void setAuthenticatedUser(String userId) {    	
+    public static void setAuthenticatedUser(User user) {    	
         AuthenticatedUser principal =
-            new AuthenticatedUser(userId, Collections.emptyList(), 1, 1);
+            new AuthenticatedUser(user.getId(), user.getEmail(), user.getPassword(),  Collections.emptyList(), 1, 1);
 
         Authentication auth =
             new UsernamePasswordAuthenticationToken(
@@ -29,9 +29,9 @@ public final class SecurityTestUtils {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
     
-    public static RequestPostProcessor auth(String userId) {
+    public static RequestPostProcessor auth(User user) {
         AuthenticatedUser principal =
-                new AuthenticatedUser(userId, List.of(), 1, 1);
+                new AuthenticatedUser(user.getId(), user.getEmail(), user.getPassword(),  Collections.emptyList(), 1, 1);
 
         Authentication auth =
                 new UsernamePasswordAuthenticationToken(
