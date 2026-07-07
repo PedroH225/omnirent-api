@@ -10,6 +10,7 @@ import br.com.omnirent.common.NamedEntity;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.rental.domain.Rental;
+import br.com.omnirent.security.domain.ExternalIdentity;
 import br.com.omnirent.security.domain.Role;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -67,6 +68,9 @@ public class User extends NamedEntity {
 	
 	@Embedded
 	private AuthMetadata authMetadata;
+	
+	@OneToMany(mappedBy = "user")
+	private Set<ExternalIdentity> authProvider;
 	
 	public User(String id, String email, String password, Integer tokenVersion, Integer globalVersion) {
 		this.id = id;
