@@ -23,7 +23,7 @@ O projeto foi desenvolvido com o objetivo de compor um portfólio em backend bas
 * **Pagamentos**: Stripe(Sandbox)
 * **Localização**: Internacionalização de respostas da API e tratamento de fusos horários
 
-### Execução
+## Execução
 **1.** Configure suas variáveis de ambiente: [Exemplo](.env-example)
 
 **2.** Execute:
