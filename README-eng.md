@@ -1,4 +1,5 @@
 # OmniRent API
+## Description
 Backend of the OmniRent platform, a marketplace for renting various types of equipment.
 
 The application allows users to list equipment so that other users can search, reserve, and rent items for defined periods.
@@ -25,10 +26,6 @@ docker compose up
 ```
 
 ## Features
-### Authentication
-- User registration
-- Login with email and password
-- Login using Google account
 
 ### Equipment
 - Users can list equipment for rent
@@ -47,6 +44,11 @@ docker compose up
 - Automatic status updates after payment confirmation
 - Payment cancellation and refunds
 - Rental renewal through a new payment
+
+### Authentication
+- User registration
+- Login with email and password
+- Login using Google account
 
 ### System
 - Tracking of important actions and changes
