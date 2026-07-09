@@ -48,6 +48,8 @@ public class User extends NamedEntity {
 	
 	private String locale;
 	
+	private String timezone;
+	
 	@OneToMany(mappedBy = "user")
 	private List<Address> addresses;
 	
@@ -72,12 +74,13 @@ public class User extends NamedEntity {
 	@OneToMany(mappedBy = "user")
 	private Set<ExternalIdentity> authProvider;
 	
-	public User(String id, String name, String username, String email, String password, Integer tokenVersion, Integer globalVersion) {
+	public User(String id, String name, String username, String email, String password, LocalDate birthDate, Integer tokenVersion, Integer globalVersion) {
 		this.id = id;
 		this.name = name;
 		this.username =  username;
 		this.email = email;
 		this.password = password;
+		this.birthDate = birthDate;
 		
 		AuthMetadata authMetadata = new AuthMetadata();
         authMetadata.setTokenVersion(tokenVersion);

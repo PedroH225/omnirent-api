@@ -5,4 +5,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app")
 public record AppProperties(
 		String frontUrl,
-		String email) {}
+		String email,
+		String locale,
+		String timezone) {}

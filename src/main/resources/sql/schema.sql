@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `birth_date` DATE,
   `user_status` VARCHAR(20) DEFAULT 'ACTIVE',
   `locale` VARCHAR(10) DEFAULT 'pt-BR',
+  `timezone` VARCHAR(20) DEFAULT 'America/Sao_Paulo',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `token_version` INT NOT NULL DEFAULT 1,
