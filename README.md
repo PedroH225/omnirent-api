@@ -1,4 +1,8 @@
 # OmniRent API
+
+> Read in other languages: [English](README-eng.md)
+
+## Descrição
 Backend da plataforma OmniRent, um marketplace de aluguel de equipamentos variados.
 
 A aplicação permite que os usuários anunciem equipamentos para que outros usuários possam buscar, reservar e realizar aluguéis por períodos definidos.
