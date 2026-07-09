@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizationFailureHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -20,6 +21,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import br.com.omnirent.config.properties.AppProperties;
+import br.com.omnirent.security.auth.provider.OAuth2AuthenticationFailureHandler;
 import br.com.omnirent.security.auth.provider.OAuth2AuthenticationSuccessHandler;
 import lombok.AllArgsConstructor;
 
@@ -36,6 +38,8 @@ public class SecurityConfigurations {
     
     private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     
+    private OAuth2AuthenticationFailureHandler oAuth2AuthorizationFailureHandler;
+    
     private AppProperties appProperties;
 
     @Bean 
@@ -45,7 +49,7 @@ public class SecurityConfigurations {
                 .csrf(csrf -> csrf.disable())
                 .oauth2Login(oauth -> oauth.
                 		successHandler(oAuth2AuthenticationSuccessHandler)
-                		.failureUrl("/login"))
+                		.failureHandler(oAuth2AuthorizationFailureHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                 		.requestMatchers(
