@@ -21,6 +21,9 @@ The project was developed as a backend portfolio project focused on production-o
 * **Localization**: API response internationalization and timezone handling
 
 ## Setup
+**1.** Configure your environment variables: [Example](.env-example)
+
+**2.** Run:
 ```bash
 docker compose up
 ```
