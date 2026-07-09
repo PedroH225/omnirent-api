@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
 import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.common.ApiErrorResponseWriter;
 import br.com.omnirent.exception.common.ApiException;
-import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
+import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import br.com.omnirent.security.TokenService;
 import br.com.omnirent.security.auth.ProviderUserMetadata;
 import br.com.omnirent.security.auth.UserIdentityService;
@@ -67,6 +68,9 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 			e.printStackTrace();
 		} catch (ApiException ex) {
 			apiWriter.onApiError(request, response, ex);
+			
+			response.sendRedirect(String.format("%s/oauth/callback?error=%s", 
+					appProperties.frontUrl(), ex.getErrorCode()));
 		}
 	}
 }

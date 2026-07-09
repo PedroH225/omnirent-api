@@ -1,8 +1,6 @@
 package br.com.omnirent.security.auth.provider;
 
 import java.io.IOException;
-import java.time.Clock;
-import java.time.Instant;
 
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -11,27 +9,23 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
-import br.com.omnirent.config.i18n.MessageService;
-import br.com.omnirent.exception.common.ApiErrorResponse;
+import br.com.omnirent.config.properties.AppProperties;
+import br.com.omnirent.exception.common.ApiErrorResponseWriter;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
-import br.com.omnirent.exception.domain.apptype.CommonErrorType;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import tools.jackson.databind.ObjectMapper;
 
 @Component
 @AllArgsConstructor
 public class OAuth2AuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-	private MessageService messageService;
+	private ApiErrorResponseWriter apiWriter;
 	
-    private ObjectMapper objectMapper;
-    
-    private Clock clock;
-	
+	private AppProperties appProperties;
+    	
 	@Override
 	public void onAuthenticationFailure(
 			HttpServletRequest request, 
@@ -43,26 +37,10 @@ public class OAuth2AuthenticationFailureHandler implements AuthenticationFailure
                         ? ae
                         : resolveApiError(ex);
 
-        String localizedMessage = messageService.get(
-                apiException.getMessageKey(),
-                apiException.getArgs()
-        );
-
-        ApiErrorResponse body = new ApiErrorResponse(
-                Instant.now(clock),
-                apiException.getHttpStatus().value(),
-                apiException.getErrorType(),
-                apiException.getErrorCode(),
-                localizedMessage,
-                request.getRequestURI()
-        );
-
-        response.setStatus(apiException.getHttpStatus().value());
-        response.setContentType("application/json");
-
-        response.getWriter().write(
-                objectMapper.writeValueAsString(body)
-        );
+        apiWriter.onApiError(request, response, apiException);
+        
+		response.sendRedirect(String.format("%s/login?error=%s", 
+				appProperties.frontUrl(), apiException.getErrorCode()));
 	}
 	
 	private ApiException resolveApiError(AuthenticationException ex) {
