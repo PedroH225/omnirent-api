@@ -7,10 +7,10 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,8 +19,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.audit.AuditAction;
+import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
-import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
 import br.com.omnirent.security.TokenService;
@@ -31,19 +31,17 @@ import br.com.omnirent.security.event.UserLoggedInEvent;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.UserQueryRepository;
-import br.com.omnirent.user.UserRepository;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.UserValidationService;
 import br.com.omnirent.user.domain.User;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class AuthenticationService implements UserDetailsService {
 	@Autowired
 	private ApplicationContext context;
-
-	@Autowired
-	private UserRepository userRepository;
 
 	@Autowired
 	private UserQueryRepository queryRepository;
@@ -60,9 +58,6 @@ public class AuthenticationService implements UserDetailsService {
 	private UserMapper mapper;
 
 	@Autowired
-	private GlobalConfigHolder globalConfigHolder;
-
-	@Autowired
 	private UserValidationService validationService;
 
 	@Autowired
@@ -75,7 +70,8 @@ public class AuthenticationService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 		User context = queryRepository.findByEmail(email)
 				.orElseThrow(() -> new UsernameNotFoundException(email));
-
+		
+		requireActive(context);
 		return mapper.toAuthUser(context);
 	}
 
@@ -97,7 +93,15 @@ public class AuthenticationService implements UserDetailsService {
 							user.getId(), ip, userAgent, true, Instant.now()));
 
 			return Map.of("token", token);
-		} catch (BadCredentialsException e) {
+		} 
+		catch (InternalAuthenticationServiceException e) {
+		    if (e.getCause() instanceof ApiException ae) {
+		        throw ae;
+		    }
+
+		    throw new ApiException(AuthenticationErrorType.AUTHENTICATION_SERVICE_ERROR);
+		}
+		catch (BadCredentialsException e) {
 			throw new ApiException(AuthenticationErrorType.INVALID_CREDENTIALS);
 		}
 	}
@@ -108,9 +112,6 @@ public class AuthenticationService implements UserDetailsService {
 
 		String locale = request.getHeader("Accept-Language");
 		String timezone = request.getHeader("Timezone");
-		System.out.println("locale: " + locale);
-		
-		System.out.println("timezone: " + timezone);
 
 		String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
 		
@@ -133,5 +134,14 @@ public class AuthenticationService implements UserDetailsService {
 		}
 
 		return request.getRemoteAddr();
+	}
+	
+	private void requireActive(User user) {
+		if (user.getUserStatus() != UserStatus.ACTIVE) {
+			log.debug("{} user tried to login, id: {}",
+					user.getUserStatus(),
+					user.getId());
+			throw new ApiException(AuthenticationErrorType.INVALID_CREDENTIALS);
+		}
 	}
 }

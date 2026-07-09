@@ -4,7 +4,9 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import br.com.omnirent.security.auth.provider.AuthProvider;
+import br.com.omnirent.common.enums.UserStatus;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import br.com.omnirent.security.domain.ExternalIdentity;
 import br.com.omnirent.user.UserQueryRepository;
 import br.com.omnirent.user.UserService;
@@ -28,14 +30,19 @@ public class UserIdentityService {
 	    		.findByProviderAndProviderUserId(userInfo.provider(), userInfo.sub());
 
 	    if (identity.isPresent()) {
-	        return identity.get().getUser();
+	    	User found = identity.get().getUser();
+			requireActive(found);
+	        return found;
 	    }
 		
 		Optional<User> optUser = userQueryRepository.findByEmail(userInfo.email());
 		if (optUser.isEmpty()) {
 			return createNewUser(userInfo);
 		}
-		return linkExternalIdentity(userInfo, optUser.get());
+		
+    	User found = optUser.get();
+		requireActive(found);
+		return linkExternalIdentity(userInfo, found);
 	}
 	
 	private User createNewUser(ProviderUserMetadata userInfo) {
@@ -58,5 +65,14 @@ public class UserIdentityService {
 		return new ExternalIdentity(
 				userInfo.provider(), userInfo.sub(), userInfo.email(),
 				userInfo.emailVerified(), userInfo.picture(), user);
+	}
+	
+	private void requireActive(User user) {
+		if (user.getUserStatus() == UserStatus.INACTIVE) {
+			throw new ApiException(UserErrorType.INACTIVE);
+		}
+		if (user.getUserStatus() == UserStatus.BANNED) {
+			throw new ApiException(UserErrorType.BANNED);
+		}
 	}
 }
