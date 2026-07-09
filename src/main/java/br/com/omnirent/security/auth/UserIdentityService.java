@@ -39,7 +39,7 @@ public class UserIdentityService {
 	}
 	
 	private User createNewUser(ProviderUserMetadata userInfo) {
-		User newUser =  userService.createUser(userInfo.name(), null, userInfo.email(), null, null, userInfo.locale());
+		User newUser =  userService.createUser(userInfo.name(), null, userInfo.email(), null, null, userInfo.locale(), null);
 
 		identityRepository.save(buildExternalIdentity(userInfo, newUser));
 		

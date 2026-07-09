@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.security.TokenService;
 import br.com.omnirent.security.auth.ProviderUserMetadata;
 import br.com.omnirent.security.auth.UserIdentityService;
@@ -29,6 +30,8 @@ public class OAuth2AuthenticationSuccessHandler
     private final UserMapper userMapper;
     
     private final TokenService tokenService;
+    
+    private final AppProperties appProperties;
 
     @Override
     public void onAuthenticationSuccess(
@@ -57,8 +60,8 @@ public class OAuth2AuthenticationSuccessHandler
 
         try {
 			response.sendRedirect(
-			    "http://localhost:3000/oauth/callback?token=" + token
-			);
+					String.format("%s/oauth/callback?token=%s",
+							appProperties.frontUrl(), token));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

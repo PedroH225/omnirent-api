@@ -32,8 +32,8 @@ import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.UserQueryRepository;
 import br.com.omnirent.user.UserRepository;
+import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.UserValidationService;
-import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -47,6 +47,9 @@ public class AuthenticationService implements UserDetailsService {
 
 	@Autowired
 	private UserQueryRepository queryRepository;
+	
+	@Autowired
+	private UserService userService;
 
 	@Autowired
 	private TokenService tokenService;
@@ -99,38 +102,27 @@ public class AuthenticationService implements UserDetailsService {
 		}
 	}
 
-	public ResponseEntity<Object> register(RegisterDTO registerDto) {
+	public ResponseEntity<Object> register(RegisterDTO registerDto, HttpServletRequest request) {
 		validationService.validateTakenFields(null, registerDto);
 		validationService.validatePasswordMatch(registerDto.password(), registerDto.repeatedPassword());
 
-		Locale userLocale = LocaleContextHolder.getLocale();
+		String locale = request.getHeader("Accept-Language");
+		String timezone = request.getHeader("Timezone");
+		System.out.println("locale: " + locale);
+		
+		System.out.println("timezone: " + timezone);
 
 		String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
-
-		User persistedUser = this.userRepository.save(fromRegisterDTO(registerDto, encryptedPassword, userLocale));
+		
+		User persistedUser = userService.createUser(
+				registerDto.name(), registerDto.username(),registerDto.email(),
+				encryptedPassword, registerDto.birthDate(), 
+				locale, timezone);
 
 		eventPublisher.publish(new UserRegisteredEvent(AuditAction.USER_REGISTERED, persistedUser.getId(),
-				mapper.toAuditSnapshot(persistedUser), Instant.now(clock), userLocale));
+				mapper.toAuditSnapshot(persistedUser), Instant.now(clock), Locale.forLanguageTag(locale)));
 
 		return ResponseEntity.ok().build();
-	}
-
-	private User fromRegisterDTO(RegisterDTO registerDTO, String encryptedPassword, Locale locale) {
-		User user = new User();
-
-		AuthMetadata authMetadata = new AuthMetadata();
-		authMetadata.setTokenVersion(1);
-		authMetadata.setGlobalVersion(globalConfigHolder.getGlobalTokenVersion());
-
-		user.setAuthMetadata(authMetadata);
-		user.setName(registerDTO.name());
-		user.setUsername(registerDTO.username());
-		user.setEmail(registerDTO.email());
-		user.setBirthDate(registerDTO.birthDate());
-		user.setPassword(encryptedPassword);
-		user.setLocale(locale.toLanguageTag());
-
-		return user;
 	}
 
 	private String extractIp(HttpServletRequest request) {
