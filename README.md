@@ -30,11 +30,6 @@ docker compose up
 
 ## Funcionalidades
 
-### Autenticação
-- Cadastro de usuários
-- Login com email e senha
-- Login utilizando conta Google
-
 ### Equipamentos
 - Usuários podem anunciar equipamentos para aluguel
 - Organização por categorias e subcategorias
@@ -52,6 +47,11 @@ docker compose up
 - Atualização automática do status após confirmação do pagamento
 - Cancelamento e reembolso do pagamento
 - Renovação do aluguel mediante a novo pagamento
+
+### Autenticação
+- Cadastro de usuários
+- Login com email e senha
+- Login utilizando conta Google
 
 ### Sistema
 - Registro de alterações e ações importantes
