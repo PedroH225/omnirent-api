@@ -24,6 +24,9 @@ O projeto foi desenvolvido com o objetivo de compor um portfólio em backend bas
 * **Localização**: Internacionalização de respostas da API e tratamento de fusos horários
 
 ### Execução
+**1.** Configure suas variáveis de ambiente: [Exemplo](.env-example)
+
+**2.** Execute:
 ```bash
 docker compose up
 ```
