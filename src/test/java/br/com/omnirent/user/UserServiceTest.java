@@ -3,6 +3,7 @@ package br.com.omnirent.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -123,6 +124,36 @@ public class UserServiceTest {
         assertThat(result)
 	        .usingRecursiveComparison()
 	        .isEqualTo(user);
+    }
+    
+    @Test
+    void createUser_GeneratingNullFields() {
+    	when(appProperties.locale()).thenReturn("pt-BR");
+    	when(appProperties.timezone()).thenReturn("America/Sao_Paulo");
+    	
+    	User data = UserTestFactory.copy(user);
+    	data.setName(null);
+    	data.setUsername(null);
+    	data.setLocale(null);   
+    	data.setTimezone(null);
+    	
+    	when(userRepository.existsByUsername(any())).thenReturn(false);
+        when(globalConfigHolder.getGlobalTokenVersion()).thenReturn(1);
+        when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.of(defaultRole));
+        when(userRepository.save(any(User.class))).thenReturn(user);
+        
+        User result = userService.createUser(data.getName(), data.getUsername(),
+        		data.getEmail(), data.getPassword(), data.getBirthDate(),
+        		data.getLocale(), data.getTimezone());
+        
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+
+        verify(userRepository).save(captor.capture());
+        
+        assertNotNull(result.getName());
+        assertNotNull(result.getUsername());
+        assertNotNull(result.getLocale());
+        assertNotNull(result.getTimezone());   
     }
 
 	@Test
