@@ -280,6 +280,34 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 		verify(request, never()).getRemoteAddr();
 		assertThat(eventCaptor.getValue().ip()).isEqualTo("10.0.0.1");
 	}
+	
+	@Test
+	void shouldExtractRemoteAddrWhenXForwardedForIsMissing() throws IOException, ServletException {
+		when(authentication.getAuthorizedClientRegistrationId()).thenReturn("google");
+		when(authentication.getPrincipal()).thenReturn(oauth2User);
+		when(authentication.getName()).thenReturn("test-user");
+		when(authorizedClientService.loadAuthorizedClient("google", "test-user")).thenReturn(authorizedClient);
+		when(authorizedClient.getAccessToken()).thenReturn(accessToken);
+		when(accessToken.getTokenValue()).thenReturn("mock-access-token");
+		when(authService.resolveUserMetadata(AuthProvider.GOOGLE, oauth2User, "mock-access-token")).thenReturn(userInfo);
+		when(userIdentityService.resolveUser(userInfo)).thenReturn(user);
+		when(userMapper.toAuthUser(user)).thenReturn(authenticatedUser);
+		when(tokenService.generateToken(authenticatedUser)).thenReturn("mock-jwt-token");
+		when(request.getHeader("X-Forwarded-For")).thenReturn(null);
+		when(request.getRemoteAddr()).thenReturn("172.16.0.1");
+		when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
+		when(clock.instant()).thenReturn(now);
+		when(appProperties.frontUrl()).thenReturn("http://localhost:3000");
+
+		successHandler.onAuthenticationSuccess(request, response, authentication);
+
+		ArgumentCaptor<UserLoggedInEvent> eventCaptor = ArgumentCaptor.forClass(UserLoggedInEvent.class);
+		verify(eventPublisher).publish(eventCaptor.capture());
+		verify(request).getRemoteAddr();
+		verify(request).getHeader("X-Forwarded-For");
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback?token=mock-jwt-token");
+		assertThat(eventCaptor.getValue().ip()).isEqualTo("172.16.0.1");
+	}
 }
 
 
