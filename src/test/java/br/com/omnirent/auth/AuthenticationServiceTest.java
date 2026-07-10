@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -25,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
@@ -159,6 +159,39 @@ public class AuthenticationServiceTest {
 
 		verify(context).getBean(AuthenticationManager.class);
 		verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+		
+		verifyNoMoreInteractions(authenticationManager, context);
+		verifyNoInteractions(tokenService, eventPublisher);
+	}
+	
+	@Test
+	void loginThrowsInternalAuthenticationServiceExceptionWithApiException() {
+		LoginDTO loginDTO = new LoginDTO("test@email.com", "password");
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		ApiException apiException = new ApiException(AuthenticationErrorType.INVALID_TOKEN);
+		InternalAuthenticationServiceException exception = new InternalAuthenticationServiceException("Error", apiException);
+
+		when(context.getBean(AuthenticationManager.class)).thenReturn(authenticationManager);
+		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(exception);
+
+		ApiException thrown = assertThrowsExactly(ApiException.class, () -> 
+				authenticationService.login(loginDTO, request)
+		);
+
+		assertThat(thrown).isSameAs(apiException);
+
+		verify(context).getBean(AuthenticationManager.class);
+		verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+		
+		ArgumentCaptor<UsernamePasswordAuthenticationToken> captor =
+		        ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
+
+		verify(authenticationManager).authenticate(captor.capture());
+
+		assertThat(captor.getValue().getPrincipal()).isEqualTo("test@email.com");
+		assertThat(captor.getValue().getCredentials()).isEqualTo("password");
+		
+		assertThat(thrown).isSameAs(apiException);
 		
 		verifyNoMoreInteractions(authenticationManager, context);
 		verifyNoInteractions(tokenService, eventPublisher);
