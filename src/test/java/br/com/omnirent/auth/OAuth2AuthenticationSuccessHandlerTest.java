@@ -3,6 +3,7 @@ package br.com.omnirent.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -253,6 +254,31 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 		verify(apiWriter).onApiError(request, response, apiException);
 		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=" + apiException.getErrorCode());
 		verifyNoInteractions(tokenService, eventPublisher, userMapper);
+	}
+	
+	@Test
+	void shouldExtractOnlyFirstIpWhenXForwardedForHasMultipleIps() throws IOException, ServletException {
+		when(authentication.getAuthorizedClientRegistrationId()).thenReturn("google");
+		when(authentication.getPrincipal()).thenReturn(oauth2User);
+		when(authentication.getName()).thenReturn("test-user");
+		when(authorizedClientService.loadAuthorizedClient("google", "test-user")).thenReturn(authorizedClient);
+		when(authorizedClient.getAccessToken()).thenReturn(accessToken);
+		when(accessToken.getTokenValue()).thenReturn("mock-access-token");
+		when(authService.resolveUserMetadata(AuthProvider.GOOGLE, oauth2User, "mock-access-token")).thenReturn(userInfo);
+		when(userIdentityService.resolveUser(userInfo)).thenReturn(user);
+		when(userMapper.toAuthUser(user)).thenReturn(authenticatedUser);
+		when(tokenService.generateToken(authenticatedUser)).thenReturn("mock-jwt-token");
+		when(request.getHeader("X-Forwarded-For")).thenReturn("10.0.0.1, 192.168.1.100");
+		when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
+		when(clock.instant()).thenReturn(now);
+		when(appProperties.frontUrl()).thenReturn("http://localhost:3000");
+
+		successHandler.onAuthenticationSuccess(request, response, authentication);
+
+		ArgumentCaptor<UserLoggedInEvent> eventCaptor = ArgumentCaptor.forClass(UserLoggedInEvent.class);
+		verify(eventPublisher).publish(eventCaptor.capture());
+		verify(request, never()).getRemoteAddr();
+		assertThat(eventCaptor.getValue().ip()).isEqualTo("10.0.0.1");
 	}
 }
 
