@@ -155,6 +155,28 @@ public class UserServiceTest {
         assertNotNull(result.getLocale());
         assertNotNull(result.getTimezone());   
     }
+    
+    @Test
+    void createUser_InvalidTimezoneAndLocale() {
+    	when(appProperties.locale()).thenReturn("pt-BR");
+    	when(appProperties.timezone()).thenReturn("America/Sao_Paulo");
+    	
+    	User data = UserTestFactory.copy(user);
+    	data.setLocale("eng-USA");   
+    	data.setTimezone("Amer/new_York");
+    	
+    	when(userRepository.existsByUsername(any())).thenReturn(false);
+        when(globalConfigHolder.getGlobalTokenVersion()).thenReturn(1);
+        when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.of(defaultRole));
+        when(userRepository.save(any(User.class))).thenReturn(user);
+        
+        User result = userService.createUser(data.getName(), data.getUsername(),
+        		data.getEmail(), data.getPassword(), data.getBirthDate(),
+        		data.getLocale(), data.getTimezone());
+                
+        assertEquals(result.getLocale(), "pt-BR");
+        assertNotNull(result.getTimezone(), "America/Sao_Paulo");   
+    }
 
 	@Test
 	void shouldThrowExceptionWhenUserDoesNotExist() {
