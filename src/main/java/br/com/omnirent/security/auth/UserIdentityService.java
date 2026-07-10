@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.UserErrorType;
+import br.com.omnirent.security.auth.provider.records.ProviderUserMetadata;
 import br.com.omnirent.security.domain.ExternalIdentity;
 import br.com.omnirent.user.UserQueryRepository;
 import br.com.omnirent.user.UserService;

@@ -2,23 +2,22 @@ package br.com.omnirent.security.auth.provider;
 
 import java.io.IOException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.common.ApiErrorResponseWriter;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
 import br.com.omnirent.security.TokenService;
-import br.com.omnirent.security.auth.ProviderUserMetadata;
 import br.com.omnirent.security.auth.UserIdentityService;
+import br.com.omnirent.security.auth.provider.records.ProviderUserMetadata;
 import br.com.omnirent.security.domain.AuthenticatedUser;
 import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.domain.User;
@@ -31,6 +30,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
+	private final OAuth2AuthorizedClientService authorizedClientService;
+	
 	private final UserIdentityService userIdentityService;
 
 	private final ApiErrorResponseWriter apiWriter;
@@ -52,8 +53,18 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 			AuthProvider provider = resolveProvider(oauth);
 			OAuth2User principal = oauth.getPrincipal();
 
+			OAuth2AuthorizedClient authorizedClient =
+			        authorizedClientService.loadAuthorizedClient(
+			                oauth.getAuthorizedClientRegistrationId(),
+			                authentication.getName()
+			        );
+			
+			String accessToken = authorizedClient
+			        .getAccessToken()
+			        .getTokenValue();
+			
 			ProviderUserMetadata userInfo = authService
-					.resolveUserMetadata(provider, principal);
+					.resolveUserMetadata(provider, principal, accessToken);
 			
 			User user = userIdentityService.resolveUser(userInfo);
 

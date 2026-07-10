@@ -1,4 +1,4 @@
-package br.com.omnirent.security.auth;
+package br.com.omnirent.security.auth.provider.records;
 
 import br.com.omnirent.security.auth.provider.AuthProvider;
 

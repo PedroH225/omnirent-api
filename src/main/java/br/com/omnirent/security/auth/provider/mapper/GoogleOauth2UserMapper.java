@@ -3,8 +3,8 @@ package br.com.omnirent.security.auth.provider.mapper;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 
-import br.com.omnirent.security.auth.ProviderUserMetadata;
 import br.com.omnirent.security.auth.provider.AuthProvider;
+import br.com.omnirent.security.auth.provider.records.ProviderUserMetadata;
 
 @Component
 public class GoogleOauth2UserMapper {

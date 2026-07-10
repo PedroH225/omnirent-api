@@ -6,8 +6,9 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
-import br.com.omnirent.security.auth.ProviderUserMetadata;
+import br.com.omnirent.security.auth.provider.mapper.GithubOauth2UserMapper;
 import br.com.omnirent.security.auth.provider.mapper.GoogleOauth2UserMapper;
+import br.com.omnirent.security.auth.provider.records.ProviderUserMetadata;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -15,17 +16,20 @@ import lombok.RequiredArgsConstructor;
 public class OAuth2Service {
 	
 	private final GoogleOauth2UserMapper googleMapper;
+	
+	private final GithubOauth2UserMapper githubMapper;
 
-	public ProviderUserMetadata resolveUserMetadata(AuthProvider provider, OAuth2User user) {
+	public ProviderUserMetadata resolveUserMetadata(
+			AuthProvider provider, OAuth2User user, String accessToken) {
 		ProviderUserMetadata metadata = switch (provider) {
 		case GOOGLE: {
 			yield googleMapper.map(provider, user);
 		}
-//		case GITHUB: {
-//			
-//			yield;
-//			
-//		}
+		case GITHUB: {
+			
+			yield githubMapper.map(provider, user, accessToken);
+			
+		}
 		default:
 			throw new ApiException(AuthenticationErrorType.UNSUPPORTED_AUTH_PROVIDER);
 		};
