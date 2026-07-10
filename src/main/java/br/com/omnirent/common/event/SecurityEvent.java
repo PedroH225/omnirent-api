@@ -2,6 +2,8 @@ package br.com.omnirent.common.event;
 
 import java.time.Instant;
 
+import br.com.omnirent.security.auth.provider.AuthProvider;
+
 public interface SecurityEvent {
 	
 	default String eventType() {
@@ -18,6 +20,8 @@ public interface SecurityEvent {
     String ip();
     
     String userAgent();
+    
+    AuthProvider provider();
     
     boolean success();
     

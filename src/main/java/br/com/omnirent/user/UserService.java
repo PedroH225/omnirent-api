@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,6 +28,7 @@ import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.security.auth.RoleRepository;
 import br.com.omnirent.security.domain.Role;
+import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.context.ChangeUserStatusContext;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
@@ -120,7 +122,12 @@ public class UserService {
 		newUser.setLocale(validLocale);
 		newUser.setTimezone(validTimezone);
 		
-		return userRepository.save(newUser);
+		User persistedUser = userRepository.save(newUser);
+
+		eventPublisher.publish(new UserRegisteredEvent(AuditAction.USER_REGISTERED, persistedUser.getId(),
+				userMapper.toAuditSnapshot(persistedUser), Instant.now(clock), Locale.forLanguageTag(validLocale)));
+
+		return persistedUser;
 	}
 
 	@Transactional

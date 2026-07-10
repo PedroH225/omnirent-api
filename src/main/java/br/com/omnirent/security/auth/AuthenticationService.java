@@ -24,6 +24,7 @@ import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
 import br.com.omnirent.security.TokenService;
+import br.com.omnirent.security.auth.provider.AuthProvider;
 import br.com.omnirent.security.domain.AuthenticatedUser;
 import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
@@ -90,7 +91,8 @@ public class AuthenticationService implements UserDetailsService {
 			String userAgent = request.getHeader("User-Agent");
 
 			eventPublisher.publish(new UserLoggedInEvent(
-							user.getId(), ip, userAgent, true, Instant.now()));
+							user.getId(), ip, userAgent, AuthProvider.LOGIN_PASSWORD,
+							true, Instant.now(clock)));
 
 			return Map.of("token", token);
 		} 
@@ -115,13 +117,10 @@ public class AuthenticationService implements UserDetailsService {
 
 		String encryptedPassword = new BCryptPasswordEncoder().encode(registerDto.password());
 		
-		User persistedUser = userService.createUser(
+		userService.createUser(
 				registerDto.name(), registerDto.username(),registerDto.email(),
 				encryptedPassword, registerDto.birthDate(), 
 				locale, timezone);
-
-		eventPublisher.publish(new UserRegisteredEvent(AuditAction.USER_REGISTERED, persistedUser.getId(),
-				mapper.toAuditSnapshot(persistedUser), Instant.now(clock), Locale.forLanguageTag(locale)));
 
 		return ResponseEntity.ok().build();
 	}

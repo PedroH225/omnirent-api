@@ -1,6 +1,8 @@
 package br.com.omnirent.security.auth.provider;
 
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +13,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.common.ApiErrorResponseWriter;
 import br.com.omnirent.exception.common.ApiException;
@@ -19,6 +22,7 @@ import br.com.omnirent.security.TokenService;
 import br.com.omnirent.security.auth.UserIdentityService;
 import br.com.omnirent.security.auth.provider.records.ProviderUserMetadata;
 import br.com.omnirent.security.domain.AuthenticatedUser;
+import br.com.omnirent.security.event.UserLoggedInEvent;
 import br.com.omnirent.user.UserMapper;
 import br.com.omnirent.user.domain.User;
 import jakarta.servlet.ServletException;
@@ -43,6 +47,10 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 	private final OAuth2Service authService;
 
 	private final AppProperties appProperties;
+	
+	private final SpringDomainEventPublisher eventPublisher;
+	
+	private final Clock clock;
 
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -72,6 +80,12 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
 			String token = tokenService.generateToken((AuthenticatedUser) authenticatedUser);
 
+			String ip = extractIp(request);
+			String userAgent = request.getHeader("User-Agent");
+			
+			eventPublisher.publish(new UserLoggedInEvent(
+					user.getId(), ip, userAgent, provider, true, Instant.now(clock)));
+			
 			response.sendRedirect(String.format("%s/oauth/callback?token=%s",
 					appProperties.frontUrl(), token));
 
@@ -96,6 +110,15 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 		} catch (IllegalArgumentException e) {
 		    throw new ApiException(AuthenticationErrorType.UNSUPPORTED_AUTH_PROVIDER);
 		}
+	}
+	
+	private String extractIp(HttpServletRequest request) {
+		String forwarded = request.getHeader("X-Forwarded-For");
 
+		if (forwarded != null && !forwarded.isBlank()) {
+			return forwarded.split(",")[0].trim();
+		}
+
+		return request.getRemoteAddr();
 	}
 }
