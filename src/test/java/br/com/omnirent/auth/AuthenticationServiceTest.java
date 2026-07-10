@@ -197,4 +197,38 @@ public class AuthenticationServiceTest {
 		verifyNoInteractions(tokenService, eventPublisher);
 	}
 
+	@Test
+	void loginThrowsInternalAuthenticationServiceExceptionWithOtherException() {
+		LoginDTO loginDTO = new LoginDTO("test@email.com", "password");
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		RuntimeException otherException = new RuntimeException("Generic error");
+		InternalAuthenticationServiceException exception = new InternalAuthenticationServiceException("Error", otherException);
+
+		when(context.getBean(AuthenticationManager.class)).thenReturn(authenticationManager);
+		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(exception);
+
+		ApiException thrown = assertThrowsExactly(ApiException.class, () -> 
+				authenticationService.login(loginDTO, request)
+		);
+
+		assertThat(thrown.getErrorType()).isEqualTo(AuthenticationErrorType.AUTHENTICATION_SERVICE_ERROR.getErrorType());
+
+		ArgumentCaptor<UsernamePasswordAuthenticationToken> captor =
+		        ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
+
+		verify(authenticationManager).authenticate(captor.capture());
+
+		assertThat(captor.getValue().getPrincipal()).isEqualTo("test@email.com");
+		assertThat(captor.getValue().getCredentials()).isEqualTo("password");
+		
+		verify(context).getBean(AuthenticationManager.class);
+		verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+		
+		assertThat(thrown.getErrorType())
+        	.isEqualTo(AuthenticationErrorType.AUTHENTICATION_SERVICE_ERROR.getErrorType());
+		
+		verifyNoMoreInteractions(authenticationManager, context);
+		verifyNoInteractions(tokenService, eventPublisher);
+	}
+	
 }
