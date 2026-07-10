@@ -1,8 +1,10 @@
 package br.com.omnirent.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 import java.util.Map;
 
@@ -12,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringIntegrationTest;
 import br.com.omnirent.security.auth.AuthenticationService;
@@ -66,5 +70,24 @@ public class AuthenticationServiceIT extends SpringIntegrationTest {
 		assertThat(response).isNotNull();
 		assertThat(response).containsOnlyKeys("token");
 		assertThat(response.get("token")).isNotBlank();
+	}
+	
+	@Test
+	void login_WithInvalidCredentials_ShouldThrowApiException() {
+		String rawPassword = "validPassword123";
+		user.setPassword(passwordEncoder.encode(rawPassword));
+		userRepository.save(user);
+		
+		entityManager.flush();
+		entityManager.clear();
+
+		LoginDTO loginDTO = new LoginDTO(user.getEmail(), "wrongPassword");
+		HttpServletRequest request = mock(HttpServletRequest.class);
+
+		ApiException exception = assertThrowsExactly(ApiException.class, () -> 
+			authenticationService.login(loginDTO, request)
+		);
+
+		assertThat(exception.getErrorType()).isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorType());
 	}
 }
