@@ -185,6 +185,27 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=OAUTH_PROVIDER_REQUIRED");
 		verifyNoInteractions(userMapper, authorizedClientService, authService, tokenService, userIdentityService, eventPublisher);
 	}
+	
+	@Test
+	void shouldHandleUnsupportedProvider() throws IOException, ServletException {
+		when(authentication.getAuthorizedClientRegistrationId()).thenReturn("invalid_provider");
+		when(appProperties.frontUrl()).thenReturn("http://localhost:3000");
+
+		successHandler.onAuthenticationSuccess(request, response, authentication);
+
+		ArgumentCaptor<ApiException> exceptionCaptor = ArgumentCaptor.forClass(ApiException.class);
+		verify(apiWriter).onApiError(eq(request), eq(response), exceptionCaptor.capture());
+		
+		ApiException exception = exceptionCaptor.getValue();
+
+		assertThat(exception.getErrorType())
+		        .isEqualTo(AuthenticationErrorType.UNSUPPORTED_AUTH_PROVIDER.getErrorType());
+		
+		verify(authentication).getAuthorizedClientRegistrationId();
+		
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=UNSUPPORTED_AUTH_PROVIDER");
+		verifyNoInteractions(userMapper, authorizedClientService, authService, tokenService, userIdentityService, eventPublisher);
+	}
 }
 
 
