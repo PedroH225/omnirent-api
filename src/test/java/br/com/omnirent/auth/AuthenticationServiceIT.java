@@ -90,4 +90,17 @@ public class AuthenticationServiceIT extends SpringIntegrationTest {
 
 		assertThat(exception.getErrorType()).isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorType());
 	}
+	
+	@Test
+	void login_NonexistentCredentials_ShouldThrowApiException() {
+	    LoginDTO loginDTO = new LoginDTO("nonexistent@email.com", "anyPassword");
+	    HttpServletRequest request = mock(HttpServletRequest.class);
+
+	    ApiException exception = assertThrowsExactly(ApiException.class, () ->
+	            authenticationService.login(loginDTO, request)
+	    );
+
+	    assertThat(exception.getErrorType())
+	            .isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorType());
+	}
 }
