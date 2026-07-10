@@ -1,9 +1,10 @@
 package br.com.omnirent.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -26,6 +27,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.common.ApiErrorResponseWriter;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
 import br.com.omnirent.factory.ExternalIdentityTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.security.TokenService;
@@ -161,6 +164,26 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 		verify(userIdentityService).resolveUser(userInfo);
 		
 		verify(response).sendRedirect("http://localhost:3000/oauth/callback?token=mock-jwt-token");
+	}
+	
+	@Test
+	void shouldHandleNullRegistrationId() throws IOException, ServletException {
+		when(authentication.getAuthorizedClientRegistrationId()).thenReturn(null);
+		when(appProperties.frontUrl()).thenReturn("http://localhost:3000");
+
+		successHandler.onAuthenticationSuccess(request, response, authentication);
+
+		ArgumentCaptor<ApiException> exceptionCaptor = ArgumentCaptor.forClass(ApiException.class);
+		verify(apiWriter).onApiError(eq(request), eq(response), exceptionCaptor.capture());
+		
+		ApiException exception = exceptionCaptor.getValue();
+
+		assertThat(exception.getErrorType())
+		        .isEqualTo(AuthenticationErrorType.OAUTH_PROVIDER_REQUIRED.getErrorType());
+		
+		verify(authentication).getAuthorizedClientRegistrationId();
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=OAUTH_PROVIDER_REQUIRED");
+		verifyNoInteractions(userMapper, authorizedClientService, authService, tokenService, userIdentityService, eventPublisher);
 	}
 }
 
