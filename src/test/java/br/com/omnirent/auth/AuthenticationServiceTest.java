@@ -1,12 +1,14 @@
 package br.com.omnirent.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
-
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -22,10 +24,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.security.TokenService;
 import br.com.omnirent.security.auth.AuthenticationService;
@@ -127,6 +132,36 @@ public class AuthenticationServiceTest {
 		verify(tokenService).generateToken(authUser);
 		verifyNoMoreInteractions(
 			    authenticationManager, tokenService, eventPublisher, context);
+	}
+	
+	@Test
+	void loginThrowsBadCredentialsException() {
+		LoginDTO loginDTO = new LoginDTO("test@email.com", "wrong-password");
+		HttpServletRequest request = mock(HttpServletRequest.class);
+
+		when(context.getBean(AuthenticationManager.class)).thenReturn(authenticationManager);
+		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+				.thenThrow(new BadCredentialsException("Bad credentials"));
+
+		ApiException exception = assertThrowsExactly(ApiException.class, () -> 
+				authenticationService.login(loginDTO, request)
+		);
+
+		ArgumentCaptor<UsernamePasswordAuthenticationToken> captor =
+		        ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
+
+		verify(authenticationManager).authenticate(captor.capture());
+
+		assertThat(captor.getValue().getPrincipal()).isEqualTo("test@email.com");
+		assertThat(captor.getValue().getCredentials()).isEqualTo("wrong-password");
+		
+		assertThat(exception.getErrorType()).isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorType());
+
+		verify(context).getBean(AuthenticationManager.class);
+		verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+		
+		verifyNoMoreInteractions(authenticationManager, context);
+		verifyNoInteractions(tokenService, eventPublisher);
 	}
 
 }
