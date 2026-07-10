@@ -2,7 +2,9 @@ package br.com.omnirent.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.CoreMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,11 +12,14 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,11 +27,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
+import br.com.omnirent.config.GlobalConfigHolder;
+import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.security.CurrentUserProvider;
+import br.com.omnirent.security.auth.RoleRepository;
+import br.com.omnirent.security.domain.Role;
+import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.context.ChangeUserStatusContext;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
@@ -61,7 +71,59 @@ public class UserServiceTest {
 	private SpringDomainEventPublisher eventPublisher;
 	
 	@Mock
+    private RoleRepository roleRepository;
+
+    @Mock
+    private GlobalConfigHolder globalConfigHolder;
+	
+	@Mock
 	private Clock clock;
+	
+    private final Instant fixedInstant = Instant.parse("2023-01-01T10:00:00Z");
+    
+    private User user;
+    
+    private Role defaultRole = new Role();
+    
+    @Mock
+    private AppProperties appProperties;
+    
+    @BeforeEach
+    void setUp() {
+    	user = UserTestFactory.persistedUser();
+    	
+    	defaultRole.setId(1);
+    	defaultRole.setName("ROLE_USER");
+    }
+	
+    @Test
+    void createUser_WithAllValidFields_ShouldCreateAndPublishEvent() {
+    	User data = UserTestFactory.copy(user);
+
+        when(userRepository.existsByUsername(data.getUsername())).thenReturn(false);
+        when(globalConfigHolder.getGlobalTokenVersion()).thenReturn(1);
+        when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.of(defaultRole));
+        when(userRepository.save(any(User.class))).thenReturn(user);
+        
+        User result = userService.createUser(data.getName(), data.getUsername(),
+        		data.getEmail(), data.getPassword(), data.getBirthDate(),
+        		data.getLocale(), data.getTimezone());
+        
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+
+        verify(userRepository).save(captor.capture());
+        verify(eventPublisher).publish(any(UserRegisteredEvent.class));
+        
+        User saved = captor.getValue();
+
+        assertThat(saved.getRoles()).contains(defaultRole);
+        assertThat(saved)
+	        .usingRecursiveComparison()
+	        .isEqualTo(data);
+        assertThat(result)
+	        .usingRecursiveComparison()
+	        .isEqualTo(user);
+    }
 
 	@Test
 	void shouldThrowExceptionWhenUserDoesNotExist() {

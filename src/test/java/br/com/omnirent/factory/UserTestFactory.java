@@ -1,14 +1,12 @@
 package br.com.omnirent.factory;
 
-import java.time.Instant;
-import java.time.LocalDate;
+import java.time.*;
 
-import br.com.omnirent.common.enums.UserStatus;
-import br.com.omnirent.user.domain.AuthMetadata;
-import br.com.omnirent.user.domain.User;
-import br.com.omnirent.user.dto.UserDetailsDTO;
-import br.com.omnirent.user.dto.UserRequestDTO;
-import br.com.omnirent.utils.Sequence;
+import br.com.omnirent.common.enums.*;
+import br.com.omnirent.security.domain.*;
+import br.com.omnirent.user.domain.*;
+import br.com.omnirent.user.dto.*;
+import br.com.omnirent.utils.*;
 
 public final class UserTestFactory {
 
@@ -28,6 +26,14 @@ public final class UserTestFactory {
         user.setPassword(value);
         user.setBirthDate(LocalDate.now());
         user.setAuthMetadata(authMetadata);
+        
+        user.setLocale("pt-BR");
+        user.setTimezone("America/Sao_Paulo");
+        
+        Role role = new Role();
+    	role.setId(1);
+    	role.setName("ROLE_USER");
+    	user.getRoles().add(role);
 
         return user;
     }
@@ -87,5 +93,19 @@ public final class UserTestFactory {
 	        String name, String username, String email, LocalDate birthDate) {
 
 	    return new UserRequestDTO(name, username, email, birthDate);
+	}
+
+	public static User copy(User data) {
+        User user = new User();
+        user.setName(data.getName());
+        user.setUsername(data.getUsername());
+        user.setEmail(data.getEmail());
+        user.setPassword(data.getPassword());
+        user.setBirthDate(data.getBirthDate());
+        user.setAuthMetadata(data.getAuthMetadata());
+        user.setRoles(data.getRoles());
+        user.setLocale(data.getLocale());
+        user.setTimezone(data.getTimezone());
+        return user;
 	}
 }
