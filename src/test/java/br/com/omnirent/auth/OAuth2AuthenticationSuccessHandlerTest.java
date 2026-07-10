@@ -206,6 +206,29 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=UNSUPPORTED_AUTH_PROVIDER");
 		verifyNoInteractions(userMapper, authorizedClientService, authService, tokenService, userIdentityService, eventPublisher);
 	}
+	
+	@Test
+	void shouldHandleApiExceptionWhenResolveUserMetadataFails() throws IOException, ServletException {
+		when(authentication.getAuthorizedClientRegistrationId()).thenReturn("google");
+		when(authentication.getPrincipal()).thenReturn(oauth2User);
+		when(authentication.getName()).thenReturn("test-user");
+		when(authorizedClientService.loadAuthorizedClient("google", "test-user")).thenReturn(authorizedClient);
+		when(authorizedClient.getAccessToken()).thenReturn(accessToken);
+		when(accessToken.getTokenValue()).thenReturn("mock-access-token");
+
+		ApiException apiException = new ApiException(AuthenticationErrorType.OAUTH_EMAIL_REQUIRED);
+		when(authService.resolveUserMetadata(AuthProvider.GOOGLE, oauth2User, "mock-access-token")).thenThrow(apiException);
+		when(appProperties.frontUrl()).thenReturn("http://localhost:3000");
+
+		successHandler.onAuthenticationSuccess(request, response, authentication);
+		
+		verify(authService).resolveUserMetadata(
+			    AuthProvider.GOOGLE, oauth2User, "mock-access-token");
+		
+		verify(apiWriter).onApiError(request, response, apiException);
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=" + apiException.getErrorCode());
+		verifyNoInteractions(tokenService, eventPublisher, userIdentityService, userMapper);
+	}
 }
 
 
