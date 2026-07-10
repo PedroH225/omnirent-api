@@ -29,6 +29,7 @@ import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.common.ApiErrorResponseWriter;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
+import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import br.com.omnirent.factory.ExternalIdentityTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.security.TokenService;
@@ -228,6 +229,30 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 		verify(apiWriter).onApiError(request, response, apiException);
 		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=" + apiException.getErrorCode());
 		verifyNoInteractions(tokenService, eventPublisher, userIdentityService, userMapper);
+	}
+
+	@Test
+	void shouldHandleApiExceptionWhenResolveUserFails() throws IOException, ServletException {
+		when(authentication.getAuthorizedClientRegistrationId()).thenReturn("google");
+		when(authentication.getPrincipal()).thenReturn(oauth2User);
+		when(authentication.getName()).thenReturn("test-user");
+		when(authorizedClientService.loadAuthorizedClient("google", "test-user")).thenReturn(authorizedClient);
+		when(authorizedClient.getAccessToken()).thenReturn(accessToken);
+		when(accessToken.getTokenValue()).thenReturn("mock-access-token");
+		when(authService.resolveUserMetadata(AuthProvider.GOOGLE, oauth2User, "mock-access-token")).thenReturn(userInfo);
+
+		ApiException apiException = new ApiException(UserErrorType.INACTIVE);
+		when(userIdentityService.resolveUser(userInfo)).thenThrow(apiException);
+		when(appProperties.frontUrl()).thenReturn("http://localhost:3000");
+
+		successHandler.onAuthenticationSuccess(request, response, authentication);
+		
+		verify(authService).resolveUserMetadata(
+			    AuthProvider.GOOGLE, oauth2User, "mock-access-token");
+		
+		verify(apiWriter).onApiError(request, response, apiException);
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=" + apiException.getErrorCode());
+		verifyNoInteractions(tokenService, eventPublisher, userMapper);
 	}
 }
 
