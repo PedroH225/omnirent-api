@@ -101,7 +101,12 @@ public class EmailConsumer {
     
     @RabbitHandler
     public void handle(RentalExpiredEvent event) {
-    	log.debug("Email: expired event recieved");
+    	RentalNotificationData notificationData =
+    			queryRepository.findRentalNotificationData(event.entityId())
+    			.orElseThrow(() -> new NotificationDataNotException());
+    	
+    	rentalEmailService.sendRentalExpiredToOwner(notificationData);
+    	rentalEmailService.sendRentalExpiredToRenter(notificationData);
     }
     
     @RabbitHandler

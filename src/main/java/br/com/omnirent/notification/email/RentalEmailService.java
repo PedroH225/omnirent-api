@@ -120,6 +120,16 @@ public class RentalEmailService {
 				"rental.canceled.renter", notificationData, notificationData.renterData());
 	}
 	
+	public void sendRentalExpiredToOwner(RentalNotificationData notificationData) {
+		sendEmailToActor(
+				"rental.expired.owner", notificationData, notificationData.ownerData());
+	}
+
+	public void sendRentalExpiredToRenter(RentalNotificationData notificationData) {
+		sendEmailToActor(
+				"rental.expired.renter", notificationData, notificationData.renterData());
+	}
+	
 	private void sendEmailToActor(
 			String messageKey, RentalNotificationData rentalData, UserNotificationData targetUserData) {
 		Locale userLocale = Locale.forLanguageTag(targetUserData.locale());
