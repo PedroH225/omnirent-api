@@ -1,14 +1,17 @@
 package br.com.omnirent.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import br.com.omnirent.common.enums.UserStatus;
+import br.com.omnirent.config.GlobalConfigHolder;
 import br.com.omnirent.factory.ExternalIdentityTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringIntegrationTest;
@@ -36,6 +39,9 @@ public class UserIdentityServiceIT extends SpringIntegrationTest {
 	@Autowired
 	private EntityManager entityManager;
 	
+	@MockitoBean
+	private GlobalConfigHolder globalConfigHolder;
+	
 	private User user;
 	
 	private User user2;
@@ -54,6 +60,8 @@ public class UserIdentityServiceIT extends SpringIntegrationTest {
 		
 		googleUser1Metadata = 
 				ExternalIdentityTestFactory.createMetadata(user, AuthProvider.GOOGLE);	
+	
+	when(globalConfigHolder.getGlobalTokenVersion()).thenReturn(1);
 	}
 	
 	@Test
@@ -91,4 +99,30 @@ public class UserIdentityServiceIT extends SpringIntegrationTest {
 		assertThat(linkedIdentities).hasSize(1);
 		assertThat(linkedIdentities.get(0).getProviderUserId()).isEqualTo(githubUserMetadata.sub());
 	}
+	
+	@Test
+	void shouldCreateNewUserAndExternalIdentityWhenUserDoesNotExist() {
+		User transientUser = UserTestFactory.user();
+		ProviderUserMetadata newMetadata = ExternalIdentityTestFactory.createMetadata(transientUser, AuthProvider.GITHUB);
+
+		User resolvedUser = userIdentityService.resolveUser(newMetadata);
+
+		entityManager.flush();
+		entityManager.clear();
+
+		assertThat(resolvedUser.getId()).isNotEqualTo(user.getId());
+		assertThat(resolvedUser.getId()).isNotEqualTo(user2.getId());
+		assertThat(resolvedUser.getEmail()).isEqualTo(newMetadata.email());
+
+		List<ExternalIdentity> linkedIdentities = entityManager.createQuery(
+				"SELECT e FROM ExternalIdentity e WHERE e.providerUserId = :sub", ExternalIdentity.class)
+				.setParameter("sub", newMetadata.sub())
+				.getResultList();
+
+		assertThat(linkedIdentities).hasSize(1);
+		assertThat(linkedIdentities.get(0).getUser().getId()).isEqualTo(resolvedUser.getId());
+		assertThat(linkedIdentities.get(0).getProvider()).isEqualTo(AuthProvider.GITHUB);
+	}
+	
+	
 }
