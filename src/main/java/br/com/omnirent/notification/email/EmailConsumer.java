@@ -91,7 +91,12 @@ public class EmailConsumer {
     
     @RabbitHandler
     public void handle(RentalCanceledEvent event) {
-    	log.debug("Email: canceled event recieved");
+    	RentalNotificationData notificationData =
+    			queryRepository.findRentalNotificationData(event.entityId())
+    			.orElseThrow(() -> new NotificationDataNotException());
+    	
+    	rentalEmailService.sendRentalCanceledToOwner(notificationData);
+    	rentalEmailService.sendRentalCanceledToRenter(notificationData);
     }
     
     @RabbitHandler
