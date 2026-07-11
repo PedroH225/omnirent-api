@@ -94,4 +94,20 @@ public class OAuth2AuthenticationFailureHandlerTest {
 			.isEqualTo(AuthenticationErrorType.OAUTH_PROVIDER_UNAVAILABLE.getErrorType());
 		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
 	}
+	
+	@Test
+	void shouldHandleOAuthAuthenticationFailedForUnknownError() throws IOException, ServletException {
+		OAuth2Error error = new OAuth2Error("unknown_error");
+		OAuth2AuthenticationException ex = new OAuth2AuthenticationException(error);
+		when(appProperties.frontUrl()).thenReturn("http://localhost:3000");
+
+		failureHandler.onAuthenticationFailure(request, response, ex);
+
+		ArgumentCaptor<ApiException> captor = ArgumentCaptor.forClass(ApiException.class);
+		verify(apiWriter).onApiError(eq(request), eq(response), captor.capture());
+
+		assertThat(captor.getValue().getErrorType())
+			.isEqualTo(AuthenticationErrorType.OAUTH_AUTHENTICATION_FAILED.getErrorType());
+		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
+	}
 }
