@@ -13,6 +13,8 @@ import br.com.omnirent.notification.context.RentalInUseNotificationData;
 import br.com.omnirent.notification.context.RentalLateNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
 import br.com.omnirent.notification.context.UserNotificationData;
+import br.com.omnirent.notification.email.service.EmailService;
+import br.com.omnirent.notification.email.service.RentalEmailService;
 import br.com.omnirent.rental.event.RentalCanceledEvent;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
 import br.com.omnirent.rental.event.RentalExpiredEvent;
@@ -61,11 +63,6 @@ public class EmailConsumer {
     
     @RabbitHandler
     public void handle(RentalCreatedEvent event) {
-    	boolean truee = true;
-    	if (truee) {
-			throw new IllegalArgumentException("Illegal argument!!");
-		}
-    	
     	RentalNotificationData notificationData =
     			queryRepository.findRentalNotificationData(event.entityId())
     			.orElseThrow(() -> new NotificationDataNotException());

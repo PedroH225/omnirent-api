@@ -1,4 +1,4 @@
-package br.com.omnirent.notification.email;
+package br.com.omnirent.notification.email.service;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -15,6 +15,8 @@ import br.com.omnirent.notification.context.RentalInUseNotificationData;
 import br.com.omnirent.notification.context.RentalLateNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
 import br.com.omnirent.notification.context.UserNotificationData;
+import br.com.omnirent.notification.email.EmailMessage;
+import br.com.omnirent.notification.email.EmailSender;
 
 @Service
 public class RentalEmailService {
