@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 
 import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.common.ApiErrorResponseWriter;
@@ -59,5 +61,21 @@ public class OAuth2AuthenticationFailureHandlerTest {
 		verify(response).sendRedirect("http://localhost:3000/login?error=" + apiException.getErrorCode());
 	
 		verifyNoMoreInteractions(apiWriter);
+	}
+	
+	@Test
+	void shouldHandleOAuthAccessDenied() throws IOException, ServletException {
+		OAuth2Error error = new OAuth2Error("access_denied");
+		OAuth2AuthenticationException ex = new OAuth2AuthenticationException(error);
+		when(appProperties.frontUrl()).thenReturn("http://localhost:3000");
+
+		failureHandler.onAuthenticationFailure(request, response, ex);
+
+		ArgumentCaptor<ApiException> captor = ArgumentCaptor.forClass(ApiException.class);
+		verify(apiWriter).onApiError(eq(request), eq(response), captor.capture());
+
+		assertThat(captor.getValue().getErrorType())
+        	.isEqualTo(AuthenticationErrorType.OAUTH_ACCESS_DENIED.getErrorType());
+		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
 	}
 }
