@@ -1,6 +1,7 @@
 package br.com.omnirent.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -12,6 +13,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.config.GlobalConfigHolder;
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import br.com.omnirent.factory.ExternalIdentityTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringIntegrationTest;
@@ -124,5 +127,21 @@ public class UserIdentityServiceIT extends SpringIntegrationTest {
 		assertThat(linkedIdentities.get(0).getProvider()).isEqualTo(AuthProvider.GITHUB);
 	}
 	
-	
+	@Test
+	void shouldThrowExceptionWhenExternalIdentityUserIsInactive() {
+		user.setUserStatus(UserStatus.INACTIVE);
+		userRepository.save(user);
+
+		ExternalIdentity identity = ExternalIdentityTestFactory.google(user, googleUser1Metadata);
+		identityRepository.save(identity);
+		
+		entityManager.flush();
+		entityManager.clear();
+
+		ApiException exception = assertThrowsExactly(ApiException.class, 
+				() -> userIdentityService.resolveUser(googleUser1Metadata));
+
+		assertThat(exception.getErrorCode())
+			.isEqualTo(UserErrorType.INACTIVE.getErrorCode());
+	}
 }
