@@ -207,4 +207,22 @@ public class UserIdentityServiceTest {
 		verifyNoInteractions(identityRepository, userService);
 	}
 	
+	@Test
+	void shouldThrowExceptionWhenExistingEmailUserIsBanned() {
+		user.setUserStatus(UserStatus.BANNED);
+		
+		ProviderUserMetadata googleUser1Metadata =
+		        ExternalIdentityTestFactory.createMetadata(user, AuthProvider.GOOGLE);
+		
+		when(identityQueryRepository.findByProviderAndProviderUserId(googleUser1Metadata.provider(), googleUser1Metadata.sub()))
+				.thenReturn(Optional.empty());
+		when(userQueryRepository.findByEmail(googleUser1Metadata.email()))
+				.thenReturn(Optional.of(user));
+
+		ApiException ex = assertThrowsExactly(ApiException.class, () -> identityService.resolveUser(googleUser1Metadata));
+
+		assertThat(ex.getErrorCode()).isEqualTo(UserErrorType.BANNED.getErrorCode());
+		verifyNoInteractions(identityRepository, userService);
+	}
+	
 }
