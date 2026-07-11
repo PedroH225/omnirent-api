@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 	)
 @Component
 @RequiredArgsConstructor
-@RabbitListener(queues = "email.queue")
+@RabbitListener(queues = "email.queue", containerFactory = "rabbitListenerContainerFactory")
 @Slf4j
 public class EmailConsumer {
 

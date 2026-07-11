@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 	)
 @Component
 @RequiredArgsConstructor
-@RabbitListener(queues = "payment.queue")
+@RabbitListener(queues = "payment.queue", containerFactory = "rabbitListenerContainerFactory")
 @Slf4j
 public class PaymentConsumer {
 
