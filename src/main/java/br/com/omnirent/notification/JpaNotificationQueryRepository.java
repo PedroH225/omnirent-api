@@ -32,6 +32,7 @@ public class JpaNotificationQueryRepository implements NotificationQueryReposito
 	        .stream().findFirst();
 	}
 
+	@Override
 	public Optional<RentalNotificationData> findRentalNotificationData(String rentalId) {
 
 	    return em.createQuery("""
@@ -52,6 +53,7 @@ public class JpaNotificationQueryRepository implements NotificationQueryReposito
 	        ));
 	}
 	
+	@Override
 	public Optional<RentalInUseNotificationData> findRentalInUseNotificationData(String rentalId) {
 	    return em.createQuery("""
 	        SELECT i.name,
@@ -74,6 +76,7 @@ public class JpaNotificationQueryRepository implements NotificationQueryReposito
 	        ));
 	}
 	
+	@Override
 	public Optional<RentalLateNotificationData> findRentalLateNotificationData(String rentalId) {
 	    return em.createQuery("""
 	        SELECT i.name,
