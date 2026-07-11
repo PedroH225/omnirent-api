@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 	)
 @Component
 @RequiredArgsConstructor
-@RabbitListener(queues = "email.queue")
+@RabbitListener(queues = "email.queue", containerFactory = "rabbitListenerContainerFactory")
 @Slf4j
 public class EmailConsumer {
 
@@ -61,6 +61,11 @@ public class EmailConsumer {
     
     @RabbitHandler
     public void handle(RentalCreatedEvent event) {
+    	boolean truee = true;
+    	if (truee) {
+			throw new IllegalArgumentException("Illegal argument!!");
+		}
+    	
     	RentalNotificationData notificationData =
     			queryRepository.findRentalNotificationData(event.entityId())
     			.orElseThrow(() -> new NotificationDataNotException());
