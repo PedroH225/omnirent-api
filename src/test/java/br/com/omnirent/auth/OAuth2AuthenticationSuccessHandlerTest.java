@@ -2,7 +2,6 @@ package br.com.omnirent.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.hamcrest.CoreMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -107,6 +106,7 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 	private ExternalIdentity google;
 	private ExternalIdentity github;
 	private ProviderUserMetadata userInfo;
+	private ProviderUserMetadata githubUserInfo;
 	private AuthenticatedUser authenticatedUser;
 	private Instant now;
 
@@ -123,6 +123,16 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 				google.isEmailVerified(), 
 				user.getName(), 
 				google.getAvatarUrl(), 
+				"pt-BR"
+		);
+		
+		githubUserInfo = new ProviderUserMetadata(
+				AuthProvider.GITHUB,
+				github.getProviderUserId(),
+				github.getEmail(),
+				github.isEmailVerified(),
+				user.getName(),
+				github.getAvatarUrl(),
 				"pt-BR"
 		);
 		
@@ -340,6 +350,43 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 		        ArgumentCaptor.forClass(UserLoggedInEvent.class);
 
 		verify(eventPublisher).publish(captor.capture());
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback?token=mock-jwt-token");
+	}
+	
+	@Test
+	void shouldAuthenticateOAuth2SuccessfullyWithGithub() throws IOException, ServletException {
+		when(authentication.getAuthorizedClientRegistrationId()).thenReturn("github");
+		when(authentication.getPrincipal()).thenReturn(oauth2User);
+		when(authentication.getName()).thenReturn("test-user");
+		when(authorizedClientService.loadAuthorizedClient("github", "test-user")).thenReturn(authorizedClient);
+		when(authorizedClient.getAccessToken()).thenReturn(accessToken);
+		when(accessToken.getTokenValue()).thenReturn("mock-access-token");
+		when(authService.resolveUserMetadata(AuthProvider.GITHUB, oauth2User, "mock-access-token")).thenReturn(githubUserInfo);
+		when(userIdentityService.resolveUser(githubUserInfo)).thenReturn(user);
+		when(userMapper.toAuthUser(user)).thenReturn(authenticatedUser);
+		when(tokenService.generateToken(authenticatedUser)).thenReturn("mock-jwt-token");
+		when(request.getHeader("X-Forwarded-For")).thenReturn("192.168.0.1");
+		when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
+		when(clock.instant()).thenReturn(now);
+		when(appProperties.frontUrl()).thenReturn("http://localhost:3000");
+
+		successHandler.onAuthenticationSuccess(request, response, authentication);
+
+		ArgumentCaptor<UserLoggedInEvent> eventCaptor = ArgumentCaptor.forClass(UserLoggedInEvent.class);
+		verify(eventPublisher).publish(eventCaptor.capture());
+
+		UserLoggedInEvent event = eventCaptor.getValue();
+		assertThat(event.userId()).isEqualTo(user.getId());
+		assertThat(event.provider()).isEqualTo(AuthProvider.GITHUB);
+		assertThat(event.ip()).isEqualTo("192.168.0.1");
+		assertThat(event.userAgent()).isEqualTo("Mozilla/5.0");
+		assertThat(event.success()).isTrue();
+		assertThat(event.occurredAt()).isEqualTo(now);
+		
+		verify(authService).resolveUserMetadata(
+			    AuthProvider.GITHUB, oauth2User, "mock-access-token");
+		
+		verify(tokenService).generateToken(authenticatedUser);
 		verify(response).sendRedirect("http://localhost:3000/oauth/callback?token=mock-jwt-token");
 	}
 }
