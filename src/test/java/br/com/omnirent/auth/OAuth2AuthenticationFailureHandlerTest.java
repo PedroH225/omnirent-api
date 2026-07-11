@@ -1,10 +1,13 @@
 package br.com.omnirent.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 import java.io.IOException;
 
@@ -156,5 +159,20 @@ public class OAuth2AuthenticationFailureHandlerTest {
 		assertThat(captor.getValue().getErrorType())
 			.isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorType());
 		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
+	}
+	
+	@Test
+	void shouldNotPropagateExceptionWhenSendRedirectThrowsIOException() throws IOException, ServletException {
+		BadCredentialsException ex = new BadCredentialsException("Bad credentials");
+		when(appProperties.frontUrl()).thenReturn("http://localhost:3000");
+
+		ArgumentCaptor<ApiException> captor = ArgumentCaptor.forClass(ApiException.class);
+		doThrow(new IOException("Redirect failed")).when(response).sendRedirect("http://localhost:3000/login?error=INVALID_CREDENTIALS");
+
+		assertThrowsExactly(IOException.class, () -> failureHandler.onAuthenticationFailure(request, response, ex));
+
+		verify(apiWriter).onApiError(eq(request), eq(response), captor.capture());
+		assertThat(captor.getValue().getErrorType())
+			.isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorType());
 	}
 }
