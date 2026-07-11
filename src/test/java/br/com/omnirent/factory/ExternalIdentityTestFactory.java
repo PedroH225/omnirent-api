@@ -1,6 +1,7 @@
 package br.com.omnirent.factory;
 
 import br.com.omnirent.security.auth.provider.AuthProvider;
+import br.com.omnirent.security.auth.provider.records.ProviderUserMetadata;
 import br.com.omnirent.security.domain.ExternalIdentity;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.utils.Sequence;
@@ -25,5 +26,13 @@ public final class ExternalIdentityTestFactory {
 	        "https://avatars.githubusercontent.com/u/1",
 	        user
 	    );
+	}
+	
+	public static ProviderUserMetadata createMetadata(User user, AuthProvider authProvider) {
+		String sub = String.format("%s_%s",
+				authProvider.name().toLowerCase(), user.getId());
+		
+		return new ProviderUserMetadata(authProvider, sub, user.getEmail(),
+				true, user.getName(), "user_picture_" + user.getId(), "pt-BR");
 	}
 }
