@@ -189,4 +189,22 @@ public class UserIdentityServiceTest {
 		verifyNoInteractions(userService);
 	}
 	
+	@Test
+	void shouldThrowExceptionWhenExistingEmailUserIsInactive() {
+		user.setUserStatus(UserStatus.INACTIVE);
+		
+		ProviderUserMetadata googleUser1Metadata =
+		        ExternalIdentityTestFactory.createMetadata(user, AuthProvider.GOOGLE);
+		
+		when(identityQueryRepository.findByProviderAndProviderUserId(googleUser1Metadata.provider(), googleUser1Metadata.sub()))
+				.thenReturn(Optional.empty());
+		when(userQueryRepository.findByEmail(googleUser1Metadata.email()))
+				.thenReturn(Optional.of(user));
+
+		ApiException ex = assertThrowsExactly(ApiException.class, () -> identityService.resolveUser(googleUser1Metadata));
+
+		assertThat(ex.getErrorCode()).isEqualTo(UserErrorType.INACTIVE.getErrorCode());
+		verifyNoInteractions(identityRepository, userService);
+	}
+	
 }
