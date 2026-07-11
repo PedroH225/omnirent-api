@@ -54,7 +54,7 @@ docker compose up
 ### Autenticação
 - Cadastro de usuários
 - Login com email e senha
-- Login utilizando conta Google
+- Login utilizando conta Google e Github
 
 ### Sistema
 - Registro de alterações e ações importantes
