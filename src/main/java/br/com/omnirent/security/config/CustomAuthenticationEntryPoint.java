@@ -1,4 +1,4 @@
-package br.com.omnirent.security;
+package br.com.omnirent.security.config;
 
 import java.io.IOException;
 import java.time.Instant;

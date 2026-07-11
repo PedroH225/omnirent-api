@@ -10,6 +10,7 @@ import br.com.omnirent.common.NamedEntity;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.rental.domain.Rental;
+import br.com.omnirent.security.domain.ExternalIdentity;
 import br.com.omnirent.security.domain.Role;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -47,6 +48,8 @@ public class User extends NamedEntity {
 	
 	private String locale;
 	
+	private String timezone;
+	
 	@OneToMany(mappedBy = "user")
 	private List<Address> addresses;
 	
@@ -59,7 +62,7 @@ public class User extends NamedEntity {
 	@OneToMany(mappedBy = "owner")
 	private List<Rental> rentals;
 	
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "user_roles",
 	    joinColumns = @JoinColumn(name = "user_id"),
 	    inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -68,15 +71,21 @@ public class User extends NamedEntity {
 	@Embedded
 	private AuthMetadata authMetadata;
 	
-	public User(String id, String email, String password, Integer tokenVersion, Integer globalVersion) {
+	@OneToMany(mappedBy = "user")
+	private Set<ExternalIdentity> authProvider;
+	
+	public User(String id, String name, String username, String email, String password, LocalDate birthDate, Integer tokenVersion, Integer globalVersion) {
 		this.id = id;
+		this.name = name;
+		this.username =  username;
 		this.email = email;
 		this.password = password;
+		this.birthDate = birthDate;
 		
 		AuthMetadata authMetadata = new AuthMetadata();
         authMetadata.setTokenVersion(tokenVersion);
         authMetadata.setGlobalVersion(globalVersion);
-        
+                
         this.authMetadata = authMetadata;
 	}
 	

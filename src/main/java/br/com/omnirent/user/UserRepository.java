@@ -14,6 +14,8 @@ import br.com.omnirent.user.domain.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
 	
+	boolean existsByUsername(String username);
+	
 	@Modifying
 	@Query("""
 			UPDATE User u SET u.userStatus = :targetStatus

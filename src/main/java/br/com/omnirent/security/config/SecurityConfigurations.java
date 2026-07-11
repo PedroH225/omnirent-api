@@ -1,4 +1,4 @@
-package br.com.omnirent.security;
+package br.com.omnirent.security.config;
 
 import java.util.List;
 
@@ -6,12 +6,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizationFailureHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -19,6 +21,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import br.com.omnirent.config.properties.AppProperties;
+import br.com.omnirent.security.auth.provider.OAuth2AuthenticationFailureHandler;
+import br.com.omnirent.security.auth.provider.OAuth2AuthenticationSuccessHandler;
 import lombok.AllArgsConstructor;
 
 @Configuration
@@ -32,6 +36,10 @@ public class SecurityConfigurations {
     
     private CustomAccessDeniedHandler customAccessDeniedHandler;
     
+    private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    
+    private OAuth2AuthenticationFailureHandler oAuth2AuthorizationFailureHandler;
+    
     private AppProperties appProperties;
 
     @Bean 
@@ -39,15 +47,25 @@ public class SecurityConfigurations {
         return httpSecurity
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+                .oauth2Login(oauth -> oauth.
+                		successHandler(oAuth2AuthenticationSuccessHandler)
+                		.failureHandler(oAuth2AuthorizationFailureHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                		.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
-                        .requestMatchers("/rental/enums").permitAll()
-                        .requestMatchers("/webhooks/**").permitAll()
-                        .requestMatchers("/**").authenticated()
-                        .anyRequest().permitAll()
+                		.requestMatchers(
+                                HttpMethod.POST,
+                                "/auth/login",
+                                "/auth/register"
+                        ).permitAll()
+                        .requestMatchers(
+                                "/ws/**",
+                                "/rental/enums",
+                                "/webhooks/**",
+                                "/oauth2/**",
+                                "/login/oauth2/**",
+                                "/login"
+                        ).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(customAuthenticationEntryPoint)

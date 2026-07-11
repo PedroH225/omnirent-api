@@ -1,4 +1,4 @@
-package br.com.omnirent.security;
+package br.com.omnirent.security.auth;
 
 import java.util.Map;
 
@@ -24,8 +24,10 @@ public class AuthenticationController {
 	private AuthenticationService authenticationService;
 	
 	@PostMapping("/register")
-	public ResponseEntity<Object> register(@RequestBody @Valid RegisterDTO registerDTO) {
-		return authenticationService.register(registerDTO);
+	public ResponseEntity<Object> register(
+			@RequestBody @Valid RegisterDTO registerDTO,
+			HttpServletRequest request) {
+		return authenticationService.register(registerDTO, request);
 	}
 	
 	@PostMapping("/login")

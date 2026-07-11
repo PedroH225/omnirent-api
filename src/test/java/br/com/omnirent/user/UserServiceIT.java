@@ -35,8 +35,6 @@ public class UserServiceIT extends SpringIntegrationTest {
 	private User user1;
 	private User user2;
 
-	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
 	@BeforeEach
 	void setUp() {
 		user1 = userRepository.save(UserTestFactory.user());
@@ -65,7 +63,7 @@ public class UserServiceIT extends SpringIntegrationTest {
 		assertThat(persistedUser.getName()).isEqualTo(response.getName());
 		assertThat(persistedUser.getEmail()).isEqualTo(response.getEmail());
 		assertThat(persistedUser.getUsername()).isEqualTo(response.getUsername());
-		assertThat(persistedUser.getBirthDate().format(dtf)).isEqualTo(response.getBirthDate());
+		assertThat(persistedUser.getBirthDate()).isEqualTo(response.getBirthDate());
 	}
 	
 	@Test

@@ -30,10 +30,11 @@ public class LoggingEventListener {
 		    		userId= {}
 		    		ip= {}
 		    		userAgent= {}
+		    		provider= {}
 		    		success= {}
 		    		occurredAt= {}
     			""",
                 event.eventType(), event.userId(), event.ip(), event.userAgent(),
-                event.success(), event.occurredAt());
+                event.provider(), event.success(), event.occurredAt());
     }
 }

@@ -1,5 +1,6 @@
 package br.com.omnirent.user;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,19 +28,8 @@ public class UserMapper {
 	
 	private MessageService messageService;
 
-	public List<UserResponseDTO> toDto(List<User> users) {
-		return users.stream()
-				.map(u -> toDto(u))
-				.collect(Collectors.toList());
-	}
-	
 	public UserResponseDTO toDto(User user) {
 		UserResponseDTO userDTO = new UserResponseDTO(user);
-		return userDTO;
-	}
-	
-	public UserDetailsDTO toDetailsDto(User user) {
-		UserDetailsDTO userDTO = new UserDetailsDTO(user);
 		return userDTO;
 	}
 	
@@ -73,18 +63,22 @@ public class UserMapper {
 	            userDTO.getName(),
 	            userDTO.getUsername(),
 	            userDTO.getEmail(),
-	            userDTO.getBirthDate().toString()
-	    );
+	            resolveBirthdateStr(userDTO.getBirthDate()));
 	}
 	
 	public UserAuditSnapshot toAuditSnapshot(User user) {
 	    return new UserAuditSnapshot(
 	    		user.getId(), user.getName(),
 	    		user.getUsername(), user.getEmail(),
-	            user.getBirthDate().toString());
+	    		resolveBirthdateStr(user.getBirthDate()));
 	}
 	
 	public UserStatusChangeAuditSnapshot toStatusChangeAuditSnapshot(UserStatus status) {
 		return new UserStatusChangeAuditSnapshot(status);
+	}
+	
+	private String resolveBirthdateStr(LocalDate birthDate) {
+		return birthDate != null ?
+				birthDate.toString() : null;
 	}
 }

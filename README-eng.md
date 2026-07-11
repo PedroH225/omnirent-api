@@ -51,7 +51,7 @@ docker compose up
 ### Authentication
 - User registration
 - Login with email and password
-- Login using Google account
+- Login using Google and Github accounts
 
 ### System
 - Tracking of important actions and changes

@@ -9,7 +9,8 @@ import lombok.Getter;
 public enum UserErrorType implements AppErrorType {
 
     NOT_FOUND("NOT_FOUND", "USER_NOT_FOUND", "not_found", HttpStatus.NOT_FOUND),
-	BANNED("FORBIDDEN", "USER_BANNED", "banned", HttpStatus.FORBIDDEN),
+    INACTIVE("FORBIDDEN", "USER_INACTIVE", "inactive", HttpStatus.FORBIDDEN),
+    BANNED("FORBIDDEN", "USER_BANNED", "banned", HttpStatus.FORBIDDEN),
     EMAIL_ALREADY_IN_USE("CONFLICT", "EMAIL_ALREADY_IN_USE", "email_already_in_use", HttpStatus.CONFLICT);	
     private String errorType;
 	
