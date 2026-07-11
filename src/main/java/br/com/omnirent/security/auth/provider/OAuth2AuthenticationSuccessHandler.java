@@ -29,9 +29,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
 	private final OAuth2AuthorizedClientService authorizedClientService;
@@ -90,7 +92,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 					appProperties.frontUrl(), token));
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Failed to redirect after OAuth2 authentication", e);
 		} catch (ApiException ex) {
 			apiWriter.onApiError(request, response, ex);
 			

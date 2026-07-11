@@ -1,7 +1,11 @@
 package br.com.omnirent.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.hamcrest.CoreMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -307,6 +311,36 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 		verify(request).getHeader("X-Forwarded-For");
 		verify(response).sendRedirect("http://localhost:3000/oauth/callback?token=mock-jwt-token");
 		assertThat(eventCaptor.getValue().ip()).isEqualTo("172.16.0.1");
+	}
+	
+	@Test
+	void shouldNotPropagateExceptionWhenSendRedirectThrowsIOException() throws IOException, ServletException {
+		when(authentication.getAuthorizedClientRegistrationId()).thenReturn("google");
+		when(authentication.getPrincipal()).thenReturn(oauth2User);
+		when(authentication.getName()).thenReturn("test-user");
+		when(authorizedClientService.loadAuthorizedClient("google", "test-user")).thenReturn(authorizedClient);
+		when(authorizedClient.getAccessToken()).thenReturn(accessToken);
+		when(accessToken.getTokenValue()).thenReturn("mock-access-token");
+		when(authService.resolveUserMetadata(AuthProvider.GOOGLE, oauth2User, "mock-access-token")).thenReturn(userInfo);
+		when(userIdentityService.resolveUser(userInfo)).thenReturn(user);
+		when(userMapper.toAuthUser(user)).thenReturn(authenticatedUser);
+		when(tokenService.generateToken(authenticatedUser)).thenReturn("mock-jwt-token");
+		when(request.getHeader("X-Forwarded-For")).thenReturn("192.168.0.1");
+		when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
+		when(clock.instant()).thenReturn(now);
+		when(appProperties.frontUrl()).thenReturn("http://localhost:3000");
+
+		doThrow(new IOException("Network error")).when(response).sendRedirect(anyString());
+
+		assertThatCode(() -> successHandler.onAuthenticationSuccess(request, response, authentication))
+				.doesNotThrowAnyException();
+
+		verify(tokenService).generateToken(authenticatedUser);
+		ArgumentCaptor<UserLoggedInEvent> captor =
+		        ArgumentCaptor.forClass(UserLoggedInEvent.class);
+
+		verify(eventPublisher).publish(captor.capture());
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback?token=mock-jwt-token");
 	}
 }
 
