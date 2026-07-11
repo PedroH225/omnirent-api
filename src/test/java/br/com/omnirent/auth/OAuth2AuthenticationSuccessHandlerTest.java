@@ -394,18 +394,32 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 	}
 	
 	@Test
-	void shouldThrowNullPointerExceptionWhenLoadAuthorizedClientReturnsNull() {
+	void shouldExtractRemoteAddrWhenXForwardedForIsBlank() throws IOException, ServletException {
 		when(authentication.getAuthorizedClientRegistrationId()).thenReturn("google");
 		when(authentication.getPrincipal()).thenReturn(oauth2User);
 		when(authentication.getName()).thenReturn("test-user");
-		when(authorizedClientService.loadAuthorizedClient("google", "test-user")).thenReturn(null);
+		when(authorizedClientService.loadAuthorizedClient("google", "test-user")).thenReturn(authorizedClient);
+		when(authorizedClient.getAccessToken()).thenReturn(accessToken);
+		when(accessToken.getTokenValue()).thenReturn("mock-access-token");
+		when(authService.resolveUserMetadata(AuthProvider.GOOGLE, oauth2User, "mock-access-token")).thenReturn(userInfo);
+		when(userIdentityService.resolveUser(userInfo)).thenReturn(user);
+		when(userMapper.toAuthUser(user)).thenReturn(authenticatedUser);
+		when(tokenService.generateToken(authenticatedUser)).thenReturn("mock-jwt-token");
+		when(request.getHeader("X-Forwarded-For")).thenReturn(" ");
+		when(request.getRemoteAddr()).thenReturn("10.1.1.1");
+		when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
+		when(clock.instant()).thenReturn(now);
+		when(appProperties.frontUrl()).thenReturn("http://localhost:3000");
 
-		assertThatThrownBy(() -> successHandler.onAuthenticationSuccess(request, response, authentication))
-        	.isInstanceOf(NullPointerException.class);
+		successHandler.onAuthenticationSuccess(request, response, authentication);
 
-		verifyNoInteractions(
-			    tokenService, eventPublisher, userIdentityService, authService);
+		ArgumentCaptor<UserLoggedInEvent> eventCaptor = ArgumentCaptor.forClass(UserLoggedInEvent.class);
+		verify(eventPublisher).publish(eventCaptor.capture());
+
+		assertThat(eventCaptor.getValue().ip()).isEqualTo("10.1.1.1");
+		verify(request).getRemoteAddr();
 	}
+	
 }
 
 
