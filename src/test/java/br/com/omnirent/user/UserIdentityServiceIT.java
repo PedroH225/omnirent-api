@@ -144,4 +144,22 @@ public class UserIdentityServiceIT extends SpringIntegrationTest {
 		assertThat(exception.getErrorCode())
 			.isEqualTo(UserErrorType.INACTIVE.getErrorCode());
 	}
+	
+	@Test
+	void shouldPreventDuplicateExternalIdentityCreation() {
+		ExternalIdentity identity = ExternalIdentityTestFactory.google(user, googleUser1Metadata);
+		identityRepository.save(identity);
+		
+		entityManager.flush();
+		entityManager.clear();
+
+		userIdentityService.resolveUser(googleUser1Metadata);
+
+		Long identityCount = entityManager.createQuery(
+				"SELECT count(e) FROM ExternalIdentity e WHERE e.providerUserId = :sub", Long.class)
+				.setParameter("sub", googleUser1Metadata.sub())
+				.getSingleResult();
+
+		assertThat(identityCount).isEqualTo(1L);
+	}
 }
