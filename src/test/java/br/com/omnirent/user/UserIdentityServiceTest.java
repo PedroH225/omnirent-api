@@ -2,6 +2,7 @@ package br.com.omnirent.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -10,6 +11,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,14 +47,12 @@ public class UserIdentityServiceTest {
 	@Mock
 	private UserQueryRepository userQueryRepository;
 	
-private User user;
+	private User user;
 	
 	private User user2;
 	
 	private ExternalIdentity google;
-	
-	private ProviderUserMetadata githubUser1Metadata;
-	
+		
 	private ProviderUserMetadata googleUser1Metadata;
 
 	@BeforeEach
@@ -65,10 +65,7 @@ private User user;
 		
 		googleUser1Metadata = ExternalIdentityTestFactory.createMetadata(user, AuthProvider.GOOGLE);
 
-		google = ExternalIdentityTestFactory.google(user, googleUser1Metadata);
-
-		githubUser1Metadata = ExternalIdentityTestFactory.createMetadata(user, AuthProvider.GITHUB);
-		
+		google = ExternalIdentityTestFactory.google(user, googleUser1Metadata);		
 	}
 	
 	@Test
@@ -120,6 +117,51 @@ private User user;
 
 		assertThat(ex.getErrorCode()).isEqualTo(UserErrorType.BANNED.getErrorCode());
 		verifyNoInteractions(userQueryRepository, userService, identityRepository);
+	}
+	
+	@Test
+	void shouldCreateNewUserAndExternalIdentityWhenUserDoesNotExist() {
+	    ProviderUserMetadata googleUser2Metadata =
+	            ExternalIdentityTestFactory.createMetadata(user2, AuthProvider.GOOGLE);
+
+	    when(identityQueryRepository.findByProviderAndProviderUserId(
+	            googleUser2Metadata.provider(), googleUser2Metadata.sub()))
+	            .thenReturn(Optional.empty());
+
+	    when(userQueryRepository.findByEmail(googleUser2Metadata.email()))
+	            .thenReturn(Optional.empty());
+
+	    when(userService.createUser(
+	            googleUser2Metadata.name(), null,
+	            googleUser2Metadata.email(), null,
+	            null, googleUser2Metadata.locale(),
+	            null)).thenReturn(user2);
+
+	    User result = identityService.resolveUser(googleUser2Metadata);
+
+	    assertThat(result).isSameAs(user2);
+
+	    verify(userService).createUser(
+	            googleUser2Metadata.name(), null,
+	            googleUser2Metadata.email(), null,
+	            null, googleUser2Metadata.locale(),
+	            null);
+	    
+	    ArgumentCaptor<ExternalIdentity> captor =
+	            ArgumentCaptor.forClass(ExternalIdentity.class);
+
+	    verify(identityRepository).save(captor.capture());
+
+	    ExternalIdentity savedIdentity = captor.getValue();
+
+	    assertThat(savedIdentity.getProvider())
+	            .isEqualTo(googleUser2Metadata.provider());
+
+	    assertThat(savedIdentity.getProviderUserId())
+	            .isEqualTo(googleUser2Metadata.sub());
+
+	    assertThat(savedIdentity.getUser())
+	            .isSameAs(user2);
 	}
 	
 }
