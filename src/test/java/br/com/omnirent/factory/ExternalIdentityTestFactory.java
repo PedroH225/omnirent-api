@@ -18,6 +18,12 @@ public final class ExternalIdentityTestFactory {
 				user);
 	}
 	
+	public static ExternalIdentity google(User user,ProviderUserMetadata userMetadata) {
+		return new ExternalIdentity(AuthProvider.GOOGLE, 
+				userMetadata.sub(), userMetadata.email(), userMetadata.emailVerified(),
+				userMetadata.picture(), user);
+	}
+	
 	public static ExternalIdentity github(User user) {
 	    return new ExternalIdentity(
 	        AuthProvider.GITHUB,
