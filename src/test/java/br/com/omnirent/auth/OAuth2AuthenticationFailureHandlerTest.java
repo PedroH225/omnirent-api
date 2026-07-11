@@ -79,8 +79,8 @@ public class OAuth2AuthenticationFailureHandlerTest {
 		ArgumentCaptor<ApiException> captor = ArgumentCaptor.forClass(ApiException.class);
 		verify(apiWriter).onApiError(eq(request), eq(response), captor.capture());
 
-		assertThat(captor.getValue().getErrorType())
-        	.isEqualTo(AuthenticationErrorType.OAUTH_ACCESS_DENIED.getErrorType());
+		assertThat(captor.getValue().getErrorCode())
+        	.isEqualTo(AuthenticationErrorType.OAUTH_ACCESS_DENIED.getErrorCode());
 		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
 	}
 	
@@ -95,8 +95,8 @@ public class OAuth2AuthenticationFailureHandlerTest {
 		ArgumentCaptor<ApiException> captor = ArgumentCaptor.forClass(ApiException.class);
 		verify(apiWriter).onApiError(eq(request), eq(response), captor.capture());
 
-		assertThat(captor.getValue().getErrorType())
-			.isEqualTo(AuthenticationErrorType.OAUTH_PROVIDER_UNAVAILABLE.getErrorType());
+		assertThat(captor.getValue().getErrorCode())
+			.isEqualTo(AuthenticationErrorType.OAUTH_PROVIDER_UNAVAILABLE.getErrorCode());
 		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
 	}
 	
@@ -111,8 +111,8 @@ public class OAuth2AuthenticationFailureHandlerTest {
 		ArgumentCaptor<ApiException> captor = ArgumentCaptor.forClass(ApiException.class);
 		verify(apiWriter).onApiError(eq(request), eq(response), captor.capture());
 
-		assertThat(captor.getValue().getErrorType())
-			.isEqualTo(AuthenticationErrorType.OAUTH_AUTHENTICATION_FAILED.getErrorType());
+		assertThat(captor.getValue().getErrorCode())
+			.isEqualTo(AuthenticationErrorType.OAUTH_AUTHENTICATION_FAILED.getErrorCode());
 		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
 	}
 	
@@ -126,8 +126,8 @@ public class OAuth2AuthenticationFailureHandlerTest {
 		ArgumentCaptor<ApiException> captor = ArgumentCaptor.forClass(ApiException.class);
 		verify(apiWriter).onApiError(eq(request), eq(response), captor.capture());
 
-		assertThat(captor.getValue().getErrorType())
-			.isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorType());
+		assertThat(captor.getValue().getErrorCode())
+			.isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorCode());
 		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
 	}
 	
@@ -141,8 +141,8 @@ public class OAuth2AuthenticationFailureHandlerTest {
 		ArgumentCaptor<ApiException> captor = ArgumentCaptor.forClass(ApiException.class);
 		verify(apiWriter).onApiError(eq(request), eq(response), captor.capture());
 
-		assertThat(captor.getValue().getErrorType())
-			.isEqualTo(AuthenticationErrorType.AUTHENTICATION_SERVICE_ERROR.getErrorType());
+		assertThat(captor.getValue().getErrorCode())
+			.isEqualTo(AuthenticationErrorType.AUTHENTICATION_SERVICE_ERROR.getErrorCode());
 		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
 	}
 	
@@ -156,8 +156,8 @@ public class OAuth2AuthenticationFailureHandlerTest {
 		ArgumentCaptor<ApiException> captor = ArgumentCaptor.forClass(ApiException.class);
 		verify(apiWriter).onApiError(eq(request), eq(response), captor.capture());
 
-		assertThat(captor.getValue().getErrorType())
-			.isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorType());
+		assertThat(captor.getValue().getErrorCode())
+			.isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorCode());
 		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
 	}
 	
@@ -172,7 +172,7 @@ public class OAuth2AuthenticationFailureHandlerTest {
 		assertThrowsExactly(IOException.class, () -> failureHandler.onAuthenticationFailure(request, response, ex));
 
 		verify(apiWriter).onApiError(eq(request), eq(response), captor.capture());
-		assertThat(captor.getValue().getErrorType())
-			.isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorType());
+		assertThat(captor.getValue().getErrorCode())
+			.isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorCode());
 	}
 }
