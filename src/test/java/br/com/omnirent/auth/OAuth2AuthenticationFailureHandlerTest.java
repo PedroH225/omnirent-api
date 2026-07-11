@@ -126,4 +126,19 @@ public class OAuth2AuthenticationFailureHandlerTest {
 			.isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorType());
 		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
 	}
+	
+	@Test
+	void shouldHandleAuthenticationServiceException() throws IOException, ServletException {
+		AuthenticationServiceException ex = new AuthenticationServiceException("Auth service error");
+		when(appProperties.frontUrl()).thenReturn("http://localhost:3000");
+
+		failureHandler.onAuthenticationFailure(request, response, ex);
+
+		ArgumentCaptor<ApiException> captor = ArgumentCaptor.forClass(ApiException.class);
+		verify(apiWriter).onApiError(eq(request), eq(response), captor.capture());
+
+		assertThat(captor.getValue().getErrorType())
+			.isEqualTo(AuthenticationErrorType.AUTHENTICATION_SERVICE_ERROR.getErrorType());
+		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
+	}
 }
