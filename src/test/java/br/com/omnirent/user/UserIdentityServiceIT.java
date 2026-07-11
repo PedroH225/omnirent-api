@@ -2,6 +2,8 @@ package br.com.omnirent.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,5 +69,26 @@ public class UserIdentityServiceIT extends SpringIntegrationTest {
 		User resolvedUser = userIdentityService.resolveUser(googleUser1Metadata);
 
 		assertThat(resolvedUser.getId()).isEqualTo(user.getId());
+	}
+	
+	@Test
+	void shouldLinkExternalIdentityWhenUserExistsByEmail() {
+		ProviderUserMetadata githubUserMetadata = ExternalIdentityTestFactory.createMetadata(user, AuthProvider.GITHUB);
+
+		User resolvedUser = userIdentityService.resolveUser(githubUserMetadata);
+
+		entityManager.flush();
+		entityManager.clear();
+
+		assertThat(resolvedUser.getId()).isEqualTo(user.getId());
+		
+		List<ExternalIdentity> linkedIdentities = entityManager.createQuery(
+				"SELECT e FROM ExternalIdentity e WHERE e.user.id = :userId AND e.provider = :provider", ExternalIdentity.class)
+				.setParameter("userId", user.getId())
+				.setParameter("provider", AuthProvider.GITHUB)
+				.getResultList();
+
+		assertThat(linkedIdentities).hasSize(1);
+		assertThat(linkedIdentities.get(0).getProviderUserId()).isEqualTo(githubUserMetadata.sub());
 	}
 }
