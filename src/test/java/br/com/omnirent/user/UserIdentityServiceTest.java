@@ -164,4 +164,29 @@ public class UserIdentityServiceTest {
 	            .isSameAs(user2);
 	}
 	
+	@Test
+	void shouldLinkExternalIdentityWhenUserExistsByEmail() {
+		ProviderUserMetadata existingUserGithubMetadata = 
+				ExternalIdentityTestFactory.createMetadata(user, AuthProvider.GITHUB);
+		
+		when(identityQueryRepository.findByProviderAndProviderUserId(existingUserGithubMetadata.provider(), existingUserGithubMetadata.sub()))
+				.thenReturn(Optional.empty());
+		when(userQueryRepository.findByEmail(existingUserGithubMetadata.email()))
+				.thenReturn(Optional.of(user));
+
+		User result = identityService.resolveUser(existingUserGithubMetadata);
+
+		assertThat(result).isEqualTo(user);
+		
+		ArgumentCaptor<ExternalIdentity> captor = ArgumentCaptor.forClass(ExternalIdentity.class);
+		verify(identityRepository).save(captor.capture());
+		
+		ExternalIdentity savedIdentity = captor.getValue();
+		assertThat(savedIdentity.getProvider()).isEqualTo(existingUserGithubMetadata.provider());
+		assertThat(savedIdentity.getProviderUserId()).isEqualTo(existingUserGithubMetadata.sub());
+		assertThat(savedIdentity.getUser()).isEqualTo(user);
+		
+		verifyNoInteractions(userService);
+	}
+	
 }
