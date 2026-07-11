@@ -2,6 +2,7 @@ package br.com.omnirent.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -10,6 +11,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 import java.io.IOException;
 import java.time.Clock;
@@ -388,6 +391,20 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 		
 		verify(tokenService).generateToken(authenticatedUser);
 		verify(response).sendRedirect("http://localhost:3000/oauth/callback?token=mock-jwt-token");
+	}
+	
+	@Test
+	void shouldThrowNullPointerExceptionWhenLoadAuthorizedClientReturnsNull() {
+		when(authentication.getAuthorizedClientRegistrationId()).thenReturn("google");
+		when(authentication.getPrincipal()).thenReturn(oauth2User);
+		when(authentication.getName()).thenReturn("test-user");
+		when(authorizedClientService.loadAuthorizedClient("google", "test-user")).thenReturn(null);
+
+		assertThatThrownBy(() -> successHandler.onAuthenticationSuccess(request, response, authentication))
+        	.isInstanceOf(NullPointerException.class);
+
+		verifyNoInteractions(
+			    tokenService, eventPublisher, userIdentityService, authService);
 	}
 }
 
