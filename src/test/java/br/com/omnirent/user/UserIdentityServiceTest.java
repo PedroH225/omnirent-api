@@ -98,10 +98,28 @@ private User user;
 	    ApiException ex = assertThrowsExactly(ApiException.class,
 	            () -> identityService.resolveUser(googleUser1Metadata));
 
-	    assertThat(ex.getErrorType())
-	        .isEqualTo(UserErrorType.INACTIVE.getErrorType());
+	    assertThat(ex.getErrorCode())
+	        .isEqualTo(UserErrorType.INACTIVE.getErrorCode());
 
 	    verifyNoInteractions(userQueryRepository, userService, identityRepository);
+	}
+	
+	@Test
+	void shouldThrowExceptionWhenExternalIdentityUserIsBanned() {
+		user.setUserStatus(UserStatus.BANNED);
+		
+		googleUser1Metadata = ExternalIdentityTestFactory.createMetadata(user, AuthProvider.GOOGLE);
+	    google = ExternalIdentityTestFactory.google(user, googleUser1Metadata);
+	    
+		when(identityQueryRepository.findByProviderAndProviderUserId(
+				googleUser1Metadata.provider(), googleUser1Metadata.sub()))
+				.thenReturn(Optional.of(google));
+
+		ApiException ex = assertThrowsExactly(ApiException.class, 
+				() -> identityService.resolveUser(googleUser1Metadata));
+
+		assertThat(ex.getErrorCode()).isEqualTo(UserErrorType.BANNED.getErrorCode());
+		verifyNoInteractions(userQueryRepository, userService, identityRepository);
 	}
 	
 }
