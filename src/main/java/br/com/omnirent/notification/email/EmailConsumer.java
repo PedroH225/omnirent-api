@@ -61,11 +61,6 @@ public class EmailConsumer {
     
     @RabbitHandler
     public void handle(RentalCreatedEvent event) {
-    	boolean truee = true;
-    	if (truee) {
-			throw new IllegalArgumentException("Illegal argument!!");
-		}
-    	
     	RentalNotificationData notificationData =
     			queryRepository.findRentalNotificationData(event.entityId())
     			.orElseThrow(() -> new NotificationDataNotException());
