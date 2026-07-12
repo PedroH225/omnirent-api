@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import br.com.omnirent.address.AddressMapper;
@@ -223,7 +224,7 @@ public class ItemMapper {
 		return new ItemStatusChangedAuditSnapshot(status);
 	}
 	
-	public List<ItemFeedDTO> toFeedDtos(List<ItemFeedContext> context) {
+	public List<ItemFeedDTO> toFeedDtos(Page<ItemFeedContext> context) {
 		return context.stream()
 				.map(i -> new ItemFeedDTO(i.id(), i.name(), i.itemCondition(), 
 						messageService.get(i.itemCondition().getMessageKey()),

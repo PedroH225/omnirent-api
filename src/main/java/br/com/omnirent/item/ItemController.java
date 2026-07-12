@@ -2,6 +2,7 @@ package br.com.omnirent.item;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -58,10 +59,11 @@ public class ItemController {
 			@RequestParam(required = false) String name, 
 			@RequestParam(required = false) String category,
 			@RequestParam(required = false) String subCategory,
-			@RequestParam(required = false) ItemCondition itemCondition) {
+			@RequestParam(required = false) ItemCondition itemCondition,
+			Pageable pageable) {
 		ItemFeedFilter feedFilter = 
 				new ItemFeedFilter(name, category, subCategory, itemCondition);
-		return itemService.getItemFeed(feedFilter);
+		return itemService.getItemFeed(feedFilter, pageable);
 	}
 	
 	@PostMapping

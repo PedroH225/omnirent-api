@@ -5,6 +5,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.address.AddressService;
@@ -110,10 +112,11 @@ public class ItemService {
 		return itemMapper.localize(result);
 	}
 	
-	public List<ItemFeedDTO> getItemFeed(ItemFeedFilter feedFilter) {
-		List<ItemFeedContext> context = queryRepository.getFeedContexts(
+	public List<ItemFeedDTO> getItemFeed(ItemFeedFilter feedFilter, Pageable pageable) {
+		Page<ItemFeedContext> context = queryRepository.getFeedContexts(
 				feedFilter.itemName(), feedFilter.categoryName(), 
-				feedFilter.subCategoryName(), feedFilter.itemCondition());
+				feedFilter.subCategoryName(), feedFilter.itemCondition(),
+				pageable);
 		
 		return itemMapper.toFeedDtos(context);
 	}

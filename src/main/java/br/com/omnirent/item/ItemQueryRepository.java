@@ -3,6 +3,8 @@ package br.com.omnirent.item;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -21,7 +23,7 @@ import br.com.omnirent.item.dto.ItemDisplayDTO;
 
 public interface ItemQueryRepository extends Repository<Item, String> {
 		
-		@Query("""
+		@Query(value ="""
 				SELECT new br.com.omnirent.item.context.ItemFeedContext(
 				i.id, i.name, i.itemData.itemCondition, i.itemData.basePrice,
 				sc.name, i.createdAt, 
@@ -31,9 +33,22 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 				  AND (:category IS NULL OR c.name = :category)
 				  AND (:subCategory IS NULL OR sc.name = :subCategory)
 				  AND (:itemCondition IS NULL OR i.itemData.itemCondition = :itemCondition)
-				""")
-		List<ItemFeedContext> getFeedContexts(
-				String name, String category, String subCategory, ItemCondition itemCondition);
+				ORDER BY i.createdAt DESC
+					""", countQuery = """
+							    SELECT COUNT(i)
+							    FROM Item i
+							    JOIN i.owner o
+							    JOIN i.subCategory sc
+							    JOIN sc.category c
+							    WHERE (:name IS NULL OR LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%')))
+							      AND (:category IS NULL OR c.name = :category)
+							      AND (:subCategory IS NULL OR sc.name = :subCategory)
+							      AND (:itemCondition IS NULL OR i.itemData.itemCondition = :itemCondition)
+								ORDER BY i.createdAt DESC
+							""")
+		Page<ItemFeedContext> getFeedContexts(
+				String name, String category, String subCategory, ItemCondition itemCondition,
+				Pageable pageable);
 		
 	@Query("""
 			SELECT new br.com.omnirent.item.dto.ItemDetailDTO(i.id, i.name, i.itemData.brand,
