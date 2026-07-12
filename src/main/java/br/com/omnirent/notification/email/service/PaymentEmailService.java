@@ -51,7 +51,7 @@ public class PaymentEmailService {
 						notificationData.currency().toUpperCase(),
 						notificationData.provider().getDisplay(),
 						notificationData.url()),
-				buildFooter(userLocale)
+				buildFooter(userLocale, true), true
 				);
 
 		emailSender.send(message);	
@@ -69,7 +69,10 @@ public class PaymentEmailService {
 		return "email.to." + messageKey;
 	}
 	
-	private String buildFooter(Locale locale) {
+	private String buildFooter(Locale locale, boolean isHtlm) {
+		if (isHtlm) {
+			return messageService.get("email.html.footer", locale, appProperties.frontUrl());
+		}
 		return messageService.get("email.footer", locale, appProperties.frontUrl());
 	}
 	
