@@ -41,6 +41,11 @@ public class PaymentEmailService {
 		sendDefaultEmail("payment.confirmed", notificationData, notificationData.renterData());
 	}
 	
+	public void sendRefundConfirmed(
+			PaymentNotificationData notificationData) {
+		sendDefaultEmail("payment.refunded", notificationData, notificationData.renterData());
+	}
+	
 	private void sendPaymentCreatedEmail(
 			String messageKey, PaymentNotificationData notificationData, 
 			UserNotificationData actorData) {
