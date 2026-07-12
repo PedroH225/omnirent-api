@@ -9,6 +9,7 @@ import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
 import br.com.omnirent.notification.JpaNotificationQueryRepository;
 import br.com.omnirent.notification.context.PaymentNotificationData;
 import br.com.omnirent.notification.email.service.PaymentEmailService;
+import br.com.omnirent.payment.event.PaymentConfirmedEvent;
 import br.com.omnirent.payment.event.PaymentCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,5 +36,10 @@ public class EmailPaymentConsumer {
     			.orElseThrow(() -> new NotificationDataNotException());
     	
     	emailService.sendPaymentCreated(notificationData);
+    }
+    
+    @RabbitHandler
+    public void handle(PaymentConfirmedEvent event) {
+    	log.info("Payment confirmed");
     }
 }
