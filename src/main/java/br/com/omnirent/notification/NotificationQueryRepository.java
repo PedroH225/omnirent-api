@@ -2,6 +2,7 @@ package br.com.omnirent.notification;
 
 import java.util.Optional;
 
+import br.com.omnirent.notification.context.PaymentNotificationData;
 import br.com.omnirent.notification.context.RentalInUseNotificationData;
 import br.com.omnirent.notification.context.RentalLateNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
@@ -16,4 +17,7 @@ public interface NotificationQueryRepository {
 	Optional<RentalInUseNotificationData> findRentalInUseNotificationData(String rentalId);
 	
 	Optional<RentalLateNotificationData> findRentalLateNotificationData(String rentalId);
+
+    Optional<PaymentNotificationData> findPaymentNotificationData(String paymentId);
+
 }

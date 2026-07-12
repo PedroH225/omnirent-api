@@ -1,15 +1,18 @@
 package br.com.omnirent.notification;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
 import br.com.omnirent.common.enums.UserStatus;
+import br.com.omnirent.notification.context.PaymentNotificationData;
 import br.com.omnirent.notification.context.RentalInUseNotificationData;
 import br.com.omnirent.notification.context.RentalLateNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
 import br.com.omnirent.notification.context.UserNotificationData;
+import br.com.omnirent.payment.enums.PaymentProvider;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
@@ -96,6 +99,30 @@ public class JpaNotificationQueryRepository implements NotificationQueryReposito
 
 	                (Instant) result[9]
 	        ));
+	}
+	
+	@Override
+	public Optional<PaymentNotificationData> findPaymentNotificationData(String paymentId) {
+		return em.createQuery("""
+				SELECT i.name, p.amount, p.currency, p.externalReference.paymentProvider,
+				p.externalReference.sessionUrl,
+				u.id, u.username, u.email, u.locale,
+				o.id, o.username, o.email, o.locale
+				FROM Payment p
+				JOIN p.rental r JOIN r.itemSnapshot i JOIN r.owner o JOIN r.renter u
+				WHERE p.id = :id
+				""", Object[].class)
+				.setParameter("id", paymentId)
+				.getResultList().stream().findFirst()
+				.map(result -> new PaymentNotificationData(
+						(String) result[0],
+						(BigDecimal) result[1],
+						(String) result[2],
+						(PaymentProvider) result[3],
+						(String) result[4],
+						toUserData(result, 5),
+						toUserData(result, 9)
+				));
 	}
 	
 	private UserNotificationData toUserData(Object[] result, int offset) {
