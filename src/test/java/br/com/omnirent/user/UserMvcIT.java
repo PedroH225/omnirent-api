@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import br.com.omnirent.config.GlobalConfigHolder;
+import br.com.omnirent.config.global.GlobalConfigHolder;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringMvcIntegration;
 import br.com.omnirent.security.dto.RegisterDTO;
