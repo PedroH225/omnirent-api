@@ -18,7 +18,7 @@ import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.common.formatter.IdentityGeneratorUtil;
-import br.com.omnirent.config.GlobalConfigHolder;
+import br.com.omnirent.config.global.GlobalConfigHolder;
 import br.com.omnirent.config.properties.AppLocale;
 import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.common.ApiException;

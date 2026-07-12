@@ -1,9 +1,7 @@
-package br.com.omnirent.config;
+package br.com.omnirent.config.global;
 
-import br.com.omnirent.OmnirentApplication;
 import java.util.Optional;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 

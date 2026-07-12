@@ -20,7 +20,7 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
-import br.com.omnirent.config.GlobalConfigHolder;
+import br.com.omnirent.config.global.GlobalConfigHolder;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
 import br.com.omnirent.exception.domain.apptype.CommonErrorType;

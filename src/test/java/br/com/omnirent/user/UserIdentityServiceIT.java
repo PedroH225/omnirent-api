@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import br.com.omnirent.common.enums.UserStatus;
-import br.com.omnirent.config.GlobalConfigHolder;
+import br.com.omnirent.config.global.GlobalConfigHolder;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import br.com.omnirent.factory.ExternalIdentityTestFactory;

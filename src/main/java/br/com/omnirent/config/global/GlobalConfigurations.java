@@ -1,6 +1,4 @@
-package br.com.omnirent.config;
-
-import org.springframework.context.annotation.Scope;
+package br.com.omnirent.config.global;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

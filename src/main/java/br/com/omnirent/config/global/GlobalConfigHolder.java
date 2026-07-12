@@ -1,4 +1,4 @@
-package br.com.omnirent.config;
+package br.com.omnirent.config.global;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
