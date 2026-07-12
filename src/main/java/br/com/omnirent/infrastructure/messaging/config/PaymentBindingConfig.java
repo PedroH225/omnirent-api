@@ -95,4 +95,15 @@ public class PaymentBindingConfig {
                 .to(domainExchange)
                 .with(IntegrationEventRouting.PAYMENT_CONFIRMED.getKey());
     }
+    
+    @Bean
+    Binding paymentStatusChangedEmailBinding(
+            Queue emailPaymentQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(emailPaymentQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.PAYMENT_STATUS_CHANGED.getKey());
+    }
 }
