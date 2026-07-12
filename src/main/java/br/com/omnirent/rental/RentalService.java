@@ -109,6 +109,7 @@ public class RentalService {
 				
 		ItemInfo itemInfo = context.getItemInfo();
 		
+		authorizationService.requireNotOwner(userId, context.getOwnerId());
 		authorizationService.canCreateRental(userId, itemInfo.getId());
 		
 		RentalStatus rentalStatus = RentalStatus.CREATED;
