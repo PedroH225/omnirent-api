@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
+import br.com.omnirent.item.context.ItemFeedContext;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -17,7 +18,16 @@ import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 
 public interface ItemQueryRepository extends Repository<Item, String> {
-	
+		
+		@Query("""
+				SELECT new br.com.omnirent.item.context.ItemFeedContext(
+				i.id, i.name, i.itemData.itemCondition, i.itemData.basePrice,
+				sc.name, i.createdAt, 
+				new br.com.omnirent.user.dto.UserResponseDTO(o.id, o.username))
+				FROM Item i JOIN i.owner o JOIN i.subCategory sc JOIN sc.category c
+				""")
+		List<ItemFeedContext> getFeedContexts();
+		
 	@Query("""
 			SELECT new br.com.omnirent.item.dto.ItemDetailDTO(i.id, i.name, i.itemData.brand,
 			i.itemData.model, i.itemData.description, i.itemData.basePrice,

@@ -15,6 +15,7 @@ import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
+import br.com.omnirent.item.dto.ItemFeedDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
@@ -46,6 +47,11 @@ public class ItemController {
 	@GetMapping("/enums")
 	public ItemEnums getEnums() {
 		return itemService.getEnums();
+	}
+	
+	@GetMapping("/feed")
+	public List<ItemFeedDTO> getItemFeed() {
+		return itemService.getItemFeed();
 	}
 	
 	@PostMapping

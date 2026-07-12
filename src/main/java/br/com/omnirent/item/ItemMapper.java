@@ -1,5 +1,7 @@
 package br.com.omnirent.item;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,8 +16,10 @@ import br.com.omnirent.common.enums.EnumOption;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.item.context.ItemAuditSnapshot;
+import br.com.omnirent.item.context.ItemFeedContext;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemReassignedAuditSnapshot;
 import br.com.omnirent.item.context.ItemStatusChangedAuditSnapshot;
@@ -26,6 +30,8 @@ import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
+import br.com.omnirent.item.dto.ItemFeedDTO;
+import br.com.omnirent.item.dto.ItemPriceData;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemSnapshotDTO;
 import br.com.omnirent.item.dto.ItemUpdatedDTO;
@@ -215,5 +221,26 @@ public class ItemMapper {
 	
 	public ItemStatusChangedAuditSnapshot toStatusChangedAuditSnapshot(ItemStatus status) {
 		return new ItemStatusChangedAuditSnapshot(status);
+	}
+	
+	public List<ItemFeedDTO> toFeedDtos(List<ItemFeedContext> context) {
+		return context.stream()
+				.map(i -> new ItemFeedDTO(i.id(), i.name(), i.itemCondition(), 
+						messageService.get(i.itemCondition().getMessageKey()),
+						calculatePriceData(i.basePrice()), i.subCategoryName(), 
+						i.createdAt(), i.owner()))
+				.collect(Collectors.toList());
+	}
+	
+	private ItemPriceData calculatePriceData(BigDecimal basePrice) {
+		return new ItemPriceData(
+				scale(basePrice.multiply(RentalPeriod.HOURLY.getMultiplier())),
+				scale(basePrice.multiply(RentalPeriod.DAILY.getMultiplier())),
+				scale(basePrice.multiply(RentalPeriod.WEEKLY.getMultiplier())),
+				scale(basePrice.multiply(RentalPeriod.MONTHLY.getMultiplier())));
+	}
+	
+	private BigDecimal scale(BigDecimal value) {
+		return value.setScale(2, RoundingMode.HALF_UP);
 	}
 } 
