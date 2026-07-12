@@ -44,9 +44,8 @@ public class PaymentEmailService {
 		
 		EmailMessage message = new EmailMessage(
 				actorData.email(),
-				messageService.get(buildSubject(messageKey), userLocale),
-				messageService.get(
-						buildBody(messageKey), userLocale, username, 
+				buildSubject(messageKey, userLocale),
+				buildBody(messageKey, userLocale, username, 
 						notificationData.itemName(),notificationData.amount(), 
 						notificationData.currency().toUpperCase(),
 						notificationData.provider().getDisplay(),
@@ -57,16 +56,12 @@ public class PaymentEmailService {
 		emailSender.send(message);	
 	}
 	
-	private String buildBody(String messageKey) {
-		return "email.body." + messageKey;
+	private String buildBody(String messageKey, Locale userLocale, Object... args) {
+		return messageService.get("email.body." + messageKey, userLocale, args);
 	}
 	
-	private String buildSubject(String messageKey) {
-		return "email.subject." + messageKey;
-	}
-	
-	private String buildTo(String messageKey) {
-		return "email.to." + messageKey;
+	private String buildSubject(String messageKey, Locale userLocale) {
+		return messageService.get("email.subject." + messageKey, userLocale);
 	}
 	
 	private String buildFooter(Locale locale, boolean isHtlm) {
@@ -78,7 +73,7 @@ public class PaymentEmailService {
 	
 	private String resolveUsername(String username, Locale locale) {
 		if (StringUtils.isBlank(username)) {
-			return messageService.get(buildTo("null.username"), locale);
+			return messageService.get("email.to.null.username", locale);
 		}
 		return username;
 	}
