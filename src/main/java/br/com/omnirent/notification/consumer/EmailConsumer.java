@@ -1,4 +1,4 @@
-package br.com.omnirent.notification.email;
+package br.com.omnirent.notification.consumer;
 
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
