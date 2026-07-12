@@ -11,7 +11,6 @@ import br.com.omnirent.notification.JpaNotificationQueryRepository;
 import br.com.omnirent.notification.context.RentalInUseNotificationData;
 import br.com.omnirent.notification.context.RentalLateNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
-import br.com.omnirent.notification.email.service.EmailService;
 import br.com.omnirent.notification.email.service.RentalEmailService;
 import br.com.omnirent.rental.event.RentalCanceledEvent;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
@@ -40,8 +39,7 @@ public class EmailRentalConsumer {
     @RabbitHandler
     public void handle(RentalCreatedEvent event) {
     	RentalNotificationData notificationData =
-    			queryRepository.findRentalNotificationData(event.entityId())
-    			.orElseThrow(() -> new NotificationDataNotException());
+    			getRentalNotificationData(event.entityId());
     	
     	rentalEmailService.sendRentalCreatedToOwner(notificationData);
     	rentalEmailService.sendRentalCreatedToRenter(notificationData);
@@ -70,8 +68,7 @@ public class EmailRentalConsumer {
     @RabbitHandler
     public void handle(RentalCanceledEvent event) {
     	RentalNotificationData notificationData =
-    			queryRepository.findRentalNotificationData(event.entityId())
-    			.orElseThrow(() -> new NotificationDataNotException());
+    			getRentalNotificationData(event.entityId());
     	
     	rentalEmailService.sendRentalCanceledToOwner(notificationData);
     	rentalEmailService.sendRentalCanceledToRenter(notificationData);
@@ -79,10 +76,9 @@ public class EmailRentalConsumer {
     
     @RabbitHandler
     public void handle(RentalExpiredEvent event) {
-    	RentalNotificationData notificationData =
-    			queryRepository.findRentalNotificationData(event.entityId())
-    			.orElseThrow(() -> new NotificationDataNotException());
-    	
+    	RentalNotificationData notificationData = 
+    			getRentalNotificationData(event.entityId());
+
     	rentalEmailService.sendRentalExpiredToOwner(notificationData);
     	rentalEmailService.sendRentalExpiredToRenter(notificationData);
     }
@@ -90,31 +86,51 @@ public class EmailRentalConsumer {
     @RabbitHandler
     public void handle(RentalStatusChangedEvent event) {
     	RentalStatus newStatus = event.currentBody().status();
-    	RentalNotificationData notificationData =
-    			queryRepository.findRentalNotificationData(event.entityId())
-    			.orElseThrow(() -> new NotificationDataNotException());
+    	RentalNotificationData notificationData = null;
     	
-    	if (newStatus == RentalStatus.CONFIRMED) {
-        	rentalEmailService.sendRentalConfirmedToOwner(notificationData);
-        	rentalEmailService.sendRentalConfirmedToRenter(notificationData);
-		}
-    	else if (newStatus == RentalStatus.PREPARING) {
-			rentalEmailService.sendRentalPreparingToRenter(notificationData);
-		}
-    	else if (newStatus == RentalStatus.SHIPPED) {
+    	switch (newStatus) {
+    	case CONFIRMED:
+    		notificationData = getRentalNotificationData(event.entityId());
+    		rentalEmailService.sendRentalConfirmedToOwner(notificationData);
+    		rentalEmailService.sendRentalConfirmedToRenter(notificationData);
+    		break;
+
+    	case PREPARING:
+    		notificationData = getRentalNotificationData(event.entityId());
+    		rentalEmailService.sendRentalPreparingToRenter(notificationData);
+    		break;
+
+    	case SHIPPED:
+    		notificationData = getRentalNotificationData(event.entityId());
     		rentalEmailService.sendRentalShippedToRenter(notificationData);
-    	}
-    	else if (newStatus == RentalStatus.RETURN_REQUESTED) {
-			rentalEmailService.sendRentalReturnRequestedToOwner(notificationData);
-			rentalEmailService.sendRentalReturnRequestedToRenter(notificationData);
-		}
-    	else if (newStatus == RentalStatus.RETURN_SHIPPED) {
+    		break;
+
+    	case RETURN_REQUESTED:
+    		notificationData = getRentalNotificationData(event.entityId());
+    		rentalEmailService.sendRentalReturnRequestedToOwner(notificationData);
+    		rentalEmailService.sendRentalReturnRequestedToRenter(notificationData);
+    		break;
+
+    	case RETURN_SHIPPED:
+    		notificationData = getRentalNotificationData(event.entityId());
     		rentalEmailService.sendRentalReturnShippedToOwner(notificationData);
-			rentalEmailService.sendRentalReturnShippedToRenter(notificationData);
-    	}
-    	else if(newStatus == RentalStatus.RETURNED) {
+    		rentalEmailService.sendRentalReturnShippedToRenter(notificationData);
+    		break;
+
+    	case RETURNED:
+    		notificationData = getRentalNotificationData(event.entityId());
     		rentalEmailService.sendRentalReturnedToOwner(notificationData);
-			rentalEmailService.sendRentalReturnedToRenter(notificationData);
+    		rentalEmailService.sendRentalReturnedToRenter(notificationData);
+    		break;
+
+    	default:
+    		break;
     	}
     }
+    
+    private RentalNotificationData getRentalNotificationData(String rentalId) {
+    	return queryRepository.findRentalNotificationData(rentalId)
+    			.orElseThrow(() -> new NotificationDataNotException());
+    }
+  
 }
