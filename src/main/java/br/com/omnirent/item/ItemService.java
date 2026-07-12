@@ -22,6 +22,7 @@ import br.com.omnirent.exception.domain.apptype.ItemErrorType;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
+import br.com.omnirent.item.context.ItemFeedFilter;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -109,8 +110,10 @@ public class ItemService {
 		return itemMapper.localize(result);
 	}
 	
-	public List<ItemFeedDTO> getItemFeed() {
-		List<ItemFeedContext> context = queryRepository.getFeedContexts();
+	public List<ItemFeedDTO> getItemFeed(ItemFeedFilter feedFilter) {
+		List<ItemFeedContext> context = queryRepository.getFeedContexts(
+				feedFilter.itemName(), feedFilter.categoryName(), 
+				feedFilter.subCategoryName(), feedFilter.itemCondition());
 		
 		return itemMapper.toFeedDtos(context);
 	}

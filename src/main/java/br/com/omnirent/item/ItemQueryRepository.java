@@ -7,9 +7,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
+import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
+import br.com.omnirent.item.context.ItemFeedFilter;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -25,8 +27,13 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 				sc.name, i.createdAt, 
 				new br.com.omnirent.user.dto.UserResponseDTO(o.id, o.username))
 				FROM Item i JOIN i.owner o JOIN i.subCategory sc JOIN sc.category c
+				WHERE (:name IS NULL OR LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%')))
+				  AND (:category IS NULL OR c.name = :category)
+				  AND (:subCategory IS NULL OR sc.name = :subCategory)
+				  AND (:itemCondition IS NULL OR i.itemData.itemCondition = :itemCondition)
 				""")
-		List<ItemFeedContext> getFeedContexts();
+		List<ItemFeedContext> getFeedContexts(
+				String name, String category, String subCategory, ItemCondition itemCondition);
 		
 	@Query("""
 			SELECT new br.com.omnirent.item.dto.ItemDetailDTO(i.id, i.name, i.itemData.brand,

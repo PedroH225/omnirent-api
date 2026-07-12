@@ -2,6 +2,7 @@ package br.com.omnirent.item;
 
 import java.util.List;
 
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,9 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemEnums;
+import br.com.omnirent.item.context.ItemFeedFilter;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
@@ -50,8 +54,14 @@ public class ItemController {
 	}
 	
 	@GetMapping("/feed")
-	public List<ItemFeedDTO> getItemFeed() {
-		return itemService.getItemFeed();
+	public List<ItemFeedDTO> getItemFeed(
+			@RequestParam(required = false) String name, 
+			@RequestParam(required = false) String category,
+			@RequestParam(required = false) String subCategory,
+			@RequestParam(required = false) ItemCondition itemCondition) {
+		ItemFeedFilter feedFilter = 
+				new ItemFeedFilter(name, category, subCategory, itemCondition);
+		return itemService.getItemFeed(feedFilter);
 	}
 	
 	@PostMapping
