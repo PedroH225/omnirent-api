@@ -36,6 +36,11 @@ public class PaymentEmailService {
 		sendPaymentCreatedEmail("payment.created", notificationData, notificationData.renterData());
 	}
 	
+	public void sendPaymentConfirmed(
+			PaymentNotificationData notificationData) {
+		sendDefaultEmail("payment.confirmed", notificationData, notificationData.renterData());
+	}
+	
 	private void sendPaymentCreatedEmail(
 			String messageKey, PaymentNotificationData notificationData, 
 			UserNotificationData actorData) {
@@ -51,6 +56,26 @@ public class PaymentEmailService {
 						notificationData.provider().getDisplay(),
 						notificationData.url()),
 				buildFooter(userLocale, true), true
+				);
+
+		emailSender.send(message);	
+	}
+	
+	private void sendDefaultEmail(
+			String messageKey, PaymentNotificationData notificationData, 
+			UserNotificationData actorData) {
+		Locale userLocale = Locale.forLanguageTag(actorData.locale());
+		String username = resolveUsername(actorData.username(), userLocale);
+		
+		EmailMessage message = new EmailMessage(
+				actorData.email(),
+				buildSubject(messageKey, userLocale),
+				buildBody(messageKey, userLocale, username, 
+						notificationData.itemName(),
+						notificationData.provider().getDisplay(),
+						notificationData.amount(), 
+						notificationData.currency().toUpperCase()),
+				buildFooter(userLocale, false), false
 				);
 
 		emailSender.send(message);	

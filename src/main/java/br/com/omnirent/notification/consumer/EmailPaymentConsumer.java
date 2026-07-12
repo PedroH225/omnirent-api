@@ -40,6 +40,10 @@ public class EmailPaymentConsumer {
     
     @RabbitHandler
     public void handle(PaymentConfirmedEvent event) {
-    	log.info("Payment confirmed");
+    	PaymentNotificationData notificationData = queryRepository
+    			.findPaymentNotificationData(event.entityId())
+    			.orElseThrow(() -> new NotificationDataNotException());
+    	
+    	emailService.sendPaymentConfirmed(notificationData);
     }
 }
