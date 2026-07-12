@@ -1,4 +1,4 @@
-package br.com.omnirent.infrastructure;
+package br.com.omnirent.infrastructure.messaging;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
@@ -6,6 +6,7 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import br.com.omnirent.common.enums.IntegrationEventRouting;
+import br.com.omnirent.infrastructure.IntegrationEvent;
 import lombok.RequiredArgsConstructor;
 
 @Service
