@@ -1,4 +1,4 @@
-package br.com.omnirent.infrastructure;
+package br.com.omnirent.infrastructure.messaging;
 
 import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;

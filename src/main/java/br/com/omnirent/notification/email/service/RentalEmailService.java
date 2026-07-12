@@ -1,4 +1,4 @@
-package br.com.omnirent.notification.email;
+package br.com.omnirent.notification.email.service;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -10,10 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.config.i18n.MessageService;
+import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.notification.context.RentalInUseNotificationData;
 import br.com.omnirent.notification.context.RentalLateNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
 import br.com.omnirent.notification.context.UserNotificationData;
+import br.com.omnirent.notification.email.EmailMessage;
+import br.com.omnirent.notification.email.EmailSender;
 
 @Service
 public class RentalEmailService {
@@ -26,7 +29,8 @@ public class RentalEmailService {
 	@Autowired
 	private ZoneId zoneId;
 	
-	private static final String OMNI_SITE = "https://omnirent.com";
+	@Autowired
+	private AppProperties appProperties;
 	
 	public void sendRentalCreatedToOwner(RentalNotificationData notificationData) {
 		sendEmailToActor(
@@ -109,6 +113,25 @@ public class RentalEmailService {
 				"rental.late.renter", notificationData, notificationData.renterData());
 	}
 	
+	public void sendRentalCanceledToOwner(RentalNotificationData notificationData) {
+		sendEmailToActor("rental.canceled.owner", notificationData, notificationData.ownerData());
+	}
+
+	public void sendRentalCanceledToRenter(RentalNotificationData notificationData) {
+		sendEmailToActor(
+				"rental.canceled.renter", notificationData, notificationData.renterData());
+	}
+	
+	public void sendRentalExpiredToOwner(RentalNotificationData notificationData) {
+		sendEmailToActor(
+				"rental.expired.owner", notificationData, notificationData.ownerData());
+	}
+
+	public void sendRentalExpiredToRenter(RentalNotificationData notificationData) {
+		sendEmailToActor(
+				"rental.expired.renter", notificationData, notificationData.renterData());
+	}
+	
 	private void sendEmailToActor(
 			String messageKey, RentalNotificationData rentalData, UserNotificationData targetUserData) {
 		Locale userLocale = Locale.forLanguageTag(targetUserData.locale());
@@ -181,7 +204,7 @@ public class RentalEmailService {
 	}
 	
 	private String buildFooter(Locale locale) {
-		return messageService.get("email.footer", locale, OMNI_SITE);
+		return messageService.get("email.footer", locale, appProperties.frontUrl());
 	}
 	
 	private String resolveUsername(String username, Locale locale) {

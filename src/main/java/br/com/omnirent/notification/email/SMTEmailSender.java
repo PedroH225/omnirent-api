@@ -35,7 +35,8 @@ public class SMTEmailSender implements EmailSender {
 
 		    helper.setTo(message.to());
 		    helper.setSubject(message.subject());
-		    helper.setText(message.body() + message.footer());
+		    
+		    helper.setText(message.body() + message.footer(), message.isHtml());
 
 		    javaMailSender.send(mimeMessage);
 

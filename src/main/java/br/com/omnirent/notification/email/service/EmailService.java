@@ -1,4 +1,4 @@
-package br.com.omnirent.notification.email;
+package br.com.omnirent.notification.email.service;
 
 import java.util.Locale;
 
@@ -12,6 +12,8 @@ import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.notification.JpaNotificationQueryRepository;
 import br.com.omnirent.notification.context.UserNotificationData;
+import br.com.omnirent.notification.email.EmailMessage;
+import br.com.omnirent.notification.email.EmailSender;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.context.UserStatusChangeAuditSnapshot;
 import br.com.omnirent.user.event.UserStatusChangeEvent;

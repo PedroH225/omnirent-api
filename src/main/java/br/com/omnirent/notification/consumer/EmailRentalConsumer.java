@@ -1,4 +1,4 @@
-package br.com.omnirent.notification.email;
+package br.com.omnirent.notification.consumer;
 
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -7,20 +7,17 @@ import org.springframework.stereotype.Component;
 
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
-import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.notification.JpaNotificationQueryRepository;
 import br.com.omnirent.notification.context.RentalInUseNotificationData;
 import br.com.omnirent.notification.context.RentalLateNotificationData;
 import br.com.omnirent.notification.context.RentalNotificationData;
-import br.com.omnirent.notification.context.UserNotificationData;
+import br.com.omnirent.notification.email.service.RentalEmailService;
 import br.com.omnirent.rental.event.RentalCanceledEvent;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
 import br.com.omnirent.rental.event.RentalExpiredEvent;
 import br.com.omnirent.rental.event.RentalInUseEvent;
 import br.com.omnirent.rental.event.RentalLateEvent;
 import br.com.omnirent.rental.event.RentalStatusChangedEvent;
-import br.com.omnirent.security.event.UserRegisteredEvent;
-import br.com.omnirent.user.event.UserStatusChangeEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,39 +28,18 @@ import lombok.extern.slf4j.Slf4j;
 	)
 @Component
 @RequiredArgsConstructor
-@RabbitListener(queues = "email.queue", containerFactory = "rabbitListenerContainerFactory")
+@RabbitListener(queues = "email.rental.queue", containerFactory = "rabbitListenerContainerFactory")
 @Slf4j
-public class EmailConsumer {
-
-    private final EmailService emailService;
-    
+public class EmailRentalConsumer {
+	
     private final RentalEmailService rentalEmailService;
     
     private final JpaNotificationQueryRepository queryRepository;
     
     @RabbitHandler
-    public void handle(UserRegisteredEvent event) {
-        emailService.sendWelcomeEmail(event);
-    }
-    
-    @RabbitHandler
-    public void handle(UserStatusChangeEvent event) {
-    	UserNotificationData data = queryRepository.findNotificationData(event.userId())
-    			.orElseThrow(() -> new NotificationDataNotException());
-;
-        emailService.sendUserStatusChanged(data);
-    }
-    
-    @RabbitHandler
-    public void handle(ItemCreatedEvent event) {
-        emailService.sendNewItemEmail(event);
-    }
-    
-    @RabbitHandler
     public void handle(RentalCreatedEvent event) {
     	RentalNotificationData notificationData =
-    			queryRepository.findRentalNotificationData(event.entityId())
-    			.orElseThrow(() -> new NotificationDataNotException());
+    			getRentalNotificationData(event.entityId());
     	
     	rentalEmailService.sendRentalCreatedToOwner(notificationData);
     	rentalEmailService.sendRentalCreatedToRenter(notificationData);
@@ -91,42 +67,70 @@ public class EmailConsumer {
     
     @RabbitHandler
     public void handle(RentalCanceledEvent event) {
-    	log.debug("Email: canceled event recieved");
+    	RentalNotificationData notificationData =
+    			getRentalNotificationData(event.entityId());
+    	
+    	rentalEmailService.sendRentalCanceledToOwner(notificationData);
+    	rentalEmailService.sendRentalCanceledToRenter(notificationData);
     }
     
     @RabbitHandler
     public void handle(RentalExpiredEvent event) {
-    	log.debug("Email: expired event recieved");
+    	RentalNotificationData notificationData = 
+    			getRentalNotificationData(event.entityId());
+
+    	rentalEmailService.sendRentalExpiredToOwner(notificationData);
+    	rentalEmailService.sendRentalExpiredToRenter(notificationData);
     }
     
     @RabbitHandler
     public void handle(RentalStatusChangedEvent event) {
     	RentalStatus newStatus = event.currentBody().status();
-    	RentalNotificationData notificationData =
-    			queryRepository.findRentalNotificationData(event.entityId())
-    			.orElseThrow(() -> new NotificationDataNotException());
+    	RentalNotificationData notificationData = null;
     	
-    	if (newStatus == RentalStatus.CONFIRMED) {
-        	rentalEmailService.sendRentalConfirmedToOwner(notificationData);
-        	rentalEmailService.sendRentalConfirmedToRenter(notificationData);
-		}
-    	else if (newStatus == RentalStatus.PREPARING) {
-			rentalEmailService.sendRentalPreparingToRenter(notificationData);
-		}
-    	else if (newStatus == RentalStatus.SHIPPED) {
+    	switch (newStatus) {
+    	case CONFIRMED:
+    		notificationData = getRentalNotificationData(event.entityId());
+    		rentalEmailService.sendRentalConfirmedToOwner(notificationData);
+    		rentalEmailService.sendRentalConfirmedToRenter(notificationData);
+    		break;
+
+    	case PREPARING:
+    		notificationData = getRentalNotificationData(event.entityId());
+    		rentalEmailService.sendRentalPreparingToRenter(notificationData);
+    		break;
+
+    	case SHIPPED:
+    		notificationData = getRentalNotificationData(event.entityId());
     		rentalEmailService.sendRentalShippedToRenter(notificationData);
-    	}
-    	else if (newStatus == RentalStatus.RETURN_REQUESTED) {
-			rentalEmailService.sendRentalReturnRequestedToOwner(notificationData);
-			rentalEmailService.sendRentalReturnRequestedToRenter(notificationData);
-		}
-    	else if (newStatus == RentalStatus.RETURN_SHIPPED) {
+    		break;
+
+    	case RETURN_REQUESTED:
+    		notificationData = getRentalNotificationData(event.entityId());
+    		rentalEmailService.sendRentalReturnRequestedToOwner(notificationData);
+    		rentalEmailService.sendRentalReturnRequestedToRenter(notificationData);
+    		break;
+
+    	case RETURN_SHIPPED:
+    		notificationData = getRentalNotificationData(event.entityId());
     		rentalEmailService.sendRentalReturnShippedToOwner(notificationData);
-			rentalEmailService.sendRentalReturnShippedToRenter(notificationData);
-    	}
-    	else if(newStatus == RentalStatus.RETURNED) {
+    		rentalEmailService.sendRentalReturnShippedToRenter(notificationData);
+    		break;
+
+    	case RETURNED:
+    		notificationData = getRentalNotificationData(event.entityId());
     		rentalEmailService.sendRentalReturnedToOwner(notificationData);
-			rentalEmailService.sendRentalReturnedToRenter(notificationData);
+    		rentalEmailService.sendRentalReturnedToRenter(notificationData);
+    		break;
+
+    	default:
+    		break;
     	}
     }
+    
+    private RentalNotificationData getRentalNotificationData(String rentalId) {
+    	return queryRepository.findRentalNotificationData(rentalId)
+    			.orElseThrow(() -> new NotificationDataNotException());
+    }
+  
 }

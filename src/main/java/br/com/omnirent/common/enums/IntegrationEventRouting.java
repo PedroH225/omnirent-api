@@ -2,8 +2,11 @@ package br.com.omnirent.common.enums;
 
 import br.com.omnirent.infrastructure.IntegrationEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
+import br.com.omnirent.payment.event.PaymentConfirmedEvent;
+import br.com.omnirent.payment.event.PaymentCreatedEvent;
 import br.com.omnirent.payment.event.PaymentExpirationRequestEvent;
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
+import br.com.omnirent.payment.event.PaymentStatusChangedEvent;
 import br.com.omnirent.rental.event.RentalCanceledEvent;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
 import br.com.omnirent.rental.event.RentalExpiredEvent;
@@ -21,6 +24,9 @@ public enum IntegrationEventRouting {
 	
 	PAYMENT_REQUESTED(PaymentRequestedEvent.class, "payment.requested"),
 	PAYMENT_EXPIRATION(PaymentExpirationRequestEvent.class, "payment.expired"),
+	PAYMENT_CREATED(PaymentCreatedEvent.class, "payment.created"),
+	PAYMENT_CONFIRMED(PaymentConfirmedEvent.class, "payment.confirmed"),
+	PAYMENT_STATUS_CHANGED(PaymentStatusChangedEvent.class, "payment.status.changed"),
 	USER_REGISTERED(UserRegisteredEvent.class, "user.registered"),
 	NEW_ITEM(ItemCreatedEvent.class, "item.created"),
 	RENTAL_CREATED(RentalCreatedEvent.class, "rental.created"),

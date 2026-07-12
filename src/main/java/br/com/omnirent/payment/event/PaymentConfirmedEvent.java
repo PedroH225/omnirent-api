@@ -5,6 +5,7 @@ import java.time.Instant;
 import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.audit.AuditableEvent;
 import br.com.omnirent.common.event.DomainEvent;
+import br.com.omnirent.infrastructure.IntegrationEvent;
 import br.com.omnirent.payment.context.audit.PaymentConfirmedAuditSnapshot;
 
 public record PaymentConfirmedEvent(
@@ -14,4 +15,4 @@ public record PaymentConfirmedEvent(
 		PaymentConfirmedAuditSnapshot currentBody,
 		PaymentConfirmedAuditSnapshot previousBody,
 		Instant occurredAt
-	) implements DomainEvent, AuditableEvent<PaymentConfirmedAuditSnapshot> {}
+	) implements IntegrationEvent, DomainEvent, AuditableEvent<PaymentConfirmedAuditSnapshot> {}

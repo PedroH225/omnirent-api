@@ -4,5 +4,14 @@ public record EmailMessage(
 		String to,
 		String subject,
 		String body,
-		String footer
-		) {}
+		String footer,
+		boolean isHtml
+		) {
+	public EmailMessage(
+			String to,
+			String subject,
+			String body,
+			String footer) {
+        this(to, subject, body, footer, false);
+	}
+}
