@@ -3,6 +3,7 @@ package br.com.omnirent.exception.common;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.common.enums.FieldErrorPriority;
@@ -66,12 +68,31 @@ public class GlobalExceptionHandler {
 
         if (cause instanceof InvalidFormatException ex
             && ex.getTargetType().isEnum()) {
-
+        	
             return handleException(
                 new ApiException(CommonErrorType.ILLEGAL_ENUMERATION,
-                    ex.getValue()),
+                    ex.getValue(), 
+                    Arrays.toString(ex.getTargetType().getEnumConstants())),
                 request);
         }
+        return handleGeneric(e, request);
+    }
+    
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handleTypeMismatch(
+            MethodArgumentTypeMismatchException e,
+            HttpServletRequest request) {
+
+        if (e.getRequiredType() != null && e.getRequiredType().isEnum()) {
+            return handleException(
+                    new ApiException(
+                            CommonErrorType.ILLEGAL_ENUMERATION,
+                            e.getValue(), 
+                            Arrays.toString(e.getRequiredType().getEnumConstants())
+                    ),
+                    request);
+        }
+
         return handleGeneric(e, request);
     }
 
