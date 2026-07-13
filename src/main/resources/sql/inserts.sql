@@ -111,7 +111,7 @@ INSERT IGNORE INTO items(id, name, brand, model, description, base_price, item_c
 ('68cfad79-bfc0-49c5-85a0-5fcbca4d0d23','Honda Portable Generator','Honda','EU22i','Portable generator for construction and events',90.00,'LIKE_NEW','AVAILABLE','f8d8a1a2-3e65-4cb4-86b1-9f4e77c7c1c8','4d83260d-92fb-45cb-b5e5-92f7d9dbfc53','dc64d9e0-25ef-4d86-b5a2-baeec93c6729'),
 ('68cfad79-bfc0-49c5-85a0-5fcbca4d0d24','Aluminum Extension Ladder','Worker','7 Steps','Aluminum ladder for maintenance work',35.00,'GOOD','AVAILABLE','1d3d0f7a-8f41-4fcb-8c54-0c7a6c7b4c92','4d83260d-92fb-45cb-b5e5-92f7d9dbfc53','dc64d9e0-25ef-4d86-b5a2-baeec93c6729'),
 ('c45c3c43-640b-4dc7-a23d-7c0e82dd731f','JBL PartyBox 710','JBL','PartyBox 710','High-power speaker for parties and events',95.00,'LIKE_NEW','AVAILABLE','f7ead54f-d389-4246-a450-c93534520616','4d83260d-92fb-45cb-b5e5-92f7d9dbfc53','dc64d9e0-25ef-4d86-b5a2-baeec93c6729'),
-('d9854d89-b81d-4b73-a9ec-87e28f5fd0ce','Canon RF 70-200mm Lens','Canon','RF 70-200mm f/2.8','Professional telephoto lens',120.00,'LIKE_NEW','AVAILABLE','a13bfa44-c3b8-4df1-a8dd-8a0bcbf3f991','9a26d72f-9b7d-4b97-a842-5d1455d90571','f3efb2a7-cd11-44f5-a8d3-8a0bcbf3f991'),
+('d9854d89-b81d-4b73-a9ec-87e28f5fd0ce','Canon RF 70-200mm Lens','Canon','RF 70-200mm f/2.8','Professional telephoto lens',120.00,'LIKE_NEW','AVAILABLE','a13bfa44-c3b8-4df1-a8dd-8a0bcbf3f991','9a26d72f-9b7d-4b97-a842-5d1455d90571','f3efb2a7-cd11-44f5-a8d3-d0c57e7d0d41'),
 ('a6afaf26-19a2-4d91-a9a0-80cf5f598fb7','Portable PA Sound System','Yamaha','StagePas 400BT','Portable sound system for live events',110.00,'GOOD','AVAILABLE','f7ead54f-d389-4246-a450-c93534520616','e75f8c6d-8a6e-49b2-ae59-1f4b9b6e31cb','5d783c8e-f5d4-4b84-a842-615c8f2f8b43');
 
 -- =========================
