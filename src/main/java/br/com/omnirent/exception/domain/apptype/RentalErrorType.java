@@ -9,6 +9,7 @@ import lombok.Getter;
 public enum RentalErrorType implements AppErrorType {
 
     NOT_FOUND("NOT_FOUND", "RENTAL_NOT_FOUND", "not_found", HttpStatus.NOT_FOUND),
+    OWNER_CANNOT_RENT_OWN_ITEM("CONFLICT", "OWNER_CANNOT_RENT_OWN_ITEM", "cannot_rent_own_item", HttpStatus.CONFLICT),
     ILLEGAL_STATE_TRANSITION("CONFLICT", "ILLEGAL_RENTAL_STATE_TRANSITION",
     		"illegal_state_transition", HttpStatus.CONFLICT),
     CREATION_COOLDOWN("CONFLICT", "RENTAL_CREATION_COOLDOWN", "creation_cooldown", HttpStatus.CONFLICT),

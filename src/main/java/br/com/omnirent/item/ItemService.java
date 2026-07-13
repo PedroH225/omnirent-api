@@ -1,9 +1,12 @@
 package br.com.omnirent.item;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.address.AddressService;
@@ -13,20 +16,25 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
+import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.apptype.ItemErrorType;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
+import br.com.omnirent.item.context.ItemFeedContext;
+import br.com.omnirent.item.context.ItemFeedFilter;
 import br.com.omnirent.item.context.ItemRentedContext;
-import br.com.omnirent.item.context.ItemStatusChangedAuditSnapshot;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
+import br.com.omnirent.item.dto.ItemFeedDTO;
+import br.com.omnirent.item.dto.ItemPriceData;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
@@ -103,6 +111,15 @@ public class ItemService {
 		List<ItemDisplayDTO> result = queryRepository.findUserItems(userId);
 		
 		return itemMapper.localize(result);
+	}
+	
+	public PageResponseDTO<ItemFeedDTO> getItemFeed(ItemFeedFilter feedFilter, Pageable pageable) {
+		Page<ItemFeedContext> context = queryRepository.getFeedContexts(
+				feedFilter.itemName(), feedFilter.categoryName(), 
+				feedFilter.subCategoryName(), feedFilter.itemCondition(),
+				pageable);
+		
+		return itemMapper.toFeedDtos(context);
 	}
 
 	public ItemCreatedDTO addItem(ItemRequestDTO itemDTO) {
@@ -243,6 +260,5 @@ public class ItemService {
 
 	public ItemEnums getEnums() {
 		return itemMapper.getLocalizedEnums();
-	}
-	
+	}	
 }

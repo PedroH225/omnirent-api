@@ -43,4 +43,10 @@ public class RentalAuthorizationService {
 			throw new ApiException(RentalErrorType.CREATION_COOLDOWN, when);
 		}
 	}
+
+	public void requireNotOwner(String userId, String ownerId) {
+		if (userId.equals(ownerId)) {
+			throw new ApiException(RentalErrorType.OWNER_CANNOT_RENT_OWN_ITEM);
+		}
+	}
 }

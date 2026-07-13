@@ -3,12 +3,17 @@ package br.com.omnirent.item;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
+import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
+import br.com.omnirent.item.context.ItemFeedContext;
+import br.com.omnirent.item.context.ItemFeedFilter;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -17,7 +22,32 @@ import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 
 public interface ItemQueryRepository extends Repository<Item, String> {
-	
+		
+		@Query(value ="""
+				SELECT new br.com.omnirent.item.context.ItemFeedContext(
+				i.id, i.name, i.itemData.itemCondition, i.itemData.basePrice,
+				sc.name, i.createdAt, 
+				new br.com.omnirent.user.dto.UserResponseDTO(o.id, o.username))
+				FROM Item i JOIN i.owner o JOIN i.subCategory sc JOIN sc.category c
+				WHERE (:name IS NULL OR LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%')))
+				  AND (:category IS NULL OR c.name = :category)
+				  AND (:subCategory IS NULL OR sc.name = :subCategory)
+				  AND (:itemCondition IS NULL OR i.itemData.itemCondition = :itemCondition)
+					""", countQuery = """
+							    SELECT COUNT(i)
+							    FROM Item i
+							    JOIN i.owner o
+							    JOIN i.subCategory sc
+							    JOIN sc.category c
+							    WHERE (:name IS NULL OR LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%')))
+							      AND (:category IS NULL OR c.name = :category)
+							      AND (:subCategory IS NULL OR sc.name = :subCategory)
+							      AND (:itemCondition IS NULL OR i.itemData.itemCondition = :itemCondition)
+							""")
+		Page<ItemFeedContext> getFeedContexts(
+				String name, String category, String subCategory, ItemCondition itemCondition,
+				Pageable pageable);
+		
 	@Query("""
 			SELECT new br.com.omnirent.item.dto.ItemDetailDTO(i.id, i.name, i.itemData.brand,
 			i.itemData.model, i.itemData.description, i.itemData.basePrice,
