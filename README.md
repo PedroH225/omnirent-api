@@ -35,7 +35,8 @@ docker compose up
 
 ### Equipamentos
 - Usuários podem anunciar equipamentos para aluguel
-- Organização por categorias e subcategorias
+- Filtragem de equipamentos por condição, título, categoria e subcategoria
+- Ordenar por data, maior preço e menor preço
 - Gerenciamento de disponibilidade dos equipamentos
 - Atualização de informações dos anúncios
 

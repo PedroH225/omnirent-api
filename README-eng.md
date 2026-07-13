@@ -32,7 +32,8 @@ docker compose up
 
 ### Equipment
 - Users can list equipment for rent
-- Organization by categories and subcategories
+- Filter equipment by condition, title, category and subcategories
+- Sort by recent, highest price and lowest prices
 - Equipment availability management
 - Listing information updates
 
