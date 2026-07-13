@@ -69,4 +69,16 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 	            .andExpect(jsonPath("$.content[*].subCategoryName",
 	                    everyItem(is("CAMERA"))));
 	}
+	
+	@Test
+	void shouldFilterFeedByItemCondition() throws Exception {
+	    mockMvc.perform(get(ITEM_FEED_URI)
+	            .param("itemCondition", "GOOD")
+	            .accept(MediaType.APPLICATION_JSON))
+	            .andExpect(status().isOk())
+	            .andExpect(jsonPath("$.totalElements").value(4))
+	            .andExpect(jsonPath("$.content", hasSize(4)))
+	            .andExpect(jsonPath("$.content[*].itemCondition",
+	                    everyItem(is("GOOD"))));
+	}
 }
