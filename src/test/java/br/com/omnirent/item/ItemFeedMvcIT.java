@@ -97,4 +97,15 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 	            .andExpect(jsonPath("$.content[0].itemCondition", is("GOOD")))
 	            .andExpect(jsonPath("$.content[0].subCategoryName", is("CAMERA")));
 	}
+	
+	@Test
+	void shouldReturnEmptyFeedWhenNoItemsMatchFilters() throws Exception {
+	    mockMvc.perform(get(ITEM_FEED_URI)
+	            .param("name", "Playstation 5")
+	            .accept(MediaType.APPLICATION_JSON))
+	            .andExpect(status().isOk())
+	            .andExpect(jsonPath("$.content", hasSize(0)))
+	            .andExpect(jsonPath("$.totalPages", is(0)))
+	            .andExpect(jsonPath("$.totalElements", is(0)));
+	}
 }
