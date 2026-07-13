@@ -1,5 +1,8 @@
 package br.com.omnirent.item;
 
+import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
+import static org.hamcrest.CoreMatchers.everyItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -14,7 +17,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import br.com.omnirent.integration.SpringMvcIntegration;
 import jakarta.transaction.Transactional;
-
 @Transactional
 public class ItemFeedMvcIT extends SpringMvcIntegration {
 
@@ -30,7 +32,7 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 	@Test
 	void shouldReturnItemFeed() throws Exception {
 		mockMvc.perform(get(ITEM_FEED_URI)
-				.contentType(MediaType.APPLICATION_JSON))
+				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content").exists())
 				.andExpect(jsonPath("$.content").isArray())
@@ -42,5 +44,17 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 				.andExpect(jsonPath("$.content[0].name").exists())
 				.andExpect(jsonPath("$.content[0].price.hourPrice").exists())
 				.andExpect(jsonPath("$.content[0].owner.username").exists());
+	}
+	
+	@Test
+	void shouldFilterFeedByName() throws Exception {
+	    mockMvc.perform(get(ITEM_FEED_URI)
+	            .param("name", "Canon")
+	            .accept(MediaType.APPLICATION_JSON))
+	            .andExpect(status().isOk())
+	            .andExpect(jsonPath("$.totalElements").value(2))
+	            .andExpect(jsonPath("$.content", hasSize(2)))
+	            .andExpect(jsonPath("$.content[*].name",
+	                    everyItem(containsStringIgnoringCase("Canon"))));
 	}
 }
