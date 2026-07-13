@@ -194,4 +194,13 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 	            .andExpect(jsonPath("$.content", hasSize(0)))
 	            .andExpect(jsonPath("$.totalElements", is(0)));
 	}
+	
+	@Test
+	void shouldIgnoreMissingOptionalParameters() throws Exception {
+		mockMvc.perform(get(ITEM_FEED_URI)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content").isNotEmpty())
+				.andExpect(jsonPath("$.totalElements", is(8)));
+	}
 }
