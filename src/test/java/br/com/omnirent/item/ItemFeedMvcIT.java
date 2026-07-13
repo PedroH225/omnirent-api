@@ -146,4 +146,18 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 				.andExpect(jsonPath("$.content[0].price.weeklyPrice").exists())
 				.andExpect(jsonPath("$.content[0].price.monthlyPrice").exists());
 	}
+	
+	@Test
+	void shouldPaginateFeed() throws Exception {
+		mockMvc.perform(get(ITEM_FEED_URI)
+				.param("page", "1")
+				.param("size", "3")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content", hasSize(3)))
+				.andExpect(jsonPath("$.page", is(1)))
+				.andExpect(jsonPath("$.size", is(3)))
+				.andExpect(jsonPath("$.totalElements", is(8)))
+				.andExpect(jsonPath("$.totalPages", is(3)));
+	}
 }
