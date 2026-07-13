@@ -184,4 +184,14 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 				.andExpect(jsonPath("$.message", containsString("PRICE_ASC")))
 				.andExpect(jsonPath("$.message", containsString("PRICE_DESC")));
 	}
+	
+	@Test
+	void shouldReturnEmptyFeedWhenCategoryDoesNotExist() throws Exception {
+	    mockMvc.perform(get(ITEM_FEED_URI)
+	            .param("category", "INVALID_CATEGORY")
+	            .accept(MediaType.APPLICATION_JSON))
+	            .andExpect(status().isOk())
+	            .andExpect(jsonPath("$.content", hasSize(0)))
+	            .andExpect(jsonPath("$.totalElements", is(0)));
+	}
 }
