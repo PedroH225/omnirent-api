@@ -172,5 +172,16 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.errorCode", 
 						is(CommonErrorType.ILLEGAL_ENUMERATION.name())));
-		}
+	}
+	
+	@Test
+	void shouldReturnBadRequestWhenSortIsInvalid() throws Exception {
+		mockMvc.perform(get(ITEM_FEED_URI)
+				.param("sort", "PRICE_DES")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message", containsString("NEWEST")))
+				.andExpect(jsonPath("$.message", containsString("PRICE_ASC")))
+				.andExpect(jsonPath("$.message", containsString("PRICE_DESC")));
+	}
 }
