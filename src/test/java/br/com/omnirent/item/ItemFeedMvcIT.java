@@ -126,4 +126,13 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 	            .andExpect(status().isOk())
 	            .andExpect(jsonPath("$.content[0].name", is("Compact Tripod")));
 	}
+	
+	@Test
+	void shouldSortFeedByPriceDesc() throws Exception {
+		mockMvc.perform(get(ITEM_FEED_URI)
+				.param("sort", "PRICE_DESC")
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+	            .andExpect(jsonPath("$.content[0].name", is("Event Sound System")));
+	}
 }
