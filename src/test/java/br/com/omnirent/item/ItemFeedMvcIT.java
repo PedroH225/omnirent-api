@@ -1,8 +1,8 @@
 package br.com.omnirent.item;
-
 import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -56,5 +56,17 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 	            .andExpect(jsonPath("$.content", hasSize(2)))
 	            .andExpect(jsonPath("$.content[*].name",
 	                    everyItem(containsStringIgnoringCase("Canon"))));
+	}
+	
+	@Test
+	void shouldFilterFeedBySubCategory() throws Exception {
+	    mockMvc.perform(get(ITEM_FEED_URI)
+	            .param("subCategory", "CAMERA")
+	            .accept(MediaType.APPLICATION_JSON))
+	            .andExpect(status().isOk())
+	            .andExpect(jsonPath("$.totalElements").value(3))
+	            .andExpect(jsonPath("$.content", hasSize(3)))
+	            .andExpect(jsonPath("$.content[*].subCategoryName",
+	                    everyItem(is("CAMERA"))));
 	}
 }
