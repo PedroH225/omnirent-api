@@ -135,4 +135,15 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 				.andExpect(status().isOk())
 	            .andExpect(jsonPath("$.content[0].name", is("Event Sound System")));
 	}
+	
+	@Test
+	void shouldReturnCalculatedPriceData() throws Exception {
+		mockMvc.perform(get(ITEM_FEED_URI)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].price.hourPrice").exists())
+				.andExpect(jsonPath("$.content[0].price.dailyPrice").exists())
+				.andExpect(jsonPath("$.content[0].price.weeklyPrice").exists())
+				.andExpect(jsonPath("$.content[0].price.monthlyPrice").exists());
+	}
 }
