@@ -203,4 +203,14 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 				.andExpect(jsonPath("$.content").isNotEmpty())
 				.andExpect(jsonPath("$.totalElements", is(8)));
 	}
+	
+	@Test
+	void shouldReturnLocalizedItemCondition() throws Exception {
+	    mockMvc.perform(get(ITEM_FEED_URI)
+	            .accept(MediaType.APPLICATION_JSON))
+	            .andExpect(status().isOk())
+	            .andExpect(jsonPath("$.content").isNotEmpty())
+	            .andExpect(jsonPath("$.content[0].itemConditionLabel").exists())
+	            .andExpect(jsonPath("$.content[0].itemConditionLabel").isNotEmpty());
+	}
 }
