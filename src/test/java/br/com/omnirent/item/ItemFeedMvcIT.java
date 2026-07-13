@@ -1,8 +1,10 @@
 package br.com.omnirent.item;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -15,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import br.com.omnirent.exception.domain.apptype.CommonErrorType;
 import br.com.omnirent.integration.SpringMvcIntegration;
 import jakarta.transaction.Transactional;
 @Transactional
@@ -160,4 +163,14 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 				.andExpect(jsonPath("$.totalElements", is(8)))
 				.andExpect(jsonPath("$.totalPages", is(3)));
 	}
+	
+	@Test
+	void shouldReturnBadRequestWhenItemConditionIsInvalid() throws Exception {
+		mockMvc.perform(get(ITEM_FEED_URI)
+				.param("itemCondition", "INVALID")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.errorCode", 
+						is(CommonErrorType.ILLEGAL_ENUMERATION.name())));
+		}
 }
