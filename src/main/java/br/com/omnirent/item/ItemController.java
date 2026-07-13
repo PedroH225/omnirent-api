@@ -1,9 +1,13 @@
 package br.com.omnirent.item;
 
+import br.com.omnirent.notification.email.EmailConfig;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,11 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemEnums;
+import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.item.context.ItemFeedFilter;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemFeedDTO;
+import br.com.omnirent.item.dto.ItemFeedSort;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
@@ -55,15 +61,20 @@ public class ItemController {
 	}
 	
 	@GetMapping("/feed")
-	public List<ItemFeedDTO> getItemFeed(
-			@RequestParam(required = false) String name, 
-			@RequestParam(required = false) String category,
-			@RequestParam(required = false) String subCategory,
-			@RequestParam(required = false) ItemCondition itemCondition,
-			Pageable pageable) {
-		ItemFeedFilter feedFilter = 
-				new ItemFeedFilter(name, category, subCategory, itemCondition);
-		return itemService.getItemFeed(feedFilter, pageable);
+	public PageResponseDTO<ItemFeedDTO> getItemFeed(
+	        @RequestParam(required = false) String name,
+	        @RequestParam(required = false) String category,
+	        @RequestParam(required = false) String subCategory,
+	        @RequestParam(required = false) ItemCondition itemCondition,
+	        @RequestParam(name = "sort", required = false) ItemFeedSort itemFeedSort,
+	        Pageable pageable) {
+
+	    ItemFeedFilter feedFilter =
+	            new ItemFeedFilter(name, category, subCategory, itemCondition);
+
+	    pageable = resolvePageSort(pageable, itemFeedSort);
+
+	    return itemService.getItemFeed(feedFilter, pageable);
 	}
 	
 	@PostMapping
@@ -89,5 +100,15 @@ public class ItemController {
 	@PatchMapping("/updateStatus/{itemId}")
 	public void updateStatus(@PathVariable String itemId) {
 		itemService.updateStatus(itemId);
+	}
+	
+	private Pageable resolvePageSort(Pageable pageable, ItemFeedSort itemFeedSort) {
+		itemFeedSort = itemFeedSort == null ? ItemFeedSort.NEWEST : itemFeedSort;
+
+	    return PageRequest.of(
+	            pageable.getPageNumber(),
+	            pageable.getPageSize(),
+	            Sort.by(itemFeedSort.getDirection(), itemFeedSort.getField())
+	    );
 	}
 }

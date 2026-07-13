@@ -18,6 +18,7 @@ import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.common.enums.RentalPeriod;
+import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.item.context.ItemAuditSnapshot;
 import br.com.omnirent.item.context.ItemFeedContext;
@@ -224,13 +225,14 @@ public class ItemMapper {
 		return new ItemStatusChangedAuditSnapshot(status);
 	}
 	
-	public List<ItemFeedDTO> toFeedDtos(Page<ItemFeedContext> context) {
-		return context.stream()
-				.map(i -> new ItemFeedDTO(i.id(), i.name(), i.itemCondition(), 
-						messageService.get(i.itemCondition().getMessageKey()),
-						calculatePriceData(i.basePrice()), i.subCategoryName(), 
-						i.createdAt(), i.owner()))
-				.collect(Collectors.toList());
+	public PageResponseDTO<ItemFeedDTO> toFeedDtos(Page<ItemFeedContext> context) {
+		Page<ItemFeedDTO> dto =  context.map(i -> new ItemFeedDTO(
+	            i.id(), i.name(), i.itemCondition(),
+	            messageService.get(i.itemCondition().getMessageKey()),
+	            calculatePriceData(i.basePrice()), i.subCategoryName(),
+	            i.createdAt(), i.owner()));
+		
+		return new PageResponseDTO<>(dto);
 	}
 	
 	private ItemPriceData calculatePriceData(BigDecimal basePrice) {

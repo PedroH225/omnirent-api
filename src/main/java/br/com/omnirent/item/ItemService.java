@@ -18,6 +18,7 @@ import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
+import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.apptype.ItemErrorType;
@@ -112,7 +113,7 @@ public class ItemService {
 		return itemMapper.localize(result);
 	}
 	
-	public List<ItemFeedDTO> getItemFeed(ItemFeedFilter feedFilter, Pageable pageable) {
+	public PageResponseDTO<ItemFeedDTO> getItemFeed(ItemFeedFilter feedFilter, Pageable pageable) {
 		Page<ItemFeedContext> context = queryRepository.getFeedContexts(
 				feedFilter.itemName(), feedFilter.categoryName(), 
 				feedFilter.subCategoryName(), feedFilter.itemCondition(),

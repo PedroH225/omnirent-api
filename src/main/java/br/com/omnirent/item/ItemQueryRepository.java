@@ -33,7 +33,6 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 				  AND (:category IS NULL OR c.name = :category)
 				  AND (:subCategory IS NULL OR sc.name = :subCategory)
 				  AND (:itemCondition IS NULL OR i.itemData.itemCondition = :itemCondition)
-				ORDER BY i.createdAt DESC
 					""", countQuery = """
 							    SELECT COUNT(i)
 							    FROM Item i
@@ -44,7 +43,6 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 							      AND (:category IS NULL OR c.name = :category)
 							      AND (:subCategory IS NULL OR sc.name = :subCategory)
 							      AND (:itemCondition IS NULL OR i.itemData.itemCondition = :itemCondition)
-								ORDER BY i.createdAt DESC
 							""")
 		Page<ItemFeedContext> getFeedContexts(
 				String name, String category, String subCategory, ItemCondition itemCondition,
