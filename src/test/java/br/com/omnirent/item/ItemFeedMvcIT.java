@@ -108,4 +108,13 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 	            .andExpect(jsonPath("$.totalPages", is(0)))
 	            .andExpect(jsonPath("$.totalElements", is(0)));
 	}
+	
+	@Test
+	void shouldSortFeedByNewest() throws Exception {
+		mockMvc.perform(get(ITEM_FEED_URI)
+				.param("sort", "NEWEST")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].name", is("Dell XPS 15")));
+	}
 }
