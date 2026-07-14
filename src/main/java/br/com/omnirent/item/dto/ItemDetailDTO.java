@@ -2,14 +2,13 @@ package br.com.omnirent.item.dto;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.List;
 
 import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.item.context.ItemImageResponseDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
 import lombok.Data;
 
@@ -46,8 +45,7 @@ public class ItemDetailDTO {
 	
 	private Instant updatedAt;
 	
-	@JsonIgnore
-	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+	private List<ItemImageResponseDTO> images;
 
 	public ItemDetailDTO(String id, String name, String brand, String model, String description,
 			BigDecimal basePrice, ItemCondition itemCondition, ItemStatus itemStatus, SubCategoryResDTO subCategory,

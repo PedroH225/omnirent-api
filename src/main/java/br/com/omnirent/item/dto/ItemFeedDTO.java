@@ -25,4 +25,6 @@ public class ItemFeedDTO {
 	private Instant createdAt;
 	
 	private UserResponseDTO owner;
+	
+	private String thumbnailStorageKey;
 }

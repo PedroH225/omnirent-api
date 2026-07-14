@@ -230,7 +230,7 @@ public class ItemMapper {
 	            i.id(), i.name(), i.itemCondition(),
 	            messageService.get(i.itemCondition().getMessageKey()),
 	            calculatePriceData(i.basePrice()), i.subCategoryName(),
-	            i.createdAt(), i.owner()));
+	            i.createdAt(), i.owner(), i.thumbnailKey()));
 		
 		return new PageResponseDTO<>(dto);
 	}

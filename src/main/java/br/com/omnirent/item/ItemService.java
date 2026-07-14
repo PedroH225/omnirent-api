@@ -2,16 +2,11 @@ package br.com.omnirent.item;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import br.com.omnirent.address.AddressService;
 import br.com.omnirent.address.domain.Address;
@@ -25,17 +20,15 @@ import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.apptype.ItemErrorType;
-import br.com.omnirent.infrastructure.StorageService;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
 import br.com.omnirent.item.context.ItemFeedFilter;
+import br.com.omnirent.item.context.ItemImageResponseDTO;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
-import br.com.omnirent.item.domain.ItemImage;
-import br.com.omnirent.item.domain.ItemImageRequestDto;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
@@ -74,6 +67,7 @@ public class ItemService {
 	
 	private ItemMapper itemMapper;
 
+	private ItemImageRepository imageRepository;
 	
 	private SpringDomainEventPublisher eventPublisher;
 	
@@ -82,6 +76,8 @@ public class ItemService {
 	public ItemDetailDTO getItemById(String id) {
 		ItemDetailDTO result = queryRepository.findItemDetailDTO(id)
 				.orElseThrow(() -> new ApiException(ItemErrorType.NOT_FOUND));
+		
+		result.setImages(imageRepository.findItemImages(id));
 		
 		return itemMapper.localize(result);	
 	}

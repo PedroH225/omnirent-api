@@ -13,5 +13,6 @@ public record ItemFeedContext(
 		 BigDecimal basePrice,
 		 String subCategoryName,
 		 Instant createdAt,
-		 UserResponseDTO owner
+		 UserResponseDTO owner,
+		 String thumbnailKey
 		 ) {}
