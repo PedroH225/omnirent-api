@@ -169,6 +169,23 @@ CREATE TABLE IF NOT EXISTS `items` (
 ) ENGINE=InnoDB;
 
 -- -----------------------------------------------------
+-- Table `item_images`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `item_images` (
+  `id` BINARY(16) NOT NULL,
+  `storage_key` VARCHAR(200) NOT NULL,
+  `display_order` INTEGER NOT NULL,
+  `item_id` CHAR(36) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_images_item`
+    FOREIGN KEY (`item_id`)
+    REFERENCES `items`(`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
 -- Table `rentals`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `rentals` (
