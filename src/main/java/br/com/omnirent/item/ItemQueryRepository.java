@@ -37,12 +37,12 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 				  AND (:itemCondition IS NULL OR i.itemData.itemCondition = :itemCondition)
 				  AND (im IS NULL OR im.displayOrder = 0)
 					""", countQuery = """
-							    SELECT COUNT(i)
+							    SELECT COUNT(DISTINCT i)
 							    FROM Item i
 							    JOIN i.owner o
 							    JOIN i.subCategory sc
 							    JOIN sc.category c
-							    JOIN i.images im
+							    LEFT JOIN i.images im
 							    WHERE (:name IS NULL OR LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%')))
 							      AND (:category IS NULL OR c.name = :category)
 							      AND (:subCategory IS NULL OR sc.name = :subCategory)
