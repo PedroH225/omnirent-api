@@ -169,6 +169,9 @@ public class ItemImageService {
 
 
     private void deleteImages(List<ItemImage> images) {
+    	if (images.isEmpty()) {
+			return;
+		}
 
         images.forEach(image ->
                 storageService.delete(image.getStorageKey()));
