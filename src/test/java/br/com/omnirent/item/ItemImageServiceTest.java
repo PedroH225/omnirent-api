@@ -3,16 +3,13 @@ package br.com.omnirent.item;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.argThat;
-
 import static org.mockito.Mockito.when;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -23,10 +20,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 
 import br.com.omnirent.address.domain.Address;
@@ -62,8 +59,11 @@ public class ItemImageServiceTest {
 	@Mock
     private StorageService storageService;
 	
-	@Autowired
-	private Clock clock;
+	private static final Instant FIXED_INSTANT =
+	        Instant.parse("2026-01-01T00:00:00Z");
+	
+	@Captor
+	private ArgumentCaptor<List<ItemImage>> itemImagesCaptor;
 	
 	private User owner;
 
@@ -99,7 +99,7 @@ public class ItemImageServiceTest {
 
         imageService.saveImages(requests, Collections.emptyMap(), item.getId());
 
-        verify(imageRepository).saveAll(any());
+        verify(imageRepository, never()).saveAll(any());
     }
 	
 	@Test
@@ -138,14 +138,27 @@ public class ItemImageServiceTest {
 	
     @Test
     void saveImages_savesImagesWhenDisplayOrdersAreUnique() throws Exception {
-        List<ItemImageRequestDto> requests = List.of(
-                ItemImageTestFactory.createRequest(UUID.randomUUID(), null, 1),
-                ItemImageTestFactory.createRequest(UUID.randomUUID(), null, 2)
-        );
+    	ItemImage image1 = ItemImageTestFactory.createPersisted(item, 1, FIXED_INSTANT);
+    	ItemImage image2 = ItemImageTestFactory.createPersisted(item, 2, FIXED_INSTANT);
+
+    	when(imageRepository.findByItemId(item.getId()))
+    	    .thenReturn(List.of(image1, image2));
+
+    	List<ItemImageRequestDto> requests = List.of(
+    	    ItemImageTestFactory.createRequest(image1.getId(), null, 1),
+    	    ItemImageTestFactory.createRequest(image2.getId(), null, 2)
+    	);
 
         imageService.saveImages(requests, Collections.emptyMap(), item.getId());
 
         verify(imageRepository).saveAll(any());
+        verify(imageRepository).saveAll(itemImagesCaptor.capture());
+
+        List<ItemImage> images = itemImagesCaptor.getValue();
+
+        assertEquals(2, images.size());
+        assertEquals(1, images.get(0).getDisplayOrder());
+        assertEquals(2, images.get(1).getDisplayOrder());
     }
 
     @Test
@@ -180,15 +193,12 @@ public class ItemImageServiceTest {
 		when(storageService.upload(any(CompressedFile.class), eq("items/" + item.getId())))
 		        .thenReturn(new StorageUploadResponse(imageId, "key1"));
 
-        ArgumentCaptor<List<ItemImage>> captor =
-                ArgumentCaptor.forClass(List.class);
-
         imageService.saveImages(requests, files, item.getId());
 
         verify(storageService).upload(any(CompressedFile.class), eq("items/" + item.getId()));
-        verify(imageRepository).saveAll(captor.capture());
+        verify(imageRepository).saveAll(itemImagesCaptor.capture());
 
-        List<ItemImage> images = captor.getValue();
+        List<ItemImage> images = itemImagesCaptor.getValue();
 
         assertEquals(1, images.size());
 
@@ -202,7 +212,7 @@ public class ItemImageServiceTest {
     
     @Test
     void saveImages_updatesDisplayOrderOfExistingImages() throws Exception {
-        ItemImage existingImage = ItemImageTestFactory.createPersisted(item, 1, Instant.now());
+        ItemImage existingImage = ItemImageTestFactory.createPersisted(item, 1, FIXED_INSTANT);
         List<ItemImageRequestDto> requests = List.of(
                 ItemImageTestFactory.createRequest(existingImage.getId(), null, 5)
         );
@@ -214,12 +224,9 @@ public class ItemImageServiceTest {
         verify(storageService, never()).upload(any(), anyString());
         verify(storageService, never()).delete(anyString());
         
-        ArgumentCaptor<List<ItemImage>> captor =
-                ArgumentCaptor.forClass(List.class);
-        
-        verify(imageRepository).saveAll(captor.capture());
+        verify(imageRepository).saveAll(itemImagesCaptor.capture());
 
-        List<ItemImage> images = captor.getValue();
+        List<ItemImage> images = itemImagesCaptor.getValue();
 
         assertEquals(1, images.size());
         assertEquals(existingImage.getId(), images.getFirst().getId());
