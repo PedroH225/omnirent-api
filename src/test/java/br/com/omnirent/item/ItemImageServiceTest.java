@@ -313,7 +313,21 @@ public class ItemImageServiceTest {
         verify(storageService, never()).upload(any(), anyString());
         assertEquals(1, images.size());
         assertEquals(existingImage.getId(), images.getFirst().getId());
-        assertEquals(2, images.getFirst().getDisplayOrder());    }
+        assertEquals(2, images.getFirst().getDisplayOrder());    
+    }
+    
+    @Test
+    void saveImages_throwsExceptionWhenTempIdHasNoMatchingFile() {
+        List<ItemImageRequestDto> requests = List.of(
+                ItemImageTestFactory.createRequest(null, "missing", 1)
+        );
+
+        assertThrows(IllegalArgumentException.class, () ->
+                imageService.saveImages(requests, Collections.emptyMap(), item.getId()));
+       
+        verify(storageService, never()).upload(any(), anyString());
+        verify(imageRepository, never()).saveAll(any());
+    }
 }
 
 
