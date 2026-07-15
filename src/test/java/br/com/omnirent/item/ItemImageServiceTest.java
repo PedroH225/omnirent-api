@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -483,6 +484,19 @@ public class ItemImageServiceTest {
 
         assertEquals(
                 ImageErrorType.INVALID_IMAGE.getErrorCode(),
+                exception.getErrorCode()
+        );
+    }
+    
+    @Test
+    void getValidBufferedImage_throwsExceptionWhenFormatIsUnsupported() throws IOException {
+        MultipartFile file = MultipartFileTestFactory.image("image/tiff", "tiff");
+
+        ApiException exception = assertThrows(ApiException.class, () ->
+                imageService.getValidBufferedImage(file));
+
+        assertEquals(
+                ImageErrorType.UNSUPPORTED_MEDIA_TYPE.getErrorCode(),
                 exception.getErrorCode()
         );
     }
