@@ -462,6 +462,17 @@ public class ItemImageServiceTest {
 
         assertNotNull(result);
     }
+    
+    @Test
+    void getValidBufferedImage_throwsExceptionWhenFileIsEmpty() {
+        MultipartFile file = mock(MultipartFile.class);
+
+        when(file.isEmpty()).thenReturn(true);
+        when(file.getOriginalFilename()).thenReturn("empty.png");
+
+        assertThrows(IllegalArgumentException.class, () ->
+                imageService.getValidBufferedImage(file));
+    }
 }
 
 
