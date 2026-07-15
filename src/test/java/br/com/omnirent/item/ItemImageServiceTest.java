@@ -3,6 +3,7 @@ package br.com.omnirent.item;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.awt.image.BufferedImage;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -450,6 +452,15 @@ public class ItemImageServiceTest {
         imageService.saveImages(requests, files, item.getId());
 
         verify(storageService).upload(any(CompressedFile.class), eq(String.format("items/%s", item.getId())));
+    }
+    
+    @Test
+    void getValidBufferedImage_returnsBufferedImageWhenImageIsValid() throws Exception {
+        MultipartFile file = MultipartFileTestFactory.png();
+
+        BufferedImage result = imageService.getValidBufferedImage(file);
+
+        assertNotNull(result);
     }
 }
 
