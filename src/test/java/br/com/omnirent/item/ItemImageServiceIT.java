@@ -39,6 +39,7 @@ import br.com.omnirent.utils.SecurityTestUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.SdkClientException;
 
 @Transactional
 @Import(GlobalExceptionHandler.class)
@@ -177,6 +178,32 @@ public class ItemImageServiceIT extends SpringMvcIntegration {
 	                    .with(SecurityTestUtils.auth(user1))
 	    )
 	    .andExpect(status().isTooManyRequests());
+
+	    verify(storageService).upload(any(), anyString());
+	}
+	
+	@Test
+	void uploadImages_returnsServiceUnavailableWhenStorageClientFails() throws Exception {
+
+	    when(storageService.upload(any(), anyString()))
+	            .thenThrow(
+	                    SdkClientException.create("Connection failed")
+	            );
+
+	    MockMultipartFile request =
+	            MultipartFileTestFactory.createRequest("temp1", 1);
+
+	    MockMultipartFile image =
+	            MultipartFileTestFactory.image(
+	                    "temp1", "image.png", "png");
+
+	    mockMvc.perform(
+	            multipart("/item/{itemId}/images", item1.getId())
+	                    .file(request)
+	                    .file(image)
+	                    .with(SecurityTestUtils.auth(user1))
+	    )
+	    .andExpect(status().isServiceUnavailable());
 
 	    verify(storageService).upload(any(), anyString());
 	}
