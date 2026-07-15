@@ -199,6 +199,32 @@ public class ItemImageServiceTest {
         assertEquals(1, image.getDisplayOrder());
         assertEquals(item.getId(), image.getItemId());
     }
+    
+    @Test
+    void saveImages_updatesDisplayOrderOfExistingImages() throws Exception {
+        ItemImage existingImage = ItemImageTestFactory.createPersisted(item, 1, Instant.now());
+        List<ItemImageRequestDto> requests = List.of(
+                ItemImageTestFactory.createRequest(existingImage.getId(), null, 5)
+        );
+
+        when(imageRepository.findByItemId(item.getId())).thenReturn(List.of(existingImage));
+
+        imageService.saveImages(requests, Collections.emptyMap(), item.getId());
+
+        verify(storageService, never()).upload(any(), anyString());
+        verify(storageService, never()).delete(anyString());
+        
+        ArgumentCaptor<List<ItemImage>> captor =
+                ArgumentCaptor.forClass(List.class);
+        
+        verify(imageRepository).saveAll(captor.capture());
+
+        List<ItemImage> images = captor.getValue();
+
+        assertEquals(1, images.size());
+        assertEquals(existingImage.getId(), images.getFirst().getId());
+        assertEquals(5, images.getFirst().getDisplayOrder()); 
+    }
 }
 
 
