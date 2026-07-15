@@ -45,7 +45,7 @@ public class ItemImageService {
     private final StorageService storageService;
         
     private static final Set<String> SUPPORTED_FORMATS =
-            Set.of(".jpg", ".jpeg", ".png", ".webp");
+            Set.of("jpeg", "png", "webp");
     
     private static final String SUPPORTED_FORMATS_MESSAGE =
             "JPEG, PNG, WebP";
@@ -201,36 +201,38 @@ public class ItemImageService {
             throw new IllegalArgumentException("Empty file");
         }
 
-        try (ImageInputStream input = ImageIO.createImageInputStream(file.getInputStream())) {
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
-            System.out.println("chegou has next");
+    	try (ImageInputStream input = ImageIO.createImageInputStream(file.getInputStream())) {
+    	    Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
 
-            if (!readers.hasNext()) {
-            	throw new ApiException(ImageErrorType.INVALID_IMAGE, filename);
-            }
+    	    if (!readers.hasNext()) {
+    	        throw new ApiException(ImageErrorType.INVALID_IMAGE, filename);
+    	    }
 
-            ImageReader reader = readers.next();
-            String format = reader.getFormatName();
+    	    ImageReader reader = readers.next();
 
-            BufferedImage bufferedImage = ImageIO.read(input);
-            
-            if (file.getContentType() == null 
-                    || !file.getContentType().startsWith("image/")) {
-                throw new ApiException(
-                    ImageErrorType.UNSUPPORTED_MEDIA_TYPE,
-                    filename, SUPPORTED_FORMATS_MESSAGE);
-            }
+    	    try {
+    	        reader.setInput(input);
 
-            if (format == null || !SUPPORTED_FORMATS.contains(format.toLowerCase(Locale.ROOT))) {
-                throw new ApiException(
-                    ImageErrorType.UNSUPPORTED_MEDIA_TYPE,
-                    filename, SUPPORTED_FORMATS_MESSAGE);
-            }
-            
-            if (bufferedImage == null) {
-                throw new ApiException(ImageErrorType.INVALID_IMAGE, filename);
-            }
-            return bufferedImage;
-        }
+    	        String format = reader.getFormatName();
+
+    	        if (!SUPPORTED_FORMATS.contains(format.toLowerCase(Locale.ROOT))) {
+    	            throw new ApiException(
+    	                ImageErrorType.UNSUPPORTED_MEDIA_TYPE,
+    	                filename,
+    	                SUPPORTED_FORMATS_MESSAGE
+    	            );
+    	        }
+
+    	        BufferedImage bufferedImage = reader.read(0);
+
+    	        if (bufferedImage == null) {
+    	            throw new ApiException(ImageErrorType.INVALID_IMAGE, filename);
+    	        }
+
+    	        return bufferedImage;
+    	    } finally {
+    	        reader.dispose();
+    	    }
+    	}
     }
 }
