@@ -30,6 +30,7 @@ import br.com.omnirent.infrastructure.StorageService;
 import br.com.omnirent.infrastructure.StorageUploadResponse;
 import br.com.omnirent.item.domain.ItemImage;
 import br.com.omnirent.item.domain.ItemImageRequestDto;
+import br.com.omnirent.security.CurrentUserProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
@@ -43,6 +44,10 @@ public class ItemImageService {
     private final ItemImageRepository imageRepository;
     
     private final StorageService storageService;
+    
+    private final CurrentUserProvider currentUserProvider;
+    
+    private final ItemAuthorizationService authorizationService;
         
     private static final Set<String> SUPPORTED_FORMATS =
             Set.of("jpeg", "png", "webp");
@@ -55,15 +60,17 @@ public class ItemImageService {
             List<ItemImageRequestDto> imageRequests,
             Map<String, MultipartFile> files,
             String itemId) throws IOException {
-    	
+    	authorizationService.validateItemFromDB(
+    			itemId, currentUserProvider.currentUserId());
+
         imageRequests = Optional.ofNullable(imageRequests)
                 .orElse(Collections.emptyList());
 
         files = Optional.ofNullable(files)
                 .orElse(Collections.emptyMap());
         
-       validateImageCount(imageRequests, files);
-       validateDisplayOrders(imageRequests);
+        validateImageCount(imageRequests, files);
+        validateDisplayOrders(imageRequests);
         
         LinkedHashMap<String, CompressedFile> compressedFiles = new LinkedHashMap<>();
 

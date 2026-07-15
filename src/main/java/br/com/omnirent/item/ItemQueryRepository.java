@@ -14,6 +14,7 @@ import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
 import br.com.omnirent.item.context.ItemFeedFilter;
+import br.com.omnirent.item.context.ItemPermissionData;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -124,4 +125,12 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 			WHERE i.id = :id
 			""")
 	Optional<ChangeItemSubCategoryContext> getChangeSubCategoryContext(@Param("id")String id);
+
+	@Query("""
+			SELECT new br.com.omnirent.item.context.ItemPermissionData(
+			i.itemStatus, i.ownerId, o.userStatus)
+			FROM Item i JOIN i.owner o
+			WHERE i.id = :itemId
+			""")
+	Optional<ItemPermissionData> getPermissionData(String itemId);
 }
