@@ -3,7 +3,6 @@ package br.com.omnirent.exception.common;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -19,13 +19,17 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.common.enums.FieldErrorPriority;
 import br.com.omnirent.common.formatter.CaptalizationUtils;
 import br.com.omnirent.config.i18n.MessageService;
+import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.domain.apptype.CommonErrorType;
 import br.com.omnirent.exception.domain.apptype.FieldErrorResponse;
+import br.com.omnirent.exception.domain.apptype.FileErrorType;
+import br.com.omnirent.exception.domain.apptype.ImageErrorType;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
@@ -36,6 +40,9 @@ import tools.jackson.databind.exc.InvalidFormatException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+	
+	@Autowired
+	private AppProperties appProperties;
 
 	@Autowired
     private MessageService messageService;
@@ -194,6 +201,21 @@ public class GlobalExceptionHandler {
 
 	    return new ArrayList<>(bestByField.values());
 	}
+	
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	public ResponseEntity<ApiErrorResponse> handleMaxUploadSize(
+	        MaxUploadSizeExceededException e,
+	        HttpServletRequest request) {
+		if (hasCause(e, FileSizeLimitExceededException.class)) {
+	        return handleException(
+	                new ApiException(
+	                        FileErrorType.FILE_TOO_LARGE,
+	                        appProperties.maxFileSize().toMegabytes()), request);
+		} 
+		return handleException(
+				new ApiException(FileErrorType.MULTIPART_TOO_LARGE, 
+						appProperties.maxUploadSize().toMegabytes()), request);	
+	}
 
 	private String getFieldCode(String objectName) {
 		String normalizedName = StringUtils.capitalize(objectName);
@@ -212,5 +234,15 @@ public class GlobalExceptionHandler {
 			return "address.field.";
 		}
 		return "";
+	}
+	
+	private boolean hasCause(Throwable ex, Class<? extends Throwable> type) {
+	    while (ex != null) {
+	        if (type.isInstance(ex)) {
+	            return true;
+	        }
+	        ex = ex.getCause();
+	    }
+	    return false;
 	}
 }
