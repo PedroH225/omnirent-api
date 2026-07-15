@@ -1,5 +1,6 @@
 package br.com.omnirent.item;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -92,9 +93,9 @@ public class ItemController {
 	public void saveImages(
 	        @PathVariable String itemId,
 	        @RequestPart(name = "request", required = false) ItemImagesRequestDto request,
-	        MultipartHttpServletRequest multipartRequest) {
+	        MultipartHttpServletRequest multipartRequest) throws IOException {
 		Map<String, MultipartFile> files = multipartRequest.getFileMap();
-		
+		files.remove("request");
 	    imageService.saveImages(request.images(), files, itemId);
 	}
 	
