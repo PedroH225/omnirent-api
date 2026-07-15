@@ -103,8 +103,8 @@ public class ItemImageServiceTest {
 
         ApiException exception = assertThrows(ApiException.class, () ->
         imageService.saveImages(requests, Collections.emptyMap(), item.getId()));
-        assertEquals(ImageErrorType.MAX_IMAGES_EXCEEDED.getErrorCode(),
-        		exception.getErrorCode());
+        assertEquals(
+        		ImageErrorType.MAX_IMAGES_EXCEEDED.getErrorCode(), exception.getErrorCode());
 	}
 
     @Test
@@ -120,10 +120,35 @@ public class ItemImageServiceTest {
 
         ApiException exception = assertThrows(ApiException.class, () ->
         imageService.saveImages(Collections.emptyList(), files, item.getId()));
-        assertEquals(ImageErrorType.MAX_IMAGES_EXCEEDED.getErrorCode(), exception.getErrorCode());
+        assertEquals(
+        		ImageErrorType.MAX_IMAGES_EXCEEDED.getErrorCode(), exception.getErrorCode());
     }
 	
-	
+    @Test
+    void saveImages_savesImagesWhenDisplayOrdersAreUnique() throws Exception {
+        List<ItemImageRequestDto> requests = List.of(
+                ItemImageTestFactory.createRequest(UUID.randomUUID(), null, 1),
+                ItemImageTestFactory.createRequest(UUID.randomUUID(), null, 2)
+        );
+
+        imageService.saveImages(requests, Collections.emptyMap(), item.getId());
+
+        verify(imageRepository).saveAll(any());
+    }
+
+    @Test
+    void saveImages_throwsDuplicateImageOrderWhenDisplayOrdersAreDuplicated() {
+        List<ItemImageRequestDto> requests = List.of(
+                ItemImageTestFactory.createRequest(UUID.randomUUID(), null, 1),
+                ItemImageTestFactory.createRequest(UUID.randomUUID(), null, 1)
+        );
+
+        ApiException exception = assertThrows(ApiException.class, () ->
+                imageService.saveImages(requests, Collections.emptyMap(), item.getId()));
+    
+        assertEquals(
+        		ImageErrorType.DUPLICATE_IMAGE_ORDER.getErrorCode(), exception.getErrorCode());
+    }
 }
 
 
