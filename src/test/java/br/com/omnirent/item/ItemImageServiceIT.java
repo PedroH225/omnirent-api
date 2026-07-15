@@ -122,4 +122,33 @@ public class ItemImageServiceIT extends SpringMvcIntegration {
 
 	    verify(storageService).upload(any(), anyString());
 	}
+	
+	@Test
+	void uploadImages_returnsAccessDeniedWhenStorageRejectsRequest() throws Exception {
+
+	    when(storageService.upload(any(), anyString()))
+	            .thenThrow(
+	                    AwsServiceException.builder()
+	                            .statusCode(403)
+	                            .message("Access denied")
+	                            .build()
+	            );
+
+	    MockMultipartFile request =
+	            MultipartFileTestFactory.createRequest("temp1", 1);
+
+	    MockMultipartFile image =
+	            MultipartFileTestFactory.image(
+	                    "temp1", "image.png", "png");
+
+	    mockMvc.perform(
+	            multipart("/item/{itemId}/images", item1.getId())
+	                    .file(request)
+	                    .file(image)
+	                    .with(SecurityTestUtils.auth(user1))
+	    )
+	    .andExpect(status().isForbidden());
+
+	    verify(storageService).upload(any(), anyString());
+	}
 }
