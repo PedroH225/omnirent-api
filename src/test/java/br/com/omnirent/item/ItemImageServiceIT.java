@@ -151,4 +151,33 @@ public class ItemImageServiceIT extends SpringMvcIntegration {
 
 	    verify(storageService).upload(any(), anyString());
 	}
+	
+	@Test
+	void uploadImages_returnsRateLimitedWhenStorageLimitIsExceeded() throws Exception {
+
+	    when(storageService.upload(any(), anyString()))
+	            .thenThrow(
+	                    AwsServiceException.builder()
+	                            .statusCode(429)
+	                            .message("Too many requests")
+	                            .build()
+	            );
+
+	    MockMultipartFile request =
+	            MultipartFileTestFactory.createRequest("temp1", 1);
+
+	    MockMultipartFile image =
+	            MultipartFileTestFactory.image(
+	                    "temp1", "image.png", "png");
+
+	    mockMvc.perform(
+	            multipart("/item/{itemId}/images", item1.getId())
+	                    .file(request)
+	                    .file(image)
+	                    .with(SecurityTestUtils.auth(user1))
+	    )
+	    .andExpect(status().isTooManyRequests());
+
+	    verify(storageService).upload(any(), anyString());
+	}
 }
