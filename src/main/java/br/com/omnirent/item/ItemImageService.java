@@ -87,8 +87,10 @@ public class ItemImageService {
         images.addAll(createNewImages(imageRequests, compressedFiles, itemId));
 
         validateImageLimit(images.size(), 0);
-
-        imageRepository.saveAll(images);
+        
+        if (!images.isEmpty()) {
+            imageRepository.saveAll(images);
+		}
     }
 
 
