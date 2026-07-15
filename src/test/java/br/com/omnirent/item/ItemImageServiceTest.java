@@ -232,6 +232,26 @@ public class ItemImageServiceTest {
         assertEquals(existingImage.getId(), images.getFirst().getId());
         assertEquals(5, images.getFirst().getDisplayOrder()); 
     }
+    
+    
+    @Test
+    void saveImages_removesImagesMissingFromRequest() throws Exception {
+        ItemImage existingImage = ItemImageTestFactory.createPersisted(item, 1, FIXED_INSTANT);
+
+        when(imageRepository.findByItemId(item.getId())).thenReturn(List.of(existingImage));
+
+        imageService.saveImages(Collections.emptyList(), Collections.emptyMap(), item.getId());
+
+        verify(imageRepository, never()).saveAll(any());
+        verify(storageService).delete(existingImage.getStorageKey());
+
+        verify(imageRepository).deleteAll(itemImagesCaptor.capture());
+
+        List<ItemImage> deleted = itemImagesCaptor.getValue();
+
+        assertEquals(1, deleted.size());
+        assertEquals(existingImage, deleted.getFirst());   
+    }
 }
 
 
