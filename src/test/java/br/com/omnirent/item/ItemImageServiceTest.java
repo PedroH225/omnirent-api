@@ -2,14 +2,14 @@ package br.com.omnirent.item;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -327,6 +327,37 @@ public class ItemImageServiceTest {
        
         verify(storageService, never()).upload(any(), anyString());
         verify(imageRepository, never()).saveAll(any());
+    }
+    
+    @Test
+    void saveImages_savesAllCreatedAndUpdatedImages() throws Exception {
+        ItemImage existingImage = ItemImageTestFactory.createPersisted(item, 1, FIXED_INSTANT);
+        List<ItemImageRequestDto> requests = List.of(
+                ItemImageTestFactory.createRequest(existingImage.getId(), null, 2),
+                ItemImageTestFactory.createRequest(null, "temp1", 1)
+        );
+        Map<String, MultipartFile> files = Map.of("temp1", MultipartFileTestFactory.png());
+
+        when(imageRepository.findByItemId(item.getId())).thenReturn(List.of(existingImage));
+        when(storageService.upload(any(CompressedFile.class), anyString()))
+                .thenReturn(new StorageUploadResponse(UUID.randomUUID(), "key1"));
+
+        imageService.saveImages(requests, files, item.getId());
+
+        verify(imageRepository).saveAll(itemImagesCaptor.capture());
+
+        List<ItemImage> images = itemImagesCaptor.getValue();
+
+        assertEquals(2, images.size());
+        assertTrue(images.stream()
+                .anyMatch(image ->
+                        image.getId().equals(existingImage.getId())
+                        && image.getDisplayOrder() == 2));
+
+        assertTrue(images.stream()
+                .anyMatch(image ->
+                        image.getStorageKey().equals("key1")
+                        && image.getDisplayOrder() == 1));    
     }
 }
 
