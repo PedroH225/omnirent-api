@@ -66,7 +66,7 @@ public class UserServiceTest {
 	private UserValidationService validationService;
 
 	@Mock
-	private UserAutorizationService autorizationService;
+	private UserAuthorizationService autorizationService;
 	
 	@Mock
 	private SpringDomainEventPublisher eventPublisher;

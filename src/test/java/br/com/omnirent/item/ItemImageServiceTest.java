@@ -50,6 +50,7 @@ import br.com.omnirent.infrastructure.StorageUploadResponse;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemImage;
 import br.com.omnirent.item.domain.ItemImageRequestDto;
+import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.domain.User;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,6 +64,12 @@ public class ItemImageServiceTest {
     
 	@Mock
     private StorageService storageService;
+	
+	@Mock
+    private CurrentUserProvider currentUserProvider;
+    
+	@Mock
+    private ItemAuthorizationService authorizationService;
 	
 	private static final Instant FIXED_INSTANT =
 	        Instant.parse("2026-01-01T00:00:00Z");
