@@ -436,6 +436,21 @@ public class ItemImageServiceTest {
         verify(imageRepository, never()).deleteAll(any());
         verify(storageService, never()).delete(anyString());
     }
+    
+    @Test
+    void saveImages_uploadsImagesToItemPath() throws Exception {
+        List<ItemImageRequestDto> requests = List.of(
+                ItemImageTestFactory.createRequest(null, "temp1", 1)
+        );
+        Map<String, MultipartFile> files = Map.of("temp1", MultipartFileTestFactory.png());
+
+        when(storageService.upload(any(CompressedFile.class), anyString()))
+                .thenReturn(new StorageUploadResponse(UUID.randomUUID(), "key1"));
+
+        imageService.saveImages(requests, files, item.getId());
+
+        verify(storageService).upload(any(CompressedFile.class), eq(String.format("items/%s", item.getId())));
+    }
 }
 
 
