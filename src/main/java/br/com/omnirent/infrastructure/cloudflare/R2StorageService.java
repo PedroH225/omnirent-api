@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import br.com.omnirent.exception.infrastructure.FileUploadException;
+import br.com.omnirent.infrastructure.CompressedFile;
 import br.com.omnirent.infrastructure.StorageService;
 import br.com.omnirent.infrastructure.StorageUploadResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,77 +23,35 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 @RequiredArgsConstructor
 public class R2StorageService implements StorageService {
 
-    private final S3Client s3Client;
-    
-    private final CloudflareProperties properties;
+	private final S3Client s3Client;
 
-    @Override
-    public StorageUploadResponse upload(MultipartFile file, String path) {
-    	String filename = normalizeFilename(
-    	        Optional.ofNullable(file.getOriginalFilename())
-    	                .orElseThrow(() -> new IllegalArgumentException("Filename is missing"))
-    	);
+	private final CloudflareProperties properties;
 
-        UUID uuid = UUID.randomUUID();
-        System.out.println(uuid);
-        String key = path + "/" + uuid + "-" + filename;
+	@Override
+	public StorageUploadResponse upload(CompressedFile file, String path) {
+		UUID uuid = UUID.randomUUID();
+		String key = path + "/" + uuid + ".webp";
 
-        try {
-            PutObjectRequest request = PutObjectRequest.builder()
-                    .bucket(properties.bucket())
-                    .key(key)
-                    .contentType(file.getContentType())
-                    .build();
-      
-            try (InputStream input = file.getInputStream()) {
-                s3Client.putObject(
-                    request,
-                    RequestBody.fromInputStream(input, file.getSize())
-                );
-            }
+		PutObjectRequest request = PutObjectRequest.builder()
+				.bucket(properties.bucket())
+				.key(key)
+				.contentType(file.contentType())
+				.build();
 
-            return new StorageUploadResponse(uuid, key);
+		s3Client.putObject(request, RequestBody.fromBytes(file.bytes()));
 
-        } catch (IOException e) {
-            throw new FileUploadException(e);
-        }
-    }
+		return new StorageUploadResponse(uuid, key);
+	}
 
-    @Override
-    public void delete(String key) {
-        DeleteObjectRequest request = DeleteObjectRequest.builder()
-                .bucket(properties.bucket())
-                .key(key)
-                .build();
+	@Override
+	public void delete(String key) {
+		DeleteObjectRequest request = DeleteObjectRequest.builder().bucket(properties.bucket()).key(key).build();
 
-        s3Client.deleteObject(request);
-    }
+		s3Client.deleteObject(request);
+	}
 
-    @Override
-    public String getPublicUrl(String key) {
-        return properties.endpoint() + "/" + key;
-    }
-    
-    private String normalizeFilename(String filename) {
-        String extension = "";
-
-        int dotIndex = filename.lastIndexOf('.');
-        if (dotIndex >= 0) {
-            extension = filename.substring(dotIndex).toLowerCase();
-            filename = filename.substring(0, dotIndex);
-        }
-
-        String normalized = Normalizer.normalize(
-                filename,
-                Normalizer.Form.NFD
-        );
-
-        normalized = normalized
-                .replaceAll("\\p{M}", "")
-                .replaceAll("[^a-zA-Z0-9]+", "-")
-                .replaceAll("^-|-$", "")
-                .toLowerCase();
-
-        return normalized + extension;
-    }
+	@Override
+	public String getPublicUrl(String key) {
+		return properties.endpoint() + "/" + key;
+	}
 }
