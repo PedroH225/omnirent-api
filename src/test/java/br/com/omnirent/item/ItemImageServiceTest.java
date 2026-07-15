@@ -280,6 +280,19 @@ public class ItemImageServiceTest {
         assertEquals(2, images.get(0).getDisplayOrder());
         assertEquals(1, images.get(1).getDisplayOrder());    
     }
+    
+    @Test
+    void saveImages_removesAllImagesWhenImageRequestsAreNull() throws Exception {
+        ItemImage image = ItemImageTestFactory.createPersisted(item, 1, FIXED_INSTANT);
+
+        when(imageRepository.findByItemId(item.getId()))
+                .thenReturn(List.of(image));
+
+        imageService.saveImages(null, Collections.emptyMap(), item.getId());
+
+        verify(storageService).delete(image.getStorageKey());
+        verify(imageRepository).deleteAll(List.of(image));
+    }
 }
 
 
