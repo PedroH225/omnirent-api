@@ -8,6 +8,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -251,6 +253,32 @@ public class ItemImageServiceTest {
 
         assertEquals(1, deleted.size());
         assertEquals(existingImage, deleted.getFirst());   
+    }
+    
+    @Test
+    void saveImages_updatesAndCreatesImagesInTheSameRequest() throws Exception {
+        ItemImage existingImage = ItemImageTestFactory.createPersisted(item, 1, FIXED_INSTANT);
+        List<ItemImageRequestDto> requests = List.of(
+                ItemImageTestFactory.createRequest(existingImage.getId(), null, 2),
+                ItemImageTestFactory.createRequest(null, "temp1", 1)
+        );
+        Map<String, MultipartFile> files = Map.of("temp1", MultipartFileTestFactory.jpeg());
+
+        when(imageRepository.findByItemId(item.getId())).thenReturn(List.of(existingImage));
+        when(storageService.upload(any(CompressedFile.class), anyString()))
+                .thenReturn(new StorageUploadResponse(UUID.randomUUID(), "key1"));
+
+        imageService.saveImages(requests, files, item.getId());
+
+        verify(storageService, times(1)).upload(any(CompressedFile.class), anyString());
+        verify(imageRepository).saveAll(itemImagesCaptor.capture());
+
+        List<ItemImage> images = itemImagesCaptor.getValue();
+
+        assertEquals(2, images.size());
+        assertEquals(existingImage.getId(), images.get(0).getId());
+        assertEquals(2, images.get(0).getDisplayOrder());
+        assertEquals(1, images.get(1).getDisplayOrder());    
     }
 }
 
