@@ -5,8 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -15,10 +17,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.apptype.ImageErrorType;
 import br.com.omnirent.infrastructure.CompressedFile;
 import br.com.omnirent.infrastructure.StorageService;
 import br.com.omnirent.infrastructure.StorageUploadResponse;
@@ -35,8 +41,15 @@ public class ItemImageService {
 	private static final int MAX_IMAGES_PER_ITEM = 5;
 
     private final ItemImageRepository imageRepository;
+    
     private final StorageService storageService;
-
+        
+    private static final Set<String> SUPPORTED_FORMATS =
+            Set.of(".jpg", ".jpeg", ".png", ".webp");
+    
+    private static final String SUPPORTED_FORMATS_MESSAGE =
+            "JPEG, PNG, WebP";
+    
     @Transactional
     public void saveImages(
             List<ItemImageRequestDto> imageRequests,
@@ -160,7 +173,7 @@ public class ItemImageService {
     
     public CompressedFile compressImage(MultipartFile file) throws IOException {
         BufferedImage bufferedImage = getValidBufferedImage(file);
-        
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         Thumbnails
@@ -178,28 +191,46 @@ public class ItemImageService {
     private void validateImageLimit(int currentImages, int newImages) {
 
         if (currentImages + newImages > MAX_IMAGES_PER_ITEM) {
-            throw new IllegalArgumentException(
-                    "An item can have at most " + MAX_IMAGES_PER_ITEM + " images"
-            );
+            throw new ApiException(ImageErrorType.MAX_FILES_EXCEEDED, MAX_IMAGES_PER_ITEM);
         }
-    }
+    }	    
     
     public BufferedImage getValidBufferedImage(MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
+        String filename = file.getOriginalFilename();
+    	if (file.isEmpty()) {
             throw new IllegalArgumentException("Empty file");
         }
 
-        if (file.getContentType() == null ||
-                !file.getContentType().startsWith("image/")) {
-            throw new IllegalArgumentException("File is not an image");
+        try (ImageInputStream input = ImageIO.createImageInputStream(file.getInputStream())) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
+            System.out.println("chegou has next");
+
+            if (!readers.hasNext()) {
+            	throw new ApiException(ImageErrorType.INVALID_IMAGE, filename);
+            }
+
+            ImageReader reader = readers.next();
+            String format = reader.getFormatName();
+
+            BufferedImage bufferedImage = ImageIO.read(input);
+            
+            if (file.getContentType() == null 
+                    || !file.getContentType().startsWith("image/")) {
+                throw new ApiException(
+                    ImageErrorType.UNSUPPORTED_MEDIA_TYPE,
+                    filename, SUPPORTED_FORMATS_MESSAGE);
+            }
+
+            if (format == null || !SUPPORTED_FORMATS.contains(format.toLowerCase(Locale.ROOT))) {
+                throw new ApiException(
+                    ImageErrorType.UNSUPPORTED_MEDIA_TYPE,
+                    filename, SUPPORTED_FORMATS_MESSAGE);
+            }
+            
+            if (bufferedImage == null) {
+                throw new ApiException(ImageErrorType.INVALID_IMAGE, filename);
+            }
+            return bufferedImage;
         }
-
-        BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
-
-        if (bufferedImage == null) {
-            throw new IllegalArgumentException("Invalid image");
-        }
-
-        return bufferedImage;
     }
 }
