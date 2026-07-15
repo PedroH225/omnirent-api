@@ -157,27 +157,10 @@ public class ItemImageService {
 
         imageRepository.deleteAll(images);
     }
-
-
-    private void validateImageLimit(int currentImages, int newImages) {
-
-        if (currentImages + newImages > MAX_IMAGES_PER_ITEM) {
-            throw new IllegalArgumentException(
-                    "An item can have at most " + MAX_IMAGES_PER_ITEM + " images"
-            );
-        }
-    }
     
     public CompressedFile compressImage(MultipartFile file) throws IOException {
-    	if (file.isEmpty()) {
-    	    throw new IllegalArgumentException("Empty file");
-    	}
-
-    	if (file.getContentType() == null || !file.getContentType().startsWith("image/")) {
-    	    throw new IllegalArgumentException("File is not an image");
-    	}
-        BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
-
+        BufferedImage bufferedImage = getValidBufferedImage(file);
+        
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         Thumbnails
@@ -190,5 +173,33 @@ public class ItemImageService {
         return new CompressedFile(
                 outputStream.toByteArray(),
                 "image/webp");
+    }
+    
+    private void validateImageLimit(int currentImages, int newImages) {
+
+        if (currentImages + newImages > MAX_IMAGES_PER_ITEM) {
+            throw new IllegalArgumentException(
+                    "An item can have at most " + MAX_IMAGES_PER_ITEM + " images"
+            );
+        }
+    }
+    
+    public BufferedImage getValidBufferedImage(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Empty file");
+        }
+
+        if (file.getContentType() == null ||
+                !file.getContentType().startsWith("image/")) {
+            throw new IllegalArgumentException("File is not an image");
+        }
+
+        BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
+
+        if (bufferedImage == null) {
+            throw new IllegalArgumentException("Invalid image");
+        }
+
+        return bufferedImage;
     }
 }
