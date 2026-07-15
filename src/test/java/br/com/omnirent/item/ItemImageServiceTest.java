@@ -3,10 +3,17 @@ package br.com.omnirent.item;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.argThat;
+
+import static org.mockito.Mockito.when;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +22,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,10 +39,14 @@ import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemImageTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
+import br.com.omnirent.factory.MultipartFileTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
+import br.com.omnirent.infrastructure.CompressedFile;
 import br.com.omnirent.infrastructure.StorageService;
+import br.com.omnirent.infrastructure.StorageUploadResponse;
 import br.com.omnirent.item.domain.Item;
+import br.com.omnirent.item.domain.ItemImage;
 import br.com.omnirent.item.domain.ItemImageRequestDto;
 import br.com.omnirent.user.domain.User;
 
@@ -148,6 +160,44 @@ public class ItemImageServiceTest {
     
         assertEquals(
         		ImageErrorType.DUPLICATE_IMAGE_ORDER.getErrorCode(), exception.getErrorCode());
+    }
+
+    @Test
+    void saveImages_createsNewImagesWhenTempIdsAreProvided() throws Exception {
+        List<ItemImageRequestDto> requests = List.of(
+                ItemImageTestFactory.createRequest(null, "temp1", 1)
+        );
+
+        MultipartFile file = MultipartFileTestFactory.png();
+
+		Map<String, MultipartFile> files = Map.of("temp1", file);
+		
+		when(imageRepository.findByItemId(item.getId()))
+		        .thenReturn(Collections.emptyList());
+		
+		UUID imageId = UUID.randomUUID();
+		
+		when(storageService.upload(any(CompressedFile.class), eq("items/" + item.getId())))
+		        .thenReturn(new StorageUploadResponse(imageId, "key1"));
+
+        ArgumentCaptor<List<ItemImage>> captor =
+                ArgumentCaptor.forClass(List.class);
+
+        imageService.saveImages(requests, files, item.getId());
+
+        verify(storageService).upload(any(CompressedFile.class), eq("items/" + item.getId()));
+        verify(imageRepository).saveAll(captor.capture());
+
+        List<ItemImage> images = captor.getValue();
+
+        assertEquals(1, images.size());
+
+        ItemImage image = images.getFirst();
+
+        assertEquals(imageId, image.getId());
+        assertEquals("key1", image.getStorageKey());
+        assertEquals(1, image.getDisplayOrder());
+        assertEquals(item.getId(), image.getItemId());
     }
 }
 
