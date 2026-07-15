@@ -29,13 +29,15 @@ import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.domain.apptype.CommonErrorType;
 import br.com.omnirent.exception.domain.apptype.FieldErrorResponse;
 import br.com.omnirent.exception.domain.apptype.FileErrorType;
-import br.com.omnirent.exception.domain.apptype.ImageErrorType;
+import br.com.omnirent.exception.domain.apptype.StorageErrorType;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserRequestDTO;
 import jakarta.servlet.http.HttpServletRequest;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import tools.jackson.databind.exc.InvalidFormatException;
 
 @RestControllerAdvice
@@ -64,7 +66,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneric(
         Exception e, HttpServletRequest request) {
-
         return handleException(new ApiException(CommonErrorType.INTERNAL_ERROR), request);
     }
 
@@ -182,6 +183,43 @@ public class GlobalExceptionHandler {
 	        );
 
 	    return ResponseEntity.status(err.getStatus()).body(err);
+	}
+	
+	@ExceptionHandler(SdkClientException.class)
+	public ResponseEntity<ApiErrorResponse> handle(
+			SdkClientException e, HttpServletRequest request) {
+		
+		return handleException(
+				new ApiException(StorageErrorType.STORAGE_UNAVAILABLE),
+                request);
+	}
+	
+	@ExceptionHandler(AwsServiceException.class)
+	public ResponseEntity<ApiErrorResponse> handle(
+	        AwsServiceException e,
+	        HttpServletRequest request) {
+
+	    if (e.statusCode() == 403) {
+	        return handleException(
+	                new ApiException(StorageErrorType.STORAGE_ACCESS_DENIED),
+	                request);
+	    }
+
+	    if (e.statusCode() == 429) {
+	        return handleException(
+	                new ApiException(StorageErrorType.STORAGE_RATE_LIMITED),
+	                request);
+	    }
+
+	    if (e.statusCode() >= 500) {
+	        return handleException(
+	                new ApiException(StorageErrorType.STORAGE_UNAVAILABLE),
+	                request);
+	    }
+
+	    return handleException(
+	            new ApiException(StorageErrorType.STORAGE_UPLOAD_FAILED),
+	            request);
 	}
 	
 	private List<FieldErrorResponse> filterBestError(List<FieldErrorResponse> fieldErrors) {
