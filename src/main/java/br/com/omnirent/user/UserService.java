@@ -58,7 +58,7 @@ public class UserService {
 	
 	private UserValidationService validationService;
 	
-	private UserAutorizationService autorizationService;
+	private UserAuthorizationService authorizationService;
 	
 	private SpringDomainEventPublisher eventPublisher;
 	
@@ -161,7 +161,7 @@ public class UserService {
 		ChangeUserStatusContext context = queryRepository.getUserStatusChangeContext(userId)
 				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
 		
-		autorizationService.requireNotBanned(context.currentUserStatus());
+		authorizationService.requireNotBanned(context.currentUserStatus());
 		
 		UserStatus currentStatus = context.currentUserStatus();
 		UserStatus newStatus = currentStatus == UserStatus.ACTIVE ?
