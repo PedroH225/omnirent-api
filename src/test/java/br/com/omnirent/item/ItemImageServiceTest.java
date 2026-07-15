@@ -473,6 +473,19 @@ public class ItemImageServiceTest {
         assertThrows(IllegalArgumentException.class, () ->
                 imageService.getValidBufferedImage(file));
     }
+    
+    @Test
+    void getValidBufferedImage_throwsExceptionWhenImageIsCorrupted() {
+        MultipartFile file = MultipartFileTestFactory.corruptedImage();
+
+        ApiException exception = assertThrows(ApiException.class, () ->
+                imageService.getValidBufferedImage(file));
+
+        assertEquals(
+                ImageErrorType.INVALID_IMAGE.getErrorCode(),
+                exception.getErrorCode()
+        );
+    }
 }
 
 
