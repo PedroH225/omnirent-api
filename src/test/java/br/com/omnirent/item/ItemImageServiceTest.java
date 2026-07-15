@@ -359,6 +359,28 @@ public class ItemImageServiceTest {
                         image.getStorageKey().equals("key1")
                         && image.getDisplayOrder() == 1));    
     }
+    
+    @Test
+    void saveImages_uploadsOnlyNewImages() throws Exception {
+        ItemImage existingImage = ItemImageTestFactory.createPersisted(item, 1, Instant.now());
+        List<ItemImageRequestDto> requests = List.of(
+                ItemImageTestFactory.createRequest(existingImage.getId(), null, 1),
+                ItemImageTestFactory.createRequest(null, "temp1", 2)
+        );
+        Map<String, MultipartFile> files = Map.of("temp1", MultipartFileTestFactory.png());
+
+        when(imageRepository.findByItemId(item.getId())).thenReturn(List.of(existingImage));
+        when(storageService.upload(any(CompressedFile.class), anyString()))
+                .thenReturn(new StorageUploadResponse(UUID.randomUUID(), "key1"));
+
+        imageService.saveImages(requests, files, item.getId());
+        
+        verify(storageService).upload(
+                any(CompressedFile.class),
+                eq("items/" + item.getId())
+        );
+        verify(storageService).upload(any(CompressedFile.class), anyString());    
+    }
 }
 
 
