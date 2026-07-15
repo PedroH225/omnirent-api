@@ -55,12 +55,14 @@ public class ItemImageService {
             List<ItemImageRequestDto> imageRequests,
             Map<String, MultipartFile> files,
             String itemId) throws IOException {
-
+    	
         imageRequests = Optional.ofNullable(imageRequests)
                 .orElse(Collections.emptyList());
 
         files = Optional.ofNullable(files)
                 .orElse(Collections.emptyMap());
+        
+       validateImageCount(imageRequests, files);
         
         LinkedHashMap<String, CompressedFile> compressedFiles = new LinkedHashMap<>();
 
@@ -188,10 +190,20 @@ public class ItemImageService {
                 "image/webp");
     }
     
+    private void validateImageCount(List<ItemImageRequestDto> imageRequests,
+            Map<String, MultipartFile> files) {
+
+    	 if (imageRequests.size() > MAX_IMAGES_PER_ITEM ||
+    	            files.size() > MAX_IMAGES_PER_ITEM) {
+    	        throw new ApiException(
+    	                ImageErrorType.MAX_IMAGES_EXCEEDED, MAX_IMAGES_PER_ITEM);
+    	    }
+    }
+    
     private void validateImageLimit(int currentImages, int newImages) {
 
         if (currentImages + newImages > MAX_IMAGES_PER_ITEM) {
-            throw new ApiException(ImageErrorType.MAX_FILES_EXCEEDED, MAX_IMAGES_PER_ITEM);
+            throw new ApiException(ImageErrorType.MAX_IMAGES_EXCEEDED, MAX_IMAGES_PER_ITEM);
         }
     }	    
     
