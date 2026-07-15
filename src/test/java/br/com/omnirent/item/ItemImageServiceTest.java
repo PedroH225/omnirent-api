@@ -401,6 +401,23 @@ public class ItemImageServiceTest {
         verify(storageService, times(1)).delete(removedImage.getStorageKey());
         verify(storageService, never()).delete(keptImage.getStorageKey());
     }
+    
+    @Test
+    void saveImages_deletesImagesMissingFromRequest() throws Exception {
+        ItemImage removedImage = ItemImageTestFactory.createPersisted(item, 1, FIXED_INSTANT);
+
+        when(imageRepository.findByItemId(item.getId())).thenReturn(List.of(removedImage));
+
+        imageService.saveImages(Collections.emptyList(), Collections.emptyMap(), item.getId());
+        
+        verify(storageService).delete(removedImage.getStorageKey());
+        verify(imageRepository).deleteAll(itemImagesCaptor.capture());
+
+        List<ItemImage> deletedImages = itemImagesCaptor.getValue();
+
+        assertEquals(1, deletedImages.size());
+        assertEquals(removedImage.getId(), deletedImages.getFirst().getId());
+    }
 }
 
 
