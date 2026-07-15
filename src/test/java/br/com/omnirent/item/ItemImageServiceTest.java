@@ -362,7 +362,7 @@ public class ItemImageServiceTest {
     
     @Test
     void saveImages_uploadsOnlyNewImages() throws Exception {
-        ItemImage existingImage = ItemImageTestFactory.createPersisted(item, 1, Instant.now());
+        ItemImage existingImage = ItemImageTestFactory.createPersisted(item, 1, FIXED_INSTANT);
         List<ItemImageRequestDto> requests = List.of(
                 ItemImageTestFactory.createRequest(existingImage.getId(), null, 1),
                 ItemImageTestFactory.createRequest(null, "temp1", 2)
@@ -380,6 +380,26 @@ public class ItemImageServiceTest {
                 eq("items/" + item.getId())
         );
         verify(storageService).upload(any(CompressedFile.class), anyString());    
+    }
+    
+    @Test
+    void saveImages_deletesOnlyRemovedImages() throws Exception {
+    	ItemImage keptImage =
+    	        ItemImageTestFactory.createPersisted(item, 1, FIXED_INSTANT);
+    	ItemImage removedImage =
+    	        ItemImageTestFactory.createPersisted(item, 2, FIXED_INSTANT);
+        List<ItemImageRequestDto> requests = List.of(
+                ItemImageTestFactory.createRequest(keptImage.getId(), null, 1)
+        );
+
+        when(imageRepository.findByItemId(item.getId())).thenReturn(List.of(keptImage, removedImage));
+
+        imageService.saveImages(requests, Collections.emptyMap(), item.getId());
+
+        verify(imageRepository).deleteAll(List.of(removedImage));
+        verify(imageRepository).saveAll(any());
+        verify(storageService, times(1)).delete(removedImage.getStorageKey());
+        verify(storageService, never()).delete(keptImage.getStorageKey());
     }
 }
 
