@@ -62,7 +62,6 @@ public class SecurityConfigurations {
                                 "/rental/enums",
                                 "/item/enums",
                                 "/item/feed",
-                                "/item/**",
                                 "/webhooks/**",
                                 "/oauth2/**",
                                 "/login/oauth2/**",
