@@ -63,6 +63,7 @@ public class ItemImageService {
                 .orElse(Collections.emptyMap());
         
        validateImageCount(imageRequests, files);
+       validateDisplayOrders(imageRequests);
         
         LinkedHashMap<String, CompressedFile> compressedFiles = new LinkedHashMap<>();
 
@@ -246,5 +247,16 @@ public class ItemImageService {
     	        reader.dispose();
     	    }
     	}
+    }
+    
+    private void validateDisplayOrders(List<ItemImageRequestDto> imageRequests) {
+        long distinctOrders = imageRequests.stream()
+                .map(ItemImageRequestDto::order)
+                .distinct()
+                .count();
+
+        if (distinctOrders != imageRequests.size()) {
+            throw new ApiException(ImageErrorType.DUPLICATE_IMAGE_ORDER);
+        }
     }
 }

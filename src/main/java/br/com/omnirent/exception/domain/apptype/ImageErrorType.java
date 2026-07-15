@@ -9,6 +9,7 @@ import lombok.Getter;
 public enum ImageErrorType implements AppErrorType {
 	INVALID_IMAGE("UNPROCESSABLE_CONTENT", "INVALID_IMAGE", "invalid", HttpStatus.UNPROCESSABLE_CONTENT),
 	UNSUPPORTED_MEDIA_TYPE("UNSUPPORTED_MEDIA_TYPE", "MEDIA_TYPE", "unsupported.media.type", HttpStatus.UNSUPPORTED_MEDIA_TYPE),
+	DUPLICATE_IMAGE_ORDER("BAD_REQUEST", "DUPLICATE_IMAGE_ORDER", "duplicate_order", HttpStatus.BAD_REQUEST),
 	MAX_IMAGES_EXCEEDED("BAD_REQUEST", "MAX_IMAGES_EXCEEDED", "limit.exceeded", HttpStatus.BAD_REQUEST);
 	
 	private String errorType;

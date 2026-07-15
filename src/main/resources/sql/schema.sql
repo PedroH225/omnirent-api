@@ -178,6 +178,7 @@ CREATE TABLE IF NOT EXISTS `item_images` (
   `item_id` CHAR(36) NOT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  UNIQUE INDEX `item_images_item_order` (`item_id`, `display_order`),
   CONSTRAINT `fk_images_item`
     FOREIGN KEY (`item_id`)
     REFERENCES `items`(`id`)
