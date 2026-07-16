@@ -14,13 +14,14 @@ O projeto foi desenvolvido com o objetivo de compor um portfólio em backend bas
 * **Backend**: Java, Spring Framework (Web, Security), JPA/Hibernate
 * **Autenticação**: JWT, OAuth2 (Google)
 * **Banco de Dados**: MySQL 8, Query DTOs, consultas otimizadas
+* **Armazenamento de Arquivos**: Cloudflare R2 (API compatível com Amazon S3)
 * **Infraestrutura**: Docker, Docker Compose, AWS (EC2, EBS, CloudWatch, EventBridge)
 * **CI/CD**: GitHub Actions
 * **Testes**: JUnit 5, Mockito, Testcontainers, AssertJ
 * **Mensageria**: RabbitMQ
 * **Observabilidade**: Logs estruturados, SLF4J, Logback
 * **Auditoria**: Registro de ações e alterações críticas do sistema
-* **Pagamentos**: Stripe(Sandbox)
+* **Pagamentos**: Stripe (Sandbox)
 * **Localização**: Internacionalização de respostas da API e tratamento de fusos horários
 
 ## Execução
@@ -39,6 +40,7 @@ docker compose up
 - Ordenar por data, maior preço e menor preço
 - Gerenciamento de disponibilidade dos equipamentos
 - Atualização de informações dos anúncios
+- Upload de até 5 imagens por item
 
 ### Aluguéis
 - Solicitação de aluguel por período definido
