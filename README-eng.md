@@ -11,6 +11,7 @@ The project was developed as a backend portfolio project focused on production-o
 * **Backend**: Java, Spring Framework (Web, Security), JPA/Hibernate
 * **Authentication**: JWT, OAuth2 (Google)
 * **Database**: MySQL 8, Query DTOs, optimized queries
+* **File Storage**: Cloudflare R2 (Amazon S3-compatible API)
 * **Infrastructure**: Docker, Docker Compose, AWS (EC2, EBS, CloudWatch, EventBridge)
 * **CI/CD**: GitHub Actions
 * **Testing**: JUnit 5, Mockito, Testcontainers, AssertJ
@@ -36,6 +37,7 @@ docker compose up
 - Sort by recent, highest price and lowest prices
 - Equipment availability management
 - Listing information updates
+- Upload up to 5 images per item
 
 ### Rentals
 - Rental requests for defined periods
