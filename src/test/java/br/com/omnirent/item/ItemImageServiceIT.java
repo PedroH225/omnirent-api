@@ -99,6 +99,7 @@ public class ItemImageServiceIT extends SpringMvcIntegration {
 
 	@Test
 	void uploadImages_returnsServiceUnavailableWhenStorageIsDown() throws Exception {
+		String targetCode = StorageErrorType.STORAGE_UNAVAILABLE.getErrorCode();
 
 	    when(storageService.upload(any(), anyString()))
 	            .thenThrow(
@@ -121,13 +122,16 @@ public class ItemImageServiceIT extends SpringMvcIntegration {
 	                    .file(image)
 	                    .with(SecurityTestUtils.auth(user1))
 	    )
-	    .andExpect(status().isServiceUnavailable());
+	    .andExpect(status().isServiceUnavailable())
+	    .andExpect(jsonPath("$.errorCode")
+	               .value(targetCode));
 
 	    verify(storageService).upload(any(), anyString());
 	}
 	
 	@Test
 	void uploadImages_returnsAccessDeniedWhenStorageRejectsRequest() throws Exception {
+		String targetCode = StorageErrorType.STORAGE_ACCESS_DENIED.getErrorCode();
 
 	    when(storageService.upload(any(), anyString()))
 	            .thenThrow(
@@ -150,13 +154,16 @@ public class ItemImageServiceIT extends SpringMvcIntegration {
 	                    .file(image)
 	                    .with(SecurityTestUtils.auth(user1))
 	    )
-	    .andExpect(status().isForbidden());
+	    .andExpect(status().isForbidden())
+	    .andExpect(jsonPath("$.errorCode")
+	               .value(targetCode));
 
 	    verify(storageService).upload(any(), anyString());
 	}
 	
 	@Test
 	void uploadImages_returnsRateLimitedWhenStorageLimitIsExceeded() throws Exception {
+		String targetCode = StorageErrorType.STORAGE_RATE_LIMITED.getErrorCode();
 
 	    when(storageService.upload(any(), anyString()))
 	            .thenThrow(
@@ -179,13 +186,16 @@ public class ItemImageServiceIT extends SpringMvcIntegration {
 	                    .file(image)
 	                    .with(SecurityTestUtils.auth(user1))
 	    )
-	    .andExpect(status().isTooManyRequests());
+	    .andExpect(status().isTooManyRequests())
+	    .andExpect(jsonPath("$.errorCode")
+	               .value(targetCode));
 
 	    verify(storageService).upload(any(), anyString());
 	}
 	
 	@Test
 	void uploadImages_returnsServiceUnavailableWhenStorageClientFails() throws Exception {
+		String targetCode = StorageErrorType.STORAGE_UNAVAILABLE.getErrorCode();
 
 	    when(storageService.upload(any(), anyString()))
 	            .thenThrow(
@@ -205,8 +215,10 @@ public class ItemImageServiceIT extends SpringMvcIntegration {
 	                    .file(image)
 	                    .with(SecurityTestUtils.auth(user1))
 	    )
-	    .andExpect(status().isServiceUnavailable());
-
+	    .andExpect(status().isServiceUnavailable())
+	    .andExpect(jsonPath("$.errorCode")
+	               .value(targetCode));
+	    
 	    verify(storageService).upload(any(), anyString());
 	}
 	
