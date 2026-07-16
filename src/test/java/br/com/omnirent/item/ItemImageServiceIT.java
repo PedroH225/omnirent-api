@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.AfterEach;
@@ -24,6 +25,7 @@ import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.exception.common.GlobalExceptionHandler;
+import br.com.omnirent.exception.domain.apptype.StorageErrorType;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
@@ -207,4 +209,38 @@ public class ItemImageServiceIT extends SpringMvcIntegration {
 
 	    verify(storageService).upload(any(), anyString());
 	}
+	
+	@Test
+	void uploadImages_returnsStorageUploadFailed() throws Exception {
+		String targetCode = StorageErrorType.STORAGE_UPLOAD_FAILED.getErrorCode();
+		
+		when(storageService.upload(any(), anyString()))
+        .thenThrow(
+                AwsServiceException.builder()
+                        .statusCode(400)
+                        .message("Bad request")
+                        .build()
+        );
+
+
+	    MockMultipartFile request =
+	            MultipartFileTestFactory.createRequest("temp1", 1);
+
+	    MockMultipartFile image =
+	            MultipartFileTestFactory.image(
+	                    "temp1", "image.png", "png");
+
+	    mockMvc.perform(
+	            multipart("/item/{itemId}/images", item1.getId())
+	                    .file(request)
+	                    .file(image)
+	                    .with(SecurityTestUtils.auth(user1))
+	    )
+	    .andExpect(status().isInternalServerError())
+	    .andExpect(jsonPath("$.errorCode")
+	    	               .value(targetCode));
+
+	    verify(storageService).upload(any(), anyString());
+	}
+	
 }
