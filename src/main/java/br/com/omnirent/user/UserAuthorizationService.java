@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
-public class UserAutorizationService {
+public class UserAuthorizationService {
 	
 	public void requireNotBanned(UserStatus currentStatus) {
 		if (currentStatus == UserStatus.BANNED) {

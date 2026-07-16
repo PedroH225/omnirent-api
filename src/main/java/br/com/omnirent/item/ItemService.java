@@ -1,6 +1,5 @@
 package br.com.omnirent.item;
 
-import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -16,7 +15,6 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
-import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.exception.common.ApiException;
@@ -26,6 +24,7 @@ import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
 import br.com.omnirent.item.context.ItemFeedFilter;
+import br.com.omnirent.item.context.ItemImageResponseDTO;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -34,7 +33,6 @@ import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemFeedDTO;
-import br.com.omnirent.item.dto.ItemPriceData;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
@@ -68,6 +66,8 @@ public class ItemService {
 	private ItemAuthorizationService authorizationService;
 	
 	private ItemMapper itemMapper;
+
+	private ItemImageRepository imageRepository;
 	
 	private SpringDomainEventPublisher eventPublisher;
 	
@@ -76,6 +76,8 @@ public class ItemService {
 	public ItemDetailDTO getItemById(String id) {
 		ItemDetailDTO result = queryRepository.findItemDetailDTO(id)
 				.orElseThrow(() -> new ApiException(ItemErrorType.NOT_FOUND));
+		
+		result.setImages(imageRepository.findItemImages(id));
 		
 		return itemMapper.localize(result);	
 	}

@@ -14,6 +14,7 @@ import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
 import br.com.omnirent.item.context.ItemFeedFilter;
+import br.com.omnirent.item.context.ItemPermissionData;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -27,22 +28,27 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 				SELECT new br.com.omnirent.item.context.ItemFeedContext(
 				i.id, i.name, i.itemData.itemCondition, i.itemData.basePrice,
 				sc.name, i.createdAt, 
-				new br.com.omnirent.user.dto.UserResponseDTO(o.id, o.username))
+				new br.com.omnirent.user.dto.UserResponseDTO(o.id, o.username),
+				im.storageKey)
 				FROM Item i JOIN i.owner o JOIN i.subCategory sc JOIN sc.category c
+				LEFT JOIN i.images im
 				WHERE (:name IS NULL OR LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%')))
 				  AND (:category IS NULL OR c.name = :category)
 				  AND (:subCategory IS NULL OR sc.name = :subCategory)
 				  AND (:itemCondition IS NULL OR i.itemData.itemCondition = :itemCondition)
+				  AND (im IS NULL OR im.displayOrder = 0)
 					""", countQuery = """
-							    SELECT COUNT(i)
+							    SELECT COUNT(DISTINCT i)
 							    FROM Item i
 							    JOIN i.owner o
 							    JOIN i.subCategory sc
 							    JOIN sc.category c
+							    LEFT JOIN i.images im
 							    WHERE (:name IS NULL OR LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%')))
 							      AND (:category IS NULL OR c.name = :category)
 							      AND (:subCategory IS NULL OR sc.name = :subCategory)
 							      AND (:itemCondition IS NULL OR i.itemData.itemCondition = :itemCondition)
+							      AND (im IS NULL OR im.displayOrder = 0)
 							""")
 		Page<ItemFeedContext> getFeedContexts(
 				String name, String category, String subCategory, ItemCondition itemCondition,
@@ -119,4 +125,12 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 			WHERE i.id = :id
 			""")
 	Optional<ChangeItemSubCategoryContext> getChangeSubCategoryContext(@Param("id")String id);
+
+	@Query("""
+			SELECT new br.com.omnirent.item.context.ItemPermissionData(
+			i.itemStatus, i.ownerId, o.userStatus)
+			FROM Item i JOIN i.owner o
+			WHERE i.id = :itemId
+			""")
+	Optional<ItemPermissionData> getPermissionData(String itemId);
 }

@@ -1,5 +1,7 @@
 package br.com.omnirent.item.domain;
 
+import java.util.List;
+
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.NamedEntity;
@@ -13,6 +15,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -50,4 +53,7 @@ public class Item extends NamedEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "owner_id", insertable = false, updatable = false)
 	private User owner;
+	
+	@OneToMany(mappedBy = "item")
+	private List<ItemImage> images;
 }

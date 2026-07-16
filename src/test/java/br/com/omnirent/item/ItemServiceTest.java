@@ -90,6 +90,9 @@ public class ItemServiceTest {
 	@Mock
 	private Clock clock;
 	
+	@Mock
+	private ItemImageRepository imageRepository;
+	
 	private User owner;
 	private User owner2;
 

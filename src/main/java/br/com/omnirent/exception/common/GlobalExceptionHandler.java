@@ -3,7 +3,6 @@ package br.com.omnirent.exception.common;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -19,23 +19,32 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.common.enums.FieldErrorPriority;
 import br.com.omnirent.common.formatter.CaptalizationUtils;
 import br.com.omnirent.config.i18n.MessageService;
+import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.domain.apptype.CommonErrorType;
 import br.com.omnirent.exception.domain.apptype.FieldErrorResponse;
+import br.com.omnirent.exception.domain.apptype.FileErrorType;
+import br.com.omnirent.exception.domain.apptype.StorageErrorType;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserRequestDTO;
 import jakarta.servlet.http.HttpServletRequest;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import tools.jackson.databind.exc.InvalidFormatException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+	
+	@Autowired
+	private AppProperties appProperties;
 
 	@Autowired
     private MessageService messageService;
@@ -57,7 +66,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneric(
         Exception e, HttpServletRequest request) {
-
         return handleException(new ApiException(CommonErrorType.INTERNAL_ERROR), request);
     }
 
@@ -177,6 +185,43 @@ public class GlobalExceptionHandler {
 	    return ResponseEntity.status(err.getStatus()).body(err);
 	}
 	
+	@ExceptionHandler(SdkClientException.class)
+	public ResponseEntity<ApiErrorResponse> handle(
+			SdkClientException e, HttpServletRequest request) {
+		
+		return handleException(
+				new ApiException(StorageErrorType.STORAGE_UNAVAILABLE),
+                request);
+	}
+	
+	@ExceptionHandler(AwsServiceException.class)
+	public ResponseEntity<ApiErrorResponse> handle(
+	        AwsServiceException e,
+	        HttpServletRequest request) {
+
+	    if (e.statusCode() == 403) {
+	        return handleException(
+	                new ApiException(StorageErrorType.STORAGE_ACCESS_DENIED),
+	                request);
+	    }
+
+	    if (e.statusCode() == 429) {
+	        return handleException(
+	                new ApiException(StorageErrorType.STORAGE_RATE_LIMITED),
+	                request);
+	    }
+
+	    if (e.statusCode() >= 500) {
+	        return handleException(
+	                new ApiException(StorageErrorType.STORAGE_UNAVAILABLE),
+	                request);
+	    }
+
+	    return handleException(
+	            new ApiException(StorageErrorType.STORAGE_UPLOAD_FAILED),
+	            request);
+	}
+	
 	private List<FieldErrorResponse> filterBestError(List<FieldErrorResponse> fieldErrors) {
 	    Map<String, FieldErrorResponse> bestByField = new HashMap<>();
 
@@ -193,6 +238,21 @@ public class GlobalExceptionHandler {
 	    }
 
 	    return new ArrayList<>(bestByField.values());
+	}
+	
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	public ResponseEntity<ApiErrorResponse> handleMaxUploadSize(
+	        MaxUploadSizeExceededException e,
+	        HttpServletRequest request) {
+		if (hasCause(e, FileSizeLimitExceededException.class)) {
+	        return handleException(
+	                new ApiException(
+	                        FileErrorType.FILE_TOO_LARGE,
+	                        appProperties.maxFileSize().toMegabytes()), request);
+		} 
+		return handleException(
+				new ApiException(FileErrorType.MULTIPART_TOO_LARGE, 
+						appProperties.maxUploadSize().toMegabytes()), request);	
 	}
 
 	private String getFieldCode(String objectName) {
@@ -212,5 +272,15 @@ public class GlobalExceptionHandler {
 			return "address.field.";
 		}
 		return "";
+	}
+	
+	private boolean hasCause(Throwable ex, Class<? extends Throwable> type) {
+	    while (ex != null) {
+	        if (type.isInstance(ex)) {
+	            return true;
+	        }
+	        ex = ex.getCause();
+	    }
+	    return false;
 	}
 }

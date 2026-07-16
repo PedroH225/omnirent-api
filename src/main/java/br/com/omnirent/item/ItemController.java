@@ -1,13 +1,13 @@
 package br.com.omnirent.item;
 
-import br.com.omnirent.notification.email.EmailConfig;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,12 +16,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.item.context.ItemFeedFilter;
+import br.com.omnirent.item.context.ItemImagesRequestDto;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
@@ -31,14 +35,16 @@ import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/item")
 public class ItemController {
 
-	private ItemService itemService;
+	private final ItemService itemService;
+	
+	private final ItemImageService imageService;
 	
 	@GetMapping("/find/{id}")
 	public ItemDetailDTO findById(@PathVariable String id) {
@@ -80,6 +86,17 @@ public class ItemController {
 	@PostMapping
 	public ItemCreatedDTO addItem(@RequestBody @Valid ItemRequestDTO itemDTO) {
 		return itemService.addItem(itemDTO);
+	}
+	
+	@PostMapping(value = "/{itemId}/images",
+	        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public void saveImages(
+	        @PathVariable String itemId,
+	        @RequestPart(name = "request", required = false) ItemImagesRequestDto request,
+	        MultipartHttpServletRequest multipartRequest) throws IOException {
+		Map<String, MultipartFile> files = multipartRequest.getFileMap();
+		files.remove("request");
+	    imageService.saveImages(request.images(), files, itemId);
 	}
 	
 	@PutMapping
