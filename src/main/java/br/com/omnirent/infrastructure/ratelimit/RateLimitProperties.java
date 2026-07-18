@@ -7,9 +7,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "rate.limit")
 public record RateLimitProperties(
-        int userMaxRequests,
-        int ipMaxRequests,
         Duration window,
         List<Duration> penalties
-) {
-}
+) {}
