@@ -21,6 +21,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import br.com.omnirent.config.properties.AppProperties;
+import br.com.omnirent.infrastructure.ratelimit.RateLimitFilter;
 import br.com.omnirent.security.auth.provider.OAuth2AuthenticationFailureHandler;
 import br.com.omnirent.security.auth.provider.OAuth2AuthenticationSuccessHandler;
 import lombok.AllArgsConstructor;
@@ -39,6 +40,8 @@ public class SecurityConfigurations {
     private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     
     private OAuth2AuthenticationFailureHandler oAuth2AuthorizationFailureHandler;
+    
+    private RateLimitFilter rateLimitFilter;
     
     private AppProperties appProperties;
 
@@ -73,6 +76,7 @@ public class SecurityConfigurations {
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 		.accessDeniedHandler(customAccessDeniedHandler))
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(rateLimitFilter, SecurityFilter.class)
                 .build();
     }
     
