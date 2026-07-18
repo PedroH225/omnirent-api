@@ -3,6 +3,7 @@ package br.com.omnirent.infrastructure.ratelimit;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -27,12 +28,15 @@ public class RateLimitFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(
 			HttpServletRequest request, HttpServletResponse response, 
 			FilterChain filterChain) throws ServletException, IOException {
-
-		List<ClientIdentifier> clientIdentifiers = identifierResolver.resolveIdentifier(request);
+		RateLimitStrategy strategy = RateLimitStrategyResolver.resolve(
+				HttpMethod.valueOf(request.getMethod()),
+				request.getRequestURI());
 		
+		List<ClientIdentifier> clientIdentifiers = identifierResolver.resolveIdentifier(request);
+
 		try {
 			for (ClientIdentifier clientIdentifier : clientIdentifiers) {
-				rateLimitService.verifyRequest(clientIdentifier);
+				rateLimitService.verifyRequest(clientIdentifier, strategy);
 			}
 		} catch (ApiException e) {
 			apiErrorWriter.onApiError(request, response, e);

@@ -29,11 +29,10 @@ public class RateLimitService {
 	
 	private final MessageService messageService;
 	
-	public void verifyRequest(ClientIdentifier clientIdentifier) {
-		log.debug("identifier: " + clientIdentifier);
+	public void verifyRequest(ClientIdentifier clientIdentifier, RateLimitStrategy strategy) {
 		Instant now = clock.instant();
 		ClientRateLimitState state = getClientState(clientIdentifier, now);
-		int maxRequests = resolveMaxRequests(clientIdentifier.type());
+		int maxRequests = resolveMaxRequests(clientIdentifier.type(), strategy);
 
 		checkBlocked(state, now);
 
@@ -92,10 +91,10 @@ public class RateLimitService {
 	    return Duration.between(now, end);
 	}
 
-	private int resolveMaxRequests(ClientIdentifierType type) {
+	private int resolveMaxRequests(ClientIdentifierType type, RateLimitStrategy strategy) {
 	    return switch (type) {
-	        case USER -> properties.userMaxRequests();
-	        case IP -> properties.ipMaxRequests();
+	        case USER -> strategy.getUserMaxRequests();
+	        case IP -> strategy.getIpMaxRequests();
 	    };
 	}
 	
