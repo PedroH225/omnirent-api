@@ -124,6 +124,11 @@ public class ItemController {
 		itemService.aproveItem(itemId);
 	}
 	
+	@PatchMapping("/reject/{itemId}")
+	public void rejectItem(@PathVariable String itemId) {
+		itemService.rejectItem(itemId);
+	}
+	
 	private Pageable resolvePageSort(Pageable pageable, ItemFeedSort itemFeedSort) {
 		itemFeedSort = itemFeedSort == null ? ItemFeedSort.NEWEST : itemFeedSort;
 

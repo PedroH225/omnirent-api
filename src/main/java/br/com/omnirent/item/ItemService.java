@@ -307,6 +307,19 @@ public class ItemService {
 		updateStatus(itemId, currStatus, targetStatus);		
 	}	
 	
+	@Transactional
+	public void rejectItem(String itemId) {
+		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
+		ItemStatus currStatus = context.currentStatus();
+		ItemStatus targetStatus = ItemStatus.BLOCKED;
+		
+		if (currStatus != ItemStatus.ANALISYS) {
+			throw new ApiException(ItemErrorType.ANALYSIS_REQUIRED);
+		}
+				
+		updateStatus(itemId, currStatus, targetStatus);		
+	}	
+	
 	private void updateStatus(String itemId, ItemStatus currStatus, ItemStatus targetStatus) {
 		int updated = itemRepository.updateStatus(itemId, currStatus, targetStatus);
 		
