@@ -64,3 +64,4 @@ docker compose up
 - Processamento de notificações e pagamentos
 - Atualização de status de aluguéis e pagamentos atrasados
 - Fluxo de entrega simulado com atualização de status automática após período definido
+- Limite de requisições por IP e autenticação

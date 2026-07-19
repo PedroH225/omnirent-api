@@ -61,3 +61,4 @@ docker compose up
 - Notification and payment processing
 - Automatic updates for overdue rental and payment statuses
 - Simulated delivery workflow with automatic status updates after a defined period
+- Rate limiting based on IP address and authenticated users
