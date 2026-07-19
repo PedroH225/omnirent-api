@@ -11,8 +11,10 @@ public enum ItemErrorType implements AppErrorType {
     NOT_FOUND("NOT_FOUND", "ITEM_NOT_FOUND", "not_found", HttpStatus.NOT_FOUND),
     BLOCKED("BLOCKED", "ITEM_BLOCKED", "blocked", HttpStatus.FORBIDDEN),
 	INVALID_STATUS_TRANSITION("INVALID_TRANSITION", "INVALID_STATUS_TRANSITION", "invalid.status.transition", HttpStatus.FORBIDDEN),
-    OWNER_REQUIRED("OWNER_REQUIRED", "ITEM_OWNER_REQUIRED", "owner_required", HttpStatus.FORBIDDEN);
-    private String errorType;
+    CHANGE_AVAILABILITY_ERROR("AVAILABILITY_ERROR", "CHANGE_AVAILABILITY_ERROR", "change.availability", HttpStatus.CONFLICT),
+	OWNER_REQUIRED("OWNER_REQUIRED", "ITEM_OWNER_REQUIRED", "owner_required", HttpStatus.FORBIDDEN);
+    
+	private String errorType;
 	
 	private String errorCode;
 	

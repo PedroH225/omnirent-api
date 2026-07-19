@@ -114,9 +114,9 @@ public class ItemController {
 		itemService.changeSubCategory(id, subCategoryId);;
 	}
 	
-	@PatchMapping("/updateStatus/{itemId}")
-	public void updateStatus(@PathVariable String itemId) {
-		itemService.updateStatus(itemId);
+	@PatchMapping("/changeAvailability/{itemId}")
+	public void changeAvailability(@PathVariable String itemId) {
+		itemService.changeAvailability(itemId);
 	}
 	
 	private Pageable resolvePageSort(Pageable pageable, ItemFeedSort itemFeedSort) {

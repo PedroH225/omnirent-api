@@ -2,6 +2,7 @@ package br.com.omnirent.item;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -237,6 +238,27 @@ public class ItemService {
 	}
 	
 	@Transactional
+	public void changeAvailability(String itemId) {
+		EnumSet<ItemStatus> required = EnumSet.of(
+				ItemStatus.UNAVAILABLE, ItemStatus.AVAILABLE);
+		
+		String currUserId = currentUserProvider.currentUserId();
+		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
+		ItemStatus currStatus = context.currentStatus();
+
+		if (!required.contains(currStatus)) {
+			throw new ApiException(ItemErrorType.CHANGE_AVAILABILITY_ERROR);
+		}
+		
+		ItemStatus targetStatus = currStatus == ItemStatus.AVAILABLE ?
+				ItemStatus.UNAVAILABLE : ItemStatus.AVAILABLE;
+		
+		authorizationService.validateItemFromDB(itemId, currUserId);
+		
+		updateStatus(itemId, currStatus, targetStatus);
+	}
+	
+	@Transactional
 	public void markRentedItem(String itemId) {
 		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
 		ItemStatus currStatus = context.currentStatus();
@@ -245,6 +267,10 @@ public class ItemService {
 		authorizationService.requireNotBlocked(currStatus);
 		validateTransition(currStatus, targetStatus);
 		
+		updateStatus(itemId, currStatus, targetStatus);
+	}
+	
+	private void updateStatus(String itemId, ItemStatus currStatus, ItemStatus targetStatus) {
 		int updated = itemRepository.updateStatus(itemId, currStatus, targetStatus);
 		
 		if (updated == 0) {
