@@ -132,7 +132,7 @@ public class ItemService {
 		SubCategory subCategory = categoryService.getValidSubReference(itemDTO.subCategoryId());
 		
 		Item item = itemMapper.fromDto(itemDTO, user.getId(), pickupAddress.getId(),
-				subCategory.getId(), ItemStatus.AVAILABLE);
+				subCategory.getId(), ItemStatus.ANALISYS);
 		
 		Item persistedItem = itemRepository.save(item);
 		
