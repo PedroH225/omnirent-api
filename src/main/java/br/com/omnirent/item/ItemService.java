@@ -235,33 +235,6 @@ public class ItemService {
 				itemMapper.toReassignedAuditSnapshot(previousSubCategoryId),
 				Instant.now(clock)));
 	}
-
-	@Transactional
-	public void updateStatus(String itemId) {
-		String currentUserId = currentUserProvider.currentUserId();
-		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
-		ItemStatus currentStatus = context.currentStatus();
-		
-		authorizationService.requireNotBlocked(currentStatus);
-		authorizationService.requireOwner(context.ownerId(), currentUserId);
-		
-		ItemStatus newStatus = 
-				currentStatus == ItemStatus.AVAILABLE ?
-				ItemStatus.UNAVAILABLE : ItemStatus.AVAILABLE;
-		
-		int updated = itemRepository.updateStatus(itemId, currentStatus, newStatus);
-		
-		if (updated == 0) {
-			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
-		}
-		
-		eventPublisher.publish(new ItemStatusUpdatedEvent(
-				AuditAction.ITEM_STATUS_UPDATED, currentUserId, context.id(), 
-				itemMapper.toStatusChangedAuditSnapshot(newStatus),
-				itemMapper.toStatusChangedAuditSnapshot(currentStatus), 
-				Instant.now(clock)));
-		
-	}
 	
 	@Transactional
 	public void markRentedItem(String itemId) {
