@@ -90,7 +90,7 @@ public class TokenService {
             rolesClaim.stream()
                 .map(SimpleGrantedAuthority::new)
                 .toList();
-        
+
         Integer tokenVer = decoded.getClaim("ver").asInt();
         AuthMetadata authMetadata = userService.getTokenVersion(id);
         if (!tokenVer.equals(authMetadata.getTokenVersion())) {

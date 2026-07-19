@@ -119,6 +119,11 @@ public class ItemController {
 		itemService.changeAvailability(itemId);
 	}
 	
+	@PatchMapping("/aprove/{itemId}")
+	public void aproveItem(@PathVariable String itemId) {
+		itemService.aproveItem(itemId);
+	}
+	
 	private Pageable resolvePageSort(Pageable pageable, ItemFeedSort itemFeedSort) {
 		itemFeedSort = itemFeedSort == null ? ItemFeedSort.NEWEST : itemFeedSort;
 

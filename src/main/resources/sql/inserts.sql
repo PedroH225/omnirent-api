@@ -8,7 +8,8 @@ INSERT IGNORE INTO global_configurations (id, global_token_version) VALUES
 -- ROLES
 -- =========================
 INSERT IGNORE INTO roles(id, name) VALUES
-(1, "ROLE_USER");
+(1, "ROLE_USER"),
+(2, "ROLE_ADMIN");
 
 -- =========================
 -- USERS

@@ -28,7 +28,6 @@ import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
 import br.com.omnirent.item.context.ItemFeedFilter;
-import br.com.omnirent.item.context.ItemImageResponseDTO;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -42,7 +41,6 @@ import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.item.event.ItemAddressChangedEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
-import br.com.omnirent.item.event.ItemStatusUpdatedEvent;
 import br.com.omnirent.item.event.ItemSubcategoryChangedEvent;
 import br.com.omnirent.item.event.ItemUpdatedEvent;
 import br.com.omnirent.security.CurrentUserProvider;
@@ -50,9 +48,11 @@ import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @AllArgsConstructor
 @Service
+@Slf4j
 public class ItemService {
 
 	private ItemRepository itemRepository;
@@ -293,6 +293,19 @@ public class ItemService {
 		}
 	}
 	
+	@Transactional
+	public void aproveItem(String itemId) {
+		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
+		ItemStatus currStatus = context.currentStatus();
+		ItemStatus targetStatus = ItemStatus.AVAILABLE;
+		
+		if (currStatus != ItemStatus.ANALISYS) {
+			throw new ApiException(ItemErrorType.ANALYSIS_REQUIRED);
+		}
+				
+		updateStatus(itemId, currStatus, targetStatus);		
+	}	
+	
 	private void updateStatus(String itemId, ItemStatus currStatus, ItemStatus targetStatus) {
 		int updated = itemRepository.updateStatus(itemId, currStatus, targetStatus);
 		
@@ -308,8 +321,8 @@ public class ItemService {
 					messageService.get(targetStatus.getMessageKey()));
 		}
 	}
-
+	
 	public ItemEnums getEnums() {
 		return itemMapper.getLocalizedEnums();
-	}	
+	}
 }
