@@ -105,8 +105,9 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 	
 	@Query("""
 			SELECT new br.com.omnirent.item.context.UpdateItemStatusContext(
-			i.id, i.itemStatus, i.ownerId)
-			FROM Item i WHERE i.id = :id
+			i.id, i.itemStatus, i.ownerId, o.userStatus)
+			FROM Item i JOIN i.owner o
+			WHERE i.id = :id
 			""")
 	Optional<UpdateItemStatusContext> getUpdateStatusContext(@Param("id")String itemId);
 	

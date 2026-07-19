@@ -16,6 +16,8 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.config.i18n.MessageService;
@@ -268,6 +270,27 @@ public class ItemService {
 		validateTransition(currStatus, targetStatus);
 		
 		updateStatus(itemId, currStatus, targetStatus);
+	}
+	
+	@Transactional
+	public void recalculateAvailability(String itemId, RentalStatus rentalStatus) {
+		EnumSet<RentalStatus> cancelledRentalContext = 
+				EnumSet.of(RentalStatus.CANCELLED, RentalStatus.EXPIRED);
+		
+		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
+		ItemStatus currStatus = context.currentStatus();
+		ItemStatus targetStatus = ItemStatus.UNAVAILABLE;
+		
+		if (context.ownerStatus() == UserStatus.BANNED) {
+			targetStatus = ItemStatus.BLOCKED;
+		} 
+		else if (cancelledRentalContext.contains(rentalStatus)) {
+			targetStatus = ItemStatus.AVAILABLE;
+		}		
+		
+		if (currStatus != targetStatus) {
+		    updateStatus(itemId, currStatus, targetStatus);
+		}
 	}
 	
 	private void updateStatus(String itemId, ItemStatus currStatus, ItemStatus targetStatus) {

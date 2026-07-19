@@ -280,6 +280,8 @@ public class RentalService {
 		
 		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
+		itemService.recalculateAvailability(context.getItemId(), targetStatus);
+		
 		publishDefaultTransition(currentUserId, rentId, context.getRentalStatus(), targetStatus);
 	}
 	
@@ -290,6 +292,8 @@ public class RentalService {
 			String rentalId = context.getId();
 			rentalRepository.updateRentalStatus(rentalId, targetStatus);
 			
+			itemService.recalculateAvailability(context.getItemId(), targetStatus);
+
 			publishDefaultTransition("SYSTEM_SCHEDULER", rentalId,
 					context.getRentalStatus(), targetStatus);
 		}
@@ -309,7 +313,8 @@ public class RentalService {
 		validateTransition(currStatus, targetStatus);
 		
 		rentalRepository.updateRentalStatus(rentId, targetStatus);
-		
+		itemService.recalculateAvailability(context.getItemId(), targetStatus);
+
 		eventPublisher.publish(new RentalCanceledEvent(
 				AuditAction.RENTAL_CANCELED, currentUserId, rentId,
 				mapper.toStatusChangedSnapshot(targetStatus), 
@@ -327,7 +332,8 @@ public class RentalService {
 		validateTransition(currStatus, targetStatus);
 		
 		rentalRepository.markExpired(rentId, targetStatus, currTime);
-		
+		itemService.recalculateAvailability(context.getItemId(), targetStatus);
+
 		eventPublisher.publish(new RentalExpiredEvent(
 				AuditAction.RENTAL_EXPIRED, "SYSTEM_SCHEDULER", rentId,
 				mapper.toStatusChangedSnapshot(targetStatus), 

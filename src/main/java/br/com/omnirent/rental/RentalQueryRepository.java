@@ -62,7 +62,7 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 	
 	@Query("""
 			SELECT new br.com.omnirent.rental.context.RentalStatusChangeContext
-			(r.id, r.ownerId, r.renterId, r.rentalStatus, r.rentalPeriod)
+			(r.id, r.ownerId, r.renterId, r.itemId, r.rentalStatus, r.rentalPeriod)
 			FROM Rental r
 			WHERE r.id = :id
 			""")
@@ -89,7 +89,7 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 
 	@Query("""
 			SELECT new br.com.omnirent.rental.context.RentalStatusChangeContext
-			(r.id, r.ownerId, r.renterId, r.rentalStatus, r.rentalPeriod)
+			(r.id, r.ownerId, r.renterId, r.itemId, r.rentalStatus, r.rentalPeriod)
 		    FROM Rental r
 		    WHERE r.rentalStatus = :status AND r.updatedAt <= :threshold
 		    """)

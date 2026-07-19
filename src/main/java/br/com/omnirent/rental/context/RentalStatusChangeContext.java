@@ -15,6 +15,8 @@ public class RentalStatusChangeContext {
 		
 	private String renterId;
 	
+	private String itemId;
+	
 	private RentalStatus rentalStatus;
 	
 	private RentalPeriod rentalPeriod;

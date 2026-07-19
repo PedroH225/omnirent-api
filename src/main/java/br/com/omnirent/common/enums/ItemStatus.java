@@ -19,7 +19,7 @@ public enum ItemStatus {
 		ANALISYS.allowedTransitions = Set.of(AVAILABLE);
 		AVAILABLE.allowedTransitions = Set.of(RENTED, UNAVAILABLE, BLOCKED);
 		UNAVAILABLE.allowedTransitions = Set.of(AVAILABLE, BLOCKED);
-		RENTED.allowedTransitions = Set.of(AVAILABLE);
+		RENTED.allowedTransitions = Set.of(UNAVAILABLE);
 	}
 	
 	public Set<ItemStatus> getAllowedTransitions() {
