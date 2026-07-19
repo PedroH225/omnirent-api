@@ -5,6 +5,7 @@ import java.time.Instant;
 import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.audit.AuditableEvent;
 import br.com.omnirent.common.event.DomainEvent;
+import br.com.omnirent.infrastructure.IntegrationEvent;
 import br.com.omnirent.item.context.ItemStatusChangedAuditSnapshot;
 
 public record ItemStatusUpdatedEvent(
@@ -14,4 +15,4 @@ public record ItemStatusUpdatedEvent(
 		ItemStatusChangedAuditSnapshot currentBody,
 		ItemStatusChangedAuditSnapshot previousBody,
 		Instant occurredAt
-		) implements DomainEvent, AuditableEvent<ItemStatusChangedAuditSnapshot> {}
+		) implements IntegrationEvent, DomainEvent, AuditableEvent<ItemStatusChangedAuditSnapshot> {}

@@ -7,9 +7,13 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
 import br.com.omnirent.item.event.ItemCreatedEvent;
+import br.com.omnirent.item.event.ItemStatusUpdatedEvent;
 import br.com.omnirent.notification.JpaNotificationQueryRepository;
 import br.com.omnirent.notification.context.AdminNotificationData;
+import br.com.omnirent.notification.context.ItemNotificationData;
 import br.com.omnirent.notification.email.service.ItemEmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,5 +40,30 @@ public class EmailItemConsumer {
         emailService.sendNewItemEmail(event);
         
         adminsData.forEach(a -> emailService.notifyAdmin(event, a));
+    }
+    
+    @RabbitHandler
+    public void handle(ItemStatusUpdatedEvent event) {
+    	ItemStatus newStatus = event.currentBody().status();
+    	ItemNotificationData notificationData = null;
+    	
+    	switch (newStatus) {
+		case AVAILABLE:
+			 
+			break;
+		case UNAVAILABLE:
+			
+			break;
+		case BLOCKED:
+			
+			break;
+		default:
+			break;
+		}
+    }
+    
+    public ItemNotificationData getNotificationData(String itemId) {
+    	return queryRepository.findItemNotificationData(itemId)
+    			.orElseThrow(NotificationDataNotException::new);
     }
 }
