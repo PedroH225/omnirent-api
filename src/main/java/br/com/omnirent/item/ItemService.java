@@ -130,6 +130,7 @@ public class ItemService {
 		return itemMapper.toFeedDtos(context);
 	}
 
+	@Transactional
 	public ItemCreatedDTO addItem(ItemRequestDTO itemDTO) {
 		String currentUserId = currentUserProvider.currentUserId();
 				
