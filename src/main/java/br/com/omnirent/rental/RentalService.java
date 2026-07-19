@@ -123,6 +123,8 @@ public class RentalService {
 		
 		Rental persistedRental = rentalRepository.save(rental);
 		
+		itemService.disableItem(itemInfo.getId());
+		
 		eventPublisher.publish(
 				new RentalCreatedEvent(
 						AuditAction.RENTAL_CREATED, userId, persistedRental.getId(),

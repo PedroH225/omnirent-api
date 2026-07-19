@@ -17,6 +17,7 @@ import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.common.page.PageResponseDTO;
+import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.apptype.ItemErrorType;
@@ -70,6 +71,8 @@ public class ItemService {
 	private ItemImageRepository imageRepository;
 	
 	private SpringDomainEventPublisher eventPublisher;
+	
+	private MessageService messageService;
 	
 	private Clock clock;
 		
@@ -258,6 +261,31 @@ public class ItemService {
 				itemMapper.toStatusChangedAuditSnapshot(currentStatus), 
 				Instant.now(clock)));
 		
+	}
+	
+	@Transactional
+	public void disableItem(String itemId) {
+		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
+		ItemStatus currStatus = context.currentStatus();
+		ItemStatus targetStatus = ItemStatus.UNAVAILABLE;
+		
+		authorizationService.requireNotBlocked(currStatus);
+		validateTransition(currStatus, targetStatus);
+		
+		int updated = itemRepository.updateStatus(itemId, currStatus, targetStatus);
+		
+		if (updated == 0) {
+			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
+		}
+	}
+	
+	
+	private void validateTransition(ItemStatus currStatus, ItemStatus targetStatus) {
+		if (!currStatus.canTransition(targetStatus)) {
+			throw new ApiException(ItemErrorType.INVALID_STATUS_TRANSITION,
+					messageService.get(currStatus.getMessageKey()),
+					messageService.get(targetStatus.getMessageKey()));
+		}
 	}
 
 	public ItemEnums getEnums() {
