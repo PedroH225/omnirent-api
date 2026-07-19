@@ -264,10 +264,10 @@ public class ItemService {
 	}
 	
 	@Transactional
-	public void disableItem(String itemId) {
+	public void markRentedItem(String itemId) {
 		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
 		ItemStatus currStatus = context.currentStatus();
-		ItemStatus targetStatus = ItemStatus.UNAVAILABLE;
+		ItemStatus targetStatus = ItemStatus.RENTED;
 		
 		authorizationService.requireNotBlocked(currStatus);
 		validateTransition(currStatus, targetStatus);
@@ -278,8 +278,7 @@ public class ItemService {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 		}
 	}
-	
-	
+		
 	private void validateTransition(ItemStatus currStatus, ItemStatus targetStatus) {
 		if (!currStatus.canTransition(targetStatus)) {
 			throw new ApiException(ItemErrorType.INVALID_STATUS_TRANSITION,
