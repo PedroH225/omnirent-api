@@ -211,9 +211,9 @@ public final class ItemTestFactory {
     			item.getSubCategoryId(), item.getItemStatus());
     }
     
-    public static UpdateItemStatusContext toUpdateItemStatusContext(Item item) {
+    public static UpdateItemStatusContext toUpdateItemStatusContext(Item item, User Owner) {
     	return new UpdateItemStatusContext(item.getId(), item.getItemStatus(),
-    			item.getOwnerId());
+    			item.getOwnerId(), Owner.getUserStatus());
     }
     
     public static ItemSnapshot toSnapshot(ItemInfo itemInfo, Rental rental) {
