@@ -3,6 +3,7 @@ package br.com.omnirent.common.audit;
 import br.com.omnirent.address.context.AddressAuditSnapshot;
 import br.com.omnirent.item.context.ItemAuditSnapshot;
 import br.com.omnirent.item.context.ItemReassignedAuditSnapshot;
+import br.com.omnirent.item.context.ItemRejectedAuditSnapshot;
 import br.com.omnirent.item.context.ItemStatusChangedAuditSnapshot;
 import br.com.omnirent.payment.context.audit.PaymentAuditSnapshot;
 import br.com.omnirent.payment.context.audit.PaymentConfirmedAuditSnapshot;
@@ -20,19 +21,25 @@ public enum AuditAction {
 	PAYMENT_CREATED(PaymentAuditSnapshot.class),
 	PAYMENT_REINITIALIZED(PaymentAuditSnapshot.class),
 	PAYMENT_CONFIRMED(PaymentConfirmedAuditSnapshot.class),
+	
 	RENTAL_CREATED(RentalAuditSnapshot.class),
 	RENTAL_STATUS_CHANGED(RentalStatusChangedAuditSnapshot.class),
 	RENTAL_IN_USE(RentalInUseAuditSnapshot.class),
 	RENTAL_CANCELED(RentalStatusChangedAuditSnapshot.class),
 	RENTAL_EXPIRED(RentalStatusChangedAuditSnapshot.class),
+	
 	ITEM_CREATED(ItemAuditSnapshot.class),
 	ITEM_UPDATED(ItemAuditSnapshot.class),
 	ITEM_STATUS_UPDATED(ItemStatusChangedAuditSnapshot.class),
 	ITEM_CATEGORY_CHANGED(ItemReassignedAuditSnapshot.class),
 	ITEM_ADDRESS_CHANGED(ItemReassignedAuditSnapshot.class),
+	ITEM_APPROVED(ItemStatusChangedAuditSnapshot.class),
+	ITEM_REJECTED(ItemRejectedAuditSnapshot.class),
+	
 	ADDRESS_CREATED(AddressAuditSnapshot.class),
 	ADDRESS_UPDATED(AddressAuditSnapshot.class),
 	ADDRESS_DELETED(AddressAuditSnapshot.class),
+	
 	USER_REGISTERED(UserAuditSnapshot.class),
 	USER_UPDATED(UserAuditSnapshot.class),
 	USER_STATUS_CHANGED(UserStatusChangeAuditSnapshot.class);

@@ -2,11 +2,14 @@ package br.com.omnirent.notification;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
 import br.com.omnirent.common.enums.UserStatus;
+import br.com.omnirent.notification.context.AdminNotificationData;
+import br.com.omnirent.notification.context.ItemNotificationData;
 import br.com.omnirent.notification.context.PaymentNotificationData;
 import br.com.omnirent.notification.context.RentalInUseNotificationData;
 import br.com.omnirent.notification.context.RentalLateNotificationData;
@@ -33,6 +36,18 @@ public class JpaNotificationQueryRepository implements NotificationQueryReposito
 	        .setParameter("id", userId)
 	        .getResultList()
 	        .stream().findFirst();
+	}
+	
+	@Override
+	public List<AdminNotificationData> findAdminsNotificationData() {
+	    return em.createQuery("""
+	        SELECT new br.com.omnirent.notification.context.AdminNotificationData(
+	    		u.email, u.locale)
+	        FROM User u JOIN u.roles r
+	        WHERE r.name = :role
+	        """, AdminNotificationData.class)
+	    	.setParameter("role", "ROLE_ADMIN")
+	        .getResultList();
 	}
 
 	@Override
@@ -123,6 +138,23 @@ public class JpaNotificationQueryRepository implements NotificationQueryReposito
 						toUserData(result, 5),
 						toUserData(result, 9)
 				));
+	}
+	
+	@Override
+	public Optional<ItemNotificationData> findItemNotificationData(String itemId) {
+
+	    return em.createQuery("""
+	        SELECT i.name,
+	            o.id, o.username, o.email, o.locale
+	        FROM Item i JOIN i.owner o
+	        WHERE i.id = :id
+	        """, Object[].class)
+	        .setParameter("id", itemId)
+	        .getResultList().stream().findFirst()
+	        .map(result -> new ItemNotificationData(
+	                (String) result[0],
+	                toUserData(result, 1)
+	        ));
 	}
 	
 	private UserNotificationData toUserData(Object[] result, int offset) {

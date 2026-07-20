@@ -2,8 +2,10 @@ package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -16,6 +18,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,8 +29,12 @@ import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.ItemRejectionReason;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
+import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AddressErrorType;
 import br.com.omnirent.exception.domain.apptype.ItemErrorType;
@@ -40,6 +47,7 @@ import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
+import br.com.omnirent.item.context.ItemRejectedRequestDto;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -50,6 +58,8 @@ import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
+import br.com.omnirent.item.event.ItemApprovedEvent;
+import br.com.omnirent.item.event.ItemRejectedEvent;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -92,6 +102,9 @@ public class ItemServiceTest {
 	
 	@Mock
 	private ItemImageRepository imageRepository;
+	
+	@Mock
+	private MessageService messageService;
 	
 	private User owner;
 	private User owner2;
@@ -236,7 +249,7 @@ public class ItemServiceTest {
 		when(addressService.getValidReference(addressId, ownerId)).thenReturn(ownerAddress);
 		when(categoryService.getValidSubReference(categoryId)).thenReturn(drill);
 		
-		when(itemMapper.fromDto(request, ownerId, addressId, categoryId, ItemStatus.AVAILABLE))
+		when(itemMapper.fromDto(request, ownerId, addressId, categoryId, ItemStatus.ANALISYS))
 		.thenReturn(mappedItem);
 		when(itemRepository.save(mappedItem)).thenReturn(persistedItem);
 		when(itemMapper.toCreatedDto(persistedItem)).thenReturn(expected);
@@ -672,143 +685,108 @@ public class ItemServiceTest {
 	}
 	
 	@Test
-	void shouldUpdateItemStatusFromAvailableToUnavailable() {
-		String currentUserId = owner.getId();
-		String itemId = item.getId();
-		
-		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item);
-		
-		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
-		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
-		when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE))
-			.thenReturn(1);
-		
-		itemService.updateStatus(itemId);
-		
-		verify(currentUserProvider).currentUserId();
-		verify(authorizationService).requireNotBlocked(context.currentStatus());
-		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
-		verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE);
+	void shouldChangeAvailabilityFromAvailableToUnavailable() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE))
+	            .thenReturn(1);
+
+	    itemService.changeAvailability(itemId);
+
+	    verify(currentUserProvider).currentUserId();
+	    verify(authorizationService).validateItemFromDB(itemId, currentUserId);
+	    verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE);
 	}
 	
 	@Test
-	void shouldUpdateItemStatusFromUnavailableToAvailable() {
-		String currentUserId = owner.getId();
-		
-		Item unavailableItem = ItemTestFactory.createPersisted(
-				owner, ownerAddress, drill, "200", ItemCondition.NEW);
-		unavailableItem.setItemStatus(ItemStatus.UNAVAILABLE);
-		
-		String itemId = unavailableItem.getId();
+	void shouldChangeAvailabilityFromUnavailableToAvailable() {
+	    String currentUserId = owner.getId();
 
-		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(unavailableItem);
+	    Item unavailableItem = ItemTestFactory.createPersisted(
+	            owner, ownerAddress, drill, "200", ItemCondition.NEW);
+	    unavailableItem.setItemStatus(ItemStatus.UNAVAILABLE);
 
-		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
-		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
-		when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.AVAILABLE))
-			.thenReturn(1);
+	    String itemId = unavailableItem.getId();
 
-		itemService.updateStatus(itemId);
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(unavailableItem, owner);
 
-		verify(currentUserProvider).currentUserId();
-		verify(authorizationService).requireNotBlocked(context.currentStatus());
-		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
-		verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.AVAILABLE);
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.AVAILABLE))
+	            .thenReturn(1);
+
+	    itemService.changeAvailability(itemId);
+
+	    verify(currentUserProvider).currentUserId();
+	    verify(authorizationService).validateItemFromDB(itemId, currentUserId);
+	    verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.AVAILABLE);
 	}
 	
 	@Test
-	void shouldThrowWhenConcurrentUpdateStatus() {
-		String currentUserId = owner.getId();
-		String itemId = item.getId();
+	void shouldThrowWhenConcurrentChangeAvailability() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
 
-		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item);
-		
-		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
-		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
-		when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE))
-			.thenReturn(0);
-		
-		assertThatThrownBy(() -> itemService.updateStatus(itemId))
-			.isInstanceOf(ApiException.class);
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
 
-		verify(currentUserProvider).currentUserId();
-		verify(authorizationService).requireNotBlocked(context.currentStatus());
-		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
-		verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE);
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE))
+	            .thenReturn(0);
+
+	    assertThatThrownBy(() -> itemService.changeAvailability(itemId))
+	            .isInstanceOf(ApiException.class);
+
+	    verify(currentUserProvider).currentUserId();
+	    verify(authorizationService).validateItemFromDB(itemId, currentUserId);
+	    verify(itemRepository).updateStatus(itemId, context.currentStatus(), ItemStatus.UNAVAILABLE);
 	}
 	
 	@Test
-	void shouldThrowWhenUserIsNotOwnerOnUpdateStatus() {
-		String currentUserId = owner2.getId();
-		String itemId = item.getId();
+	void shouldThrowWhenUserCannotChangeAvailability() {
+	    String currentUserId = owner2.getId();
+	    String itemId = item.getId();
 
-		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item);
-		
-		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
-		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
-		doThrow(new ApiException(ItemErrorType.OWNER_REQUIRED))
-			.when(authorizationService).requireOwner(context.ownerId(), currentUserId);
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner2);
 
-		assertThatThrownBy(() -> itemService.updateStatus(itemId))
-			.isInstanceOf(ApiException.class);
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
 
-		verify(currentUserProvider).currentUserId();
-		verify(authorizationService).requireNotBlocked(context.currentStatus());
-		verify(authorizationService).requireOwner(context.ownerId(), currentUserId);
-		verifyNoInteractions(itemRepository);
+	    doThrow(new ApiException(ItemErrorType.OWNER_REQUIRED))
+	            .when(authorizationService)
+	            .validateItemFromDB(itemId, currentUserId);
+
+	    assertThatThrownBy(() -> itemService.changeAvailability(itemId))
+	            .isInstanceOf(ApiException.class);
+
+	    verify(currentUserProvider).currentUserId();
+	    verify(authorizationService).validateItemFromDB(itemId, currentUserId);
+	    verifyNoInteractions(itemRepository);
 	}
 	
 	@Test
-	void shouldThrowWhenItemIsBlockedOnUpdateStatus() {
-		String currentUserId = owner.getId();
-		String itemId = item.getId();
+	void shouldThrowWhenItemStatusCannotChangeAvailability() {
+	    String currentUserId = owner.getId();
 
-		UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item);
-		
-		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
-		when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
-		doThrow(new ApiException(ItemErrorType.BLOCKED))
-			.when(authorizationService).requireNotBlocked(context.currentStatus());
+	    item.setItemStatus(ItemStatus.RENTED);
 
-		assertThatThrownBy(() -> itemService.updateStatus(itemId))
-			.isInstanceOf(ApiException.class);
+	    String itemId = item.getId();
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
 
-		verify(currentUserProvider).currentUserId();
-		verify(authorizationService).requireNotBlocked(context.currentStatus());
-		verifyNoMoreInteractions(authorizationService);
-		verifyNoInteractions(itemRepository);
-	}
-	
-	@Test
-	void shouldThrowWhenUpdateStatusContextNotFound() {
-		String itemId = "invalid-id";
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId)).thenReturn(Optional.of(context));
 
-		when(currentUserProvider.currentUserId()).thenReturn(owner.getId());
-		when(queryRepository.getUpdateStatusContext(itemId))
-			.thenReturn(Optional.empty());
+	    assertThatThrownBy(() -> itemService.changeAvailability(itemId))
+	            .isInstanceOf(ApiException.class)
+	            .hasFieldOrPropertyWithValue("errorCode", ItemErrorType.CHANGE_AVAILABILITY_ERROR.getErrorCode());
 
-		assertThatThrownBy(() -> itemService.updateStatus(itemId))
-			.isInstanceOf(ApiException.class);
-
-		verify(currentUserProvider).currentUserId();
-		verifyNoInteractions(authorizationService, itemRepository);
-	}
-	
-	@Test
-	void shouldThrowWhenChangeAddressContextNotFound() {
-		String currentUserId = owner.getId();
-		String itemId = "invalid-id";
-		String newAddressId = ownerAddress2.getId();
-
-		when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
-		when(queryRepository.getChangeAddressContext(itemId))
-			.thenReturn(Optional.empty());
-
-		assertThatThrownBy(() -> itemService.changePickupAddress(itemId, newAddressId))
-			.isInstanceOf(ApiException.class);
-
-		verify(currentUserProvider).currentUserId();
-		verifyNoInteractions(authorizationService, itemRepository);
+	    verifyNoInteractions(authorizationService);
+	    verifyNoInteractions(itemRepository);
 	}
 	
 	@Test
@@ -827,5 +805,344 @@ public class ItemServiceTest {
 		verify(currentUserProvider).currentUserId();
 		verifyNoInteractions(authorizationService, itemRepository);
 	}
+	
+	@Test
+	void shouldMarkItemAsRented() {
+	    String itemId = item.getId();
 
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.RENTED))
+	            .thenReturn(1);
+
+	    itemService.markRentedItem(itemId);
+
+	    verify(authorizationService).requireNotBlocked(context.currentStatus());
+	    verify(itemRepository)
+	            .updateStatus(itemId, context.currentStatus(), ItemStatus.RENTED);
+	}
+	
+	@Test
+	void shouldThrowWhenConcurrentMarkRentedItem() {
+	    String itemId = item.getId();
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.RENTED))
+	            .thenReturn(0);
+
+	    assertThatThrownBy(() -> itemService.markRentedItem(itemId))
+	            .isInstanceOf(ApiException.class);
+
+	    verify(authorizationService).requireNotBlocked(context.currentStatus());
+	    verify(itemRepository)
+	            .updateStatus(itemId, context.currentStatus(), ItemStatus.RENTED);
+	}
+
+	@Test
+	void shouldThrowWhenItemIsBlockedOnMarkRented() {
+	    String itemId = item.getId();
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+
+	    doThrow(new ApiException(ItemErrorType.BLOCKED))
+	            .when(authorizationService)
+	            .requireNotBlocked(context.currentStatus());
+
+	    assertThatThrownBy(() -> itemService.markRentedItem(itemId))
+	            .isInstanceOf(ApiException.class);
+
+	    verify(authorizationService).requireNotBlocked(context.currentStatus());
+	    verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenTransitionToRentedIsInvalid() {
+	    item.setItemStatus(ItemStatus.ANALISYS);
+
+	    String itemId = item.getId();
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+
+	    assertThatThrownBy(() -> itemService.markRentedItem(itemId))
+	            .isInstanceOf(ApiException.class)
+	            .hasFieldOrPropertyWithValue(
+	                    "errorCode",
+	                    ItemErrorType.INVALID_STATUS_TRANSITION.getErrorCode());
+
+	    verify(authorizationService).requireNotBlocked(context.currentStatus());
+	    verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldRecalculateAvailabilityToUnavailable() {
+	    String itemId = item.getId();
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, ItemStatus.AVAILABLE, ItemStatus.UNAVAILABLE))
+	            .thenReturn(1);
+
+	    itemService.recalculateAvailability(itemId, RentalStatus.CONFIRMED);
+
+	    verify(itemRepository)
+	            .updateStatus(itemId, ItemStatus.AVAILABLE, ItemStatus.UNAVAILABLE);
+	}
+	
+	@Test
+	void shouldRecalculateAvailabilityToAvailableWhenRentalIsCancelled() {
+	    Item unavailableItem = ItemTestFactory.createPersisted(
+	            owner, ownerAddress, drill, "200", ItemCondition.NEW);
+	    unavailableItem.setItemStatus(ItemStatus.UNAVAILABLE);
+
+	    String itemId = unavailableItem.getId();
+	    UpdateItemStatusContext context =
+	            ItemTestFactory.toUpdateItemStatusContext(unavailableItem, owner);
+
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, ItemStatus.UNAVAILABLE, ItemStatus.AVAILABLE))
+	            .thenReturn(1);
+
+	    itemService.recalculateAvailability(itemId, RentalStatus.CANCELLED);
+
+	    verify(itemRepository)
+	            .updateStatus(itemId, ItemStatus.UNAVAILABLE, ItemStatus.AVAILABLE);
+	}
+	
+	@Test
+	void shouldRecalculateAvailabilityToAvailableWhenRentalExpired() {
+	    Item unavailableItem = ItemTestFactory.createPersisted(
+	            owner, ownerAddress, drill, "200", ItemCondition.NEW);
+	    unavailableItem.setItemStatus(ItemStatus.UNAVAILABLE);
+
+	    String itemId = unavailableItem.getId();
+	    UpdateItemStatusContext context =
+	            ItemTestFactory.toUpdateItemStatusContext(unavailableItem, owner);
+
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, ItemStatus.UNAVAILABLE, ItemStatus.AVAILABLE))
+	            .thenReturn(1);
+
+	    itemService.recalculateAvailability(itemId, RentalStatus.EXPIRED);
+
+	    verify(itemRepository)
+	            .updateStatus(itemId, ItemStatus.UNAVAILABLE, ItemStatus.AVAILABLE);
+	}
+	
+	@Test
+	void shouldNotUpdateWhenItemAlreadyHasExpectedStatus() {
+	    Item unavailableItem = ItemTestFactory.createPersisted(
+	            owner, ownerAddress, drill, "200", ItemCondition.NEW);
+	    unavailableItem.setItemStatus(ItemStatus.UNAVAILABLE);
+
+	    String itemId = unavailableItem.getId();
+	    UpdateItemStatusContext context =
+	            ItemTestFactory.toUpdateItemStatusContext(unavailableItem, owner);
+
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+
+	    itemService.recalculateAvailability(itemId, RentalStatus.IN_USE);
+
+	    verify(itemRepository, never())
+	            .updateStatus(any(), any(), any());
+	}
+	
+	@Test
+	void shouldNotUpdateWhenItemIsAlreadyAvailable() {
+	    String itemId = item.getId();
+
+	    UpdateItemStatusContext context =
+	            ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+
+	    itemService.recalculateAvailability(itemId, RentalStatus.CANCELLED);
+
+	    verify(itemRepository, never())
+	            .updateStatus(any(), any(), any());
+	}
+	
+	@Test
+	void shouldBlockItemWhenOwnerIsBanned() {
+	    Item bannedOwnerItem = ItemTestFactory.createPersisted(
+	            owner, ownerAddress, drill, "200", ItemCondition.NEW);
+	    owner.setUserStatus(UserStatus.BANNED);
+	    UpdateItemStatusContext context = new UpdateItemStatusContext(
+	    		bannedOwnerItem.getId(),
+	    		bannedOwnerItem.getItemStatus(),
+	            owner.getId(),
+	            UserStatus.BANNED);
+
+	    String itemId = bannedOwnerItem.getId();
+
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.BLOCKED))
+	            .thenReturn(1);
+
+	    itemService.recalculateAvailability(itemId, RentalStatus.CANCELLED);
+
+	    verify(itemRepository)
+	            .updateStatus(itemId, context.currentStatus(), ItemStatus.BLOCKED);
+	}
+	
+	@Test
+	void shouldApproveItem() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
+
+	    item.setItemStatus(ItemStatus.ANALISYS);
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.AVAILABLE))
+	            .thenReturn(1);
+
+	    itemService.approveItem(itemId);
+
+	    verify(itemRepository)
+	            .updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.AVAILABLE);
+
+	    ArgumentCaptor<ItemApprovedEvent> captor =
+	            ArgumentCaptor.forClass(ItemApprovedEvent.class);
+
+	    verify(eventPublisher).publish(captor.capture());
+
+	    assertThat(captor.getValue().entityId()).isEqualTo(itemId);
+	    assertThat(captor.getValue().actorId()).isEqualTo(currentUserId);
+	}
+
+	@Test
+	void shouldThrowWhenApprovingItemThatIsNotUnderAnalysis() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+
+	    assertThatThrownBy(() -> itemService.approveItem(itemId))
+	            .isInstanceOf(ApiException.class);
+
+	    verify(itemRepository, never()).updateStatus(any(), any(), any());
+	    verifyNoInteractions(eventPublisher);
+	}
+
+	@Test
+	void shouldThrowWhenConcurrentApproveItem() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
+
+	    item.setItemStatus(ItemStatus.ANALISYS);
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.AVAILABLE))
+	            .thenReturn(0);
+
+	    assertThatThrownBy(() -> itemService.approveItem(itemId))
+	            .isInstanceOf(ApiException.class);
+
+	    verify(eventPublisher, never()).publish(any());
+	}
+
+	@Test
+	void shouldRejectItem() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
+
+	    item.setItemStatus(ItemStatus.ANALISYS);
+
+	    ItemRejectedRequestDto dto =
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.BLOCKED))
+	            .thenReturn(1);
+
+	    itemService.rejectItem(itemId, dto);
+
+	    verify(itemRepository)
+	            .updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.BLOCKED);
+
+	    ArgumentCaptor<ItemRejectedEvent> captor =
+	            ArgumentCaptor.forClass(ItemRejectedEvent.class);
+
+	    verify(eventPublisher).publish(captor.capture());
+
+	    assertThat(captor.getValue().entityId()).isEqualTo(itemId);
+	    assertThat(captor.getValue().actorId()).isEqualTo(currentUserId);
+	}
+
+	@Test
+	void shouldThrowWhenRejectingItemThatIsNotUnderAnalysis() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
+
+	    ItemRejectedRequestDto dto =
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+
+	    assertThatThrownBy(() -> itemService.rejectItem(itemId, dto))
+	            .isInstanceOf(ApiException.class);
+
+	    verify(itemRepository, never()).updateStatus(any(), any(), any());
+	    verifyNoInteractions(eventPublisher);
+	}
+
+	@Test
+	void shouldThrowWhenConcurrentRejectItem() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
+
+	    item.setItemStatus(ItemStatus.ANALISYS);
+
+	    ItemRejectedRequestDto dto =
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.BLOCKED))
+	            .thenReturn(0);
+
+	    assertThatThrownBy(() -> itemService.rejectItem(itemId, dto))
+	            .isInstanceOf(ApiException.class);
+
+	    verify(eventPublisher, never()).publish(any());
+	}
 }

@@ -1,6 +1,7 @@
 package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -16,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.benmanes.caffeine.cache.Cache;
 
 import br.com.omnirent.address.AddressRepository;
 import br.com.omnirent.address.domain.Address;
@@ -24,12 +26,16 @@ import br.com.omnirent.category.SubCategoryRepository;
 import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.ItemRejectionReason;
+import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
+import br.com.omnirent.infrastructure.ratelimit.ClientRateLimitState;
 import br.com.omnirent.integration.SpringMvcIntegration;
+import br.com.omnirent.item.context.ItemRejectedRequestDto;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
@@ -65,6 +71,9 @@ public class ItemMvcIT extends SpringMvcIntegration {
 	@Autowired
 	private EntityManager entityManager;
 	
+	@Autowired
+	Cache<String, ClientRateLimitState> rateLimitCache;
+	
 	private static final ObjectMapper objectMapper = new ObjectMapper()
 			.registerModule(new JavaTimeModule());
 	
@@ -78,6 +87,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 	
 	private Category electronics;
 	private SubCategory notebook;
+
 	
 	@BeforeEach
 	void setUp() {
@@ -89,7 +99,8 @@ public class ItemMvcIT extends SpringMvcIntegration {
 		item1 = itemRepository.save(ItemTestFactory.create(user1, address1, notebook, "200", ItemCondition.NEW));
 	    
 		SecurityTestUtils.setAuthenticatedUser(user1);
-	}
+		rateLimitCache.invalidateAll();
+		}
 	
 	@AfterEach
 	void clearAuth() {
@@ -246,5 +257,67 @@ public class ItemMvcIT extends SpringMvcIntegration {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isConflict());
+	}
+	
+	@Test
+	void shouldApproveItemWhenUserIsAdmin() throws Exception {
+		User admin = userRepository.save(UserTestFactory.admin());
+		item1.setItemStatus(ItemStatus.ANALISYS);
+		itemRepository.saveAndFlush(item1);
+		
+		mockMvc.perform(patch("/item/approve/{itemId}", item1.getId())
+	            .with(SecurityTestUtils.auth(admin)))
+	        .andExpect(status().isOk());
+	}
+	
+	@Test
+	void shouldRejectItemWhenUserIsAdmin() throws Exception {
+	    ItemRejectedRequestDto dto =
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+		User admin = userRepository.save(UserTestFactory.admin());
+		item1.setItemStatus(ItemStatus.ANALISYS);
+		itemRepository.saveAndFlush(item1);
+		
+	    mockMvc.perform(patch("/item/reject/{itemId}", item1.getId())
+	            .with(SecurityTestUtils.auth(admin))
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .content(objectMapper.writeValueAsString(dto)))
+	        .andExpect(status().isOk());
+	}
+	
+	@Test
+	void shouldReturnForbiddenWhenApprovingItemAsRegularUser() throws Exception {
+	    mockMvc.perform(post("/item/approve/{itemId}", item1.getId())
+	            .with(SecurityTestUtils.auth(user1)))
+	        .andExpect(status().isForbidden());
+	}
+	
+	@Test
+	void shouldReturnForbiddenWhenRejectingItemAsRegularUser() throws Exception {
+	    ItemRejectedRequestDto dto =
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+
+	    mockMvc.perform(post("/item/reject/{itemId}", item1.getId())
+	            .with(SecurityTestUtils.auth(user1))
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .content(objectMapper.writeValueAsString(dto)))
+	        .andExpect(status().isForbidden());
+	}
+	
+	@Test
+	void shouldReturnUnauthorizedWhenApprovingItemWithoutAuthentication() throws Exception {
+	    mockMvc.perform(post("/item/approve/{itemId}", item1.getId()))
+	        .andExpect(status().isUnauthorized());
+	}
+	
+	@Test
+	void shouldReturnUnauthorizedWhenRejectingItemWithoutAuthentication() throws Exception {
+	    ItemRejectedRequestDto dto =
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+
+	    mockMvc.perform(post("/item/reject/{itemId}", item1.getId())
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .content(objectMapper.writeValueAsString(dto)))
+	        .andExpect(status().isUnauthorized());
 	}
 }

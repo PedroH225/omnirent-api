@@ -8,9 +8,12 @@ import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.config.i18n.MessageService;
+import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
+import br.com.omnirent.item.context.ItemAuditSnapshot;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.notification.JpaNotificationQueryRepository;
+import br.com.omnirent.notification.context.AdminNotificationData;
 import br.com.omnirent.notification.context.UserNotificationData;
 import br.com.omnirent.notification.email.EmailMessage;
 import br.com.omnirent.notification.email.EmailSender;
@@ -30,14 +33,15 @@ public class EmailService {
 	@Autowired
 	private JpaNotificationQueryRepository queryRepository;
 	
-	private static final String OMNI_SITE = "https://omnirent.com";
+	@Autowired
+	private AppProperties appProperties;
 	
-	private String buildBody(String messageKey) {
-		return "email.body." + messageKey;
+	private String buildBody(String messageKey, Locale locale, Object... args) {
+		return messageService.get("email.body." + messageKey, locale, args);
 	}
 	
-	private String buildSubject(String messageKey) {
-		return "email.subject." + messageKey;
+	private String buildSubject(String messageKey, Locale locale) {
+		return messageService.get("email.subject." + messageKey, locale);
 	}
 	
 	private String buildTo(String messageKey) {
@@ -45,7 +49,7 @@ public class EmailService {
 	}
 	
 	private String buildFooter(Locale locale) {
-		return messageService.get("email.footer", locale, OMNI_SITE);
+		return messageService.get("email.footer", locale, appProperties.frontUrl());
 	}
 	
 	private String resolveUsername(String username, Locale locale) {
@@ -62,8 +66,8 @@ public class EmailService {
 		
 		EmailMessage message = new EmailMessage(
 				event.currentBody().email(),
-				messageService.get(buildSubject(messageKey), userLocale),
-				messageService.get(buildBody(messageKey), userLocale, username),
+				buildSubject(messageKey, userLocale),
+				buildBody(messageKey, userLocale, username),
 				buildFooter(userLocale)
 				);
 
@@ -77,8 +81,8 @@ public class EmailService {
 				
 		EmailMessage message = new EmailMessage(
 				data.email(),
-				messageService.get(buildSubject(newStatus.getMessageKey() ), userLocale),
-				messageService.get(buildBody(newStatus.getMessageKey()), userLocale, username),
+				buildSubject(newStatus.getMessageKey(), userLocale),
+				buildBody(newStatus.getMessageKey(), userLocale, username),
 				buildFooter(userLocale)
 				);
 
@@ -99,9 +103,28 @@ public class EmailService {
 		
 		EmailMessage message = new EmailMessage(
 				email,
-				messageService.get(buildSubject(messageKey), userLocale),
-				messageService.get(buildBody(messageKey), userLocale, username, itemName),
+				buildSubject(messageKey, userLocale),
+				buildBody(messageKey, userLocale, username, itemName),
 				buildFooter(userLocale)
+				);
+
+		emailSender.send(message);
+	}
+
+	public void notifyAdmin(ItemCreatedEvent event, AdminNotificationData adminData) {
+		String messageKey = "admin.new_item";
+		ItemAuditSnapshot item = event.currentBody();
+		Locale admLocale = Locale.forLanguageTag(adminData.locale());
+		String email = adminData.email();
+		
+		String redirectUrl = 
+				String.format("%s/review/%s", appProperties.frontUrl(), event.entityId());
+
+		EmailMessage message = new EmailMessage(
+				email,
+				buildSubject(messageKey, admLocale),
+				buildBody(messageKey, admLocale, item.itemName(), redirectUrl),
+				buildFooter(admLocale)
 				);
 
 		emailSender.send(message);

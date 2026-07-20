@@ -10,6 +10,7 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
@@ -37,6 +38,8 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 				  AND (:subCategory IS NULL OR sc.name = :subCategory)
 				  AND (:itemCondition IS NULL OR i.itemData.itemCondition = :itemCondition)
 				  AND (im IS NULL OR im.displayOrder = 0)
+				  AND i.itemStatus = AVAILABLE
+				  AND o.userStatus = ACTIVE
 					""", countQuery = """
 							    SELECT COUNT(DISTINCT i)
 							    FROM Item i
@@ -49,6 +52,8 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 							      AND (:subCategory IS NULL OR sc.name = :subCategory)
 							      AND (:itemCondition IS NULL OR i.itemData.itemCondition = :itemCondition)
 							      AND (im IS NULL OR im.displayOrder = 0)
+								  AND i.itemStatus = AVAILABLE
+							      AND o.userStatus = ACTIVE
 							""")
 		Page<ItemFeedContext> getFeedContexts(
 				String name, String category, String subCategory, ItemCondition itemCondition,
@@ -105,8 +110,9 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 	
 	@Query("""
 			SELECT new br.com.omnirent.item.context.UpdateItemStatusContext(
-			i.id, i.itemStatus, i.ownerId)
-			FROM Item i WHERE i.id = :id
+			i.id, i.itemStatus, i.ownerId, o.userStatus)
+			FROM Item i JOIN i.owner o
+			WHERE i.id = :id
 			""")
 	Optional<UpdateItemStatusContext> getUpdateStatusContext(@Param("id")String itemId);
 	

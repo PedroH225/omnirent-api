@@ -126,6 +126,7 @@ public final class RentalTestFactory {
 	
 	public static RentalStatusChangeContext toRentalStatusChangeContext(Rental rental) {
 		return new RentalStatusChangeContext(rental.getId(), rental.getOwnerId(),
-				rental.getRenterId(), rental.getRentalStatus(), rental.getRentalPeriod());
+				rental.getRenterId(), rental.getItemId(), rental.getRentalStatus(),
+				rental.getRentalPeriod());
 	}
 }

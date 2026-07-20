@@ -2,6 +2,7 @@ package br.com.omnirent.item;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -13,10 +14,14 @@ import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.audit.AuditAction;
+import br.com.omnirent.common.enums.EnumOption;
 import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.common.page.PageResponseDTO;
+import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.apptype.ItemErrorType;
@@ -24,7 +29,8 @@ import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
 import br.com.omnirent.item.context.ItemFeedFilter;
-import br.com.omnirent.item.context.ItemImageResponseDTO;
+import br.com.omnirent.item.context.ItemRejectedAuditSnapshot;
+import br.com.omnirent.item.context.ItemRejectedRequestDto;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -37,8 +43,9 @@ import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.item.event.ItemAddressChangedEvent;
+import br.com.omnirent.item.event.ItemApprovedEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
-import br.com.omnirent.item.event.ItemStatusUpdatedEvent;
+import br.com.omnirent.item.event.ItemRejectedEvent;
 import br.com.omnirent.item.event.ItemSubcategoryChangedEvent;
 import br.com.omnirent.item.event.ItemUpdatedEvent;
 import br.com.omnirent.security.CurrentUserProvider;
@@ -46,9 +53,11 @@ import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @AllArgsConstructor
 @Service
+@Slf4j
 public class ItemService {
 
 	private ItemRepository itemRepository;
@@ -70,6 +79,8 @@ public class ItemService {
 	private ItemImageRepository imageRepository;
 	
 	private SpringDomainEventPublisher eventPublisher;
+	
+	private MessageService messageService;
 	
 	private Clock clock;
 		
@@ -124,6 +135,7 @@ public class ItemService {
 		return itemMapper.toFeedDtos(context);
 	}
 
+	@Transactional
 	public ItemCreatedDTO addItem(ItemRequestDTO itemDTO) {
 		String currentUserId = currentUserProvider.currentUserId();
 				
@@ -132,7 +144,7 @@ public class ItemService {
 		SubCategory subCategory = categoryService.getValidSubReference(itemDTO.subCategoryId());
 		
 		Item item = itemMapper.fromDto(itemDTO, user.getId(), pickupAddress.getId(),
-				subCategory.getId(), ItemStatus.AVAILABLE);
+				subCategory.getId(), ItemStatus.ANALISYS);
 		
 		Item persistedItem = itemRepository.save(item);
 		
@@ -232,35 +244,120 @@ public class ItemService {
 				itemMapper.toReassignedAuditSnapshot(previousSubCategoryId),
 				Instant.now(clock)));
 	}
-
+	
 	@Transactional
-	public void updateStatus(String itemId) {
-		String currentUserId = currentUserProvider.currentUserId();
+	public void changeAvailability(String itemId) {
+		EnumSet<ItemStatus> required = EnumSet.of(
+				ItemStatus.UNAVAILABLE, ItemStatus.AVAILABLE);
+		
+		String currUserId = currentUserProvider.currentUserId();
 		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
-		ItemStatus currentStatus = context.currentStatus();
+		ItemStatus currStatus = context.currentStatus();
+
+		if (!required.contains(currStatus)) {
+			throw new ApiException(ItemErrorType.CHANGE_AVAILABILITY_ERROR);
+		}
 		
-		authorizationService.requireNotBlocked(currentStatus);
-		authorizationService.requireOwner(context.ownerId(), currentUserId);
-		
-		ItemStatus newStatus = 
-				currentStatus == ItemStatus.AVAILABLE ?
+		ItemStatus targetStatus = currStatus == ItemStatus.AVAILABLE ?
 				ItemStatus.UNAVAILABLE : ItemStatus.AVAILABLE;
 		
-		int updated = itemRepository.updateStatus(itemId, currentStatus, newStatus);
+		authorizationService.validateItemFromDB(itemId, currUserId);
+		
+		updateStatus(itemId, currStatus, targetStatus);
+	}
+	
+	@Transactional
+	public void markRentedItem(String itemId) {
+		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
+		ItemStatus currStatus = context.currentStatus();
+		ItemStatus targetStatus = ItemStatus.RENTED;
+		
+		authorizationService.requireNotBlocked(currStatus);
+		validateTransition(currStatus, targetStatus);
+		
+		updateStatus(itemId, currStatus, targetStatus);
+	}
+	
+	@Transactional
+	public void recalculateAvailability(String itemId, RentalStatus rentalStatus) {
+		EnumSet<RentalStatus> cancelledRentalContext = 
+				EnumSet.of(RentalStatus.CANCELLED, RentalStatus.EXPIRED);
+		
+		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
+		ItemStatus currStatus = context.currentStatus();
+		ItemStatus targetStatus = ItemStatus.UNAVAILABLE;
+		
+		if (context.ownerStatus() == UserStatus.BANNED) {
+			targetStatus = ItemStatus.BLOCKED;
+		} 
+		else if (cancelledRentalContext.contains(rentalStatus)) {
+			targetStatus = ItemStatus.AVAILABLE;
+		}		
+		
+		if (currStatus != targetStatus) {
+		    updateStatus(itemId, currStatus, targetStatus);
+		}
+	}
+	
+	@Transactional
+	public void approveItem(String itemId) {
+		String currUserId = currentUserProvider.currentUserId();
+		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
+		ItemStatus currStatus = context.currentStatus();
+		ItemStatus targetStatus = ItemStatus.AVAILABLE;
+		
+		if (currStatus != ItemStatus.ANALISYS) {
+			throw new ApiException(ItemErrorType.ANALYSIS_REQUIRED);
+		}
+				
+		updateStatus(itemId, currStatus, targetStatus);		
+		
+		eventPublisher.publish(new ItemApprovedEvent(
+				AuditAction.ITEM_APPROVED, currUserId, itemId, 
+				itemMapper.toStatusChangedAuditSnapshot(targetStatus), 
+				itemMapper.toStatusChangedAuditSnapshot(currStatus), clock.instant()));
+	}	
+	
+	@Transactional
+	public void rejectItem(String itemId, ItemRejectedRequestDto rejectedDto) {
+		String currUserId = currentUserProvider.currentUserId();
+		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
+		ItemStatus currStatus = context.currentStatus();
+		ItemStatus targetStatus = ItemStatus.BLOCKED;
+		
+		if (currStatus != ItemStatus.ANALISYS) {
+			throw new ApiException(ItemErrorType.ANALYSIS_REQUIRED);
+		}
+				
+		updateStatus(itemId, currStatus, targetStatus);		
+		
+		eventPublisher.publish(new ItemRejectedEvent(
+				AuditAction.ITEM_REJECTED, currUserId, itemId, 
+				new ItemRejectedAuditSnapshot(targetStatus, rejectedDto.reason()), 
+				new ItemRejectedAuditSnapshot(currStatus, null), clock.instant()));
+	}	
+	
+	private void updateStatus(String itemId, ItemStatus currStatus, ItemStatus targetStatus) {
+		int updated = itemRepository.updateStatus(itemId, currStatus, targetStatus);
 		
 		if (updated == 0) {
 			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
 		}
-		
-		eventPublisher.publish(new ItemStatusUpdatedEvent(
-				AuditAction.ITEM_STATUS_UPDATED, currentUserId, context.id(), 
-				itemMapper.toStatusChangedAuditSnapshot(newStatus),
-				itemMapper.toStatusChangedAuditSnapshot(currentStatus), 
-				Instant.now(clock)));
-		
 	}
-
+		
+	private void validateTransition(ItemStatus currStatus, ItemStatus targetStatus) {
+		if (!currStatus.canTransition(targetStatus)) {
+			throw new ApiException(ItemErrorType.INVALID_STATUS_TRANSITION,
+					messageService.get(currStatus.getMessageKey()),
+					messageService.get(targetStatus.getMessageKey()));
+		}
+	}
+	
 	public ItemEnums getEnums() {
 		return itemMapper.getLocalizedEnums();
-	}	
+	}
+	
+	public List<EnumOption> getRejectedReasonEnums() {
+		return itemMapper.getLocalizedRejectedEnums();
+	}
 }

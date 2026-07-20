@@ -221,38 +221,38 @@ public class ItemServiceIT extends SpringIntegrationTest {
 	}
 	
 	@Test
-	void shouldUpdateItemStatusToUnavailable() {
-		itemService.updateStatus(item.getId());
-		
-		entityManager.flush();
+	void shouldChangeAvailabilityToUnavailable() {
+	    itemService.changeAvailability(item.getId());
+
+	    entityManager.flush();
 	    entityManager.clear();
-		
-		Optional<Item> optPersisted = itemRepository.findById(item.getId());
+
+	    Optional<Item> optPersisted = itemRepository.findById(item.getId());
 	    assertThat(optPersisted).isPresent();
+
 	    Item persisted = optPersisted.get();
-	    
 	    assertThat(persisted.getItemStatus()).isEqualTo(ItemStatus.UNAVAILABLE);
-	    
-	    itemService.updateStatus(item.getId());
 	}
 	
 	@Test
-	void shouldUpdateItemStatusToAvailable() {
-		Item newItem = ItemTestFactory.create(owner, ownerAddress, ball, "200", ItemCondition.USED);
-		newItem.setItemStatus(ItemStatus.UNAVAILABLE);
-		Item result = itemRepository.save(newItem);
-		
-		assertThat(result.getItemStatus()).isEqualTo(ItemStatus.UNAVAILABLE);
-		
-		itemService.updateStatus(result.getId());
-		
-		entityManager.flush();
+	void shouldChangeAvailabilityToAvailable() {
+	    Item newItem = ItemTestFactory.create(
+	            owner, ownerAddress, ball, "200", ItemCondition.USED);
+	    newItem.setItemStatus(ItemStatus.UNAVAILABLE);
+
+	    Item result = itemRepository.save(newItem);
+
+	    assertThat(result.getItemStatus()).isEqualTo(ItemStatus.UNAVAILABLE);
+
+	    itemService.changeAvailability(result.getId());
+
+	    entityManager.flush();
 	    entityManager.clear();
-		
-		Optional<Item> optPersisted = itemRepository.findById(result.getId());
+
+	    Optional<Item> optPersisted = itemRepository.findById(result.getId());
 	    assertThat(optPersisted).isPresent();
+
 	    Item persisted = optPersisted.get();
-	    
-	    assertThat(persisted.getItemStatus()).isEqualTo(ItemStatus.AVAILABLE);	    
+	    assertThat(persisted.getItemStatus()).isEqualTo(ItemStatus.AVAILABLE);
 	}
 }

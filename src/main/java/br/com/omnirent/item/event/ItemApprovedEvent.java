@@ -8,7 +8,7 @@ import br.com.omnirent.common.event.DomainEvent;
 import br.com.omnirent.infrastructure.IntegrationEvent;
 import br.com.omnirent.item.context.ItemStatusChangedAuditSnapshot;
 
-public record ItemStatusUpdatedEvent(
+public record ItemApprovedEvent(
 		AuditAction action,
 		String actorId,
 		String entityId,

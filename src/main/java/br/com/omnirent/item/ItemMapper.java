@@ -16,6 +16,7 @@ import br.com.omnirent.category.dto.SubCategoryResDTO;
 import br.com.omnirent.common.enums.EnumOption;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemEnums;
+import br.com.omnirent.common.enums.ItemRejectionReason;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.page.PageResponseDTO;
@@ -152,6 +153,12 @@ public class ItemMapper {
 				.collect(Collectors.toList());
 		
 		return new ItemEnums(itemConditions, itemStatus);
+	}
+	
+	public List<EnumOption> getLocalizedRejectedEnums() {
+		return Arrays.stream(ItemRejectionReason.values())
+				.map(i -> new EnumOption(i.name(), messageService.get(i.getLabelKey())))
+				.collect(Collectors.toList());
 	}
 	
 	public ItemUpdatedDTO toItemUpdatedDTO(

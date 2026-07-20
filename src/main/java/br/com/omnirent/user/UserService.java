@@ -167,12 +167,7 @@ public class UserService {
 		UserStatus newStatus = currentStatus == UserStatus.ACTIVE ?
 				UserStatus.INACTIVE : UserStatus.ACTIVE;
 		
-		int updated =
-				userRepository.updateUserStatus(userId, currentStatus, newStatus);
-		
-		if (updated == 0) {
-			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
-		}
+		updateStatus(userId, currentStatus, newStatus);
 		
 		eventPublisher.publish(
 			    new UserStatusChangeEvent(
@@ -180,6 +175,18 @@ public class UserService {
 			        userMapper.toStatusChangeAuditSnapshot(newStatus),
 			        userMapper.toStatusChangeAuditSnapshot(currentStatus),
 			        Instant.now(clock)));	
+	}
+	
+	@Transactional
+	public void banUser(String userId) {
+		ChangeUserStatusContext context = queryRepository.getUserStatusChangeContext(userId)
+				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
+	
+		UserStatus currentStatus = context.currentUserStatus();
+		UserStatus targetStatus = UserStatus.BANNED;
+		
+		updateStatus(userId, currentStatus, targetStatus);
+		invalidateUserTokens(userId);
 	}
 	
 	public UserEnums getEnums() {
@@ -193,12 +200,22 @@ public class UserService {
 	    return authMetadata;
 	}
 	
-	@CacheEvict(value = "tokenVersion", key = "#user.id")
-	public User saveUpdatingToken(User user) {
-		AuthMetadata authMetadata = user.getAuthMetadata();
-		Integer currentTokenVer = authMetadata.getTokenVersion();
-		authMetadata.setTokenVersion(currentTokenVer == null ? 1 : currentTokenVer + 1);
-	    return userRepository.save(user);
+	@CacheEvict(value = "tokenVersion", key = "#userId")
+	public void invalidateUserTokens(String userId) {
+		int updated = userRepository.incrementTokenVersion(userId);
+		
+		if (updated == 0) {
+			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
+		}
+	}
+	
+	private void updateStatus(String userId, UserStatus currentStatus, UserStatus newStatus) {
+		int updated =
+				userRepository.updateUserStatus(userId, currentStatus, newStatus);
+		
+		if (updated == 0) {
+			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
+		}
 	}
 	
 	private String resolveTimezone(String timezone) {

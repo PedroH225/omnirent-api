@@ -1,7 +1,10 @@
 package br.com.omnirent.notification;
 
+import java.util.List;
 import java.util.Optional;
 
+import br.com.omnirent.notification.context.AdminNotificationData;
+import br.com.omnirent.notification.context.ItemNotificationData;
 import br.com.omnirent.notification.context.PaymentNotificationData;
 import br.com.omnirent.notification.context.RentalInUseNotificationData;
 import br.com.omnirent.notification.context.RentalLateNotificationData;
@@ -20,4 +23,7 @@ public interface NotificationQueryRepository {
 
     Optional<PaymentNotificationData> findPaymentNotificationData(String paymentId);
 
+    List<AdminNotificationData> findAdminsNotificationData();
+
+    Optional<ItemNotificationData> findItemNotificationData(String itemId);
 }
