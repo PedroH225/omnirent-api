@@ -36,9 +36,10 @@ public class EmailItemConsumer {
     
     @RabbitHandler
     public void handle(ItemCreatedEvent event) {
+    	ItemNotificationData notificationData = getNotificationData(event.entityId());
     	List<AdminNotificationData> adminsData = queryRepository.findAdminsNotificationData();
     	
-        emailService.sendNewItemEmail(event);
+        emailService.sendNewItemEmail(notificationData);
         
         adminsData.forEach(a -> emailService.notifyAdmin(event, a));
     }
@@ -68,6 +69,8 @@ public class EmailItemConsumer {
     	ItemNotificationData notificationData = getNotificationData(event.entityId());
     	emailService.sendItemRejectedEmail(event, notificationData);
     }
+    
+
     
     public ItemNotificationData getNotificationData(String itemId) {
     	return queryRepository.findItemNotificationData(itemId)
