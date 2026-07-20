@@ -24,23 +24,11 @@ services:
        condition: service_healthy
       rabbitmq:
        condition: service_healthy
-    environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      OMNI_DB_HOST: db
-      OMNI_DB: ${OMNI_DB}
-      OMNI_DB_USER: ${OMNI_DB_USER}
-      OMNI_DB_PASS: ${OMNI_DB_PASS}
-      TOKEN_PASS: ${TOKEN_PASS}
-      OMNI_EMAIL: ${OMNI_EMAIL}
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT}
-      OMNI_EMAIL_PASS: ${OMNI_EMAIL_PASS}
-      MAIL_PROTOCOL: ${MAIL_PROTOCOL}
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USER: ${RABBITMQ_USER}
-      RABBITMQ_PASS: ${RABBITMQ_PASS}
+    env_file:
+      - .env
     ports:
       - "8080:8080"
+
     stdin_open: true
     tty: true
     healthcheck:
