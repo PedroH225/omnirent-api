@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import br.com.omnirent.common.enums.UserStatus;
@@ -30,5 +31,13 @@ public interface UserRepository extends JpaRepository<User, String> {
 			WHERE u.id = :id
 			""")
 	int updateUser(String id, String name, String username, String email, LocalDate birthDate);
+
+	@Modifying
+	@Query("""
+	    UPDATE User u
+	    SET u.authMetadata.tokenVersion = u.authMetadata.tokenVersion + 1
+	    WHERE u.id = :userId
+	    """)
+	int incrementTokenVersion(@Param("userId") String userId);
 	
 }

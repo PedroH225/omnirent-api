@@ -54,8 +54,9 @@ public class SecurityConfigurations {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                 		.requestMatchers(
-                				"/item/aprove/**",
-                				"/item/reject/**"
+                				"/item/approve/**",
+                				"/item/reject/**",
+                				"/user/ban/**"
                 				).hasRole("ADMIN")
                 		.requestMatchers(
                                 HttpMethod.POST,
