@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import br.com.omnirent.common.enums.EnumOption;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.page.PageResponseDTO;
@@ -65,6 +66,11 @@ public class ItemController {
 	@GetMapping("/enums")
 	public ItemEnums getEnums() {
 		return itemService.getEnums();
+	}
+	
+	@GetMapping("/enums/rejected")
+	public List<EnumOption> getRejectedEnums() {
+		return itemService.getRejectedReasonEnums();
 	}
 	
 	@GetMapping("/feed")

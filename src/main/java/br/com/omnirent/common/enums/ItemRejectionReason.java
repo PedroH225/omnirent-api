@@ -19,4 +19,12 @@ public enum ItemRejectionReason {
 
     OTHER;
 
+	public String getLabelKey() {
+		return "item.rejected.reason." + name();
+	}
+	
+	public String getDescriptionKey() {
+		return "item.rejected.reason.description" + name();
+	}
+	
 }

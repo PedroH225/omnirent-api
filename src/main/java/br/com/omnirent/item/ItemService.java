@@ -14,6 +14,7 @@ import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.audit.AuditAction;
+import br.com.omnirent.common.enums.EnumOption;
 import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.common.enums.RentalStatus;
@@ -347,5 +348,9 @@ public class ItemService {
 	
 	public ItemEnums getEnums() {
 		return itemMapper.getLocalizedEnums();
+	}
+	
+	public List<EnumOption> getRejectedReasonEnums() {
+		return itemMapper.getLocalizedRejectedEnums();
 	}
 }
