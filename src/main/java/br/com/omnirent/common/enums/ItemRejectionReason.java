@@ -24,7 +24,7 @@ public enum ItemRejectionReason {
 	}
 	
 	public String getDescriptionKey() {
-		return "item.rejected.reason.description" + name();
+		return "item.rejected.reason.description." + name();
 	}
 	
 }

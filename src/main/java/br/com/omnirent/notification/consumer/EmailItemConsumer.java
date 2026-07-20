@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
 import br.com.omnirent.item.event.ItemCreatedEvent;
+import br.com.omnirent.item.event.ItemRejectedEvent;
 import br.com.omnirent.item.event.ItemStatusUpdatedEvent;
 import br.com.omnirent.notification.JpaNotificationQueryRepository;
 import br.com.omnirent.notification.context.AdminNotificationData;
@@ -60,6 +61,12 @@ public class EmailItemConsumer {
 		default:
 			break;
 		}
+    }
+    
+    @RabbitHandler
+    public void handle(ItemRejectedEvent event) {
+    	ItemNotificationData notificationData = getNotificationData(event.entityId());
+    	emailService.sendItemRejectedEmail(event, notificationData);
     }
     
     public ItemNotificationData getNotificationData(String itemId) {

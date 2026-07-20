@@ -6,13 +6,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.com.omnirent.common.enums.ItemRejectionReason;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
 import br.com.omnirent.item.context.ItemAuditSnapshot;
 import br.com.omnirent.item.event.ItemCreatedEvent;
+import br.com.omnirent.item.event.ItemRejectedEvent;
 import br.com.omnirent.notification.JpaNotificationQueryRepository;
 import br.com.omnirent.notification.context.AdminNotificationData;
+import br.com.omnirent.notification.context.ItemNotificationData;
 import br.com.omnirent.notification.context.UserNotificationData;
 import br.com.omnirent.notification.email.EmailMessage;
 import br.com.omnirent.notification.email.EmailSender;
@@ -93,6 +96,29 @@ public class ItemEmailService {
 				buildFooter(admLocale)
 				);
 
+		emailSender.send(message);
+	}
+
+	public void sendItemRejectedEmail(ItemRejectedEvent event, ItemNotificationData notificationData) {
+		String messageKey = "item.rejected";
+		ItemRejectionReason reason = event.currentBody().reason();
+		
+		UserNotificationData userData = notificationData.ownerData();
+		Locale userLocale = Locale.forLanguageTag(userData.locale());
+		String username = 
+				resolveUsername(userData.username(), userLocale);
+		
+		String reasonDescription =
+				messageService.get(reason.getDescriptionKey(), userLocale);
+		
+		EmailMessage message = new EmailMessage(
+				userData.email(),
+				buildSubject(messageKey, userLocale),
+				buildBody(messageKey, userLocale, 
+						username, notificationData.name(), reasonDescription),
+				buildFooter(userLocale)
+				);
+		
 		emailSender.send(message);
 	}
 
