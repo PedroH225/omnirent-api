@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.benmanes.caffeine.cache.Cache;
 
 import br.com.omnirent.address.AddressRepository;
 import br.com.omnirent.address.domain.Address;
@@ -32,6 +33,7 @@ import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
 import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
+import br.com.omnirent.infrastructure.ratelimit.ClientRateLimitState;
 import br.com.omnirent.integration.SpringMvcIntegration;
 import br.com.omnirent.item.context.ItemRejectedRequestDto;
 import br.com.omnirent.item.domain.Item;
@@ -69,6 +71,9 @@ public class ItemMvcIT extends SpringMvcIntegration {
 	@Autowired
 	private EntityManager entityManager;
 	
+	@Autowired
+	Cache<String, ClientRateLimitState> rateLimitCache;
+	
 	private static final ObjectMapper objectMapper = new ObjectMapper()
 			.registerModule(new JavaTimeModule());
 	
@@ -82,6 +87,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 	
 	private Category electronics;
 	private SubCategory notebook;
+
 	
 	@BeforeEach
 	void setUp() {
@@ -93,7 +99,8 @@ public class ItemMvcIT extends SpringMvcIntegration {
 		item1 = itemRepository.save(ItemTestFactory.create(user1, address1, notebook, "200", ItemCondition.NEW));
 	    
 		SecurityTestUtils.setAuthenticatedUser(user1);
-	}
+		rateLimitCache.invalidateAll();
+		}
 	
 	@AfterEach
 	void clearAuth() {

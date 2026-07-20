@@ -4,11 +4,11 @@ import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -16,8 +16,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.benmanes.caffeine.cache.Cache;
 
 import br.com.omnirent.exception.domain.apptype.CommonErrorType;
+import br.com.omnirent.infrastructure.ratelimit.ClientRateLimitState;
 import br.com.omnirent.integration.SpringMvcIntegration;
 import jakarta.transaction.Transactional;
 @Transactional
@@ -30,7 +32,14 @@ public class ItemFeedMvcIT extends SpringMvcIntegration {
 			.registerModule(new JavaTimeModule());
 	
 	private static final String ITEM_FEED_URI = "/item/feed";
-	
+
+	@Autowired
+	Cache<String, ClientRateLimitState> rateLimitCache;
+
+	@BeforeEach
+	void clearCache() {
+	    rateLimitCache.invalidateAll();
+	}
 	
 	@Test
 	void shouldReturnItemFeed() throws Exception {
