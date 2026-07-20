@@ -28,6 +28,7 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
+import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AddressErrorType;
 import br.com.omnirent.exception.domain.apptype.ItemErrorType;
@@ -92,6 +93,9 @@ public class ItemServiceTest {
 	
 	@Mock
 	private ItemImageRepository imageRepository;
+	
+	@Mock
+	private MessageService messageService;
 	
 	private User owner;
 	private User owner2;
@@ -792,5 +796,81 @@ public class ItemServiceTest {
 		verify(currentUserProvider).currentUserId();
 		verifyNoInteractions(authorizationService, itemRepository);
 	}
+	
+	@Test
+	void shouldMarkItemAsRented() {
+	    String itemId = item.getId();
 
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.RENTED))
+	            .thenReturn(1);
+
+	    itemService.markRentedItem(itemId);
+
+	    verify(authorizationService).requireNotBlocked(context.currentStatus());
+	    verify(itemRepository)
+	            .updateStatus(itemId, context.currentStatus(), ItemStatus.RENTED);
+	}
+	
+	@Test
+	void shouldThrowWhenConcurrentMarkRentedItem() {
+	    String itemId = item.getId();
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, context.currentStatus(), ItemStatus.RENTED))
+	            .thenReturn(0);
+
+	    assertThatThrownBy(() -> itemService.markRentedItem(itemId))
+	            .isInstanceOf(ApiException.class);
+
+	    verify(authorizationService).requireNotBlocked(context.currentStatus());
+	    verify(itemRepository)
+	            .updateStatus(itemId, context.currentStatus(), ItemStatus.RENTED);
+	}
+
+	@Test
+	void shouldThrowWhenItemIsBlockedOnMarkRented() {
+	    String itemId = item.getId();
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+
+	    doThrow(new ApiException(ItemErrorType.BLOCKED))
+	            .when(authorizationService)
+	            .requireNotBlocked(context.currentStatus());
+
+	    assertThatThrownBy(() -> itemService.markRentedItem(itemId))
+	            .isInstanceOf(ApiException.class);
+
+	    verify(authorizationService).requireNotBlocked(context.currentStatus());
+	    verifyNoInteractions(itemRepository);
+	}
+	
+	@Test
+	void shouldThrowWhenTransitionToRentedIsInvalid() {
+	    item.setItemStatus(ItemStatus.ANALISYS);
+
+	    String itemId = item.getId();
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+
+	    assertThatThrownBy(() -> itemService.markRentedItem(itemId))
+	            .isInstanceOf(ApiException.class)
+	            .hasFieldOrPropertyWithValue(
+	                    "errorCode",
+	                    ItemErrorType.INVALID_STATUS_TRANSITION.getErrorCode());
+
+	    verify(authorizationService).requireNotBlocked(context.currentStatus());
+	    verifyNoInteractions(itemRepository);
+	}
 }
