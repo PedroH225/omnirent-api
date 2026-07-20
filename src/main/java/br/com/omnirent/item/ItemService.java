@@ -28,6 +28,8 @@ import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
 import br.com.omnirent.item.context.ItemFeedFilter;
+import br.com.omnirent.item.context.ItemRejectedAuditSnapshot;
+import br.com.omnirent.item.context.ItemRejectedRequestDto;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -41,6 +43,7 @@ import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.item.event.ItemAddressChangedEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
+import br.com.omnirent.item.event.ItemRejectedEvent;
 import br.com.omnirent.item.event.ItemSubcategoryChangedEvent;
 import br.com.omnirent.item.event.ItemUpdatedEvent;
 import br.com.omnirent.security.CurrentUserProvider;
@@ -308,7 +311,8 @@ public class ItemService {
 	}	
 	
 	@Transactional
-	public void rejectItem(String itemId) {
+	public void rejectItem(String itemId, ItemRejectedRequestDto rejectedDto) {
+		String currUserId = currentUserProvider.currentUserId();
 		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
 		ItemStatus currStatus = context.currentStatus();
 		ItemStatus targetStatus = ItemStatus.BLOCKED;
@@ -318,6 +322,11 @@ public class ItemService {
 		}
 				
 		updateStatus(itemId, currStatus, targetStatus);		
+		
+		eventPublisher.publish(new ItemRejectedEvent(
+				AuditAction.ITEM_REJECTED, currUserId, itemId, 
+				new ItemRejectedAuditSnapshot(targetStatus, rejectedDto.reason()), 
+				new ItemRejectedAuditSnapshot(currStatus, null), clock.instant()));
 	}	
 	
 	private void updateStatus(String itemId, ItemStatus currStatus, ItemStatus targetStatus) {

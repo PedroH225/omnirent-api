@@ -3,6 +3,7 @@ package br.com.omnirent.common.audit;
 import br.com.omnirent.address.context.AddressAuditSnapshot;
 import br.com.omnirent.item.context.ItemAuditSnapshot;
 import br.com.omnirent.item.context.ItemReassignedAuditSnapshot;
+import br.com.omnirent.item.context.ItemRejectedAuditSnapshot;
 import br.com.omnirent.item.context.ItemStatusChangedAuditSnapshot;
 import br.com.omnirent.payment.context.audit.PaymentAuditSnapshot;
 import br.com.omnirent.payment.context.audit.PaymentConfirmedAuditSnapshot;
@@ -16,6 +17,7 @@ import lombok.Getter;
 
 @Getter
 public enum AuditAction {
+	ITEM_REJECTED(ItemRejectedAuditSnapshot.class),
 	PAYMENT_STATUS_CHANGED(PaymentStatusChangedAuditSnapshot.class),
 	PAYMENT_CREATED(PaymentAuditSnapshot.class),
 	PAYMENT_REINITIALIZED(PaymentAuditSnapshot.class),

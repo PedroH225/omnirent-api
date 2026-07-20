@@ -26,6 +26,7 @@ import br.com.omnirent.common.enums.ItemEnums;
 import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.item.context.ItemFeedFilter;
 import br.com.omnirent.item.context.ItemImagesRequestDto;
+import br.com.omnirent.item.context.ItemRejectedRequestDto;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
@@ -125,8 +126,9 @@ public class ItemController {
 	}
 	
 	@PatchMapping("/reject/{itemId}")
-	public void rejectItem(@PathVariable String itemId) {
-		itemService.rejectItem(itemId);
+	public void rejectItem(
+			@PathVariable String itemId, @RequestBody ItemRejectedRequestDto rejectedDto) {
+		itemService.rejectItem(itemId, rejectedDto);
 	}
 	
 	private Pageable resolvePageSort(Pageable pageable, ItemFeedSort itemFeedSort) {
