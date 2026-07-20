@@ -43,6 +43,7 @@ import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.item.event.ItemAddressChangedEvent;
+import br.com.omnirent.item.event.ItemApprovedEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.item.event.ItemRejectedEvent;
 import br.com.omnirent.item.event.ItemSubcategoryChangedEvent;
@@ -299,7 +300,8 @@ public class ItemService {
 	}
 	
 	@Transactional
-	public void aproveItem(String itemId) {
+	public void approveItem(String itemId) {
+		String currUserId = currentUserProvider.currentUserId();
 		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
 		ItemStatus currStatus = context.currentStatus();
 		ItemStatus targetStatus = ItemStatus.AVAILABLE;
@@ -309,6 +311,11 @@ public class ItemService {
 		}
 				
 		updateStatus(itemId, currStatus, targetStatus);		
+		
+		eventPublisher.publish(new ItemApprovedEvent(
+				AuditAction.ITEM_APPROVED, currUserId, itemId, 
+				itemMapper.toStatusChangedAuditSnapshot(targetStatus), 
+				itemMapper.toStatusChangedAuditSnapshot(currStatus), clock.instant()));
 	}	
 	
 	@Transactional

@@ -42,4 +42,15 @@ public class ItemBindingConfig {
                 .to(domainExchange)
                 .with(IntegrationEventRouting.ITEM_REJECTED.getKey());
     }
+    
+    @Bean
+    Binding newItemAprovedBinding(
+            Queue emailItemQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(emailItemQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.ITEM_APROVED.getKey());
+    }
 }

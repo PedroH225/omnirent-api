@@ -9,13 +9,9 @@ import org.springframework.stereotype.Service;
 import br.com.omnirent.common.enums.ItemRejectionReason;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.config.properties.AppProperties;
-import br.com.omnirent.exception.infrastructure.NotificationDataNotException;
-import br.com.omnirent.infrastructure.IntegrationEvent;
 import br.com.omnirent.item.context.ItemAuditSnapshot;
-import br.com.omnirent.item.event.ItemAprovedEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.item.event.ItemRejectedEvent;
-import br.com.omnirent.notification.JpaNotificationQueryRepository;
 import br.com.omnirent.notification.context.AdminNotificationData;
 import br.com.omnirent.notification.context.ItemNotificationData;
 import br.com.omnirent.notification.context.UserNotificationData;
@@ -36,6 +32,10 @@ public class ItemEmailService {
 	
 	public void sendNewItemEmail(ItemNotificationData notificationData) {
 		sendDefaultEmail("new_item", notificationData);
+	}
+	
+	public void sendItemAprovedEmail(ItemNotificationData notificationData) {
+		sendDefaultEmail("item.approved", notificationData);
 	}
 	
 	private void sendDefaultEmail(String messageKey, ItemNotificationData notificationData) {
@@ -104,17 +104,13 @@ public class ItemEmailService {
 		return messageService.get("email.subject." + messageKey, locale);
 	}
 	
-	private String buildTo(String messageKey) {
-		return "email.to." + messageKey;
-	}
-	
 	private String buildFooter(Locale locale) {
 		return messageService.get("email.footer", locale, appProperties.frontUrl());
 	}
 	
 	private String resolveUsername(String username, Locale locale) {
 		if (StringUtils.isBlank(username)) {
-			return messageService.get(buildTo("null.username"), locale);
+			return messageService.get("email.to.null.username", locale);
 		}
 		return username;
 	}

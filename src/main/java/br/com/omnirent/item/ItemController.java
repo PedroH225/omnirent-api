@@ -126,9 +126,9 @@ public class ItemController {
 		itemService.changeAvailability(itemId);
 	}
 	
-	@PatchMapping("/aprove/{itemId}")
-	public void aproveItem(@PathVariable String itemId) {
-		itemService.aproveItem(itemId);
+	@PatchMapping("/approve/{itemId}")
+	public void approveItem(@PathVariable String itemId) {
+		itemService.approveItem(itemId);
 	}
 	
 	@PatchMapping("/reject/{itemId}")
