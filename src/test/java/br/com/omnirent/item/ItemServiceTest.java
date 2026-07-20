@@ -2,6 +2,7 @@ package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -9,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.any;
 
 import java.time.Clock;
 import java.util.List;
@@ -18,6 +18,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,6 +29,7 @@ import br.com.omnirent.category.CategoryService;
 import br.com.omnirent.category.domain.Category;
 import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.ItemRejectionReason;
 import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.common.enums.UserStatus;
@@ -45,6 +47,7 @@ import br.com.omnirent.factory.SubCategoryTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
+import br.com.omnirent.item.context.ItemRejectedRequestDto;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -55,6 +58,8 @@ import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
+import br.com.omnirent.item.event.ItemApprovedEvent;
+import br.com.omnirent.item.event.ItemRejectedEvent;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -994,5 +999,150 @@ public class ItemServiceTest {
 
 	    verify(itemRepository)
 	            .updateStatus(itemId, context.currentStatus(), ItemStatus.BLOCKED);
+	}
+	
+	@Test
+	void shouldApproveItem() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
+
+	    item.setItemStatus(ItemStatus.ANALISYS);
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.AVAILABLE))
+	            .thenReturn(1);
+
+	    itemService.approveItem(itemId);
+
+	    verify(itemRepository)
+	            .updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.AVAILABLE);
+
+	    ArgumentCaptor<ItemApprovedEvent> captor =
+	            ArgumentCaptor.forClass(ItemApprovedEvent.class);
+
+	    verify(eventPublisher).publish(captor.capture());
+
+	    assertThat(captor.getValue().entityId()).isEqualTo(itemId);
+	    assertThat(captor.getValue().actorId()).isEqualTo(currentUserId);
+	}
+
+	@Test
+	void shouldThrowWhenApprovingItemThatIsNotUnderAnalysis() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+
+	    assertThatThrownBy(() -> itemService.approveItem(itemId))
+	            .isInstanceOf(ApiException.class);
+
+	    verify(itemRepository, never()).updateStatus(any(), any(), any());
+	    verifyNoInteractions(eventPublisher);
+	}
+
+	@Test
+	void shouldThrowWhenConcurrentApproveItem() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
+
+	    item.setItemStatus(ItemStatus.ANALISYS);
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.AVAILABLE))
+	            .thenReturn(0);
+
+	    assertThatThrownBy(() -> itemService.approveItem(itemId))
+	            .isInstanceOf(ApiException.class);
+
+	    verify(eventPublisher, never()).publish(any());
+	}
+
+	@Test
+	void shouldRejectItem() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
+
+	    item.setItemStatus(ItemStatus.ANALISYS);
+
+	    ItemRejectedRequestDto dto =
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.BLOCKED))
+	            .thenReturn(1);
+
+	    itemService.rejectItem(itemId, dto);
+
+	    verify(itemRepository)
+	            .updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.BLOCKED);
+
+	    ArgumentCaptor<ItemRejectedEvent> captor =
+	            ArgumentCaptor.forClass(ItemRejectedEvent.class);
+
+	    verify(eventPublisher).publish(captor.capture());
+
+	    assertThat(captor.getValue().entityId()).isEqualTo(itemId);
+	    assertThat(captor.getValue().actorId()).isEqualTo(currentUserId);
+	}
+
+	@Test
+	void shouldThrowWhenRejectingItemThatIsNotUnderAnalysis() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
+
+	    ItemRejectedRequestDto dto =
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+
+	    assertThatThrownBy(() -> itemService.rejectItem(itemId, dto))
+	            .isInstanceOf(ApiException.class);
+
+	    verify(itemRepository, never()).updateStatus(any(), any(), any());
+	    verifyNoInteractions(eventPublisher);
+	}
+
+	@Test
+	void shouldThrowWhenConcurrentRejectItem() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
+
+	    item.setItemStatus(ItemStatus.ANALISYS);
+
+	    ItemRejectedRequestDto dto =
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.BLOCKED))
+	            .thenReturn(0);
+
+	    assertThatThrownBy(() -> itemService.rejectItem(itemId, dto))
+	            .isInstanceOf(ApiException.class);
+
+	    verify(eventPublisher, never()).publish(any());
 	}
 }
