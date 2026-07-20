@@ -46,6 +46,17 @@ public final class UserTestFactory {
         return createUser("user");
     }
     
+    public static User admin() {
+        User admin = createUser("admin");
+        
+        Role role = new Role();
+    	role.setId(2);
+    	role.setName("ROLE_ADMIN");
+    	admin.getRoles().add(role);
+    	
+    	return admin;
+    }
+    
     public static User persistedUser() {
     	User user = user();
     	user.setCreatedAt(Instant.now());
