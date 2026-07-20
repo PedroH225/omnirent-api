@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import br.com.omnirent.config.global.GlobalConfigHolder;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
 import br.com.omnirent.factory.UserTestFactory;
@@ -41,6 +42,9 @@ public class AuthenticationServiceIT extends SpringIntegrationTest {
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private GlobalConfigHolder globalConfigHolder;
 	
 	private User user;
 	
