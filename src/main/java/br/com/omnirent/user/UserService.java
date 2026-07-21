@@ -200,6 +200,7 @@ public class UserService {
 	    return authMetadata;
 	}
 	
+	@Transactional
 	@CacheEvict(value = "tokenVersion", key = "#userId")
 	public void invalidateUserTokens(String userId) {
 		int updated = userRepository.incrementTokenVersion(userId);
