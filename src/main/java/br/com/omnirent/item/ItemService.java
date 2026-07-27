@@ -118,12 +118,12 @@ public class ItemService {
 				.orElseThrow(() -> new ApiException(ItemErrorType.NOT_FOUND));
 	}
 	
-	public List<ItemDisplayDTO> getUserItems() {
+	public PageResponseDTO<ItemDisplayDTO> getUserItems(Pageable pageable) {
 		String userId = currentUserProvider.currentUserId();
 		userService.requireExistence(userId);
-		List<ItemDisplayDTO> result = queryRepository.findUserItems(userId);
+		Page<ItemDisplayDTO> result = queryRepository.findUserItems(userId, pageable);
 		
-		return itemMapper.localize(result);
+		return new PageResponseDTO<>(itemMapper.localize(result));
 	}
 	
 	public PageResponseDTO<ItemFeedDTO> getItemFeed(ItemFeedFilter feedFilter, Pageable pageable) {

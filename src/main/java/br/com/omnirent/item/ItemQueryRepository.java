@@ -79,9 +79,10 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 			i.itemData.itemCondition, i.itemStatus, sc.name, im.storageKey, i.createdAt)
 			FROM Item i LEFT JOIN i.images im
 			JOIN i.owner o JOIN i.subCategory sc
-			WHERE o.id = :id
+			WHERE o.id = :id AND (im IS NULL OR im.displayOrder = 0)
 			""")
-	List<ItemDisplayDTO> findUserItems(@Param("id")String userId);
+	Page<ItemDisplayDTO> findUserItems(@Param("id")String userId, 
+			Pageable pageable);
 	
 	@Query("""
 			SELECT new br.com.omnirent.item.context.ItemRentedContext(

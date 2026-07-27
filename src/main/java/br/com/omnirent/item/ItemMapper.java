@@ -126,7 +126,7 @@ public class ItemMapper {
 	    return itemSnapshot;
 	}
 	
-	public List<ItemDisplayDTO> localize(List<ItemDisplayDTO> displayDTOs) {
+	public Page<ItemDisplayDTO> localize(Page<ItemDisplayDTO> displayDTOs) {
 		displayDTOs.forEach(d -> {
 			d.setItemConditionLabel(messageService.get(d.getItemCondition().getMessageKey()));;
 			d.setItemStatusLabel(messageService.get(d.getItemStatus().getMessageKey()));

@@ -54,13 +54,13 @@ public class ItemController {
 	}
 	
 	@GetMapping("/find/user/me")
-	public List<ItemDisplayDTO> findOwnerItems() {
-		return itemService.getUserItems();
+	public PageResponseDTO<ItemDisplayDTO> findOwnerItems(Pageable pageable) {
+		return itemService.getUserItems(pageable);
 	}
 	
 	@GetMapping("/find/user")
-	public List<ItemDisplayDTO> findUserItems() {
-		return itemService.getUserItems();
+	public PageResponseDTO<ItemDisplayDTO> findUserItems(Pageable pageable) {
+		return itemService.getUserItems(pageable);
 	}
 	
 	@GetMapping("/enums")
