@@ -66,6 +66,7 @@ public class SecurityConfigurations {
                         .requestMatchers(
                                 "/ws/**",
                                 "/rental/enums",
+                                "/category/findAll",
                                 "/item/enums",
                                 "/item/feed",
                                 "/webhooks/**",

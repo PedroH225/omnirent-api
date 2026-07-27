@@ -4,7 +4,7 @@ import org.springframework.data.domain.Sort;
 
 import lombok.Getter;
 
-@Getter
+@Getter	
 public enum ItemFeedSort {
 	NEWEST("createdAt", Sort.Direction.DESC),
 	PRICE_ASC("itemData.basePrice", Sort.Direction.ASC),

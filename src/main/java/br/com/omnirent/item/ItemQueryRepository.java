@@ -10,11 +10,9 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 import br.com.omnirent.common.enums.ItemCondition;
-import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
-import br.com.omnirent.item.context.ItemFeedFilter;
 import br.com.omnirent.item.context.ItemPermissionData;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
@@ -78,9 +76,8 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 	
 	@Query("""
 			SELECT new br.com.omnirent.item.dto.ItemDisplayDTO(i.id, i.name, i.itemData.basePrice,
-			i.itemData.itemCondition, i.itemStatus, sc.name, i.createdAt,
-			new br.com.omnirent.user.dto.UserResponseDTO(o.id, o.username))
-			FROM Item i
+			i.itemData.itemCondition, i.itemStatus, sc.name, im.storageKey, i.createdAt)
+			FROM Item i LEFT JOIN i.images im
 			JOIN i.owner o JOIN i.subCategory sc
 			WHERE o.id = :id
 			""")
