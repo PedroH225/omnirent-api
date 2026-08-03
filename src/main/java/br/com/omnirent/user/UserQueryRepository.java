@@ -63,7 +63,7 @@ public interface UserQueryRepository extends Repository<User, String> {
 
 	@Query("""
 			SELECT new br.com.omnirent.user.context.LoggedUserResponseDTO(u.id,
-			u.username, u.email, u.locale, u.timezone)
+			u.username, u.name, u.locale, u.timezone)
 			FROM User u WHERE u.id = :id
 			""")
 	Optional<LoggedUserResponseDTO> findLoggedUserData(String id); 
