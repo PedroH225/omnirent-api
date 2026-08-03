@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -41,7 +43,8 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 			FROM Rental r JOIN r.itemSnapshot i
 			WHERE r.id = :id
 			""")
-	Optional<RentalDisplayDTO> findRentalDisplayDTO(@Param("id") String rentalId);
+	Optional<RentalDisplayDTO> findRentalDisplayDTO(
+			@Param("id") String rentalId);
 	
 	@Query("""
 			SELECT new br.com.omnirent.rental.dto.RentalDisplayDTO(
@@ -51,7 +54,7 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 			FROM Rental r JOIN r.itemSnapshot i
 			WHERE r.renterId = :id
 			""")
-	List<RentalDisplayDTO> findUserRented(@Param("id") String renterId);
+	Page<RentalDisplayDTO> findUserRented(@Param("id") String renterId, Pageable pageable);
 	
 	@Query("""
 			SELECT new br.com.omnirent.rental.dto.RentalDisplayDTO(
@@ -61,7 +64,7 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 			FROM Rental r JOIN r.itemSnapshot i
 			WHERE r.ownerId = :id
 			""")
-	List<RentalDisplayDTO> findUserRentals(@Param("id") String ownerId);
+	Page<RentalDisplayDTO> findUserRentals(@Param("id") String ownerId, Pageable pageable);
 	
 	@Query("""
 			SELECT new br.com.omnirent.rental.context.RentalStatusChangeContext

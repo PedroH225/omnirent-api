@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.audit.AuditAction;
@@ -13,6 +15,7 @@ import br.com.omnirent.common.enums.RentalEnums;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
+import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.CommonErrorType;
@@ -373,22 +376,22 @@ public class RentalService {
 	            Instant.now(clock)));
 	}
 	
-	public List<RentalDisplayDTO> findUserRented() {
+	public PageResponseDTO<RentalDisplayDTO> findUserRented(Pageable pageable) {
 		String renterId = currentUserProvider.currentUserId();
 		userService.requireExistence(renterId);
 		
-		List<RentalDisplayDTO> result = queryRepository.findUserRented(renterId);
+		Page<RentalDisplayDTO> result = queryRepository.findUserRented(renterId, pageable);
 		
-		return mapper.localize(result);
+		return new PageResponseDTO<>(mapper.localize(result));
 	}
 
-	public List<RentalDisplayDTO> findUserRentals() {
+	public PageResponseDTO<RentalDisplayDTO> findUserRentals(Pageable pageable) {
 		String ownerId = currentUserProvider.currentUserId();
 		userService.requireExistence(ownerId);
 		
-		List<RentalDisplayDTO> result = queryRepository.findUserRentals(ownerId);
+		Page<RentalDisplayDTO> result = queryRepository.findUserRentals(ownerId, pageable);
 		
-		return mapper.localize(result);
+		return new PageResponseDTO<>(mapper.localize(result));
 	}
 
 	public RentalEnums getEnums() {

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import br.com.omnirent.address.AddressMapper;
@@ -84,7 +85,7 @@ public class RentalMapper {
 		return rental;
 	}
 	
-	public List<RentalDisplayDTO> localize(List<RentalDisplayDTO> displayDTOs) {
+	public Page<RentalDisplayDTO> localize(Page<RentalDisplayDTO> displayDTOs) {
 		displayDTOs.forEach(r -> {
 		r.setRentalPeriodLabel(messageService.get(r.getRentalPeriod().getMessageKey()));
 		r.setRentalStatusLabel(messageService.get(r.getRentalStatus().getMessageKey()));

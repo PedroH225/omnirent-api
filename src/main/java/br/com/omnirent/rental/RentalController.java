@@ -1,7 +1,6 @@
 package br.com.omnirent.rental;
 
-import java.util.List;
-
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.omnirent.common.enums.RentalEnums;
+import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
@@ -30,13 +30,13 @@ public class RentalController {
 	}
 	
 	@GetMapping("/find/rented")
-	public List<RentalDisplayDTO> findUserRented() {
-		return rentalService.findUserRented();
+	public PageResponseDTO<RentalDisplayDTO> findUserRented(Pageable pageable) {
+		return rentalService.findUserRented(pageable);
 	}
 	
 	@GetMapping("/find/userRentals")
-	public List<RentalDisplayDTO> findUserRentals() {
-		return rentalService.findUserRentals();
+	public PageResponseDTO<RentalDisplayDTO> findUserRentals(Pageable pageable) {
+		return rentalService.findUserRentals(pageable);
 	}
 	
 	@GetMapping("/enums")
