@@ -32,11 +32,11 @@ import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
+import br.com.omnirent.item.dto.ItemDetailSnapshotDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemFeedDTO;
 import br.com.omnirent.item.dto.ItemPriceData;
 import br.com.omnirent.item.dto.ItemRequestDTO;
-import br.com.omnirent.item.dto.ItemSnapshotDTO;
 import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.rental.domain.Rental;
@@ -86,10 +86,10 @@ public class ItemMapper {
 		return newItem;
 	}
 	
-	public ItemSnapshotDTO toSnapshotDTO(ItemSnapshot itemSnapshot) {
+	public ItemDetailSnapshotDTO toSnapshotDTO(ItemSnapshot itemSnapshot) {
 		ItemData itemData = itemSnapshot.getItemData();
 
-		return new ItemSnapshotDTO(
+		return new ItemDetailSnapshotDTO(
 			    itemSnapshot.getId(), itemSnapshot.getName(), itemData.getBrand(),
 			    itemData.getModel(), itemData.getBasePrice(), itemData.getItemCondition(),
 			    itemData.getDescription()

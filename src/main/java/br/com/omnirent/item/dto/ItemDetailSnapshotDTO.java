@@ -8,7 +8,7 @@ import br.com.omnirent.item.domain.ItemSnapshot;
 import lombok.Data;
 
 @Data
-public class ItemSnapshotDTO {
+public class ItemDetailSnapshotDTO {
 
 	private String id;
 	
@@ -26,7 +26,7 @@ public class ItemSnapshotDTO {
 	
 	private String description;
 	
-	public ItemSnapshotDTO(String id, String name, String brand, String model, BigDecimal basePrice,
+	public ItemDetailSnapshotDTO(String id, String name, String brand, String model, BigDecimal basePrice,
 			ItemCondition itemCondition, String description) {
 		this.id = id;
 		this.name = name;
@@ -37,7 +37,7 @@ public class ItemSnapshotDTO {
 		this.description = description;
 	}
 		
-	public ItemSnapshotDTO(ItemSnapshot item) {
+	public ItemDetailSnapshotDTO(ItemSnapshot item) {
 		this.id = item.getId();
 		this.name = item.getName();
 		

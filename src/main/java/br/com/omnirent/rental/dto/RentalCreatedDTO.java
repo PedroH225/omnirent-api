@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import br.com.omnirent.address.dto.AddressSnapshotDTO;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
-import br.com.omnirent.item.dto.ItemSnapshotDTO;
+import br.com.omnirent.item.dto.ItemDetailSnapshotDTO;
 import lombok.Data;
 
 @Data
@@ -30,13 +30,13 @@ private String id;
 	private String rentalPeriodLabel;
 			
 	@JsonProperty("item")
-	private ItemSnapshotDTO itemSnapshot;
+	private ItemDetailSnapshotDTO itemSnapshot;
 	
 	@JsonProperty("address")
 	private AddressSnapshotDTO addressSnapshot;
 	
 	public RentalCreatedDTO(String id, Instant startDate, Instant endDate, BigDecimal finalPrice, RentalStatus rentalStatus,
-			RentalPeriod rentalPeriod, ItemSnapshotDTO itemSnapshot,
+			RentalPeriod rentalPeriod, ItemDetailSnapshotDTO itemSnapshot,
 			AddressSnapshotDTO addressSnapshot) {
 		this.id = id;
 		this.finalPrice = finalPrice;

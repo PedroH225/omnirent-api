@@ -22,7 +22,7 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 			r.finalPrice, r.rentalStatus, r.rentalPeriod,
 			new br.com.omnirent.user.dto.UserResponseDTO(rt.id, rt.username),
 			new br.com.omnirent.user.dto.UserResponseDTO(o.id, o.username),
-			new br.com.omnirent.item.dto.ItemSnapshotDTO(iSnp.id, iSnp.name, iSnp.itemData.brand,
+			new br.com.omnirent.item.dto.ItemDetailSnapshotDTO(iSnp.id, iSnp.name, iSnp.itemData.brand,
 			iSnp.itemData.model,iSnp.itemData.basePrice, iSnp.itemData.itemCondition, iSnp.itemData.description),
 			new br.com.omnirent.address.dto.AddressSnapshotDTO(aSnp.id, aSnp.addressData.street, aSnp.addressData.number,
 			aSnp.addressData.complement, aSnp.addressData.district, aSnp.addressData.city,

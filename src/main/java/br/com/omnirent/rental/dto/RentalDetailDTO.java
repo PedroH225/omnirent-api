@@ -2,15 +2,13 @@ package br.com.omnirent.rental.dto;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import br.com.omnirent.address.dto.AddressSnapshotDTO;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
-import br.com.omnirent.item.dto.ItemSnapshotDTO;
+import br.com.omnirent.item.dto.ItemDetailSnapshotDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
 import lombok.Data;
 
@@ -38,13 +36,13 @@ public class RentalDetailDTO {
 	private UserResponseDTO owner;
 	
 	@JsonProperty("item")
-	private ItemSnapshotDTO itemSnapshot;
+	private ItemDetailSnapshotDTO itemSnapshot;
 	
 	@JsonProperty("address")
 	private AddressSnapshotDTO addressSnapshot;
 		
 	public RentalDetailDTO(String id, Instant startDate, Instant endDate, BigDecimal finalPrice, RentalStatus rentalStatus,
-			RentalPeriod rentalPeriod, UserResponseDTO renter, UserResponseDTO owner, ItemSnapshotDTO itemSnapshot,
+			RentalPeriod rentalPeriod, UserResponseDTO renter, UserResponseDTO owner, ItemDetailSnapshotDTO itemSnapshot,
 			AddressSnapshotDTO addressSnapshot) {
 		this.id = id;
 		this.finalPrice = finalPrice;
