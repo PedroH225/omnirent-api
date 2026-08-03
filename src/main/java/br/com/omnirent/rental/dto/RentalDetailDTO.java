@@ -30,7 +30,7 @@ public class RentalDetailDTO {
 	private RentalPeriod rentalPeriod;
 	
 	private String rentalPeriodLabel;
-
+	
 	private UserResponseDTO renter;
 	
 	private UserResponseDTO owner;
@@ -42,8 +42,8 @@ public class RentalDetailDTO {
 	private AddressSnapshotDTO addressSnapshot;
 		
 	public RentalDetailDTO(String id, Instant startDate, Instant endDate, BigDecimal finalPrice, RentalStatus rentalStatus,
-			RentalPeriod rentalPeriod, UserResponseDTO renter, UserResponseDTO owner, ItemDetailSnapshotDTO itemSnapshot,
-			AddressSnapshotDTO addressSnapshot) {
+			RentalPeriod rentalPeriod, UserResponseDTO renter, UserResponseDTO owner,
+			ItemDetailSnapshotDTO itemSnapshot, AddressSnapshotDTO addressSnapshot) {
 		this.id = id;
 		this.finalPrice = finalPrice;
 		this.rentalStatus = rentalStatus;

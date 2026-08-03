@@ -92,7 +92,7 @@ public class ItemMapper {
 		return new ItemDetailSnapshotDTO(
 			    itemSnapshot.getId(), itemSnapshot.getName(), itemData.getBrand(),
 			    itemData.getModel(), itemData.getBasePrice(), itemData.getItemCondition(),
-			    itemData.getDescription()
+			    itemData.getDescription(), itemSnapshot.getThumbnailKey()
 			);
 	}
 
@@ -115,10 +115,11 @@ public class ItemMapper {
 		return item;
 	}
 	
-	public ItemSnapshot fromRentContext(ItemInfo itemInfo, Rental rental) {
+	public ItemSnapshot fromRentContext(ItemInfo itemInfo, Rental rental, String thumbnailKey) {
 	    ItemSnapshot itemSnapshot = new ItemSnapshot(
 	        itemInfo.getItemName(), itemInfo.getBrand(), itemInfo.getModel(),
-	        itemInfo.getDescription(), itemInfo.getBasePrice(), itemInfo.getItemCondition()
+	        itemInfo.getDescription(), itemInfo.getBasePrice(), 
+	        itemInfo.getItemCondition(), thumbnailKey
 	    );
 
 	    itemSnapshot.setRental(rental);

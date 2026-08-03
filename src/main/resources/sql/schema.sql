@@ -279,6 +279,7 @@ CREATE TABLE IF NOT EXISTS `item_snapshots` (
   `base_price` DECIMAL(10,2) NOT NULL,
   `item_condition` VARCHAR(20) NOT NULL,
   `sub_category_name` VARCHAR(100),
+  `thumbnail_key` VARCHAR(200) DEFAULT NULL,
   `rental_id` CHAR(36) NOT NULL,
   PRIMARY KEY (`rental_id`),
   CONSTRAINT `fk_item_snapshot_rental`

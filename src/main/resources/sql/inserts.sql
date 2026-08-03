@@ -115,6 +115,11 @@ INSERT IGNORE INTO items(id, name, brand, model, description, base_price, item_c
 ('d9854d89-b81d-4b73-a9ec-87e28f5fd0ce','Canon RF 70-200mm Lens','Canon','RF 70-200mm f/2.8','Professional telephoto lens',120.00,'LIKE_NEW','AVAILABLE','a13bfa44-c3b8-4df1-a8dd-8a0bcbf3f991','9a26d72f-9b7d-4b97-a842-5d1455d90571','f3efb2a7-cd11-44f5-a8d3-d0c57e7d0d41'),
 ('a6afaf26-19a2-4d91-a9a0-80cf5f598fb7','Portable PA Sound System','Yamaha','StagePas 400BT','Portable sound system for live events',110.00,'GOOD','AVAILABLE','f7ead54f-d389-4246-a450-c93534520616','e75f8c6d-8a6e-49b2-ae59-1f4b9b6e31cb','5d783c8e-f5d4-4b84-a842-615c8f2f8b43');
 
+INSERT INTO item_images (id, storage_key, display_order, item_id) VALUES 
+(UUID_TO_BIN(UUID()), 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image1.webp', 0, 'efbeb34f-203b-4609-826f-ef49ffdb9c20'),
+(UUID_TO_BIN(UUID()), 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image2.webp', 1, 'efbeb34f-203b-4609-826f-ef49ffdb9c20'),
+(UUID_TO_BIN(UUID()), 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image3.webp', 2, 'efbeb34f-203b-4609-826f-ef49ffdb9c20');
+
 -- =========================
 -- RENTALS
 -- =========================
@@ -126,8 +131,8 @@ INSERT IGNORE INTO rentals (id, rental_status, rental_period, final_price, rente
 -- ITEM SNAPSHOTS
 -- =========================
 INSERT IGNORE INTO item_snapshots VALUES
-('3db9a3e6-0368-45ac-9200-8ee3d0a10f44','Canon T6 Camera','Canon','T6', 'DSLR camera for photography', 80.00,'GOOD','Camera', '5f54c279-9ad6-40c2-8a32-22216d48ca39'),
-('faefe02d-cc3e-4e33-aefb-2b3e556fabc2','Dell XPS 15','Dell','9520', 'High performance laptop',120.00,'GOOD','Laptop', 'b24fca5b-648a-44e2-ba89-2223d8ab57b0');
+('3db9a3e6-0368-45ac-9200-8ee3d0a10f44','Canon T6 Camera','Canon','T6', 'DSLR camera for photography', 80.00,'GOOD','Camera', null, '5f54c279-9ad6-40c2-8a32-22216d48ca39'),
+('faefe02d-cc3e-4e33-aefb-2b3e556fabc2','Dell XPS 15','Dell','9520', 'High performance laptop',120.00,'GOOD','Laptop', 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image1.webp', 'b24fca5b-648a-44e2-ba89-2223d8ab57b0');
 
 -- =========================
 -- ADDRESS_SNAPSHOTS

@@ -71,7 +71,7 @@ public class RentalMapper {
 		rental.setFinalPrice(finalPrice);
 		
 		rental.setAddressSnapshot(addressMapper.fromRentContext(addressInfo, rental));
-		rental.setItemSnapshot(itemMapper.fromRentContext(item, rental));
+		rental.setItemSnapshot(itemMapper.fromRentContext(item, rental, context.getThumbnailKey()));
 		rental.setItemId(item.getId());
 		
 		return rental;

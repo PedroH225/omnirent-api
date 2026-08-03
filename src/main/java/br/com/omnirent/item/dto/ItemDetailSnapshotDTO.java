@@ -26,8 +26,10 @@ public class ItemDetailSnapshotDTO {
 	
 	private String description;
 	
+	private String thumbnailKey;
+	
 	public ItemDetailSnapshotDTO(String id, String name, String brand, String model, BigDecimal basePrice,
-			ItemCondition itemCondition, String description) {
+			ItemCondition itemCondition, String description, String thumbnailKey) {
 		this.id = id;
 		this.name = name;
 		this.brand = brand;
@@ -35,6 +37,7 @@ public class ItemDetailSnapshotDTO {
 		this.basePrice = basePrice;
 		this.itemCondition = itemCondition;
 		this.description = description;
+		this.thumbnailKey = thumbnailKey;
 	}
 		
 	public ItemDetailSnapshotDTO(ItemSnapshot item) {
@@ -48,5 +51,6 @@ public class ItemDetailSnapshotDTO {
 		this.description = itemData.getDescription();
 		this.basePrice = itemData.getBasePrice();
 		this.itemCondition = itemData.getItemCondition();
+		this.thumbnailKey = item.getThumbnailKey();
 	}
 }

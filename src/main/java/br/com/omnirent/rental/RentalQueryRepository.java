@@ -23,7 +23,7 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 			new br.com.omnirent.user.dto.UserResponseDTO(rt.id, rt.username),
 			new br.com.omnirent.user.dto.UserResponseDTO(o.id, o.username),
 			new br.com.omnirent.item.dto.ItemDetailSnapshotDTO(iSnp.id, iSnp.name, iSnp.itemData.brand,
-			iSnp.itemData.model,iSnp.itemData.basePrice, iSnp.itemData.itemCondition, iSnp.itemData.description),
+			iSnp.itemData.model,iSnp.itemData.basePrice, iSnp.itemData.itemCondition, iSnp.itemData.description, iSnp.thumbnailKey),
 			new br.com.omnirent.address.dto.AddressSnapshotDTO(aSnp.id, aSnp.addressData.street, aSnp.addressData.number,
 			aSnp.addressData.complement, aSnp.addressData.district, aSnp.addressData.city,
 			aSnp.addressData.state, aSnp.addressData.country, aSnp.addressData.zipCode))
@@ -34,24 +34,30 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 	Optional<RentalDetailDTO> findRentalDetail(String id);
 	
 	@Query("""
-			SELECT new br.com.omnirent.rental.dto.RentalDisplayDTO(r.id, r.startDate, r.endDate,
-			r.finalPrice, r.rentalStatus, r.rentalPeriod, i.id, i.name, r.createdAt)
+			SELECT new br.com.omnirent.rental.dto.RentalDisplayDTO(
+			r.id, r.startDate, r.endDate, r.finalPrice, r.rentalStatus, r.rentalPeriod, 
+			new br.com.omnirent.item.dto.ItemSnapshotDto(i.id, i.name, i.thumbnailKey),
+			r.createdAt)
 			FROM Rental r JOIN r.itemSnapshot i
 			WHERE r.id = :id
 			""")
 	Optional<RentalDisplayDTO> findRentalDisplayDTO(@Param("id") String rentalId);
 	
 	@Query("""
-			SELECT new br.com.omnirent.rental.dto.RentalDisplayDTO(r.id, r.startDate, r.endDate,
-			r.finalPrice, r.rentalStatus, r.rentalPeriod, i.id, i.name, r.createdAt)
+			SELECT new br.com.omnirent.rental.dto.RentalDisplayDTO(
+			r.id, r.startDate, r.endDate, r.finalPrice, r.rentalStatus, r.rentalPeriod,
+			new br.com.omnirent.item.dto.ItemSnapshotDto(i.id, i.name, i.thumbnailKey),
+			r.createdAt)
 			FROM Rental r JOIN r.itemSnapshot i
 			WHERE r.renterId = :id
 			""")
 	List<RentalDisplayDTO> findUserRented(@Param("id") String renterId);
 	
 	@Query("""
-			SELECT new br.com.omnirent.rental.dto.RentalDisplayDTO(r.id, r.startDate, r.endDate,
-			r.finalPrice, r.rentalStatus, r.rentalPeriod, i.id, i.name, r.createdAt)
+			SELECT new br.com.omnirent.rental.dto.RentalDisplayDTO(
+			r.id, r.startDate, r.endDate, r.finalPrice, r.rentalStatus, r.rentalPeriod, 
+			new br.com.omnirent.item.dto.ItemSnapshotDto(i.id, i.name, i.thumbnailKey),
+			r.createdAt)
 			FROM Rental r JOIN r.itemSnapshot i
 			WHERE r.ownerId = :id
 			""")

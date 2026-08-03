@@ -1,6 +1,5 @@
 package br.com.omnirent.item;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -87,12 +86,13 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 	@Query("""
 			SELECT new br.com.omnirent.item.context.ItemRentedContext(
 			new br.com.omnirent.item.context.ItemInfo(i.id, i.name, i.itemData.brand, 
-			i.itemData.model, i.itemData.description, i.itemData.basePrice, i.itemData.itemCondition),
+			i.itemData.model, i.itemData.description, i.itemData.basePrice, i.itemData.itemCondition), 
 			new br.com.omnirent.address.context.AddressInfo(ad.id, ad.addressData.street, ad.addressData.number, 
 			ad.addressData.complement, ad.addressData.district, ad.addressData.city, ad.addressData.state, ad.addressData.country, ad.addressData.zipCode),
-			o.id, o.name)
-			FROM Item i JOIN i.pickupAddress ad JOIN i.owner o
+			o.id, o.name, im.storageKey)
+			FROM Item i JOIN i.pickupAddress ad JOIN i.owner o LEFT JOIN i.images im
 			WHERE i.id = :id
+			AND (im IS NULL OR im.displayOrder = 0)
 			""")
 	Optional<ItemRentedContext> getItemRentedContext(@Param("id")String itemId);
 
