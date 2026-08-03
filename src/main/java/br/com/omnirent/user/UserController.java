@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.omnirent.common.enums.UserEnums;
+import br.com.omnirent.user.context.LoggedUserResponseDTO;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
@@ -32,6 +33,11 @@ public class UserController {
 	@GetMapping("/find")
 	public UserDetailsDTO findById() {
 		return userService.getUserDetailsById();
+	}
+	
+	@GetMapping("/me")
+	public LoggedUserResponseDTO findLoggedUser() {
+		return userService.getLoggedUserData();
 	}
 	
 	@GetMapping("/enums")
