@@ -29,30 +29,17 @@ public class RentalDisplayDTO {
 	private String itemId;
 	
 	private String itemName;
-		
-	private String renterId;
-	
-	private String renterName;
-	
-	private String ownerId;
-	
-	private String ownerName;
 	
 	private Instant createdAt;
 
 	public RentalDisplayDTO(String id, Instant startDate, Instant endDate, BigDecimal finalPrice, RentalStatus rentalStatus,
-			RentalPeriod rentalPeriod, String itemId, String itemName, String renterId, String renterName, String ownerId,
-			String ownerName, Instant createdAt) {
+			RentalPeriod rentalPeriod, String itemId, String itemName, Instant createdAt) {
 		this.id = id;
 		this.finalPrice = finalPrice;
 		this.rentalStatus = rentalStatus;
 		this.rentalPeriod = rentalPeriod;
 		this.itemId = itemId;
 		this.itemName = itemName;
-		this.renterId = renterId;
-		this.renterName = renterName;
-		this.ownerId = ownerId;
-		this.ownerName = ownerName;
 		
 		this.createdAt = createdAt;
 		this.startDate = startDate;

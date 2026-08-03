@@ -349,15 +349,6 @@ public class RentalService {
 		
 		publishDefaultTransition("SERVER_CONFIRMATION", rentId, currentStatus, targetStatus);
 	}
-
-	public List<RentalDisplayDTO> findUserRented() {
-		String renterId = currentUserProvider.currentUserId();
-		userService.requireExistence(renterId);
-		
-		List<RentalDisplayDTO> result = queryRepository.findUserRented(renterId);
-		
-		return mapper.localize(result);
-	}
 	
 	private void publishDefaultTransition(
 			String actorId, String entityId, RentalStatus oldStatus, RentalStatus newStatus) {
@@ -380,6 +371,15 @@ public class RentalService {
 	            mapper.toInUseSnapshot(targetStatus, startDate, endDateTime),
 	            mapper.toInUseSnapshot(context.rentalStatus(), context.startDate(), context.endDate()),
 	            Instant.now(clock)));
+	}
+	
+	public List<RentalDisplayDTO> findUserRented() {
+		String renterId = currentUserProvider.currentUserId();
+		userService.requireExistence(renterId);
+		
+		List<RentalDisplayDTO> result = queryRepository.findUserRented(renterId);
+		
+		return mapper.localize(result);
 	}
 
 	public List<RentalDisplayDTO> findUserRentals() {
