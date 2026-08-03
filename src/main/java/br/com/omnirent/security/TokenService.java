@@ -99,7 +99,7 @@ public class TokenService {
 		} 
         
         Integer globalVer = globalConfigHolder.getGlobalTokenVersion();
-        Integer currGlobalVer = decoded.getClaim("ver").asInt();
+        Integer currGlobalVer = decoded.getClaim("gver").asInt();
         if (!globalVer.equals(currGlobalVer)) {
 			throw new CredentialsExpiredException(
 					"", new ApiException(AuthenticationErrorType.INVALID_TOKEN));
