@@ -131,6 +131,7 @@ public class ItemMapper {
 		displayDTOs.forEach(d -> {
 			d.setItemConditionLabel(messageService.get(d.getItemCondition().getMessageKey()));;
 			d.setItemStatusLabel(messageService.get(d.getItemStatus().getMessageKey()));
+			d.setSubCategoryName(messageService.get("subcategory." + d.getSubCategoryName()));
 		});
 		
 		return displayDTOs;
