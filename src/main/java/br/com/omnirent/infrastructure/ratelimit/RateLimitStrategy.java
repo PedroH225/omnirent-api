@@ -10,8 +10,11 @@ import lombok.Getter;
 public enum RateLimitStrategy {
 
 	LOGIN(HttpMethod.POST,"/api/auth/login", 5, 20),
-	UPLOAD(HttpMethod.POST, "/api/item/{itemId}/images", 5, 10),
-	DEFAULT(null,"/api/**", 20, 30);
+	UPLOAD_IMAGE(HttpMethod.POST, "/api/item/{itemId}/images", 5, 10),
+	CREATE(HttpMethod.POST, "/api/**", 20, 20),
+	EDIT(HttpMethod.PUT, "/api/**", 20, 20),
+	PATCH(HttpMethod.PATCH, "/api/**", 30, 20),
+	DEFAULT(null,"/api/**", 50, 100);
 	
 	private HttpMethod method;
 	
