@@ -31,7 +31,7 @@ public class RateLimitService {
 	
 	public void verifyRequest(ClientIdentifier clientIdentifier, RateLimitStrategy strategy) {
 		Instant now = clock.instant();
-		ClientRateLimitState state = getClientState(clientIdentifier, now);
+		ClientRateLimitState state = getClientState(clientIdentifier, now, strategy);
 		int maxRequests = resolveMaxRequests(clientIdentifier.type(), strategy);
 
 		checkBlocked(state, now);
@@ -50,7 +50,7 @@ public class RateLimitService {
 		}
 		log.debug(
 			    "RateLimitState[id={}, requests={}, windowStart={}, penaltyLevel={}, blockedUntil={}]",
-			    clientIdentifier.identifier(),
+			    buildKey(clientIdentifier, strategy),
 			    state.getRequestCount(),
 			    state.getWindowStart(),
 			    state.getPenaltyLevel(),
@@ -58,10 +58,10 @@ public class RateLimitService {
 			);
 	}
 
-	private ClientRateLimitState getClientState(ClientIdentifier clientIdentifier, Instant now) {
-	    return cache.get(
-	        clientIdentifier.identifier(),
-	        key -> ClientRateLimitState.createState(now)
+	private ClientRateLimitState getClientState(ClientIdentifier clientIdentifier, Instant now, RateLimitStrategy strategy) {
+		return cache.get(
+				buildKey(clientIdentifier, strategy),
+				key -> ClientRateLimitState.createState(now)
 	    );
 	}
 	
@@ -107,5 +107,9 @@ public class RateLimitService {
 	    
 		throw new ApiException(RateLimitErrorType.TOO_MANY_REQUESTS, 
 	    		durationMessage.value(), timeUnitKey);
+	}
+	
+	private String buildKey(ClientIdentifier clientIdentifier, RateLimitStrategy strategy) {
+		return String.format("%s:%s", clientIdentifier.identifier(), strategy.name());
 	}
 }
