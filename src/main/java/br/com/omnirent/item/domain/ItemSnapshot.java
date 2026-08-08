@@ -31,16 +31,19 @@ public class ItemSnapshot {
 	@Embedded
 	private ItemData itemData;
 	
+	private String thumbnailKey;
+	
 	@ToString.Exclude
 	@OneToOne
 	@JoinColumn(name = "rental_id")
 	private Rental rental;
 
-	public ItemSnapshot(String name, String brand, String model,
-		String description, BigDecimal basePrice, ItemCondition itemCondition) {
+	public ItemSnapshot(String name, String brand, String model, String description,
+			BigDecimal basePrice, ItemCondition itemCondition, String thumbnailKey) {
 		this.name = name;
 
 		this.itemData = new ItemData(brand, model, description, basePrice, itemCondition);
+		this.thumbnailKey = thumbnailKey;
 	}
 	
 }

@@ -1,6 +1,5 @@
 package br.com.omnirent.item;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -10,11 +9,9 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 import br.com.omnirent.common.enums.ItemCondition;
-import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
-import br.com.omnirent.item.context.ItemFeedFilter;
 import br.com.omnirent.item.context.ItemPermissionData;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
@@ -78,23 +75,24 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 	
 	@Query("""
 			SELECT new br.com.omnirent.item.dto.ItemDisplayDTO(i.id, i.name, i.itemData.basePrice,
-			i.itemData.itemCondition, i.itemStatus, sc.name, i.createdAt,
-			new br.com.omnirent.user.dto.UserResponseDTO(o.id, o.username))
-			FROM Item i
+			i.itemData.itemCondition, i.itemStatus, sc.name, im.storageKey, i.createdAt)
+			FROM Item i LEFT JOIN i.images im
 			JOIN i.owner o JOIN i.subCategory sc
-			WHERE o.id = :id
+			WHERE o.id = :id AND (im IS NULL OR im.displayOrder = 0)
 			""")
-	List<ItemDisplayDTO> findUserItems(@Param("id")String userId);
+	Page<ItemDisplayDTO> findUserItems(@Param("id")String userId, 
+			Pageable pageable);
 	
 	@Query("""
 			SELECT new br.com.omnirent.item.context.ItemRentedContext(
 			new br.com.omnirent.item.context.ItemInfo(i.id, i.name, i.itemData.brand, 
-			i.itemData.model, i.itemData.description, i.itemData.basePrice, i.itemData.itemCondition),
+			i.itemData.model, i.itemData.description, i.itemData.basePrice, i.itemData.itemCondition), 
 			new br.com.omnirent.address.context.AddressInfo(ad.id, ad.addressData.street, ad.addressData.number, 
 			ad.addressData.complement, ad.addressData.district, ad.addressData.city, ad.addressData.state, ad.addressData.country, ad.addressData.zipCode),
-			o.id, o.name)
-			FROM Item i JOIN i.pickupAddress ad JOIN i.owner o
+			o.id, o.name, im.storageKey)
+			FROM Item i JOIN i.pickupAddress ad JOIN i.owner o LEFT JOIN i.images im
 			WHERE i.id = :id
+			AND (im IS NULL OR im.displayOrder = 0)
 			""")
 	Optional<ItemRentedContext> getItemRentedContext(@Param("id")String itemId);
 

@@ -1,5 +1,6 @@
 package br.com.omnirent.security.auth;
 
+import br.com.omnirent.security.CurrentUserProvider;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Locale;
@@ -41,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class AuthenticationService implements UserDetailsService {
+
 	@Autowired
 	private ApplicationContext context;
 
@@ -64,6 +66,9 @@ public class AuthenticationService implements UserDetailsService {
 	@Autowired
 	private SpringDomainEventPublisher eventPublisher;
 
+	@Autowired
+	private CurrentUserProvider currentUserProvider;
+	
 	@Autowired
 	private Clock clock;
 
@@ -142,5 +147,9 @@ public class AuthenticationService implements UserDetailsService {
 					user.getId());
 			throw new ApiException(AuthenticationErrorType.INVALID_CREDENTIALS);
 		}
+	}
+
+	public void logout() {
+		userService.invalidateUserTokens(currentUserProvider.currentUserId());
 	}
 }

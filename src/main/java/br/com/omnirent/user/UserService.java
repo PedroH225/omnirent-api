@@ -30,6 +30,7 @@ import br.com.omnirent.security.auth.RoleRepository;
 import br.com.omnirent.security.domain.Role;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.context.ChangeUserStatusContext;
+import br.com.omnirent.user.context.LoggedUserResponseDTO;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
@@ -200,6 +201,7 @@ public class UserService {
 	    return authMetadata;
 	}
 	
+	@Transactional
 	@CacheEvict(value = "tokenVersion", key = "#userId")
 	public void invalidateUserTokens(String userId) {
 		int updated = userRepository.incrementTokenVersion(userId);
@@ -236,5 +238,11 @@ public class UserService {
 	    return !StringUtils.isBlank(locale) 
 	    		&& AppLocale.SUPPORTED_LOCALES.contains(locale)
 	    		? locale : appProperties.locale();
+	}
+
+	public LoggedUserResponseDTO getLoggedUserData() {
+		String currUserId = currentUserProvider.currentUserId();
+		return queryRepository.findLoggedUserData(currUserId)
+				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
 	}
 }

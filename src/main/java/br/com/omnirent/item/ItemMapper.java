@@ -32,11 +32,11 @@ import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
+import br.com.omnirent.item.dto.ItemDetailSnapshotDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemFeedDTO;
 import br.com.omnirent.item.dto.ItemPriceData;
 import br.com.omnirent.item.dto.ItemRequestDTO;
-import br.com.omnirent.item.dto.ItemSnapshotDTO;
 import br.com.omnirent.item.dto.ItemUpdatedDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.rental.domain.Rental;
@@ -86,13 +86,13 @@ public class ItemMapper {
 		return newItem;
 	}
 	
-	public ItemSnapshotDTO toSnapshotDTO(ItemSnapshot itemSnapshot) {
+	public ItemDetailSnapshotDTO toSnapshotDTO(ItemSnapshot itemSnapshot) {
 		ItemData itemData = itemSnapshot.getItemData();
 
-		return new ItemSnapshotDTO(
+		return new ItemDetailSnapshotDTO(
 			    itemSnapshot.getId(), itemSnapshot.getName(), itemData.getBrand(),
 			    itemData.getModel(), itemData.getBasePrice(), itemData.getItemCondition(),
-			    itemData.getDescription()
+			    itemData.getDescription(), itemSnapshot.getThumbnailKey()
 			);
 	}
 
@@ -115,10 +115,11 @@ public class ItemMapper {
 		return item;
 	}
 	
-	public ItemSnapshot fromRentContext(ItemInfo itemInfo, Rental rental) {
+	public ItemSnapshot fromRentContext(ItemInfo itemInfo, Rental rental, String thumbnailKey) {
 	    ItemSnapshot itemSnapshot = new ItemSnapshot(
 	        itemInfo.getItemName(), itemInfo.getBrand(), itemInfo.getModel(),
-	        itemInfo.getDescription(), itemInfo.getBasePrice(), itemInfo.getItemCondition()
+	        itemInfo.getDescription(), itemInfo.getBasePrice(), 
+	        itemInfo.getItemCondition(), thumbnailKey
 	    );
 
 	    itemSnapshot.setRental(rental);
@@ -126,10 +127,11 @@ public class ItemMapper {
 	    return itemSnapshot;
 	}
 	
-	public List<ItemDisplayDTO> localize(List<ItemDisplayDTO> displayDTOs) {
+	public Page<ItemDisplayDTO> localize(Page<ItemDisplayDTO> displayDTOs) {
 		displayDTOs.forEach(d -> {
 			d.setItemConditionLabel(messageService.get(d.getItemCondition().getMessageKey()));;
 			d.setItemStatusLabel(messageService.get(d.getItemStatus().getMessageKey()));
+			d.setSubCategoryName(messageService.get("subcategory." + d.getSubCategoryName()));
 		});
 		
 		return displayDTOs;

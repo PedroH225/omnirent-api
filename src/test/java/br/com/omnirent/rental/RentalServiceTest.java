@@ -19,6 +19,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.category.domain.Category;
@@ -27,6 +31,7 @@ import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
+import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.RentalErrorType;
 import br.com.omnirent.exception.domain.apptype.UserErrorType;
@@ -120,14 +125,19 @@ public class RentalServiceTest {
 	@Test
 	void shouldFindUserRentedItems() {
 		String renterId = renter.getId();
+		Pageable pageable = PageRequest.of(0, 10);
+
+		Page<RentalDisplayDTO> page = new PageImpl<>(
+				List.of(RentalTestFactory.toRentalDisplayDTO(rental)), pageable, 1);
 		
-		List<RentalDisplayDTO> expected = List.of(RentalTestFactory.toRentalDisplayDTO(rental));
+		PageResponseDTO<RentalDisplayDTO> expected =
+		        new PageResponseDTO<>(page);
 		
 		when(currentUserProvider.currentUserId()).thenReturn(renterId);
-		when(queryRepository.findUserRented(renterId)).thenReturn(expected);
-		when(mapper.localize(expected)).thenReturn(expected);
+		when(queryRepository.findUserRented(renterId, pageable)).thenReturn(page);
+		when(mapper.localize(page)).thenReturn(page);
 
-		List<RentalDisplayDTO> result = rentalService.findUserRented();
+		PageResponseDTO<RentalDisplayDTO> result = rentalService.findUserRented(pageable);
 		
 		assertThat(result).isEqualTo(expected);
 		
@@ -137,13 +147,15 @@ public class RentalServiceTest {
 	
 	@Test
 	void shouldThrowWhenUserDoesNotExistOnFindUserRented() {
+		Pageable pageable = PageRequest.of(0, 10);
+
 	    String invalidId = "invalid-id";
 
 	    when(currentUserProvider.currentUserId()).thenReturn(invalidId);
 	    doThrow(new ApiException(UserErrorType.NOT_FOUND))
 	        .when(userService).requireExistence(invalidId);
 
-	    assertThatThrownBy(() -> rentalService.findUserRented())
+	    assertThatThrownBy(() -> rentalService.findUserRented(pageable))
 	        .isInstanceOf(ApiException.class);
 
 	    verify(currentUserProvider).currentUserId();
@@ -154,14 +166,19 @@ public class RentalServiceTest {
 	@Test
 	void shouldFindUserRentals() {
 		String ownerId = owner.getId();
+		Pageable pageable = PageRequest.of(0, 10);
+
+		Page<RentalDisplayDTO> page = new PageImpl<>(
+				List.of(RentalTestFactory.toRentalDisplayDTO(rental)), pageable, 1);
 		
-		List<RentalDisplayDTO> expected = List.of(RentalTestFactory.toRentalDisplayDTO(rental));
+		PageResponseDTO<RentalDisplayDTO> expected =
+		        new PageResponseDTO<>(page);
 		
 		when(currentUserProvider.currentUserId()).thenReturn(ownerId);
-		when(queryRepository.findUserRentals(ownerId)).thenReturn(expected);
-		when(mapper.localize(expected)).thenReturn(expected);
+		when(queryRepository.findUserRentals(ownerId, pageable)).thenReturn(page);
+		when(mapper.localize(page)).thenReturn(page);
 
-		List<RentalDisplayDTO> result = rentalService.findUserRentals();
+		PageResponseDTO<RentalDisplayDTO> result = rentalService.findUserRentals(pageable);
 		
 		assertThat(result).isEqualTo(expected);
 		
@@ -172,12 +189,13 @@ public class RentalServiceTest {
 	@Test
 	void shouldThrowWhenUserDoesNotExistOnFindUserRentals() {
 	    String invalidId = "invalid-id";
+		Pageable pageable = PageRequest.of(0, 10);
 
 	    when(currentUserProvider.currentUserId()).thenReturn(invalidId);
 	    doThrow(new ApiException(UserErrorType.NOT_FOUND))
 	        .when(userService).requireExistence(invalidId);
 
-	    assertThatThrownBy(() -> rentalService.findUserRentals())
+	    assertThatThrownBy(() -> rentalService.findUserRentals(pageable))
 	        .isInstanceOf(ApiException.class);
 
 	    verify(currentUserProvider).currentUserId();

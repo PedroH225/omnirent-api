@@ -66,12 +66,13 @@ public class SecurityConfigurations {
                         .requestMatchers(
                                 "/ws/**",
                                 "/rental/enums",
+                                "/category/findAll",
                                 "/item/enums",
                                 "/item/feed",
                                 "/webhooks/**",
                                 "/oauth2/**",
                                 "/login/oauth2/**",
-                                "/login"
+                                "/login", "/logout"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -87,7 +88,7 @@ public class SecurityConfigurations {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(appProperties.frontUrl()));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedMethods(List.of("GET", "PATCH", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);

@@ -3,6 +3,9 @@ package br.com.omnirent.factory;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 import br.com.omnirent.address.context.AddressInfo;
 import br.com.omnirent.address.domain.Address;
@@ -18,12 +21,13 @@ import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
+import br.com.omnirent.item.domain.ItemImage;
 import br.com.omnirent.item.domain.ItemSnapshot;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
+import br.com.omnirent.item.dto.ItemDetailSnapshotDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
-import br.com.omnirent.item.dto.ItemSnapshotDTO;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.user.domain.User;
@@ -53,6 +57,11 @@ public final class ItemTestFactory {
         
         item.setPickupAddress(address);
         item.setPickupAddressId(address.getId());
+        
+        List<ItemImage> itemImages = Arrays.asList(
+        		new ItemImage(null, "images/image1.webp", 0, Instant.now(), item, item.getId())); 
+        item.setImages(itemImages);
+        
         return item;
     }
     
@@ -106,7 +115,7 @@ public final class ItemTestFactory {
 
         return new ItemRentedContext(
                 itemInfo, addressInfo, owner.getId(),
-                owner.getUsername()
+                owner.getUsername(), item.getImages().get(0).getStorageKey()
         );
     }
     
@@ -117,10 +126,7 @@ public final class ItemTestFactory {
         return new ItemDisplayDTO(
                 item.getId(), item.getName(), itemData.getBasePrice(),
                 itemData.getItemCondition(), item.getItemStatus(), subCategory.getName(),
-                item.getCreatedAt(),
-                new UserResponseDTO(
-                        owner.getId(), owner.getUsername()
-                )
+                item.getImages().get(0).getStorageKey(), item.getCreatedAt()
         );
     }
     
@@ -219,21 +225,20 @@ public final class ItemTestFactory {
     public static ItemSnapshot toSnapshot(ItemInfo itemInfo, Rental rental) {
     	ItemSnapshot itemSnapshot = new ItemSnapshot(
     	        itemInfo.getItemName(), itemInfo.getBrand(), itemInfo.getModel(),
-    	        itemInfo.getDescription(), itemInfo.getBasePrice(), itemInfo.getItemCondition()
-    	    );
+    	        itemInfo.getDescription(), itemInfo.getBasePrice(), itemInfo.getItemCondition(), "items/image1.webp");
 
     	    itemSnapshot.setRental(rental);
 
     	    return itemSnapshot;
     }
     
-	public static ItemSnapshotDTO toSnapshotDTO(ItemSnapshot itemSnapshot) {
+	public static ItemDetailSnapshotDTO toSnapshotDTO(ItemSnapshot itemSnapshot) {
 		ItemData itemData = itemSnapshot.getItemData();
 
-		return new ItemSnapshotDTO(
+		return new ItemDetailSnapshotDTO(
 			    itemSnapshot.getId(), itemSnapshot.getName(), itemData.getBrand(),
 			    itemData.getModel(), itemData.getBasePrice(), itemData.getItemCondition(),
-			    itemData.getDescription()
+			    itemData.getDescription(), itemSnapshot.getThumbnailKey()
 			);
 	}
 }

@@ -8,6 +8,7 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 import br.com.omnirent.user.context.ChangeUserStatusContext;
+import br.com.omnirent.user.context.LoggedUserResponseDTO;
 import br.com.omnirent.user.context.UserTakenContext;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
@@ -58,5 +59,12 @@ public interface UserQueryRepository extends Repository<User, String> {
 			u.email, u.username, u.locale)
 			FROM User u WHERE u.id = :id
 			""")
-	Optional<ChangeUserStatusContext> getUserStatusChangeContext(@Param("id") String userId); 
+	Optional<ChangeUserStatusContext> getUserStatusChangeContext(@Param("id") String userId);
+
+	@Query("""
+			SELECT new br.com.omnirent.user.context.LoggedUserResponseDTO(u.id,
+			u.username, u.name, u.locale, u.timezone)
+			FROM User u WHERE u.id = :id
+			""")
+	Optional<LoggedUserResponseDTO> findLoggedUserData(String id); 
 }

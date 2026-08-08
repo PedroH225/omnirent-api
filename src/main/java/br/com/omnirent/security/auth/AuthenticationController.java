@@ -3,6 +3,7 @@ package br.com.omnirent.security.auth;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +34,11 @@ public class AuthenticationController {
 	@PostMapping("/login")
 	public Map<String, String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
 		return authenticationService.login(loginDTO, request);
+	}
+	
+	@PatchMapping("/logout")
+	public void logout() {
+		authenticationService.logout();
 	}
 
 }

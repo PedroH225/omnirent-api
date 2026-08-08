@@ -5,6 +5,7 @@ import java.time.Instant;
 
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
+import br.com.omnirent.item.dto.ItemSnapshotDto;
 import lombok.Data;
 
 @Data
@@ -26,33 +27,17 @@ public class RentalDisplayDTO {
 	
 	private String rentalPeriodLabel;
 	
-	private String itemId;
-	
-	private String itemName;
-		
-	private String renterId;
-	
-	private String renterName;
-	
-	private String ownerId;
-	
-	private String ownerName;
+	private ItemSnapshotDto itemSnapshotDto;
 	
 	private Instant createdAt;
 
 	public RentalDisplayDTO(String id, Instant startDate, Instant endDate, BigDecimal finalPrice, RentalStatus rentalStatus,
-			RentalPeriod rentalPeriod, String itemId, String itemName, String renterId, String renterName, String ownerId,
-			String ownerName, Instant createdAt) {
+			RentalPeriod rentalPeriod, ItemSnapshotDto itemSnapshotDto, Instant createdAt) {
 		this.id = id;
 		this.finalPrice = finalPrice;
 		this.rentalStatus = rentalStatus;
 		this.rentalPeriod = rentalPeriod;
-		this.itemId = itemId;
-		this.itemName = itemName;
-		this.renterId = renterId;
-		this.renterName = renterName;
-		this.ownerId = ownerId;
-		this.ownerName = ownerName;
+		this.itemSnapshotDto = itemSnapshotDto;
 		
 		this.createdAt = createdAt;
 		this.startDate = startDate;

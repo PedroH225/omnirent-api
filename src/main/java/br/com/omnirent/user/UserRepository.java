@@ -1,7 +1,6 @@
 package br.com.omnirent.user;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
