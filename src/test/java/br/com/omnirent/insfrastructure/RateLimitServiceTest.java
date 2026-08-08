@@ -66,11 +66,15 @@ public class RateLimitServiceTest {
         ));        
     }
     
+	private String buildKey(ClientIdentifier clientIdentifier, RateLimitStrategy strategy) {
+		return String.format("%s:%s", clientIdentifier.identifier(), strategy.name());
+	}
+    
     @Test
     void shouldAllowRequestWhenClientIsBelowConfiguredLimit() {
         ClientIdentifier client = ClientIdentifierFactoryTest.user();
         ClientRateLimitState state = ClientRateLimitStateFactory.newState(now);
-        when(cache.get(eq(client.identifier()), any())).thenReturn(state);
+        when(cache.get(eq(buildKey(client, RateLimitStrategy.DEFAULT)), any())).thenReturn(state);
         
         assertThatCode(() -> rateLimitService.verifyRequest(client, RateLimitStrategy.DEFAULT))
                 .doesNotThrowAnyException();
@@ -80,11 +84,13 @@ public class RateLimitServiceTest {
 
     @Test
     void shouldBlockClientWhenRequestLimitIsExceeded() {
-        ClientIdentifier client = ClientIdentifierFactoryTest.user();
-        ClientRateLimitState state = ClientRateLimitStateFactory.withRequests(20, now);
-        when(cache.get(eq(client.identifier()), any())).thenReturn(state);
+    	RateLimitStrategy strategy = RateLimitStrategy.DEFAULT;
+    	ClientIdentifier client = ClientIdentifierFactoryTest.user();
+        ClientRateLimitState state = ClientRateLimitStateFactory.withRequests(strategy.getUserMaxRequests(), now);
         
-        assertThatThrownBy(() -> rateLimitService.verifyRequest(client, RateLimitStrategy.DEFAULT))
+        when(cache.get(eq(buildKey(client, strategy)), any())).thenReturn(state);
+        
+        assertThatThrownBy(() -> rateLimitService.verifyRequest(client, strategy))
                 .isInstanceOf(ApiException.class);
 
         assertThat(state.getBlockedUntil()).isEqualTo(now.plus(Duration.ofMinutes(1)));
@@ -95,7 +101,7 @@ public class RateLimitServiceTest {
     void shouldResetStateWhenConfiguredWindowExpires() {
         ClientIdentifier client = ClientIdentifierFactoryTest.user();
         ClientRateLimitState state = ClientRateLimitStateFactory.withRequests(15, now);
-        when(cache.get(eq(client.identifier()), any())).thenReturn(state);
+        when(cache.get(eq(buildKey(client, RateLimitStrategy.DEFAULT)), any())).thenReturn(state);
         
         Instant later = now.plusSeconds(120);
         when(clock.instant()).thenReturn(later);
@@ -109,13 +115,14 @@ public class RateLimitServiceTest {
 
     @Test
     void shouldApplyProgressivePenalties() {
-        ClientIdentifier client = ClientIdentifierFactoryTest.user();
+    	RateLimitStrategy strategy = RateLimitStrategy.DEFAULT;
+    	ClientIdentifier client = ClientIdentifierFactoryTest.user();
         ClientRateLimitState state = ClientRateLimitStateFactory.withRequestsAndPenalty(
-        		20, 1, 2, now);
+        		strategy.getUserMaxRequests(), 1, 2, now);
         
-        when(cache.get(eq(client.identifier()), any())).thenReturn(state);
+        when(cache.get(eq(buildKey(client, strategy)), any())).thenReturn(state);
         
-        assertThatThrownBy(() -> rateLimitService.verifyRequest(client, RateLimitStrategy.DEFAULT))
+        assertThatThrownBy(() -> rateLimitService.verifyRequest(client, strategy))
         	.isInstanceOf(ApiException.class);
 
         assertThat(state.getBlockedUntil()).isEqualTo(now.plus(Duration.ofMinutes(5)));
@@ -127,7 +134,7 @@ public class RateLimitServiceTest {
     void shouldNotApplyAnotherPenaltyWhileClientIsAlreadyBlocked() {
         ClientIdentifier client = ClientIdentifierFactoryTest.user();
         ClientRateLimitState state = ClientRateLimitStateFactory.blocked(now);
-        when(cache.get(eq(client.identifier()), any())).thenReturn(state);
+        when(cache.get(eq(buildKey(client, RateLimitStrategy.DEFAULT)), any())).thenReturn(state);
         
         assertThatThrownBy(() -> rateLimitService.verifyRequest(client, RateLimitStrategy.DEFAULT))
                 .isInstanceOf(ApiException.class);
@@ -140,7 +147,7 @@ public class RateLimitServiceTest {
     void shouldAllowRequestAfterBlockExpires() {
         ClientIdentifier client = ClientIdentifierFactoryTest.user();
         ClientRateLimitState state = ClientRateLimitStateFactory.blocked(now.minusSeconds(120));
-        when(cache.get(eq(client.identifier()), any())).thenReturn(state);
+        when(cache.get(eq(buildKey(client, RateLimitStrategy.DEFAULT)), any())).thenReturn(state);
         
         assertThatCode(() -> rateLimitService.verifyRequest(client, RateLimitStrategy.DEFAULT))
                 .doesNotThrowAnyException();
@@ -150,7 +157,7 @@ public class RateLimitServiceTest {
     void shouldHandleDifferentClientIdentifierTypes() {
         ClientIdentifier ipClient = ClientIdentifierFactoryTest.ip();
         ClientRateLimitState ipState = ClientRateLimitStateFactory.withRequests(25, now);
-        when(cache.get(eq(ipClient.identifier()), any())).thenReturn(ipState);
+        when(cache.get(eq(buildKey(ipClient, RateLimitStrategy.DEFAULT)), any())).thenReturn(ipState);
 
         assertThatCode(() -> rateLimitService.verifyRequest(ipClient, RateLimitStrategy.DEFAULT))
                 .doesNotThrowAnyException();
