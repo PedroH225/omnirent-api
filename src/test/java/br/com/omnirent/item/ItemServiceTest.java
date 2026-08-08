@@ -22,6 +22,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import br.com.omnirent.address.AddressService;
 import br.com.omnirent.address.domain.Address;
@@ -34,6 +38,7 @@ import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
+import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.config.i18n.MessageService;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AddressErrorType;
@@ -199,32 +204,39 @@ public class ItemServiceTest {
 	@Test
 	void shouldGetUserItems() {
 		String userId = owner.getId();
-		
+		Pageable pageable = PageRequest.of(0, 10);
+
 		ItemDisplayDTO dto1 = ItemTestFactory.toItemDisplayDTO(item, drill, owner);
 		ItemDisplayDTO dto2 = ItemTestFactory.toItemDisplayDTO(item2, drill, owner);
-		List<ItemDisplayDTO> expected = List.of(dto1, dto2);
-		
-		when(currentUserProvider.currentUserId()).thenReturn(userId);
-		when(queryRepository.findUserItems(userId)).thenReturn(expected);
-		when(itemMapper.localize(expected)).thenReturn(expected);
 
-		List<ItemDisplayDTO> result = itemService.getUserItems();
-		
+		Page<ItemDisplayDTO> page = new PageImpl<>(
+				List.of(dto1, dto2), pageable, 2);
+
+		when(currentUserProvider.currentUserId()).thenReturn(userId);
+		when(queryRepository.findUserItems(userId, pageable)).thenReturn(page);
+		when(itemMapper.localize(page)).thenReturn(page);
+
+		PageResponseDTO<ItemDisplayDTO> result = itemService.getUserItems(pageable);
+
+		PageResponseDTO<ItemDisplayDTO> expected = new PageResponseDTO<>(page);
+
 		assertThat(result).isEqualTo(expected);
-		
+
 		verify(currentUserProvider).currentUserId();
 		verify(userService).requireExistence(userId);
-		verify(queryRepository).findUserItems(userId);
+		verify(queryRepository).findUserItems(userId, pageable);
+		verify(itemMapper).localize(page);
 	}
 	
 	@Test
 	void shouldThrowWhenUserNotFoundOnGetUserItems() {
 		String invalidId = "invalid-id";
+		Pageable pageable = PageRequest.of(0, 10);
 		
 		when(currentUserProvider.currentUserId()).thenReturn(invalidId);	
 		doThrow(new ApiException(UserErrorType.NOT_FOUND)).when(userService).requireExistence(invalidId);
 	
-		assertThatThrownBy(() -> itemService.getUserItems())
+		assertThatThrownBy(() -> itemService.getUserItems(pageable))
 		.isInstanceOf(ApiException.class);
 		
 		verify(currentUserProvider).currentUserId();

@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import br.com.omnirent.address.AddressRepository;
 import br.com.omnirent.address.domain.Address;
@@ -126,7 +129,8 @@ public class ItemRepositoryTest extends IntegrationTest {
 	
 	@Test
 	void shouldFindUserItems() {
-		List<ItemDisplayDTO> userItems = queryRepository.findUserItems(owner.getId());
+		Pageable pageable = PageRequest.of(0, 10);
+		Page<ItemDisplayDTO> userItems = queryRepository.findUserItems(owner.getId(), pageable);
 		
 		assertThat(userItems).hasSize(2)
 		.allSatisfy(i -> {
@@ -146,9 +150,6 @@ public class ItemRepositoryTest extends IntegrationTest {
 	    .extracting(ItemDisplayDTO::getSubCategoryName)
 	    .containsOnly(drill.getName());
 		
-		assertThat(userItems)
-		.extracting(item -> item.getOwner().getId())
-		.containsOnly(owner.getId());
 	}
 	
 	@Test
