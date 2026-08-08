@@ -4,10 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import br.com.omnirent.address.AddressRepository;
 import br.com.omnirent.address.domain.Address;
@@ -42,7 +43,8 @@ import br.com.omnirent.item.ItemRepository;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemData;
 import br.com.omnirent.item.domain.ItemSnapshot;
-import br.com.omnirent.item.dto.ItemSnapshotDTO;
+import br.com.omnirent.item.dto.ItemDetailSnapshotDTO;
+import br.com.omnirent.item.dto.ItemSnapshotDto;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
@@ -138,7 +140,7 @@ public class RentalRepositoryTest extends IntegrationTest {
 
 	    RentalDetailDTO dto = result.get();
 
-	    ItemSnapshotDTO itemSnpDto = dto.getItemSnapshot();
+	    ItemDetailSnapshotDTO itemSnpDto = dto.getItemSnapshot();
 	    AddressSnapshotDTO adrsSnpDto = dto.getAddressSnapshot();
 	    UserResponseDTO ownerDTO = dto.getOwner();
 	    UserResponseDTO renterDto = dto.getRenter();
@@ -192,7 +194,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	            .orElseThrow();
 	    
 	    ItemSnapshot itemSnp = rental.getItemSnapshot();
-
+	    ItemSnapshotDto itemSnpDto = dto.getItemSnapshotDto();
+	    		
 	    assertThat(dto.getId()).isEqualTo(rental.getId());
 	    assertThat(dto.getStartDate()).isEqualTo(rental.getStartDate().truncatedTo(ChronoUnit.SECONDS));
 	    assertThat(dto.getEndDate()).isEqualTo(rental.getEndDate().truncatedTo(ChronoUnit.SECONDS));
@@ -200,20 +203,14 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
 	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
 
-	    assertThat(dto.getItemId()).isEqualTo(itemSnp.getId());
-	    assertThat(dto.getItemName()).isEqualTo(itemSnp.getName());
-
-	    assertThat(dto.getRenterId()).isEqualTo(renter.getId());
-	    assertThat(dto.getRenterName()).isEqualTo(renter.getName());
-
-	    assertThat(dto.getOwnerId()).isEqualTo(owner.getId());
-	    assertThat(dto.getOwnerName()).isEqualTo(owner.getName());
-
+	    assertThat(itemSnpDto.id()).isEqualTo(itemSnp.getId());
+	    assertThat(itemSnpDto.name()).isEqualTo(itemSnp.getName());
 	}
 
 	@Test
 	void shouldFindUserRentals() {
-	    List<RentalDisplayDTO> result = queryRepository.findUserRentals(owner.getId());
+		Pageable pageable = PageRequest.of(0, 10);
+	    Page<RentalDisplayDTO> result = queryRepository.findUserRentals(owner.getId(), pageable);
 
 	    assertThat(result).isNotEmpty();
 	    assertThat(result).hasSize(2);
@@ -224,7 +221,8 @@ public class RentalRepositoryTest extends IntegrationTest {
 	            .orElseThrow();
 
 	    ItemSnapshot itemSnp = rental.getItemSnapshot();
-
+	    ItemSnapshotDto itemSnpDto = dto.getItemSnapshotDto();
+	    
 	    assertThat(dto.getId()).isEqualTo(rental.getId());
 	    assertThat(dto.getStartDate()).isEqualTo(rental.getStartDate().truncatedTo(ChronoUnit.SECONDS));
 	    assertThat(dto.getEndDate()).isEqualTo(rental.getEndDate().truncatedTo(ChronoUnit.SECONDS));
@@ -232,27 +230,23 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
 	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
 
-	    assertThat(dto.getItemId()).isEqualTo(itemSnp.getId());
-	    assertThat(dto.getItemName()).isEqualTo(itemSnp.getName());
-
-	    assertThat(dto.getRenterId()).isEqualTo(renter.getId());
-	    assertThat(dto.getRenterName()).isEqualTo(renter.getName());
-
-	    assertThat(dto.getOwnerId()).isEqualTo(owner.getId());
-	    assertThat(dto.getOwnerName()).isEqualTo(owner.getName());
-
+	    assertThat(itemSnpDto.id()).isEqualTo(itemSnp.getId());
+	    assertThat(itemSnpDto.name()).isEqualTo(itemSnp.getName());
 	}
 
 	@Test
 	void shouldReturnEmptyListWhenUserHasNoRentals() {
-	    List<RentalDisplayDTO> result = queryRepository.findUserRentals(renter.getId());
+		Pageable pageable = PageRequest.of(0, 10);
+
+	    Page<RentalDisplayDTO> result = queryRepository.findUserRentals(renter.getId(), pageable);
 
 	    assertThat(result).isEmpty();
 	}
 	
 	@Test
 	void shouldFindUserRented() {
-	    List<RentalDisplayDTO> result = queryRepository.findUserRented(renter.getId());
+		Pageable pageable = PageRequest.of(0, 10);
+	    Page<RentalDisplayDTO> result = queryRepository.findUserRented(renter.getId(), pageable);
 
 	    assertThat(result).isNotEmpty();
 	    assertThat(result).hasSize(2);
@@ -263,6 +257,7 @@ public class RentalRepositoryTest extends IntegrationTest {
 	            .orElseThrow();
 
 	    ItemSnapshot itemSnp = rental.getItemSnapshot();
+	    ItemSnapshotDto itemSnpDto = dto.getItemSnapshotDto();
 
 	    assertThat(dto.getId()).isEqualTo(rental.getId());
 	    assertThat(dto.getStartDate()).isEqualTo(rental.getStartDate().truncatedTo(ChronoUnit.SECONDS));
@@ -271,20 +266,15 @@ public class RentalRepositoryTest extends IntegrationTest {
 	    assertThat(dto.getRentalStatus()).isEqualTo(rental.getRentalStatus());
 	    assertThat(dto.getRentalPeriod()).isEqualTo(rental.getRentalPeriod());
 
-	    assertThat(dto.getItemId()).isEqualTo(itemSnp.getId());
-	    assertThat(dto.getItemName()).isEqualTo(itemSnp.getName());
-
-	    assertThat(dto.getRenterId()).isEqualTo(renter.getId());
-	    assertThat(dto.getRenterName()).isEqualTo(renter.getName());
-
-	    assertThat(dto.getOwnerId()).isEqualTo(owner.getId());
-	    assertThat(dto.getOwnerName()).isEqualTo(owner.getName());
+	    assertThat(itemSnpDto.id()).isEqualTo(itemSnp.getId());
+	    assertThat(itemSnpDto.name()).isEqualTo(itemSnp.getName());
 
 	}
 
 	@Test
 	void shouldReturnEmptyListWhenUserHasNoRented() {
-	    List<RentalDisplayDTO> result = queryRepository.findUserRented(owner.getId());
+		Pageable pageable = PageRequest.of(0, 10);
+	    Page<RentalDisplayDTO> result = queryRepository.findUserRented(owner.getId(), pageable);
 
 	    assertThat(result).isEmpty();
 	}

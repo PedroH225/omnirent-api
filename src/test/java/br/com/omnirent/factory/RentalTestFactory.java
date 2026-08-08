@@ -13,7 +13,8 @@ import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.domain.ItemSnapshot;
-import br.com.omnirent.item.dto.ItemSnapshotDTO;
+import br.com.omnirent.item.dto.ItemDetailSnapshotDTO;
+import br.com.omnirent.item.dto.ItemSnapshotDto;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalCreatedDTO;
@@ -31,7 +32,7 @@ public final class RentalTestFactory {
 		Rental rental = new Rental();
 		ItemSnapshot itemSnapshot = new ItemSnapshot(item.getName(), item.getItemData().getBrand(),
 				item.getItemData().getModel(), item.getItemData().getDescription(),
-				item.getItemData().getBasePrice(), item.getItemData().getItemCondition());
+				item.getItemData().getBasePrice(), item.getItemData().getItemCondition(), "items/image1.webp");
 		itemSnapshot.setRental(rental);
 		AddressSnapshot addressSnapshot = new AddressSnapshot(address.getAddressData().getStreet(),
 				address.getAddressData().getNumber(), address.getAddressData().getComplement(),
@@ -100,7 +101,7 @@ public final class RentalTestFactory {
 	}
 	
 	public static RentalCreatedDTO toCreatedDTO(Rental rental) {
-		ItemSnapshotDTO itemSnapshotDTO = ItemTestFactory.toSnapshotDTO(rental.getItemSnapshot());
+		ItemDetailSnapshotDTO itemSnapshotDTO = ItemTestFactory.toSnapshotDTO(rental.getItemSnapshot());
 		AddressSnapshotDTO addressSnapshotDTO = AddressTestFactory.toSnapDto(rental.getAddressSnapshot());
 		
 		return new RentalCreatedDTO(
@@ -111,12 +112,12 @@ public final class RentalTestFactory {
 	}
 	
 	public static RentalDisplayDTO toRentalDisplayDTO(Rental rental) {
+		ItemSnapshotDto itemSnpDto = new ItemSnapshotDto(rental.getId(), rental.getItemSnapshot().getName(), "items/image1.webp");
+		
 	    return new RentalDisplayDTO(
 	        rental.getId(), rental.getStartDate(), rental.getEndDate(),
 	        rental.getFinalPrice(), rental.getRentalStatus(), rental.getRentalPeriod(),
-	        rental.getItemSnapshot().getId(), rental.getItemSnapshot().getName(), rental.getRenterId(),
-	        rental.getRenter().getName(), rental.getOwnerId(), rental.getOwner().getName(),
-	        rental.getCreatedAt()
+	        itemSnpDto, rental.getCreatedAt()
 	    );
 	}
 	
