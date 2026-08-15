@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.omnirent.payment.dto.CheckoutCompletedDTO;
 import br.com.omnirent.payment.dto.PaymentHistoryResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -20,5 +21,10 @@ public class PaymentController {
 	@GetMapping("/history/{rentalId}")
 	public List<PaymentHistoryResponse> getPaymentHistory(@PathVariable String rentalId) {
 		return paymentService.getPaymentHistory(rentalId);
+	}
+	
+	@GetMapping("/checkout/rental/{rentalId}")
+	public CheckoutCompletedDTO findCheckout(@PathVariable String rentalId) {
+		return paymentService.findPaymentCheckout(rentalId);
 	}
 }

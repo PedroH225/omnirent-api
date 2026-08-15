@@ -97,7 +97,7 @@ public class PaymentService {
         simpMessagingTemplate.convertAndSend(
         		"/topic/rental/payment/" + event.rentalId(), 
         		new CheckoutCompletedDTO(
-        				event.rentalId(), session.url(), "CHECKOUT_CREATED"));
+        				event.rentalId(), session.url(), payment.getStatus()));
         
         log.debug("Session URL: {}", session.url());;
         
@@ -269,6 +269,11 @@ public class PaymentService {
 				new PaymentStatusChangedAuditSnapshot(newStatus),
 				new PaymentStatusChangedAuditSnapshot(oldStatus),
 				Instant.now(clock)));
+	}
+
+	public CheckoutCompletedDTO findPaymentCheckout(String rentalId) {
+		return queryRepository.findCheckout(rentalId)
+				.orElseThrow(() -> new ApiException(PaymentErrorType.NOT_FOUND));
 	}
 	
 	public List<PaymentHistoryResponse> getPaymentHistory(String rentalId) {
