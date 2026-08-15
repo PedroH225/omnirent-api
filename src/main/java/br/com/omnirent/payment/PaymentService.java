@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -88,11 +90,12 @@ public class PaymentService {
 
         paymentRepository.save(payment);
 
-        StripeCheckoutSession session = createCheckoutSession(amount, "brl", payment.getId());
+        StripeCheckoutSession session = createCheckoutSession(amount, "brl", payment.getId(), event.rentalId());
 
         payment.attachExternalReference(PaymentProvider.STRIPE, session.sessionId(), session.url());
-        
+        			
         payment = paymentRepository.save(payment);
+      
 
         simpMessagingTemplate.convertAndSend(
         		"/topic/rental/payment/" + event.rentalId(), 
@@ -244,7 +247,7 @@ public class PaymentService {
 		String currency = "brl";
 		
 		StripeCheckoutSession session = createCheckoutSession(
-				context.finalPrice(), currency, context.paymentId());
+				context.finalPrice(), currency, context.paymentId(), rentalId);
 		
 		paymentRepository.reinitializePayment(context.paymentId(), context.currentPaymentStatus(),
 				session.sessionId(), PaymentProvider.STRIPE, targetStatus,
@@ -316,13 +319,15 @@ public class PaymentService {
 	}
 	
 	private StripeCheckoutSession createCheckoutSession(
-			BigDecimal amount, String currency, String paymentId) {
-        String frontUrl = appProperties.frontUrl();
-		return stripeService.createCheckoutSession(
+			BigDecimal amount, String currency, String paymentId, String rentalId) {
+        String redirectUrl = String.format("%s/rentals/%s",
+        		appProperties.frontUrl(), rentalId);
+        
+        		return stripeService.createCheckoutSession(
                         amount.longValue() * 100,
                         currency,
-                        frontUrl + "/success",
-                        frontUrl + "/cancel",
+                        redirectUrl + "?success=true",
+                        redirectUrl + "?success=false",
                         paymentId);
 	}
 	
