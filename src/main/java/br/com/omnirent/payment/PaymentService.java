@@ -100,7 +100,7 @@ public class PaymentService {
         simpMessagingTemplate.convertAndSend(
         		"/topic/rental/payment/" + event.rentalId(), 
         		new CheckoutCompletedDTO(
-        				event.rentalId(), session.url(), payment.getStatus()));
+        				event.rentalId(), session.url(), payment.getStatus(), clock.instant()));
         
         log.debug("Session URL: {}", session.url());;
         

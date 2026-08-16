@@ -77,7 +77,7 @@ public interface PaymentQueryRepository extends Repository<Payment, String> {
 	
 	@Query("""
 			SELECT new br.com.omnirent.payment.dto.CheckoutCompletedDTO(p.rentalId,
-			p.externalReference.sessionUrl, p.status)
+			p.externalReference.sessionUrl, p.status, p.createdAt)
 			FROM Payment p
 			WHERE p.rentalId = :rentalId
 			""")
