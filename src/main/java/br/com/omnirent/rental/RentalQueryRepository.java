@@ -16,6 +16,7 @@ import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.domain.Rental;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
+import br.com.omnirent.rental.dto.RentalOperationDTO;
 
 public interface RentalQueryRepository extends Repository<Rental, String>  {
 	
@@ -120,4 +121,11 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 		""")
 	Optional<Instant> canCreateRental(String userId, String itemId, RentalStatus expired, Instant threshold);
 
+	@Query("""
+			SELECT new br.com.omnirent.rental.dto.RentalOperationDTO(
+			r.rentalStatus, r.startDate, r.endDate, r.updatedAt)
+			FROM Rental r
+			WHERE r.id = :rentalId
+			""")
+	Optional<RentalOperationDTO> getOperationalDto(String rentalId);
 }
