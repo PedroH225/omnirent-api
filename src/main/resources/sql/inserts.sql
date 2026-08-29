@@ -1,20 +1,20 @@
 -- =========================
 -- GLOBAL_CONFIGURATIONS
 -- =========================
-INSERT IGNORE INTO global_configurations (id, global_token_version) VALUES
+INSERT INTO global_configurations (id, global_token_version) VALUES
 (1, 1);
 
 -- =========================
 -- ROLES
 -- =========================
-INSERT IGNORE INTO roles(id, name) VALUES
-(1, "ROLE_USER"),
-(2, "ROLE_ADMIN");
+INSERT INTO roles(id, name) VALUES
+(1, 'ROLE_USER'),
+(2, 'ROLE_ADMIN');
 
 -- =========================
 -- USERS
 -- =========================
-INSERT IGNORE INTO users (id, name, username, email, password, birth_date, user_status) VALUES
+INSERT INTO users (id, name, username, email, password, birth_date, user_status) VALUES
 ('ab6c0937-17ac-434e-80dd-c8b581d55935','Pedro Alves','pedro','pedrodguimaraes@hotmail.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1998-05-10','ACTIVE'),
 ('d101df10-ca1d-446a-a897-8ffed7950acb','Maria Costa','maria','maria@example.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1995-03-22','ACTIVE'),
 ('966fc885-5107-4466-aa9a-ab7366e56fab','Lucas Lima','lucas','lucas@example.com','$2a$10$qCK6YDQuc9NW6cIuVLgtH.b9MrrNwWGM/HCQHtA33Qe1HhY8avKnS','1992-11-01','ACTIVE'),
@@ -26,7 +26,7 @@ INSERT IGNORE INTO users (id, name, username, email, password, birth_date, user_
 -- =========================
 -- USER_ROLES
 -- =========================
-INSERT IGNORE INTO user_roles(user_id, role_id) VALUES
+INSERT INTO user_roles(user_id, role_id) VALUES
 ('ab6c0937-17ac-434e-80dd-c8b581d55935',1),
 ('d101df10-ca1d-446a-a897-8ffed7950acb',1),
 ('966fc885-5107-4466-aa9a-ab7366e56fab',1),
@@ -38,7 +38,7 @@ INSERT IGNORE INTO user_roles(user_id, role_id) VALUES
 -- =========================
 -- CATEGORIES
 -- =========================
-INSERT IGNORE INTO categories(id, name) VALUES
+INSERT INTO categories(id, name) VALUES
 ('b0791d66-d480-402a-99fb-0a95c5f911ac','AUDIOVISUAL'),
 ('9c826e49-9a0e-44cd-ac5f-8c12aea42766','EVENTS'),
 ('701c8dc1-7e9b-46c9-85da-49e6d352190c','IT'),
@@ -48,7 +48,7 @@ INSERT IGNORE INTO categories(id, name) VALUES
 -- =========================
 -- SUBCATEGORIES
 -- =========================
-INSERT IGNORE INTO sub_categories(id, name, category_id) VALUES
+INSERT INTO sub_categories(id, name, category_id) VALUES
 -- AUDIOVISUAL
 ('eba0769d-36fc-4d36-899f-65d12342d74e','CAMERA','b0791d66-d480-402a-99fb-0a95c5f911ac'),
 ('47c5e3d5-5e5e-4bc2-a5b0-214f5835939b','TRIPOD','b0791d66-d480-402a-99fb-0a95c5f911ac'),
@@ -82,7 +82,7 @@ INSERT IGNORE INTO sub_categories(id, name, category_id) VALUES
 -- =========================
 -- ADDRESS
 -- =========================
-INSERT IGNORE INTO addresses(id, street, number, complement, district, city, state, country, zip_code, user_id) VALUES
+INSERT INTO addresses(id, street, number, complement, district, city, state, country, zip_code, user_id) VALUES
 ('b64ea00e-53ca-4015-85db-c26629e3cda0','Rua das Flores','100',NULL,'Centro','Sorocaba','SP','Brazil','18130-000','ab6c0937-17ac-434e-80dd-c8b581d55935'),
 ('a2f78f3c-b290-4573-b56a-311e4ecd2183','Av Brasil','250','Ap 12','Jardim','Sao Paulo','SP','Brazil','01000-000','d101df10-ca1d-446a-a897-8ffed7950acb'),
 ('33bac100-e500-425e-aef0-270e664a959f','Rua Verde','45',NULL,'Centro','Campinas','SP','Brazil','13000-000','966fc885-5107-4466-aa9a-ab7366e56fab'),
@@ -95,11 +95,11 @@ INSERT IGNORE INTO addresses(id, street, number, complement, district, city, sta
 -- =========================
 -- ITEMS
 -- =========================
-INSERT IGNORE INTO items(id, name, brand, model, description, base_price, item_condition, item_status, sub_category_id, owner_id, pickup_address_id, created_at, updated_at) VALUES
+INSERT INTO items(id, name, brand, model, description, base_price, item_condition, item_status, sub_category_id, owner_id, pickup_address_id, created_at, updated_at) VALUES
 ('9ec286a9-f11b-406a-87f5-956b612fb0cb','Canon T6 Camera','Canon','T6','DSLR camera for photography',80.00,'GOOD','AVAILABLE','eba0769d-36fc-4d36-899f-65d12342d74e','ab6c0937-17ac-434e-80dd-c8b581d55935','b64ea00e-53ca-4015-85db-c26629e3cda0','2026-07-10 14:30:00', NOW()),
 ('2e6fbb11-bbdf-426c-85d7-4ac0d52e81b2','Manfrotto Professional Tripod','Manfrotto','MK190XPRO4','Professional aluminum tripod',25.00,'LIKE_NEW','AVAILABLE','47c5e3d5-5e5e-4bc2-a5b0-214f5835939b','ab6c0937-17ac-434e-80dd-c8b581d55935','b64ea00e-53ca-4015-85db-c26629e3cda0','2026-06-20 09:15:00', NOW());
 
-INSERT IGNORE INTO items(id, name, brand, model, description, base_price, item_condition, item_status, sub_category_id, owner_id, pickup_address_id) VALUES
+INSERT INTO items(id, name, brand, model, description, base_price, item_condition, item_status, sub_category_id, owner_id, pickup_address_id) VALUES
 ('efbeb34f-203b-4609-826f-ef49ffdb9c20','Dell XPS 15','Dell','9520','High performance laptop for professional use',120.00,'GOOD','AVAILABLE','0f956f80-aa28-4b6f-80a2-9dfc65609c2e','d101df10-ca1d-446a-a897-8ffed7950acb','a2f78f3c-b290-4573-b56a-311e4ecd2183'),
 ('b9a99f4d-3b38-4f9c-9d2a-7864dddb1a01','Sony A6400 Camera','Sony','A6400','Mirrorless camera for professional photography',95.00,'LIKE_NEW','AVAILABLE','eba0769d-36fc-4d36-899f-65d12342d74e','9a26d72f-9b7d-4b97-a842-5d1455d90571','f3efb2a7-cd11-44f5-a8d3-d0c57e7d0d41'),
 ('cb93d2f6-6d85-48a4-a73c-73452b91af02','DJI Mini 3 Pro Drone','DJI','Mini 3 Pro','Drone for aerial photography and video',180.00,'LIKE_NEW','AVAILABLE','8d5d5077-86f2-4c95-bf0d-44cf5f5ecf18','9a26d72f-9b7d-4b97-a842-5d1455d90571','f3efb2a7-cd11-44f5-a8d3-d0c57e7d0d41'),
@@ -116,27 +116,27 @@ INSERT IGNORE INTO items(id, name, brand, model, description, base_price, item_c
 ('a6afaf26-19a2-4d91-a9a0-80cf5f598fb7','Portable PA Sound System','Yamaha','StagePas 400BT','Portable sound system for live events',110.00,'GOOD','AVAILABLE','f7ead54f-d389-4246-a450-c93534520616','e75f8c6d-8a6e-49b2-ae59-1f4b9b6e31cb','5d783c8e-f5d4-4b84-a842-615c8f2f8b43');
 
 INSERT INTO item_images (id, storage_key, display_order, item_id) VALUES 
-(UUID_TO_BIN(UUID()), 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image1.webp', 0, 'efbeb34f-203b-4609-826f-ef49ffdb9c20'),
-(UUID_TO_BIN(UUID()), 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image2.webp', 1, 'efbeb34f-203b-4609-826f-ef49ffdb9c20'),
-(UUID_TO_BIN(UUID()), 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image3.webp', 2, 'efbeb34f-203b-4609-826f-ef49ffdb9c20');
+(gen_random_uuid(), 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image1.webp', 0, 'efbeb34f-203b-4609-826f-ef49ffdb9c20'),
+(gen_random_uuid(), 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image2.webp', 1, 'efbeb34f-203b-4609-826f-ef49ffdb9c20'),
+(gen_random_uuid(), 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image3.webp', 2, 'efbeb34f-203b-4609-826f-ef49ffdb9c20');
 
 -- =========================
 -- RENTALS
 -- =========================
-INSERT IGNORE INTO rentals (id, rental_status, rental_period, final_price, renter_id, owner_id, item_id) VALUES
+INSERT INTO rentals (id, rental_status, rental_period, final_price, renter_id, owner_id, item_id) VALUES
 ('5f54c279-9ad6-40c2-8a32-22216d48ca39','CREATED','DAILY',160.00,'d101df10-ca1d-446a-a897-8ffed7950acb','ab6c0937-17ac-434e-80dd-c8b581d55935', '2e6fbb11-bbdf-426c-85d7-4ac0d52e81b2'),
 ('b24fca5b-648a-44e2-ba89-2223d8ab57b0','CONFIRMED','DAILY',240.00,'ab6c0937-17ac-434e-80dd-c8b581d55935','d101df10-ca1d-446a-a897-8ffed7950acb', 'efbeb34f-203b-4609-826f-ef49ffdb9c20');
 
 -- =========================
 -- ITEM SNAPSHOTS
 -- =========================
-INSERT IGNORE INTO item_snapshots VALUES
+INSERT INTO item_snapshots VALUES
 ('3db9a3e6-0368-45ac-9200-8ee3d0a10f44','Canon T6 Camera','Canon','T6', 'DSLR camera for photography', 80.00,'GOOD','Camera', null, '5f54c279-9ad6-40c2-8a32-22216d48ca39'),
 ('faefe02d-cc3e-4e33-aefb-2b3e556fabc2','Dell XPS 15','Dell','9520', 'High performance laptop',120.00,'GOOD','Laptop', 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image1.webp', 'b24fca5b-648a-44e2-ba89-2223d8ab57b0');
 
 -- =========================
 -- ADDRESS_SNAPSHOTS
 -- =========================
-INSERT IGNORE INTO address_snapshots VALUES
+INSERT INTO address_snapshots VALUES
 ('80b6696f-d7fe-4f0d-81b9-3ae47ab7de99','Rua das Flores','123',NULL,'Centro','São Paulo','SP','Brasil','01001-000', '5f54c279-9ad6-40c2-8a32-22216d48ca39'),
 ('3f9ce4e3-8fec-4782-b9d5-c6ddf3607f8b','Av. Paulista','1578','Apto 42','Bela Vista','São Paulo','SP','Brasil','01310-200', 'b24fca5b-648a-44e2-ba89-2223d8ab57b0');
