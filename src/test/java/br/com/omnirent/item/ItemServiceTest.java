@@ -153,6 +153,7 @@ public class ItemServiceTest {
 		ItemDetailDTO itemDetailDTO = ItemTestFactory.toItemDetailsDto(item, drill, ownerAddress, owner);
 	
 		when(queryRepository.findItemDetailDTO(itemId)).thenReturn(Optional.of(itemDetailDTO));
+		when(itemMapper.calculateItemPrices(itemDetailDTO)).thenReturn(itemDetailDTO);
 		when(itemMapper.localize(itemDetailDTO)).thenReturn(itemDetailDTO);
 		
 		ItemDetailDTO result = itemService.getItemById(itemId);
