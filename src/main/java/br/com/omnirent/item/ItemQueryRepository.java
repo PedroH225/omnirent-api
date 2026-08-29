@@ -30,7 +30,7 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 				im.storageKey)
 				FROM Item i JOIN i.owner o JOIN i.subCategory sc JOIN sc.category c
 				LEFT JOIN i.images im
-				WHERE (:name IS NULL OR LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%')))
+				WHERE LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%'))
 				  AND (:category IS NULL OR c.name = :category)
 				  AND (:subCategory IS NULL OR sc.name = :subCategory)
 				  AND (:itemCondition IS NULL OR i.itemData.itemCondition = :itemCondition)
@@ -44,7 +44,7 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 							    JOIN i.subCategory sc
 							    JOIN sc.category c
 							    LEFT JOIN i.images im
-							    WHERE (:name IS NULL OR LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%')))
+							    WHERE LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%'))
 							      AND (:category IS NULL OR c.name = :category)
 							      AND (:subCategory IS NULL OR sc.name = :subCategory)
 							      AND (:itemCondition IS NULL OR i.itemData.itemCondition = :itemCondition)

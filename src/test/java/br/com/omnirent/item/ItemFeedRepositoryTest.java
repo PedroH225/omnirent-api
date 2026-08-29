@@ -34,7 +34,7 @@ public class ItemFeedRepositoryTest extends IntegrationTest {
     void shouldReturnAllItemsWhenNoFiltersApplied() {
         Pageable pageable = PageRequest.of(0, 20);
         
-        Page<ItemFeedContext> result = queryRepository.getFeedContexts(null, null, null, null, pageable);
+        Page<ItemFeedContext> result = queryRepository.getFeedContexts("", null, null, null, pageable);
 
         assertThat(result.getContent()).isNotEmpty();
         assertThat(result.getTotalElements()).isEqualTo(8);
@@ -57,7 +57,7 @@ public class ItemFeedRepositoryTest extends IntegrationTest {
     void shouldFilterByCategory() {
         Pageable pageable = PageRequest.of(0, 10);
         
-        Page<ItemFeedContext> result = queryRepository.getFeedContexts(null, "IT", null, null, pageable);
+        Page<ItemFeedContext> result = queryRepository.getFeedContexts("", "IT", null, null, pageable);
 
         assertThat(result.getContent())
 	        .extracting(ItemFeedContext::subCategoryName)
@@ -68,7 +68,7 @@ public class ItemFeedRepositoryTest extends IntegrationTest {
     void shouldFilterBySubCategory() {
         Pageable pageable = PageRequest.of(0, 10);
         
-        Page<ItemFeedContext> result = queryRepository.getFeedContexts(null, null, "CAMERA", null, pageable);
+        Page<ItemFeedContext> result = queryRepository.getFeedContexts("", null, "CAMERA", null, pageable);
 
         assertThat(result.getContent())
 	        .extracting(ItemFeedContext::subCategoryName)
@@ -79,7 +79,7 @@ public class ItemFeedRepositoryTest extends IntegrationTest {
     void shouldFilterByItemCondition() {
         Pageable pageable = PageRequest.of(0, 20);
         
-        Page<ItemFeedContext> result = queryRepository.getFeedContexts(null, null, null, ItemCondition.GOOD, pageable);
+        Page<ItemFeedContext> result = queryRepository.getFeedContexts("", null, null, ItemCondition.GOOD, pageable);
 
         assertThat(result.getContent()).hasSize(4);
     }
@@ -114,7 +114,7 @@ public class ItemFeedRepositoryTest extends IntegrationTest {
     void shouldSortByCreatedAtDesc() {
         Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
         
-        Page<ItemFeedContext> result = queryRepository.getFeedContexts(null, null, null, null, pageable);
+        Page<ItemFeedContext> result = queryRepository.getFeedContexts("", null, null, null, pageable);
 
         assertThat(result.getContent()).isNotEmpty();
         assertThat(result.getContent().get(0).name()).isEqualTo("Dell XPS 15");
@@ -124,7 +124,7 @@ public class ItemFeedRepositoryTest extends IntegrationTest {
     void shouldSortByBasePriceAsc() {
         Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.ASC, "itemData.basePrice"));
         
-        Page<ItemFeedContext> result = queryRepository.getFeedContexts(null, null, null, null, pageable);
+        Page<ItemFeedContext> result = queryRepository.getFeedContexts("", null, null, null, pageable);
 
         assertThat(result.getContent()).isNotEmpty();
         
@@ -137,7 +137,7 @@ public class ItemFeedRepositoryTest extends IntegrationTest {
     void shouldSortByBasePriceDesc() {
         Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "itemData.basePrice"));
         
-        Page<ItemFeedContext> result = queryRepository.getFeedContexts(null, null, null, null, pageable);
+        Page<ItemFeedContext> result = queryRepository.getFeedContexts("", null, null, null, pageable);
 
         assertThat(result.getContent()).isNotEmpty();
         
@@ -150,10 +150,10 @@ public class ItemFeedRepositoryTest extends IntegrationTest {
     void shouldPaginateResults() {
         int pageSize = 3;
         
-        Page<ItemFeedContext> page0 = queryRepository.getFeedContexts(null, null, null, null, PageRequest.of(0, pageSize));
+        Page<ItemFeedContext> page0 = queryRepository.getFeedContexts("", null, null, null, PageRequest.of(0, pageSize));
         assertThat(page0.getContent()).hasSize(3);
         
-        Page<ItemFeedContext> page1 = queryRepository.getFeedContexts(null, null, null, null, PageRequest.of(1, pageSize));
+        Page<ItemFeedContext> page1 = queryRepository.getFeedContexts("", null, null, null, PageRequest.of(1, pageSize));
         assertThat(page1.getContent()).hasSize(3);
 
         assertThat(page0.getContent()).doesNotContainAnyElementsOf(page1.getContent());

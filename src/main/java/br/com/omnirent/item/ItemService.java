@@ -128,10 +128,11 @@ public class ItemService {
 	}
 	
 	public PageResponseDTO<ItemFeedDTO> getItemFeed(ItemFeedFilter feedFilter, Pageable pageable) {
+		String itemName = feedFilter.itemName() == null ? "" : feedFilter.itemName();
+		
 		Page<ItemFeedContext> context = queryRepository.getFeedContexts(
-				feedFilter.itemName(), feedFilter.categoryName(), 
-				feedFilter.subCategoryName(), feedFilter.itemCondition(),
-				pageable);
+		        itemName, feedFilter.categoryName(), feedFilter.subCategoryName(), 
+		        feedFilter.itemCondition(), pageable);
 		
 		return itemMapper.toFeedDtos(context);
 	}
