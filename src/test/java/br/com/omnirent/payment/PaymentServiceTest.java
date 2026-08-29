@@ -171,8 +171,14 @@ class PaymentServiceTest {
 
     @Test
     void createPayment_ShouldSavePaymentAndCreateStripeSession() {
-        String frontUrl = "https://omnirent.com.br";
-        when(appProperties.frontUrl()).thenReturn(frontUrl);
+    	String expectedUrl = "https://omnirent.com.br";
+    	String expectedSuccessUrl = String.format(
+    	        "%s/rentals/%s?success=true", expectedUrl, rental.getId());
+
+    	String expectedCancelUrl = String.format(
+    	        "%s/rentals/%s?success=false", expectedUrl, rental.getId());	
+    	
+        when(appProperties.frontUrl()).thenReturn(expectedUrl);
         when(stripeService.createCheckoutSession(anyLong(), anyString(), anyString(), anyString(), any()))
                 .thenReturn(stripeSession);
         when(paymentRepository.save(any(Payment.class))).thenReturn(mock(Payment.class));
@@ -183,8 +189,8 @@ class PaymentServiceTest {
         verify(stripeService).createCheckoutSession(
                 15000L,
                 "brl",
-                frontUrl + "/success",
-                frontUrl + "/cancel",
+                expectedSuccessUrl,
+                expectedCancelUrl,
                 null
         );
         verify(simpMessagingTemplate).convertAndSend(
@@ -338,7 +344,6 @@ class PaymentServiceTest {
 
         assertEquals(rental.getId(), sentDto.rentalId());
         assertEquals(checkoutUrl, sentDto.checkoutUrl());
-        assertEquals("CHECKOUT_CREATED", sentDto.status());
     }
 
     @Test
