@@ -33,6 +33,7 @@ import br.com.omnirent.rental.domain.RentalPriceService;
 import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
+import br.com.omnirent.rental.dto.RentalOperationDTO;
 import br.com.omnirent.rental.dto.RentalRequestDTO;
 import br.com.omnirent.rental.event.RentalCanceledEvent;
 import br.com.omnirent.rental.event.RentalCreatedEvent;
@@ -100,6 +101,11 @@ public class RentalService {
 	
 	private RentalInUseContext getInUseContext(String rentId) {
 		return queryRepository.getStatusInUseContext(rentId)
+				.orElseThrow(() -> new ApiException(RentalErrorType.NOT_FOUND));
+	}
+	
+	public RentalOperationDTO getOperationalDto(String rentalId) {
+		return queryRepository.getOperationalDto(rentalId)
 				.orElseThrow(() -> new ApiException(RentalErrorType.NOT_FOUND));
 	}
 

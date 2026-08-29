@@ -16,6 +16,7 @@ public record RegisterDTO(
 		String name, 
 		
 		@NotBlank(message = "required")
+		@Size(min=3, max = 50, message = "size")	
 		String username,
 		
 		@NotBlank(message = "required")

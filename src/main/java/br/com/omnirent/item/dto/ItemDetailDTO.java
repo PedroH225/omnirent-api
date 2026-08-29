@@ -27,6 +27,8 @@ public class ItemDetailDTO {
 	
 	private BigDecimal basePrice;
 	
+	private ItemPriceData priceData;
+	
 	private ItemCondition itemCondition;
 	
 	private String itemConditionLabel;

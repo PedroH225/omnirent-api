@@ -90,6 +90,7 @@ public class ItemService {
 		
 		result.setImages(imageRepository.findItemImages(id));
 		
+		result = itemMapper.calculateItemPrices(result);
 		return itemMapper.localize(result);	
 	}
 	

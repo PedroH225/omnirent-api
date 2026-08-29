@@ -14,6 +14,7 @@ import br.com.omnirent.payment.context.PaymentConfirmedContext;
 import br.com.omnirent.payment.context.PaymentExpiredContext;
 import br.com.omnirent.payment.context.PaymentRefundContext;
 import br.com.omnirent.payment.context.ReopenPaymentContext;
+import br.com.omnirent.payment.dto.CheckoutCompletedDTO;
 import br.com.omnirent.payment.model.Payment;
 
 public interface PaymentQueryRepository extends Repository<Payment, String> {
@@ -73,4 +74,12 @@ public interface PaymentQueryRepository extends Repository<Payment, String> {
 			WHERE p.rentalId = :rentalId
 			""")
 	Optional<String> getPaymentId(String rentalId);
+	
+	@Query("""
+			SELECT new br.com.omnirent.payment.dto.CheckoutCompletedDTO(p.rentalId,
+			p.externalReference.sessionUrl, p.status, p.createdAt)
+			FROM Payment p
+			WHERE p.rentalId = :rentalId
+			""")
+	Optional<CheckoutCompletedDTO> findCheckout(String rentalId);
 }

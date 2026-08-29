@@ -244,6 +244,11 @@ public class ItemMapper {
 		return new PageResponseDTO<>(dto);
 	}
 	
+	public ItemDetailDTO calculateItemPrices(ItemDetailDTO result) {
+		result.setPriceData(calculatePriceData(result.getBasePrice()));
+		return result;
+	}
+	
 	private ItemPriceData calculatePriceData(BigDecimal basePrice) {
 		return new ItemPriceData(
 				scale(basePrice.multiply(RentalPeriod.HOURLY.getMultiplier())),

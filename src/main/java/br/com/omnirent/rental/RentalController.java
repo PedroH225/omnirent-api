@@ -14,6 +14,7 @@ import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.rental.dto.RentalCreatedDTO;
 import br.com.omnirent.rental.dto.RentalDetailDTO;
 import br.com.omnirent.rental.dto.RentalDisplayDTO;
+import br.com.omnirent.rental.dto.RentalOperationDTO;
 import br.com.omnirent.rental.dto.RentalRequestDTO;
 import lombok.AllArgsConstructor;
 
@@ -37,6 +38,11 @@ public class RentalController {
 	@GetMapping("/find/userRentals")
 	public PageResponseDTO<RentalDisplayDTO> findUserRentals(Pageable pageable) {
 		return rentalService.findUserRentals(pageable);
+	}
+	
+	@GetMapping("/find/operational/{rentalId}")
+	public RentalOperationDTO findUserRentals(@PathVariable String rentalId) {
+		return rentalService.getOperationalDto(rentalId);
 	}
 	
 	@GetMapping("/enums")
