@@ -146,8 +146,8 @@ INSERT INTO rentals (id, rental_status, rental_period, final_price, renter_id, o
 -- ITEM SNAPSHOTS
 -- =========================
 INSERT INTO item_snapshots VALUES
-('3db9a3e6-0368-45ac-9200-8ee3d0a10f44','Canon T6 Camera','Canon','T6', 'DSLR camera for photography', 80.00,'GOOD','Camera', null, '5f54c279-9ad6-40c2-8a32-22216d48ca39'),
-('faefe02d-cc3e-4e33-aefb-2b3e556fabc2','Dell XPS 15','Dell','9520', 'High performance laptop',120.00,'GOOD','Laptop', 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image1.webp', 'b24fca5b-648a-44e2-ba89-2223d8ab57b0');
+('3db9a3e6-0368-45ac-9200-8ee3d0a10f44','Canon T6 Camera','Canon','T6', 'DSLR camera for photography', 80.00,'GOOD','Camera', 'items/sample/9ec286a9-f11b-406a-87f5-956b612fb0cb/sample.webp', '5f54c279-9ad6-40c2-8a32-22216d48ca39'),
+('faefe02d-cc3e-4e33-aefb-2b3e556fabc2','Dell XPS 15','Dell','9520', 'High performance laptop',120.00,'GOOD','Laptop', 'items/sample/efbeb34f-203b-4609-826f-ef49ffdb9c20/image1.webp', 'b24fca5b-648a-44e2-ba89-2223d8ab57b0');
 
 -- =========================
 -- ADDRESS_SNAPSHOTS
