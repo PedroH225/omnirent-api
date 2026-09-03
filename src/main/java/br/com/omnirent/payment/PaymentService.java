@@ -250,7 +250,7 @@ public class PaymentService {
 				context.finalPrice(), currency, context.paymentId(), rentalId);
 		
 		paymentRepository.reinitializePayment(context.paymentId(), context.currentPaymentStatus(),
-				session.sessionId(), PaymentProvider.STRIPE, targetStatus,
+				session.sessionId(), session.url(), PaymentProvider.STRIPE, targetStatus,
 				context.finalPrice(), currency);
 		
         log.debug("Session URL: {}", session.url());
