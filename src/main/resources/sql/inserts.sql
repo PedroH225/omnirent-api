@@ -116,9 +116,24 @@ INSERT INTO items(id, name, brand, model, description, base_price, item_conditio
 ('a6afaf26-19a2-4d91-a9a0-80cf5f598fb7','Portable PA Sound System','Yamaha','StagePas 400BT','Portable sound system for live events',110.00,'GOOD','AVAILABLE','f7ead54f-d389-4246-a450-c93534520616','e75f8c6d-8a6e-49b2-ae59-1f4b9b6e31cb','5d783c8e-f5d4-4b84-a842-615c8f2f8b43');
 
 INSERT INTO item_images (id, storage_key, display_order, item_id) VALUES 
-(gen_random_uuid(), 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image1.webp', 0, 'efbeb34f-203b-4609-826f-ef49ffdb9c20'),
-(gen_random_uuid(), 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image2.webp', 1, 'efbeb34f-203b-4609-826f-ef49ffdb9c20'),
-(gen_random_uuid(), 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image3.webp', 2, 'efbeb34f-203b-4609-826f-ef49ffdb9c20');
+(gen_random_uuid(), 'items/sample/efbeb34f-203b-4609-826f-ef49ffdb9c20/image1.webp', 0, 'efbeb34f-203b-4609-826f-ef49ffdb9c20'),
+(gen_random_uuid(), 'items/sample/efbeb34f-203b-4609-826f-ef49ffdb9c20/image2.webp', 1, 'efbeb34f-203b-4609-826f-ef49ffdb9c20'),
+(gen_random_uuid(), 'items/sample/efbeb34f-203b-4609-826f-ef49ffdb9c20/image3.webp', 2, 'efbeb34f-203b-4609-826f-ef49ffdb9c20'),
+(gen_random_uuid(), 'items/sample/9ec286a9-f11b-406a-87f5-956b612fb0cb/sample.webp', 0, '9ec286a9-f11b-406a-87f5-956b612fb0cb'),
+(gen_random_uuid(), 'items/sample/2e6fbb11-bbdf-426c-85d7-4ac0d52e81b2/sample.webp', 0, '2e6fbb11-bbdf-426c-85d7-4ac0d52e81b2'),
+(gen_random_uuid(), 'items/sample/b9a99f4d-3b38-4f9c-9d2a-7864dddb1a01/sample.webp', 0, 'b9a99f4d-3b38-4f9c-9d2a-7864dddb1a01'),
+(gen_random_uuid(), 'items/sample/cb93d2f6-6d85-48a4-a73c-73452b91af02/sample.webp', 0, 'cb93d2f6-6d85-48a4-a73c-73452b91af02'),
+(gen_random_uuid(), 'items/sample/2efda34b-9d79-4f34-a01d-f8ebc63866b4/sample.webp', 0, '2efda34b-9d79-4f34-a01d-f8ebc63866b4'),
+(gen_random_uuid(), 'items/sample/d77c26d4-96cf-4b0c-a95f-3a6fb8ec14d3/sample.webp', 0, 'd77c26d4-96cf-4b0c-a95f-3a6fb8ec14d3'),
+(gen_random_uuid(), 'items/sample/05f1b89e-7292-4ea3-935d-f66729bdbb31/sample.webp', 0, '05f1b89e-7292-4ea3-935d-f66729bdbb31'),
+(gen_random_uuid(), 'items/sample/05f1b89e-7292-4ea3-935d-f66729bdbb32/sample.webp', 0, '05f1b89e-7292-4ea3-935d-f66729bdbb32'),
+(gen_random_uuid(), 'items/sample/d8f2d9fd-cf4b-4f4c-9c8c-8f3dba55b8de/sample.webp', 0, 'd8f2d9fd-cf4b-4f4c-9c8c-8f3dba55b8de'),
+(gen_random_uuid(), 'items/sample/68cfad79-bfc0-49c5-85a0-5fcbca4d0d22/sample.webp', 0, '68cfad79-bfc0-49c5-85a0-5fcbca4d0d22'),
+(gen_random_uuid(), 'items/sample/68cfad79-bfc0-49c5-85a0-5fcbca4d0d23/sample.webp', 0, '68cfad79-bfc0-49c5-85a0-5fcbca4d0d23'),
+(gen_random_uuid(), 'items/sample/68cfad79-bfc0-49c5-85a0-5fcbca4d0d24/sample.webp', 0, '68cfad79-bfc0-49c5-85a0-5fcbca4d0d24'),
+(gen_random_uuid(), 'items/sample/c45c3c43-640b-4dc7-a23d-7c0e82dd731f/sample.webp', 0, 'c45c3c43-640b-4dc7-a23d-7c0e82dd731f'),
+(gen_random_uuid(), 'items/sample/d9854d89-b81d-4b73-a9ec-87e28f5fd0ce/sample.webp', 0, 'd9854d89-b81d-4b73-a9ec-87e28f5fd0ce'),
+(gen_random_uuid(), 'items/sample/a6afaf26-19a2-4d91-a9a0-80cf5f598fb7/sample.webp', 0, 'a6afaf26-19a2-4d91-a9a0-80cf5f598fb7');
 
 -- =========================
 -- RENTALS
@@ -131,8 +146,8 @@ INSERT INTO rentals (id, rental_status, rental_period, final_price, renter_id, o
 -- ITEM SNAPSHOTS
 -- =========================
 INSERT INTO item_snapshots VALUES
-('3db9a3e6-0368-45ac-9200-8ee3d0a10f44','Canon T6 Camera','Canon','T6', 'DSLR camera for photography', 80.00,'GOOD','Camera', null, '5f54c279-9ad6-40c2-8a32-22216d48ca39'),
-('faefe02d-cc3e-4e33-aefb-2b3e556fabc2','Dell XPS 15','Dell','9520', 'High performance laptop',120.00,'GOOD','Laptop', 'items/efbeb34f-203b-4609-826f-ef49ffdb9c20/image1.webp', 'b24fca5b-648a-44e2-ba89-2223d8ab57b0');
+('3db9a3e6-0368-45ac-9200-8ee3d0a10f44','Canon T6 Camera','Canon','T6', 'DSLR camera for photography', 80.00,'GOOD','Camera', 'items/sample/9ec286a9-f11b-406a-87f5-956b612fb0cb/sample.webp', '5f54c279-9ad6-40c2-8a32-22216d48ca39'),
+('faefe02d-cc3e-4e33-aefb-2b3e556fabc2','Dell XPS 15','Dell','9520', 'High performance laptop',120.00,'GOOD','Laptop', 'items/sample/efbeb34f-203b-4609-826f-ef49ffdb9c20/image1.webp', 'b24fca5b-648a-44e2-ba89-2223d8ab57b0');
 
 -- =========================
 -- ADDRESS_SNAPSHOTS
