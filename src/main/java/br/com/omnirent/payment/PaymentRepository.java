@@ -39,11 +39,12 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     @Query("""
     		UPDATE Payment p
     		SET p.status = :pending, p.externalReference.externalPaymentId = :sessionId,
-    		p.externalReference.paymentIntent = null, p.externalReference.paymentProvider = :provider,
-    		p.paidAt = null, p.amount = :amount, p.currency = :currency
+    		p.externalReference.sessionUrl = :sessionUrl, p.externalReference.paymentIntent = null,
+    		p.externalReference.paymentProvider = :provider, p.paidAt = null, 
+    		p.amount = :amount, p.currency = :currency
     		WHERE p.id = :id AND p.status = :currStatus
     		""")
     int reinitializePayment(String id, PaymentStatus currStatus, String sessionId,
-    		PaymentProvider provider, PaymentStatus pending, BigDecimal amount,
-    		String currency);
+    		String sessionUrl, PaymentProvider provider, PaymentStatus pending,
+    		BigDecimal amount, String currency);
 }
