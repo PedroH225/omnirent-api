@@ -3,14 +3,18 @@ package br.com.omnirent.rental;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.audit.AuditAction;
+import br.com.omnirent.common.enums.PaymentStatus;
 import br.com.omnirent.common.enums.RentalEnums;
 import br.com.omnirent.common.enums.RentalPeriod;
 import br.com.omnirent.common.enums.RentalStatus;
@@ -23,6 +27,8 @@ import br.com.omnirent.exception.domain.apptype.RentalErrorType;
 import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.payment.dto.CheckoutCompletedDTO;
+import br.com.omnirent.payment.dto.PaymentUpdateDTO;
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
 import br.com.omnirent.rental.context.RentalInUseContext;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
@@ -71,6 +77,8 @@ public class RentalService {
 	private MessageService messageService;
 	
 	private SpringDomainEventPublisher eventPublisher;
+	
+    private final SimpMessagingTemplate simpMessagingTemplate;
 		
 	private void validateTransition(RentalStatus currStatus, RentalStatus targetStatus) {
 		if (!currStatus.canTransition(targetStatus)) {
@@ -241,6 +249,8 @@ public class RentalService {
 		
 		publishInUseTransition(context, "SYSTEM_RENEWAL", targetStatus,
 				startDate, endDateTime);
+		
+		notifyPaymentUpdate(rentalId);
 	}
 	
 	@Transactional
@@ -353,10 +363,35 @@ public class RentalService {
 	@Transactional
 	public void confirm(String rentId, RentalStatus currentStatus) {
 		RentalStatus targetStatus = RentalStatus.CONFIRMED;
-		
+	
 		rentalRepository.updateRentalStatus(rentId, targetStatus);
 		
 		publishDefaultTransition("SERVER_CONFIRMATION", rentId, currentStatus, targetStatus);
+	
+		notifyPaymentUpdate(rentId);
+	}
+	
+	
+	public PageResponseDTO<RentalDisplayDTO> findUserRented(Pageable pageable) {
+		String renterId = currentUserProvider.currentUserId();
+		userService.requireExistence(renterId);
+		
+		Page<RentalDisplayDTO> result = queryRepository.findUserRented(renterId, pageable);
+		
+		return new PageResponseDTO<>(mapper.localize(result));
+	}
+
+	public PageResponseDTO<RentalDisplayDTO> findUserRentals(Pageable pageable) {
+		String ownerId = currentUserProvider.currentUserId();
+		userService.requireExistence(ownerId);
+		
+		Page<RentalDisplayDTO> result = queryRepository.findUserRentals(ownerId, pageable);
+		
+		return new PageResponseDTO<>(mapper.localize(result));
+	}
+
+	public RentalEnums getEnums() {
+		return mapper.getLocalizedEnums();
 	}
 	
 	private void publishDefaultTransition(
@@ -382,25 +417,9 @@ public class RentalService {
 	            Instant.now(clock)));
 	}
 	
-	public PageResponseDTO<RentalDisplayDTO> findUserRented(Pageable pageable) {
-		String renterId = currentUserProvider.currentUserId();
-		userService.requireExistence(renterId);
-		
-		Page<RentalDisplayDTO> result = queryRepository.findUserRented(renterId, pageable);
-		
-		return new PageResponseDTO<>(mapper.localize(result));
-	}
-
-	public PageResponseDTO<RentalDisplayDTO> findUserRentals(Pageable pageable) {
-		String ownerId = currentUserProvider.currentUserId();
-		userService.requireExistence(ownerId);
-		
-		Page<RentalDisplayDTO> result = queryRepository.findUserRentals(ownerId, pageable);
-		
-		return new PageResponseDTO<>(mapper.localize(result));
-	}
-
-	public RentalEnums getEnums() {
-		return mapper.getLocalizedEnums();
+	private void notifyPaymentUpdate(String rentalId) {
+		simpMessagingTemplate.convertAndSend(
+				"/topic/rental/payment-update/" + rentalId,
+				new PaymentUpdateDTO(PaymentStatus.PAID));
 	}
 }
