@@ -1,6 +1,8 @@
 package br.com.omnirent.security.auth;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,5 +41,9 @@ public class AuthenticationController {
 	public void logout(HttpServletResponse response) {
 		authenticationService.logout(response);
 	}
-
+	
+	@GetMapping("/csrf")
+	public CsrfToken csrf(CsrfToken csrfToken) {
+		return csrfToken;
+	}
 }
