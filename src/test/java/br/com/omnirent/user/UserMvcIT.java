@@ -204,4 +204,13 @@ public class UserMvcIT extends SpringMvcIntegration {
 	            .content(payload))
 	        .andExpect(status().isConflict());
 	}
+	
+	@Test
+	void shouldThrowWithoutCsrf() throws Exception {
+	    mockMvc.perform(put(USER_PREFIX + "/update")
+	            .with(SecurityTestUtils.auth(user1))
+	            .contentType(MediaType.APPLICATION_JSON)
+	            )
+	        .andExpect(status().isForbidden());
+	}
 }
