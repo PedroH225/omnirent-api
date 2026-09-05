@@ -1,19 +1,18 @@
 package br.com.omnirent.security.auth;
 
-import java.util.Map;
-
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.security.dto.RegisterDTO;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -32,13 +31,19 @@ public class AuthenticationController {
 	}
 	
 	@PostMapping("/login")
-	public Map<String, String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
-		return authenticationService.login(loginDTO, request);
+	public void login(
+			@RequestBody LoginDTO loginDTO, 
+			HttpServletRequest request, HttpServletResponse response) {
+		authenticationService.login(loginDTO, request, response);
 	}
 	
 	@PatchMapping("/logout")
-	public void logout() {
-		authenticationService.logout();
+	public void logout(HttpServletResponse response) {
+		authenticationService.logout(response);
 	}
-
+	
+	@GetMapping("/csrf")
+	public CsrfToken csrf(CsrfToken csrfToken) {
+		return csrfToken;
+	}
 }

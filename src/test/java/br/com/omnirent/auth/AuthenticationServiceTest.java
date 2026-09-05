@@ -32,6 +32,7 @@ import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
 import br.com.omnirent.factory.UserTestFactory;
+import br.com.omnirent.security.CookieService;
 import br.com.omnirent.security.TokenService;
 import br.com.omnirent.security.auth.AuthenticationService;
 import br.com.omnirent.security.auth.provider.AuthProvider;
@@ -44,6 +45,7 @@ import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.UserValidationService;
 import br.com.omnirent.user.domain.User;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthenticationServiceTest {
@@ -78,6 +80,9 @@ public class AuthenticationServiceTest {
 	@Mock
 	private Clock clock;
 	
+	@Mock
+	private CookieService cookieService;
+	
 	private User user;
 	
 	@BeforeEach
@@ -89,6 +94,8 @@ public class AuthenticationServiceTest {
 	void loginSuccess() {
 		LoginDTO loginDTO = new LoginDTO("test@email.com", "password");
 		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse httpResponse = mock(HttpServletResponse.class);
+
 		Authentication auth = mock(Authentication.class);
 		AuthenticatedUser authUser = new AuthenticatedUser("123", "test@email.com", "password", Collections.emptyList(), 1, 1);
 		Instant now = Instant.now(clock);
@@ -102,11 +109,7 @@ public class AuthenticationServiceTest {
 		when(request.getHeader("User-Agent")).thenReturn("Test-Agent");
 		when(clock.instant()).thenReturn(now);
 
-		Map<String, String> result = authenticationService.login(loginDTO, request);
-
-		assertThat(result)
-				.isNotNull()
-				.containsEntry("token", "expected-token");
+		authenticationService.login(loginDTO, request, httpResponse);
 
 		ArgumentCaptor<UserLoggedInEvent> eventCaptor = ArgumentCaptor.forClass(UserLoggedInEvent.class);
 		verify(eventPublisher).publish(eventCaptor.capture());
@@ -138,13 +141,14 @@ public class AuthenticationServiceTest {
 	void loginThrowsBadCredentialsException() {
 		LoginDTO loginDTO = new LoginDTO("test@email.com", "wrong-password");
 		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
 
 		when(context.getBean(AuthenticationManager.class)).thenReturn(authenticationManager);
 		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
 				.thenThrow(new BadCredentialsException("Bad credentials"));
 
 		ApiException exception = assertThrowsExactly(ApiException.class, () -> 
-				authenticationService.login(loginDTO, request)
+				authenticationService.login(loginDTO, request, response)
 		);
 
 		ArgumentCaptor<UsernamePasswordAuthenticationToken> captor =
@@ -168,6 +172,8 @@ public class AuthenticationServiceTest {
 	void loginThrowsInternalAuthenticationServiceExceptionWithApiException() {
 		LoginDTO loginDTO = new LoginDTO("test@email.com", "password");
 		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+
 		ApiException apiException = new ApiException(AuthenticationErrorType.INVALID_TOKEN);
 		InternalAuthenticationServiceException exception = new InternalAuthenticationServiceException("Error", apiException);
 
@@ -175,7 +181,7 @@ public class AuthenticationServiceTest {
 		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(exception);
 
 		ApiException thrown = assertThrowsExactly(ApiException.class, () -> 
-				authenticationService.login(loginDTO, request)
+				authenticationService.login(loginDTO, request, response)
 		);
 
 		assertThat(thrown).isSameAs(apiException);
@@ -201,6 +207,8 @@ public class AuthenticationServiceTest {
 	void loginThrowsInternalAuthenticationServiceExceptionWithOtherException() {
 		LoginDTO loginDTO = new LoginDTO("test@email.com", "password");
 		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+
 		RuntimeException otherException = new RuntimeException("Generic error");
 		InternalAuthenticationServiceException exception = new InternalAuthenticationServiceException("Error", otherException);
 
@@ -208,7 +216,7 @@ public class AuthenticationServiceTest {
 		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(exception);
 
 		ApiException thrown = assertThrowsExactly(ApiException.class, () -> 
-				authenticationService.login(loginDTO, request)
+				authenticationService.login(loginDTO, request, response)
 		);
 
 		assertThat(thrown.getErrorType()).isEqualTo(AuthenticationErrorType.AUTHENTICATION_SERVICE_ERROR.getErrorType());

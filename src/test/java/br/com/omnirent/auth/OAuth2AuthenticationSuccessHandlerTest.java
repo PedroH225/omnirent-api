@@ -39,6 +39,7 @@ import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
 import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import br.com.omnirent.factory.ExternalIdentityTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
+import br.com.omnirent.security.CookieService;
 import br.com.omnirent.security.TokenService;
 import br.com.omnirent.security.auth.UserIdentityService;
 import br.com.omnirent.security.auth.provider.AuthProvider;
@@ -104,6 +105,9 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 
 	@Mock
 	private OAuth2AccessToken accessToken;
+	
+	@Mock
+	private CookieService cookieService;
 	
 	private User user;
 	private ExternalIdentity google;
@@ -182,7 +186,7 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 		verify(tokenService).generateToken(authenticatedUser);
 		verify(userIdentityService).resolveUser(userInfo);
 		
-		verify(response).sendRedirect("http://localhost:3000/oauth/callback?token=mock-jwt-token");
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback");
 	}
 	
 	@Test
@@ -322,7 +326,7 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 		verify(eventPublisher).publish(eventCaptor.capture());
 		verify(request).getRemoteAddr();
 		verify(request).getHeader("X-Forwarded-For");
-		verify(response).sendRedirect("http://localhost:3000/oauth/callback?token=mock-jwt-token");
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback");
 		assertThat(eventCaptor.getValue().ip()).isEqualTo("172.16.0.1");
 	}
 	
@@ -353,7 +357,7 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 		        ArgumentCaptor.forClass(UserLoggedInEvent.class);
 
 		verify(eventPublisher).publish(captor.capture());
-		verify(response).sendRedirect("http://localhost:3000/oauth/callback?token=mock-jwt-token");
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback");
 	}
 	
 	@Test
@@ -390,7 +394,7 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 			    AuthProvider.GITHUB, oauth2User, "mock-access-token");
 		
 		verify(tokenService).generateToken(authenticatedUser);
-		verify(response).sendRedirect("http://localhost:3000/oauth/callback?token=mock-jwt-token");
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback");
 	}
 	
 	@Test
@@ -446,7 +450,7 @@ public class OAuth2AuthenticationSuccessHandlerTest {
 		assertThat(event.userAgent()).isNull();
 		assertThat(event.success()).isTrue();
 
-		verify(response).sendRedirect("http://localhost:3000/oauth/callback?token=mock-jwt-token");
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback");
 	}
 }
 

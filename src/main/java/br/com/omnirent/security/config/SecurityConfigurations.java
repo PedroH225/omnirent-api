@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -45,13 +46,21 @@ public class SecurityConfigurations {
 
     @Bean 
     protected SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity) throws Exception{
-        return httpSecurity
+        CookieCsrfTokenRepository repository =
+                CookieCsrfTokenRepository.withHttpOnlyFalse();
+
+            repository.setCookiePath("/");
+            
+    	return httpSecurity
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf
+                		.spa()
+                		.csrfTokenRepository(repository))
                 .oauth2Login(oauth -> oauth.
                 		successHandler(oAuth2AuthenticationSuccessHandler)
                 		.failureHandler(oAuth2AuthorizationFailureHandler))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session
+                		.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                 		.requestMatchers(
                 				"/item/approve/**",
@@ -73,7 +82,8 @@ public class SecurityConfigurations {
                                 "/webhooks/**",
                                 "/oauth2/**",
                                 "/login/oauth2/**",
-                                "/login", "/logout"
+                                "/login", "/logout",
+                                "/auth/csrf"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

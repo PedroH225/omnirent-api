@@ -18,6 +18,7 @@ import br.com.omnirent.config.properties.AppProperties;
 import br.com.omnirent.exception.common.ApiErrorResponseWriter;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
+import br.com.omnirent.security.CookieService;
 import br.com.omnirent.security.TokenService;
 import br.com.omnirent.security.auth.UserIdentityService;
 import br.com.omnirent.security.auth.provider.records.ProviderUserMetadata;
@@ -52,6 +53,8 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 	
 	private final SpringDomainEventPublisher eventPublisher;
 	
+	private final CookieService cookieService;
+	
 	private final Clock clock;
 
 	@Override
@@ -82,14 +85,16 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
 			String token = tokenService.generateToken((AuthenticatedUser) authenticatedUser);
 
+			cookieService.addAccessTokenCookie(response, token);
+			
 			String ip = extractIp(request);
 			String userAgent = request.getHeader("User-Agent");
 			
 			eventPublisher.publish(new UserLoggedInEvent(
 					user.getId(), ip, userAgent, provider, true, Instant.now(clock)));
 			
-			response.sendRedirect(String.format("%s/oauth/callback?token=%s",
-					appProperties.frontUrl(), token));
+			response.sendRedirect(String.format("%s/oauth/callback",
+					appProperties.frontUrl()));
 
 		} catch (IOException e) {
 			log.error("Failed to redirect after OAuth2 authentication", e);

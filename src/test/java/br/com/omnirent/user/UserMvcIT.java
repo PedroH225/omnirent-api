@@ -1,6 +1,7 @@
 package br.com.omnirent.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -77,8 +78,10 @@ public class UserMvcIT extends SpringMvcIntegration {
 		String payload = objectMapper.writeValueAsString(dirty);
 		
 	    mockMvc.perform(post(AUTH_PREFIX + "/register")
+	    		.with(csrf())
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .content(payload))
+	    
 	        .andExpect(status().isOk());
 
 	}
@@ -98,6 +101,7 @@ public class UserMvcIT extends SpringMvcIntegration {
 		
 	    mockMvc.perform(post(AUTH_PREFIX + "/register")
 	            .contentType(MediaType.APPLICATION_JSON)
+	            .with(csrf())
 	            .content(payload))
 	        .andExpect(status().isConflict());
 	}
@@ -116,6 +120,7 @@ public class UserMvcIT extends SpringMvcIntegration {
 		String payload = objectMapper.writeValueAsString(dirty);
 		
 	    mockMvc.perform(post(AUTH_PREFIX + "/register")
+	            .with(csrf())
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .content(payload))
 	        .andExpect(status().isConflict());
@@ -139,6 +144,7 @@ public class UserMvcIT extends SpringMvcIntegration {
 		
 	    mockMvc.perform(put(USER_PREFIX + "/update")
 	    		.with(SecurityTestUtils.auth(user1))
+	            .with(csrf())
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .content(payload))
 	        .andExpect(status().isOk());
@@ -170,6 +176,7 @@ public class UserMvcIT extends SpringMvcIntegration {
 
 	    mockMvc.perform(put(USER_PREFIX + "/update")
 	            .with(SecurityTestUtils.auth(user1))
+	            .with(csrf())
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .content(payload))
 	        .andExpect(status().isConflict());
@@ -191,9 +198,19 @@ public class UserMvcIT extends SpringMvcIntegration {
 	    String payload = objectMapper.writeValueAsString(dirty);
 
 	    mockMvc.perform(put(USER_PREFIX + "/update")
+	            .with(csrf())
 	            .with(SecurityTestUtils.auth(user1))
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .content(payload))
 	        .andExpect(status().isConflict());
+	}
+	
+	@Test
+	void shouldThrowWithoutCsrf() throws Exception {
+	    mockMvc.perform(put(USER_PREFIX + "/update")
+	            .with(SecurityTestUtils.auth(user1))
+	            .contentType(MediaType.APPLICATION_JSON)
+	            )
+	        .andExpect(status().isForbidden());
 	}
 }

@@ -1,5 +1,6 @@
 package br.com.omnirent.security.auth;
 
+import br.com.omnirent.security.CookieService;
 import br.com.omnirent.security.CurrentUserProvider;
 import java.time.Clock;
 import java.time.Instant;
@@ -37,6 +38,7 @@ import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.UserValidationService;
 import br.com.omnirent.user.domain.User;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -71,7 +73,10 @@ public class AuthenticationService implements UserDetailsService {
 	
 	@Autowired
 	private Clock clock;
-
+	
+	@Autowired
+	private CookieService cookieService;
+	
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 		User context = queryRepository.findByEmail(email)
@@ -81,7 +86,8 @@ public class AuthenticationService implements UserDetailsService {
 		return mapper.toAuthUser(context);
 	}
 
-	public Map<String, String> login(LoginDTO data, HttpServletRequest request) {
+	public void login(
+			LoginDTO data, HttpServletRequest request, HttpServletResponse response) {
 		try {
 			authenticationManager = context.getBean(AuthenticationManager.class);
 
@@ -94,12 +100,13 @@ public class AuthenticationService implements UserDetailsService {
 
 			String ip = extractIp(request);
 			String userAgent = request.getHeader("User-Agent");
+			
+			cookieService.addAccessTokenCookie(response, token);
 
 			eventPublisher.publish(new UserLoggedInEvent(
 							user.getId(), ip, userAgent, AuthProvider.LOGIN_PASSWORD,
 							true, Instant.now(clock)));
 
-			return Map.of("token", token);
 		} 
 		catch (InternalAuthenticationServiceException e) {
 		    if (e.getCause() instanceof ApiException ae) {
@@ -149,7 +156,9 @@ public class AuthenticationService implements UserDetailsService {
 		}
 	}
 
-	public void logout() {
+	public void logout(HttpServletResponse response) {
 		userService.invalidateUserTokens(currentUserProvider.currentUserId());
+		
+		cookieService.removeAccessTokenCookie(response);
 	}
 }

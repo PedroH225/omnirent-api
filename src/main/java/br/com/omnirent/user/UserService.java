@@ -30,9 +30,9 @@ import br.com.omnirent.security.auth.RoleRepository;
 import br.com.omnirent.security.domain.Role;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.context.ChangeUserStatusContext;
-import br.com.omnirent.user.context.LoggedUserResponseDTO;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
+import br.com.omnirent.user.dto.LoggedUserResponseDTO;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
@@ -194,6 +194,16 @@ public class UserService {
 		return userMapper.getLocalizedEnums();
 	}
 	
+	public LoggedUserResponseDTO getLoggedUserData() {
+		String currUserId = currentUserProvider.currentUserId();
+		LoggedUserResponseDTO loggedUser = queryRepository.findLoggedUserData(currUserId)
+				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
+		
+		loggedUser.setAuthorities(currentUserProvider.getAuthorities());
+		
+		return loggedUser;
+	}
+	
 	@Cacheable(value = "tokenVersion", key = "#userId")
 	public AuthMetadata getTokenVersion(String userId) {
 	    AuthMetadata authMetadata = queryRepository.findTokenVersionById(userId);
@@ -238,11 +248,5 @@ public class UserService {
 	    return !StringUtils.isBlank(locale) 
 	    		&& AppLocale.SUPPORTED_LOCALES.contains(locale)
 	    		? locale : appProperties.locale();
-	}
-
-	public LoggedUserResponseDTO getLoggedUserData() {
-		String currUserId = currentUserProvider.currentUserId();
-		return queryRepository.findLoggedUserData(currUserId)
-				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
 	}
 }

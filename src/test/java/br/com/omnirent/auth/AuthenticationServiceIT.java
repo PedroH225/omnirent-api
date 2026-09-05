@@ -2,16 +2,14 @@ package br.com.omnirent.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-
-import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import br.com.omnirent.config.global.GlobalConfigHolder;
@@ -19,6 +17,7 @@ import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AuthenticationErrorType;
 import br.com.omnirent.factory.UserTestFactory;
 import br.com.omnirent.integration.SpringIntegrationTest;
+import br.com.omnirent.security.CookieService;
 import br.com.omnirent.security.auth.AuthenticationService;
 import br.com.omnirent.security.dto.LoginDTO;
 import br.com.omnirent.user.UserRepository;
@@ -26,6 +25,7 @@ import br.com.omnirent.user.domain.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 
 @Transactional
@@ -46,6 +46,9 @@ public class AuthenticationServiceIT extends SpringIntegrationTest {
 	@Autowired
 	private GlobalConfigHolder globalConfigHolder;
 	
+	@Autowired
+	private CookieService cookieService;
+	
 	private User user;
 	
 	@BeforeEach
@@ -54,7 +57,7 @@ public class AuthenticationServiceIT extends SpringIntegrationTest {
 	}
 	
 	@Test
-	void login_WithValidCredentials_ShouldReturnToken() {
+	void shouldLogin_WithValidCredentials() {
 		String rawPassword = "validPassword123";
 		user.setPassword(passwordEncoder.encode(rawPassword));
 		userRepository.save(user);
@@ -64,16 +67,14 @@ public class AuthenticationServiceIT extends SpringIntegrationTest {
 
 		LoginDTO loginDTO = new LoginDTO(user.getEmail(), rawPassword);
 		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse httpResponse = mock(HttpServletResponse.class);
 		
+
 		when(request.getHeader("X-Forwarded-For")).thenReturn(null);
 		when(request.getRemoteAddr()).thenReturn("127.0.0.1");
 		when(request.getHeader("User-Agent")).thenReturn("Integration-Test-Agent");
-
-		Map<String, String> response = authenticationService.login(loginDTO, request);
-
-		assertThat(response).isNotNull();
-		assertThat(response).containsOnlyKeys("token");
-		assertThat(response.get("token")).isNotBlank();
+		
+		authenticationService.login(loginDTO, request, httpResponse);
 	}
 	
 	@Test
@@ -87,9 +88,10 @@ public class AuthenticationServiceIT extends SpringIntegrationTest {
 
 		LoginDTO loginDTO = new LoginDTO(user.getEmail(), "wrongPassword");
 		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse httpResponse = mock(HttpServletResponse.class);
 
 		ApiException exception = assertThrowsExactly(ApiException.class, () -> 
-			authenticationService.login(loginDTO, request)
+			authenticationService.login(loginDTO, request, httpResponse)
 		);
 
 		assertThat(exception.getErrorType()).isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorType());
@@ -99,9 +101,10 @@ public class AuthenticationServiceIT extends SpringIntegrationTest {
 	void login_NonexistentCredentials_ShouldThrowApiException() {
 	    LoginDTO loginDTO = new LoginDTO("nonexistent@email.com", "anyPassword");
 	    HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse httpResponse = mock(HttpServletResponse.class);
 
 	    ApiException exception = assertThrowsExactly(ApiException.class, () ->
-	            authenticationService.login(loginDTO, request)
+	            authenticationService.login(loginDTO, request, httpResponse)
 	    );
 
 	    assertThat(exception.getErrorType())

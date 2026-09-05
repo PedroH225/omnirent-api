@@ -2,12 +2,14 @@ package br.com.omnirent.security.config;
 
 import java.io.IOException;
 
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.security.CookieService;
 import br.com.omnirent.security.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,6 +22,8 @@ import lombok.AllArgsConstructor;
 public class SecurityFilter extends OncePerRequestFilter{
 	
     private TokenService tokenService;
+    
+    private CookieService cookieService;
     
     private CustomAuthenticationEntryPoint authenticationEntryPoint;
  
@@ -36,9 +40,14 @@ public class SecurityFilter extends OncePerRequestFilter{
                 SecurityContextHolder.getContext()
                 .setAuthentication(tokenService.authenticate(decoded));
 
-            } catch (AuthenticationException ex) {
+            } catch (CredentialsExpiredException ex) {
                 SecurityContextHolder.clearContext();
-
+                cookieService.removeAccessTokenCookie(response);
+                authenticationEntryPoint.commence(request, response, ex);
+                return;
+            }
+            catch (AuthenticationException ex) {
+                SecurityContextHolder.clearContext();
                 authenticationEntryPoint.commence(request, response, ex);
                 return;
             }
@@ -46,9 +55,9 @@ public class SecurityFilter extends OncePerRequestFilter{
         filterChain.doFilter(request, response);
     }
 
-    private String recoverToken(HttpServletRequest request){
-        var authHeader = request.getHeader("Authorization");
-        if (authHeader == null) return null;
-        return authHeader.replace("Bearer ", "");
+    private String recoverToken(HttpServletRequest request) {
+
+        return cookieService.getAccessToken(request)
+                .orElse(null);
     }
 }
