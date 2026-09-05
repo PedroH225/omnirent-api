@@ -1,6 +1,7 @@
 package br.com.omnirent.address;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -82,6 +83,7 @@ public class AddressMvcIT extends SpringMvcIntegration {
 
 		String response = mockMvc.perform(post(ADDRESS_PREFIX)
 				.with(SecurityTestUtils.auth(user1))
+				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isOk())
@@ -139,6 +141,7 @@ public class AddressMvcIT extends SpringMvcIntegration {
 
 		mockMvc.perform(post(ADDRESS_PREFIX)
 				.with(SecurityTestUtils.auth(user1))
+				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isConflict());
@@ -162,6 +165,7 @@ public class AddressMvcIT extends SpringMvcIntegration {
 
 		String response = mockMvc.perform(put(ADDRESS_PREFIX)
 				.with(SecurityTestUtils.auth(user1))
+				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isOk())
@@ -221,6 +225,7 @@ public class AddressMvcIT extends SpringMvcIntegration {
 
 		mockMvc.perform(put(ADDRESS_PREFIX)
 				.with(SecurityTestUtils.auth(user1))
+				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isConflict());

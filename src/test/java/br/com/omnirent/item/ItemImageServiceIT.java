@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -121,6 +122,7 @@ public class ItemImageServiceIT extends SpringMvcIntegration {
 	                    .file(request)
 	                    .file(image)
 	                    .with(SecurityTestUtils.auth(user1))
+	                    .with(csrf())
 	    )
 	    .andExpect(status().isServiceUnavailable())
 	    .andExpect(jsonPath("$.errorCode")
@@ -153,6 +155,7 @@ public class ItemImageServiceIT extends SpringMvcIntegration {
 	                    .file(request)
 	                    .file(image)
 	                    .with(SecurityTestUtils.auth(user1))
+	                    .with(csrf())
 	    )
 	    .andExpect(status().isForbidden())
 	    .andExpect(jsonPath("$.errorCode")
@@ -185,6 +188,7 @@ public class ItemImageServiceIT extends SpringMvcIntegration {
 	                    .file(request)
 	                    .file(image)
 	                    .with(SecurityTestUtils.auth(user1))
+	                    .with(csrf())
 	    )
 	    .andExpect(status().isTooManyRequests())
 	    .andExpect(jsonPath("$.errorCode")
@@ -214,6 +218,7 @@ public class ItemImageServiceIT extends SpringMvcIntegration {
 	                    .file(request)
 	                    .file(image)
 	                    .with(SecurityTestUtils.auth(user1))
+	                    .with(csrf())
 	    )
 	    .andExpect(status().isServiceUnavailable())
 	    .andExpect(jsonPath("$.errorCode")
@@ -247,6 +252,7 @@ public class ItemImageServiceIT extends SpringMvcIntegration {
 	                    .file(request)
 	                    .file(image)
 	                    .with(SecurityTestUtils.auth(user1))
+	                    .with(csrf())
 	    )
 	    .andExpect(status().isInternalServerError())
 	    .andExpect(jsonPath("$.errorCode")

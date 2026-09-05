@@ -1,6 +1,7 @@
 package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -125,6 +126,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 
 		String response = mockMvc.perform(post(ITEM_PREFIX)
 				.with(SecurityTestUtils.auth(user1))
+				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isOk())
@@ -181,6 +183,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 
 		mockMvc.perform(post(ITEM_PREFIX)
 				.with(SecurityTestUtils.auth(user1))
+				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isConflict());
@@ -202,6 +205,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 
 		mockMvc.perform(put(ITEM_PREFIX)
 				.with(SecurityTestUtils.auth(user1))
+				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isOk());
@@ -254,6 +258,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 
 		mockMvc.perform(put(ITEM_PREFIX)
 				.with(SecurityTestUtils.auth(user1))
+				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 		.andExpect(status().isConflict());
@@ -266,7 +271,8 @@ public class ItemMvcIT extends SpringMvcIntegration {
 		itemRepository.saveAndFlush(item1);
 		
 		mockMvc.perform(patch("/item/approve/{itemId}", item1.getId())
-	            .with(SecurityTestUtils.auth(admin)))
+	            .with(SecurityTestUtils.auth(admin))
+	            .with(csrf()))
 	        .andExpect(status().isOk());
 	}
 	
@@ -280,6 +286,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 		
 	    mockMvc.perform(patch("/item/reject/{itemId}", item1.getId())
 	            .with(SecurityTestUtils.auth(admin))
+	            .with(csrf())
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .content(objectMapper.writeValueAsString(dto)))
 	        .andExpect(status().isOk());
@@ -306,7 +313,8 @@ public class ItemMvcIT extends SpringMvcIntegration {
 	
 	@Test
 	void shouldReturnUnauthorizedWhenApprovingItemWithoutAuthentication() throws Exception {
-	    mockMvc.perform(post("/item/approve/{itemId}", item1.getId()))
+	    mockMvc.perform(post("/item/approve/{itemId}", item1.getId())
+	    		.with(csrf()))
 	        .andExpect(status().isUnauthorized());
 	}
 	
@@ -317,6 +325,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 
 	    mockMvc.perform(post("/item/reject/{itemId}", item1.getId())
 	            .contentType(MediaType.APPLICATION_JSON)
+	            .with(csrf())
 	            .content(objectMapper.writeValueAsString(dto)))
 	        .andExpect(status().isUnauthorized());
 	}
