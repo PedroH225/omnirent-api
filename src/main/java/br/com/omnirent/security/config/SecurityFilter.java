@@ -2,6 +2,7 @@ package br.com.omnirent.security.config;
 
 import java.io.IOException;
 
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -39,9 +40,14 @@ public class SecurityFilter extends OncePerRequestFilter{
                 SecurityContextHolder.getContext()
                 .setAuthentication(tokenService.authenticate(decoded));
 
-            } catch (AuthenticationException ex) {
+            } catch (CredentialsExpiredException ex) {
                 SecurityContextHolder.clearContext();
-
+                cookieService.removeAccessTokenCookie(response);
+                authenticationEntryPoint.commence(request, response, ex);
+                return;
+            }
+            catch (AuthenticationException ex) {
+                SecurityContextHolder.clearContext();
                 authenticationEntryPoint.commence(request, response, ex);
                 return;
             }
