@@ -28,6 +28,7 @@ import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.item.context.ItemFeedFilter;
 import br.com.omnirent.item.context.ItemImagesRequestDto;
 import br.com.omnirent.item.context.ItemRejectedRequestDto;
+import br.com.omnirent.item.dto.ItemAnalisysDTO;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
@@ -61,6 +62,11 @@ public class ItemController {
 	@GetMapping("/find/user")
 	public PageResponseDTO<ItemDisplayDTO> findUserItems(Pageable pageable) {
 		return itemService.getUserItems(pageable);
+	}
+	
+	@GetMapping("/find/analisys")
+	public List<ItemAnalisysDTO> findItemUnderAnalisys() {
+		return itemService.getUnderAnalisys();
 	}
 	
 	@GetMapping("/enums")

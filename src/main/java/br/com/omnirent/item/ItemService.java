@@ -4,6 +4,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,12 +31,14 @@ import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
 import br.com.omnirent.item.context.ItemFeedFilter;
+import br.com.omnirent.item.context.ItemImageResponseDTO;
 import br.com.omnirent.item.context.ItemRejectedAuditSnapshot;
 import br.com.omnirent.item.context.ItemRejectedRequestDto;
 import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
+import br.com.omnirent.item.dto.ItemAnalisysDTO;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
@@ -339,6 +343,45 @@ public class ItemService {
 				new ItemRejectedAuditSnapshot(currStatus, null), clock.instant()));
 	}	
 	
+
+	public List<ItemAnalisysDTO> getUnderAnalisys() {
+	    List<ItemAnalisysDTO> itemDtos =
+	            queryRepository.findUnderAnalisys(ItemStatus.ANALISYS);
+
+	    if (itemDtos.isEmpty()) {
+	        return itemDtos;
+	    }
+
+	    List<String> itemIds = itemDtos.stream()
+	            .map(ItemAnalisysDTO::getId)
+	            .toList();
+
+	    List<ItemImageResponseDTO> images =
+	            imageRepository.findItemImagesByItemIds(itemIds);
+
+	    Map<String, List<ItemImageResponseDTO>> imagesByItemId =
+	            images.stream()
+	                    .collect(Collectors.groupingBy(
+	                            ItemImageResponseDTO::itemId
+	                    ));
+
+	    for (ItemAnalisysDTO itemDto : itemDtos) {
+	        itemDto.setImages(
+	                imagesByItemId.getOrDefault(itemDto.getId(), List.of())
+	        );
+	    }
+
+	    return itemDtos;
+	}
+	
+	public ItemEnums getEnums() {
+		return itemMapper.getLocalizedEnums();
+	}
+	
+	public List<EnumOption> getRejectedReasonEnums() {
+		return itemMapper.getLocalizedRejectedEnums();
+	}
+	
 	private void updateStatus(String itemId, ItemStatus currStatus, ItemStatus targetStatus) {
 		int updated = itemRepository.updateStatus(itemId, currStatus, targetStatus);
 		
@@ -353,13 +396,5 @@ public class ItemService {
 					messageService.get(currStatus.getMessageKey()),
 					messageService.get(targetStatus.getMessageKey()));
 		}
-	}
-	
-	public ItemEnums getEnums() {
-		return itemMapper.getLocalizedEnums();
-	}
-	
-	public List<EnumOption> getRejectedReasonEnums() {
-		return itemMapper.getLocalizedRejectedEnums();
 	}
 }

@@ -55,7 +55,8 @@ public class SecurityConfigurations {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf
                 		.spa()
-                		.csrfTokenRepository(repository))
+                		.csrfTokenRepository(repository)
+                		)
                 .oauth2Login(oauth -> oauth.
                 		successHandler(oAuth2AuthenticationSuccessHandler)
                 		.failureHandler(oAuth2AuthorizationFailureHandler))
@@ -65,6 +66,7 @@ public class SecurityConfigurations {
                 		.requestMatchers(
                 				"/item/approve/**",
                 				"/item/reject/**",
+                				"/item/find/analisys",
                 				"/user/ban/**"
                 				).hasRole("ADMIN")
                 		.requestMatchers(
