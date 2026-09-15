@@ -184,12 +184,15 @@ public class UserService {
 	}
 	
 	@Transactional
-	public void banUser(String userId) {
+	public void toggleUserBanStatus(String userId) {
 		ChangeUserStatusContext context = queryRepository.getUserStatusChangeContext(userId)
 				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
 	
 		UserStatus currentStatus = context.currentUserStatus();
-		UserStatus targetStatus = UserStatus.BANNED;
+		UserStatus targetStatus = 
+				currentStatus == UserStatus.BANNED 
+				? UserStatus.ACTIVE
+				: UserStatus.BANNED;
 		
 		updateStatus(userId, currentStatus, targetStatus);
 		invalidateUserTokens(userId);

@@ -64,8 +64,8 @@ public class UserController {
 		userService.changeUserStatus();
 	}
 	
-	@PatchMapping("/ban/{id}")
-	public void banUser(@PathVariable String id) {
-		userService.banUser(id);
+	@PatchMapping("/admin/status/{id}")
+	public void toggleUserBanStatus(@PathVariable String id) {
+		userService.toggleUserBanStatus(id);
 	}
 }
