@@ -24,10 +24,12 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import br.com.omnirent.common.enums.EnumOption;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemEnums;
+import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.item.context.ItemFeedFilter;
 import br.com.omnirent.item.context.ItemImagesRequestDto;
 import br.com.omnirent.item.context.ItemRejectedRequestDto;
+import br.com.omnirent.item.context.SearchItemFilter;
 import br.com.omnirent.item.dto.ItemAnalisysDTO;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
@@ -64,9 +66,17 @@ public class ItemController {
 		return itemService.getUserItems(pageable);
 	}
 	
-	@GetMapping("/find/analisys")
+	@GetMapping("/admin/find/analisys")
 	public PageResponseDTO<ItemAnalisysDTO> findItemUnderAnalisys(Pageable pageable) {
 		return itemService.getUnderAnalisys(pageable);
+	}
+	
+	@GetMapping("/admin/find")
+	public PageResponseDTO<ItemDisplayDTO> searchItens(
+			@RequestParam(required = false) String name,
+			@RequestParam(required = false) ItemStatus itemStatus, Pageable pageable) {
+		SearchItemFilter searchFilters = new SearchItemFilter(name, itemStatus);
+		return itemService.searchItems(searchFilters, pageable);
 	}
 	
 	@GetMapping("/enums")
@@ -132,12 +142,12 @@ public class ItemController {
 		itemService.changeAvailability(itemId);
 	}
 	
-	@PatchMapping("/approve/{itemId}")
+	@PatchMapping("/admin/approve/{itemId}")
 	public void approveItem(@PathVariable String itemId) {
 		itemService.approveItem(itemId);
 	}
 	
-	@PatchMapping("/reject/{itemId}")
+	@PatchMapping("/admin/reject/{itemId}")
 	public void rejectItem(
 			@PathVariable String itemId, @RequestBody ItemRejectedRequestDto rejectedDto) {
 		itemService.rejectItem(itemId, rejectedDto);

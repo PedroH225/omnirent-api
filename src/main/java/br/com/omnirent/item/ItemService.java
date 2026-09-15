@@ -2,6 +2,7 @@ package br.com.omnirent.item;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import br.com.omnirent.item.context.ItemImageResponseDTO;
 import br.com.omnirent.item.context.ItemRejectedAuditSnapshot;
 import br.com.omnirent.item.context.ItemRejectedRequestDto;
 import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.item.context.SearchItemFilter;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
@@ -372,6 +374,18 @@ public class ItemService {
 	    }
 
 	    return new PageResponseDTO<ItemAnalisysDTO>(itemDtos);
+	}
+	
+	public PageResponseDTO<ItemDisplayDTO> searchItems(SearchItemFilter searchFilters, Pageable pageable) {
+		String nameFilter = 
+				searchFilters.name() == null ? "" : searchFilters.name();
+		List<ItemStatus> statusFilter = 
+				searchFilters.itemStatus() == null
+					? Arrays.asList(ItemStatus.values())
+					: Arrays.asList(searchFilters.itemStatus());
+		
+		return new PageResponseDTO<ItemDisplayDTO>(
+				queryRepository.searchItems(nameFilter, statusFilter, pageable));
 	}
 	
 	public ItemEnums getEnums() {

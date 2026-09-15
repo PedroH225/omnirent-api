@@ -154,4 +154,15 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 			WHERE i.itemStatus = :analisys
 			""")
 	Page<ItemAnalisysDTO> findUnderAnalisys(ItemStatus analisys, Pageable pageable);
+
+	@Query("""
+			SELECT new br.com.omnirent.item.dto.ItemDisplayDTO(i.id, i.name, i.itemData.basePrice,
+			i.itemData.itemCondition, i.itemStatus, sc.name, im.storageKey, i.createdAt)
+			FROM Item i LEFT JOIN i.images im
+			JOIN i.owner o JOIN i.subCategory sc
+			WHERE (im IS NULL OR im.displayOrder = 0)
+				AND LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%'))
+				AND i.itemStatus IN :status
+			""")
+	Page<ItemDisplayDTO> searchItems(String name, List<ItemStatus> status, Pageable pageable);
 }
