@@ -36,6 +36,7 @@ import br.com.omnirent.item.context.ItemImageResponseDTO;
 import br.com.omnirent.item.context.ItemRejectedAuditSnapshot;
 import br.com.omnirent.item.context.ItemRejectedRequestDto;
 import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.item.context.ItemStatusChangedAuditSnapshot;
 import br.com.omnirent.item.context.SearchItemFilter;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
@@ -52,6 +53,7 @@ import br.com.omnirent.item.event.ItemAddressChangedEvent;
 import br.com.omnirent.item.event.ItemApprovedEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.item.event.ItemRejectedEvent;
+import br.com.omnirent.item.event.ItemStatusUpdatedEvent;
 import br.com.omnirent.item.event.ItemSubcategoryChangedEvent;
 import br.com.omnirent.item.event.ItemUpdatedEvent;
 import br.com.omnirent.security.CurrentUserProvider;
@@ -347,6 +349,7 @@ public class ItemService {
 	
 	@Transactional
 	public void toggleItemBlockedStatus(String itemId) {
+		String currUserId = currentUserProvider.currentUserId();
 		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
 		
 		ItemStatus currStatus = context.currentStatus();
@@ -356,6 +359,11 @@ public class ItemService {
 					: ItemStatus.BLOCKED;
 		
 		updateStatus(itemId, currStatus, targetStatus);
+		
+		eventPublisher.publish(new ItemStatusUpdatedEvent(
+				AuditAction.ITEM_BLOCK_TOGGLED, currUserId, itemId, 
+				new ItemStatusChangedAuditSnapshot(targetStatus), 
+				new ItemStatusChangedAuditSnapshot(currStatus), clock.instant()));
 	}
 
 	public PageResponseDTO<ItemAnalisysDTO> getUnderAnalisys(Pageable pageable) {
