@@ -41,6 +41,7 @@ import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
 import br.com.omnirent.user.dto.UserSummaryDTO;
+import br.com.omnirent.user.event.UserBanToggledEvent;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
 import br.com.omnirent.user.event.UserUpdatedEvent;
 import jakarta.transaction.Transactional;
@@ -185,6 +186,7 @@ public class UserService {
 	
 	@Transactional
 	public void toggleUserBanStatus(String userId) {
+		String currUserId = currentUserProvider.currentUserId();
 		ChangeUserStatusContext context = queryRepository.getUserStatusChangeContext(userId)
 				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
 	
@@ -196,6 +198,13 @@ public class UserService {
 		
 		updateStatus(userId, currentStatus, targetStatus);
 		invalidateUserTokens(userId);
+		
+		eventPublisher.publish(
+			    new UserBanToggledEvent(
+			    	AuditAction.USER_BAN_TOGGLED, currUserId, userId,
+			        userMapper.toStatusChangeAuditSnapshot(targetStatus),
+			        userMapper.toStatusChangeAuditSnapshot(currentStatus),
+			        Instant.now(clock)));	
 	}
 	
 	public UserEnums getEnums() {

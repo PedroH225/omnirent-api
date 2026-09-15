@@ -35,6 +35,7 @@ public enum AuditAction {
 	ITEM_ADDRESS_CHANGED(ItemReassignedAuditSnapshot.class),
 	ITEM_APPROVED(ItemStatusChangedAuditSnapshot.class),
 	ITEM_REJECTED(ItemRejectedAuditSnapshot.class),
+	ITEM_BLOCK_TOGGLED(ItemStatusChangedAuditSnapshot.class),
 	
 	ADDRESS_CREATED(AddressAuditSnapshot.class),
 	ADDRESS_UPDATED(AddressAuditSnapshot.class),
@@ -42,7 +43,8 @@ public enum AuditAction {
 	
 	USER_REGISTERED(UserAuditSnapshot.class),
 	USER_UPDATED(UserAuditSnapshot.class),
-	USER_STATUS_CHANGED(UserStatusChangeAuditSnapshot.class);
+	USER_STATUS_CHANGED(UserStatusChangeAuditSnapshot.class),
+	USER_BAN_TOGGLED(UserStatusChangeAuditSnapshot.class);
 
 	private Class<? extends AuditBody> bodyClass;
 	
