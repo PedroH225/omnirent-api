@@ -344,12 +344,12 @@ public class ItemService {
 	}	
 	
 
-	public List<ItemAnalisysDTO> getUnderAnalisys() {
-	    List<ItemAnalisysDTO> itemDtos =
-	            queryRepository.findUnderAnalisys(ItemStatus.ANALISYS);
+	public PageResponseDTO<ItemAnalisysDTO> getUnderAnalisys(Pageable pageable) {
+	    Page<ItemAnalisysDTO> itemDtos =
+	            queryRepository.findUnderAnalisys(ItemStatus.ANALISYS, pageable);
 
 	    if (itemDtos.isEmpty()) {
-	        return itemDtos;
+	        return new PageResponseDTO<ItemAnalisysDTO>(itemDtos);
 	    }
 
 	    List<String> itemIds = itemDtos.stream()
@@ -371,7 +371,7 @@ public class ItemService {
 	        );
 	    }
 
-	    return itemDtos;
+	    return new PageResponseDTO<ItemAnalisysDTO>(itemDtos);
 	}
 	
 	public ItemEnums getEnums() {

@@ -65,8 +65,8 @@ public class ItemController {
 	}
 	
 	@GetMapping("/find/analisys")
-	public List<ItemAnalisysDTO> findItemUnderAnalisys() {
-		return itemService.getUnderAnalisys();
+	public PageResponseDTO<ItemAnalisysDTO> findItemUnderAnalisys(Pageable pageable) {
+		return itemService.getUnderAnalisys(pageable);
 	}
 	
 	@GetMapping("/enums")

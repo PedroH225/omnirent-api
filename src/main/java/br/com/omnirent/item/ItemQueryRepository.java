@@ -153,5 +153,5 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 			JOIN a.addressData ad
 			WHERE i.itemStatus = :analisys
 			""")
-	List<ItemAnalisysDTO> findUnderAnalisys(ItemStatus analisys);
+	Page<ItemAnalisysDTO> findUnderAnalisys(ItemStatus analisys, Pageable pageable);
 }
