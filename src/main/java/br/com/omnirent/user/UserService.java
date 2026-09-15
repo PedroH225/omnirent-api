@@ -5,12 +5,14 @@ import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.omnirent.common.audit.AuditAction;
@@ -18,6 +20,7 @@ import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.common.formatter.IdentityGeneratorUtil;
+import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.config.global.GlobalConfigHolder;
 import br.com.omnirent.config.properties.AppLocale;
 import br.com.omnirent.config.properties.AppProperties;
@@ -30,12 +33,14 @@ import br.com.omnirent.security.auth.RoleRepository;
 import br.com.omnirent.security.domain.Role;
 import br.com.omnirent.security.event.UserRegisteredEvent;
 import br.com.omnirent.user.context.ChangeUserStatusContext;
+import br.com.omnirent.user.context.UserFilter;
 import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.LoggedUserResponseDTO;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
+import br.com.omnirent.user.dto.UserSummaryDTO;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
 import br.com.omnirent.user.event.UserUpdatedEvent;
 import jakarta.transaction.Transactional;
@@ -202,6 +207,18 @@ public class UserService {
 		loggedUser.setAuthorities(currentUserProvider.getAuthorities());
 		
 		return loggedUser;
+	}
+	
+	public PageResponseDTO<UserSummaryDTO> searchUsers(UserFilter filters, Pageable pageable) {
+		String usernameFilter = filters.username() == null ? "" : filters.username();
+		List<UserStatus> userStatusFilter =
+		        filters.userStatus() == null
+		                ? Arrays.asList(UserStatus.ACTIVE, UserStatus.INACTIVE)
+		                : Arrays.asList(filters.userStatus());
+		
+		return new PageResponseDTO<UserSummaryDTO>(
+				queryRepository.searchUsers(usernameFilter, userStatusFilter,
+						pageable));
 	}
 	
 	@Cacheable(value = "tokenVersion", key = "#userId")

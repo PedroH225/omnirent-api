@@ -67,7 +67,8 @@ public class SecurityConfigurations {
                 				"/item/approve/**",
                 				"/item/reject/**",
                 				"/item/find/analisys",
-                				"/user/ban/**"
+                				"/user/ban/**",
+                				"/user/admin/find"
                 				).hasRole("ADMIN")
                 		.requestMatchers(
                                 HttpMethod.POST,
