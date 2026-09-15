@@ -53,4 +53,15 @@ public class ItemBindingConfig {
                 .to(domainExchange)
                 .with(IntegrationEventRouting.ITEM_APROVED.getKey());
     }
+    
+    @Bean
+    Binding ItemStatusUpdatedBinding(
+            Queue emailItemQueue,
+            TopicExchange domainExchange
+    ) {
+        return BindingBuilder
+                .bind(emailItemQueue)
+                .to(domainExchange)
+                .with(IntegrationEventRouting.ITEM_STATUS_UPDATED.getKey());
+    }
 }

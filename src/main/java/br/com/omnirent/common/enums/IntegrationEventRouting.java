@@ -4,6 +4,7 @@ import br.com.omnirent.infrastructure.IntegrationEvent;
 import br.com.omnirent.item.event.ItemApprovedEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.item.event.ItemRejectedEvent;
+import br.com.omnirent.item.event.ItemStatusUpdatedEvent;
 import br.com.omnirent.payment.event.PaymentConfirmedEvent;
 import br.com.omnirent.payment.event.PaymentCreatedEvent;
 import br.com.omnirent.payment.event.PaymentExpirationRequestEvent;
@@ -31,6 +32,7 @@ public enum IntegrationEventRouting {
 	PAYMENT_STATUS_CHANGED(PaymentStatusChangedEvent.class, "payment.status.changed"),
 	
 	NEW_ITEM(ItemCreatedEvent.class, "item.created"),
+	ITEM_STATUS_UPDATED(ItemStatusUpdatedEvent.class, "item.status.updated"),
 	ITEM_REJECTED(ItemRejectedEvent.class, "item.rejected"),
 	ITEM_APROVED(ItemApprovedEvent.class, "item.aproved"),
 	
