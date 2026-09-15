@@ -30,8 +30,8 @@ public class ItemAdminController {
 	@GetMapping
 	public PageResponseDTO<ItemDisplayDTO> searchItems(
 			@RequestParam(required = false) String name,
-			@RequestParam(required = false) ItemStatus itemStatus, Pageable pageable) {
-		SearchItemFilter searchFilters = new SearchItemFilter(name, itemStatus);
+			@RequestParam(required = false) ItemStatus status, Pageable pageable) {
+		SearchItemFilter searchFilters = new SearchItemFilter(name, status);
 		return itemService.searchItems(searchFilters, pageable);
 	}	
 
@@ -45,7 +45,6 @@ public class ItemAdminController {
 		return itemService.getRejectedReasonEnums();
 	}
 	
-	
 	@PatchMapping("/approve/{itemId}")
 	public void approveItem(@PathVariable String itemId) {
 		itemService.approveItem(itemId);
@@ -55,5 +54,10 @@ public class ItemAdminController {
 	public void rejectItem(
 			@PathVariable String itemId, @RequestBody ItemRejectedRequestDto rejectedDto) {
 		itemService.rejectItem(itemId, rejectedDto);
+	}
+	
+	@PatchMapping("/status/{itemId}")
+	public void toggleItemBlockedStatus(@PathVariable String itemId) {
+		itemService.toggleItemBlockedStatus(itemId);
 	}
 }

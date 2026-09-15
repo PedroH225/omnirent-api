@@ -343,8 +343,20 @@ public class ItemService {
 				AuditAction.ITEM_REJECTED, currUserId, itemId, 
 				new ItemRejectedAuditSnapshot(targetStatus, rejectedDto.reason()), 
 				new ItemRejectedAuditSnapshot(currStatus, null), clock.instant()));
-	}	
+	}
 	
+	@Transactional
+	public void toggleItemBlockedStatus(String itemId) {
+		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
+		
+		ItemStatus currStatus = context.currentStatus();
+		ItemStatus targetStatus =
+				currStatus == ItemStatus.BLOCKED
+					? ItemStatus.UNAVAILABLE
+					: ItemStatus.BLOCKED;
+		
+		updateStatus(itemId, currStatus, targetStatus);
+	}
 
 	public PageResponseDTO<ItemAnalisysDTO> getUnderAnalisys(Pageable pageable) {
 	    Page<ItemAnalisysDTO> itemDtos =
