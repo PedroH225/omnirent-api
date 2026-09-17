@@ -341,10 +341,16 @@ public class ItemService {
 				
 		updateStatus(itemId, currStatus, targetStatus);		
 		
+		boolean banOwner = rejectedDto.banOwner();
+		boolean ownerAlreadyBanned = context.ownerStatus().equals(UserStatus.BANNED);
+		if (banOwner && !ownerAlreadyBanned) {
+			userService.toggleUserBanStatus(context.ownerId());
+		}
+		
 		eventPublisher.publish(new ItemRejectedEvent(
 				AuditAction.ITEM_REJECTED, currUserId, itemId, 
-				new ItemRejectedAuditSnapshot(targetStatus, rejectedDto.reason()), 
-				new ItemRejectedAuditSnapshot(currStatus, null), clock.instant()));
+				new ItemRejectedAuditSnapshot(targetStatus, rejectedDto.reason(), ownerAlreadyBanned || banOwner), 
+				new ItemRejectedAuditSnapshot(currStatus, null, ownerAlreadyBanned), clock.instant()));
 	}
 	
 	@Transactional
