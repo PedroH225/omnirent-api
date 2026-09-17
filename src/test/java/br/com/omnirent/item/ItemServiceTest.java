@@ -1090,7 +1090,7 @@ public class ItemServiceTest {
 	    item.setItemStatus(ItemStatus.ANALISYS);
 
 	    ItemRejectedRequestDto dto =
-	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE, false);
 
 	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
 
@@ -1120,7 +1120,7 @@ public class ItemServiceTest {
 	    String itemId = item.getId();
 
 	    ItemRejectedRequestDto dto =
-	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE, false);
 
 	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
 
@@ -1143,7 +1143,7 @@ public class ItemServiceTest {
 	    item.setItemStatus(ItemStatus.ANALISYS);
 
 	    ItemRejectedRequestDto dto =
-	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE, false);
 
 	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
 
