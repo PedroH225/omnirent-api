@@ -24,10 +24,13 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import br.com.omnirent.common.enums.EnumOption;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemEnums;
+import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.item.context.ItemFeedFilter;
 import br.com.omnirent.item.context.ItemImagesRequestDto;
 import br.com.omnirent.item.context.ItemRejectedRequestDto;
+import br.com.omnirent.item.context.SearchItemFilter;
+import br.com.omnirent.item.dto.ItemAnalisysDTO;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
@@ -66,11 +69,6 @@ public class ItemController {
 	@GetMapping("/enums")
 	public ItemEnums getEnums() {
 		return itemService.getEnums();
-	}
-	
-	@GetMapping("/enums/rejected")
-	public List<EnumOption> getRejectedEnums() {
-		return itemService.getRejectedReasonEnums();
 	}
 	
 	@GetMapping("/feed")
@@ -124,17 +122,6 @@ public class ItemController {
 	@PatchMapping("/changeAvailability/{itemId}")
 	public void changeAvailability(@PathVariable String itemId) {
 		itemService.changeAvailability(itemId);
-	}
-	
-	@PatchMapping("/approve/{itemId}")
-	public void approveItem(@PathVariable String itemId) {
-		itemService.approveItem(itemId);
-	}
-	
-	@PatchMapping("/reject/{itemId}")
-	public void rejectItem(
-			@PathVariable String itemId, @RequestBody ItemRejectedRequestDto rejectedDto) {
-		itemService.rejectItem(itemId, rejectedDto);
 	}
 	
 	private Pageable resolvePageSort(Pageable pageable, ItemFeedSort itemFeedSort) {

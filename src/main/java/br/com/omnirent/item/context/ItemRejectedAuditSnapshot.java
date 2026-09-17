@@ -6,5 +6,6 @@ import br.com.omnirent.common.enums.ItemStatus;
 
 public record ItemRejectedAuditSnapshot(
 		ItemStatus status,
-		ItemRejectionReason reason
+		ItemRejectionReason reason,
+		boolean ownerBanned
 		) implements AuditBody {}

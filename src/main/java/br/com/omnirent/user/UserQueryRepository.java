@@ -3,10 +3,13 @@ package br.com.omnirent.user;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
+import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.user.context.ChangeUserStatusContext;
 import br.com.omnirent.user.context.UserTakenContext;
 import br.com.omnirent.user.domain.AuthMetadata;
@@ -14,6 +17,7 @@ import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.LoggedUserResponseDTO;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
+import br.com.omnirent.user.dto.UserSummaryDTO;
 
 public interface UserQueryRepository extends Repository<User, String> {
 	
@@ -66,5 +70,16 @@ public interface UserQueryRepository extends Repository<User, String> {
 			u.username, u.name, u.locale, u.timezone)
 			FROM User u WHERE u.id = :id
 			""")
-	Optional<LoggedUserResponseDTO> findLoggedUserData(String id); 
+	Optional<LoggedUserResponseDTO> findLoggedUserData(String id);
+	
+	@Query("""
+		    SELECT new br.com.omnirent.user.dto.UserSummaryDTO(
+		        u.id, u.username, u.userStatus)
+		    FROM User u
+		    WHERE LOWER(u.username) LIKE LOWER(CONCAT('%', :username, '%'))
+		      AND u.userStatus IN :status
+		    """)
+		Page<UserSummaryDTO> searchUsers(
+		        @Param("username") String username, @Param("status") List<UserStatus> status,
+		        Pageable pageable);
 }

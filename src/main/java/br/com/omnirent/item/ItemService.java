@@ -2,8 +2,11 @@ package br.com.omnirent.item;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,12 +32,16 @@ import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
 import br.com.omnirent.item.context.ItemFeedFilter;
+import br.com.omnirent.item.context.ItemImageResponseDTO;
 import br.com.omnirent.item.context.ItemRejectedAuditSnapshot;
 import br.com.omnirent.item.context.ItemRejectedRequestDto;
 import br.com.omnirent.item.context.ItemRentedContext;
+import br.com.omnirent.item.context.ItemStatusChangedAuditSnapshot;
+import br.com.omnirent.item.context.SearchItemFilter;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
+import br.com.omnirent.item.dto.ItemAnalisysDTO;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
@@ -46,6 +53,7 @@ import br.com.omnirent.item.event.ItemAddressChangedEvent;
 import br.com.omnirent.item.event.ItemApprovedEvent;
 import br.com.omnirent.item.event.ItemCreatedEvent;
 import br.com.omnirent.item.event.ItemRejectedEvent;
+import br.com.omnirent.item.event.ItemStatusUpdatedEvent;
 import br.com.omnirent.item.event.ItemSubcategoryChangedEvent;
 import br.com.omnirent.item.event.ItemUpdatedEvent;
 import br.com.omnirent.security.CurrentUserProvider;
@@ -333,11 +341,86 @@ public class ItemService {
 				
 		updateStatus(itemId, currStatus, targetStatus);		
 		
+		boolean banOwner = rejectedDto.banOwner();
+		boolean ownerAlreadyBanned = context.ownerStatus().equals(UserStatus.BANNED);
+		if (banOwner && !ownerAlreadyBanned) {
+			userService.toggleUserBanStatus(context.ownerId());
+		}
+		
 		eventPublisher.publish(new ItemRejectedEvent(
 				AuditAction.ITEM_REJECTED, currUserId, itemId, 
-				new ItemRejectedAuditSnapshot(targetStatus, rejectedDto.reason()), 
-				new ItemRejectedAuditSnapshot(currStatus, null), clock.instant()));
-	}	
+				new ItemRejectedAuditSnapshot(targetStatus, rejectedDto.reason(), ownerAlreadyBanned || banOwner), 
+				new ItemRejectedAuditSnapshot(currStatus, null, ownerAlreadyBanned), clock.instant()));
+	}
+	
+	@Transactional
+	public void toggleItemBlockedStatus(String itemId) {
+		String currUserId = currentUserProvider.currentUserId();
+		UpdateItemStatusContext context = getUpdateStatusContext(itemId);
+		
+		ItemStatus currStatus = context.currentStatus();
+		ItemStatus targetStatus =
+				currStatus == ItemStatus.BLOCKED
+					? ItemStatus.UNAVAILABLE
+					: ItemStatus.BLOCKED;
+		
+		updateStatus(itemId, currStatus, targetStatus);
+		
+		eventPublisher.publish(new ItemStatusUpdatedEvent(
+				AuditAction.ITEM_BLOCK_TOGGLED, currUserId, itemId, 
+				new ItemStatusChangedAuditSnapshot(targetStatus), 
+				new ItemStatusChangedAuditSnapshot(currStatus), clock.instant()));
+	}
+
+	public PageResponseDTO<ItemAnalisysDTO> getUnderAnalisys(Pageable pageable) {
+	    Page<ItemAnalisysDTO> itemDtos =
+	            queryRepository.findUnderAnalisys(ItemStatus.ANALISYS, pageable);
+
+	    if (itemDtos.isEmpty()) {
+	        return new PageResponseDTO<ItemAnalisysDTO>(itemDtos);
+	    }
+
+	    List<String> itemIds = itemDtos.stream()
+	            .map(ItemAnalisysDTO::getId)
+	            .toList();
+
+	    List<ItemImageResponseDTO> images =
+	            imageRepository.findItemImagesByItemIds(itemIds);
+
+	    Map<String, List<ItemImageResponseDTO>> imagesByItemId =
+	            images.stream()
+	                    .collect(Collectors.groupingBy(
+	                            ItemImageResponseDTO::itemId
+	                    ));
+
+	    for (ItemAnalisysDTO itemDto : itemDtos) {
+	        itemDto.setImages(
+	                imagesByItemId.getOrDefault(itemDto.getId(), List.of())
+	        );
+	    }
+
+	    return new PageResponseDTO<ItemAnalisysDTO>(itemDtos);
+	}
+	
+	public PageResponseDTO<ItemDisplayDTO> searchItems(SearchItemFilter searchFilters, Pageable pageable) {
+		String nameFilter = 
+				searchFilters.name() == null ? "" : searchFilters.name();
+		List<ItemStatus> statusFilter = 
+				searchFilters.itemStatus() == null
+					? Arrays.asList(ItemStatus.values())
+					: Arrays.asList(searchFilters.itemStatus());
+		
+		return new PageResponseDTO<ItemDisplayDTO>(
+				queryRepository.searchItems(nameFilter, statusFilter, pageable));
+	}
+	
+	public ItemEnums getEnums() {
+		return itemMapper.getLocalizedEnums();
+	}
+	
+	public List<EnumOption> getRejectedReasonEnums() {
+		return itemMapper.getLocalizedRejectedEnums();
+	}
 	
 	private void updateStatus(String itemId, ItemStatus currStatus, ItemStatus targetStatus) {
 		int updated = itemRepository.updateStatus(itemId, currStatus, targetStatus);
@@ -353,13 +436,5 @@ public class ItemService {
 					messageService.get(currStatus.getMessageKey()),
 					messageService.get(targetStatus.getMessageKey()));
 		}
-	}
-	
-	public ItemEnums getEnums() {
-		return itemMapper.getLocalizedEnums();
-	}
-	
-	public List<EnumOption> getRejectedReasonEnums() {
-		return itemMapper.getLocalizedRejectedEnums();
 	}
 }

@@ -1,6 +1,7 @@
 package br.com.omnirent.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -29,6 +30,7 @@ import br.com.omnirent.category.domain.SubCategory;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemRejectionReason;
 import br.com.omnirent.common.enums.ItemStatus;
+import br.com.omnirent.common.enums.UserStatus;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.CategoryTestFactory;
 import br.com.omnirent.factory.ItemTestFactory;
@@ -79,6 +81,8 @@ public class ItemMvcIT extends SpringMvcIntegration {
 			.registerModule(new JavaTimeModule());
 	
 	private static final String ITEM_PREFIX = "/item";
+	
+	private static final String ADMIN_ITEM_PREFIX = "/admin/items";
 	
 	private User user1;
 	
@@ -270,7 +274,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 		item1.setItemStatus(ItemStatus.ANALISYS);
 		itemRepository.saveAndFlush(item1);
 		
-		mockMvc.perform(patch("/item/approve/{itemId}", item1.getId())
+		mockMvc.perform(patch(ADMIN_ITEM_PREFIX + "/approve/{itemId}", item1.getId())
 	            .with(SecurityTestUtils.auth(admin))
 	            .with(csrf()))
 	        .andExpect(status().isOk());
@@ -279,12 +283,12 @@ public class ItemMvcIT extends SpringMvcIntegration {
 	@Test
 	void shouldRejectItemWhenUserIsAdmin() throws Exception {
 	    ItemRejectedRequestDto dto =
-	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE, false);
 		User admin = userRepository.save(UserTestFactory.admin());
 		item1.setItemStatus(ItemStatus.ANALISYS);
 		itemRepository.saveAndFlush(item1);
 		
-	    mockMvc.perform(patch("/item/reject/{itemId}", item1.getId())
+	    mockMvc.perform(patch(ADMIN_ITEM_PREFIX + "/reject/{itemId}", item1.getId())
 	            .with(SecurityTestUtils.auth(admin))
 	            .with(csrf())
 	            .contentType(MediaType.APPLICATION_JSON)
@@ -293,8 +297,31 @@ public class ItemMvcIT extends SpringMvcIntegration {
 	}
 	
 	@Test
+	void shouldRejectItemAndBanOwner() throws Exception {
+	    ItemRejectedRequestDto dto =
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE, true);
+		User admin = userRepository.save(UserTestFactory.admin());
+		item1.setItemStatus(ItemStatus.ANALISYS);
+		itemRepository.saveAndFlush(item1);
+		
+	    mockMvc.perform(patch(ADMIN_ITEM_PREFIX + "/reject/{itemId}", item1.getId())
+	            .with(SecurityTestUtils.auth(admin))
+	            .with(csrf())
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .content(objectMapper.writeValueAsString(dto)))
+	        .andExpect(status().isOk());
+		
+	    entityManager.flush();
+		entityManager.clear();
+	
+	    User owner = userRepository.findById(item1.getOwnerId()).orElseThrow();
+	    
+	    assertEquals(UserStatus.BANNED, owner.getUserStatus());
+	}
+	
+	@Test
 	void shouldReturnForbiddenWhenApprovingItemAsRegularUser() throws Exception {
-	    mockMvc.perform(post("/item/approve/{itemId}", item1.getId())
+	    mockMvc.perform(post(ADMIN_ITEM_PREFIX + "/approve/{itemId}", item1.getId())
 	            .with(SecurityTestUtils.auth(user1)))
 	        .andExpect(status().isForbidden());
 	}
@@ -302,9 +329,9 @@ public class ItemMvcIT extends SpringMvcIntegration {
 	@Test
 	void shouldReturnForbiddenWhenRejectingItemAsRegularUser() throws Exception {
 	    ItemRejectedRequestDto dto =
-	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE, false);
 
-	    mockMvc.perform(post("/item/reject/{itemId}", item1.getId())
+	    mockMvc.perform(post(ADMIN_ITEM_PREFIX + "/reject/{itemId}", item1.getId())
 	            .with(SecurityTestUtils.auth(user1))
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .content(objectMapper.writeValueAsString(dto)))
@@ -313,7 +340,7 @@ public class ItemMvcIT extends SpringMvcIntegration {
 	
 	@Test
 	void shouldReturnUnauthorizedWhenApprovingItemWithoutAuthentication() throws Exception {
-	    mockMvc.perform(post("/item/approve/{itemId}", item1.getId())
+	    mockMvc.perform(post(ADMIN_ITEM_PREFIX + "/approve/{itemId}", item1.getId())
 	    		.with(csrf()))
 	        .andExpect(status().isUnauthorized());
 	}
@@ -321,9 +348,9 @@ public class ItemMvcIT extends SpringMvcIntegration {
 	@Test
 	void shouldReturnUnauthorizedWhenRejectingItemWithoutAuthentication() throws Exception {
 	    ItemRejectedRequestDto dto =
-	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE, false);
 
-	    mockMvc.perform(post("/item/reject/{itemId}", item1.getId())
+	    mockMvc.perform(post(ADMIN_ITEM_PREFIX + "/reject/{itemId}", item1.getId())
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .with(csrf())
 	            .content(objectMapper.writeValueAsString(dto)))

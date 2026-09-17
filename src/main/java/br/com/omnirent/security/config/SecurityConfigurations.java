@@ -55,7 +55,8 @@ public class SecurityConfigurations {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf
                 		.spa()
-                		.csrfTokenRepository(repository))
+                		.csrfTokenRepository(repository)
+                		)
                 .oauth2Login(oauth -> oauth.
                 		successHandler(oAuth2AuthenticationSuccessHandler)
                 		.failureHandler(oAuth2AuthorizationFailureHandler))
@@ -63,10 +64,7 @@ public class SecurityConfigurations {
                 		.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                 		.requestMatchers(
-                				"/item/approve/**",
-                				"/item/reject/**",
-                				"/user/ban/**"
-                				).hasRole("ADMIN")
+                				"/admin/**").hasRole("ADMIN")
                 		.requestMatchers(
                                 HttpMethod.POST,
                                 "/auth/login",

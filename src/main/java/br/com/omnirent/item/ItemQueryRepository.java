@@ -1,5 +1,6 @@
 package br.com.omnirent.item;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -9,6 +10,7 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 import br.com.omnirent.common.enums.ItemCondition;
+import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.item.context.ChangeItemAddressContext;
 import br.com.omnirent.item.context.ChangeItemSubCategoryContext;
 import br.com.omnirent.item.context.ItemFeedContext;
@@ -17,6 +19,7 @@ import br.com.omnirent.item.context.ItemRentedContext;
 import br.com.omnirent.item.context.UpdateItemContext;
 import br.com.omnirent.item.context.UpdateItemStatusContext;
 import br.com.omnirent.item.domain.Item;
+import br.com.omnirent.item.dto.ItemAnalisysDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
 
@@ -137,4 +140,29 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 			WHERE i.id = :itemId
 			""")
 	Optional<ItemPermissionData> getPermissionData(String itemId);
+
+	@Query("""
+			SELECT new br.com.omnirent.item.dto.ItemAnalisysDTO(i.id, i.name, i.itemData.brand,
+			i.itemData.model, i.itemData.description, i.itemData.basePrice,
+			i.itemData.itemCondition, i.itemStatus,
+			new br.com.omnirent.category.dto.SubCategoryResDTO(sc.id, sc.name, c.name),
+			new br.com.omnirent.address.dto.AddressSummaryDTO(a.id, ad.city, ad.state, ad.country),
+			new br.com.omnirent.user.dto.UserResponseDTO(o.id, o.username))
+			FROM Item i 
+			JOIN i.owner o JOIN i.subCategory sc JOIN sc.category c JOIN i.pickupAddress a 
+			JOIN a.addressData ad
+			WHERE i.itemStatus = :analisys
+			""")
+	Page<ItemAnalisysDTO> findUnderAnalisys(ItemStatus analisys, Pageable pageable);
+
+	@Query("""
+			SELECT new br.com.omnirent.item.dto.ItemDisplayDTO(i.id, i.name, i.itemData.basePrice,
+			i.itemData.itemCondition, i.itemStatus, sc.name, im.storageKey, i.createdAt)
+			FROM Item i LEFT JOIN i.images im
+			JOIN i.owner o JOIN i.subCategory sc
+			WHERE (im IS NULL OR im.displayOrder = 0)
+				AND LOWER(i.name) LIKE LOWER(CONCAT('%', :name, '%'))
+				AND i.itemStatus IN :status
+			""")
+	Page<ItemDisplayDTO> searchItems(String name, List<ItemStatus> status, Pageable pageable);
 }

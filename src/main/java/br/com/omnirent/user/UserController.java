@@ -1,10 +1,7 @@
 package br.com.omnirent.user;
 
-import java.util.List;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +11,6 @@ import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.user.dto.LoggedUserResponseDTO;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
-import br.com.omnirent.user.dto.UserResponseDTO;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -24,11 +20,6 @@ import lombok.AllArgsConstructor;
 public class UserController {
 
 	private UserService userService;
-	
-	@GetMapping("/findAll")
-	public List<UserResponseDTO> findAll() {
-		return userService.findAll();
-	}
 	
 	@GetMapping("/find")
 	public UserDetailsDTO findById() {
@@ -53,10 +44,5 @@ public class UserController {
 	@PatchMapping("/changeStatus")
 	public void changeUserStatus() {
 		userService.changeUserStatus();
-	}
-	
-	@PatchMapping("/ban/{id}")
-	public void banUser(@PathVariable String id) {
-		userService.banUser(id);
 	}
 }

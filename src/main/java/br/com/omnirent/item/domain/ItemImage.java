@@ -27,7 +27,7 @@ public class ItemImage {
     private String storageKey;
 
     private Integer displayOrder;
-
+    
     private Instant createdAt;
     
     @ManyToOne(fetch = FetchType.LAZY)

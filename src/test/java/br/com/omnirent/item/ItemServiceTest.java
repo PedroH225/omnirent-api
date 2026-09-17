@@ -1090,7 +1090,7 @@ public class ItemServiceTest {
 	    item.setItemStatus(ItemStatus.ANALISYS);
 
 	    ItemRejectedRequestDto dto =
-	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE, false);
 
 	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
 
@@ -1109,7 +1109,75 @@ public class ItemServiceTest {
 	            ArgumentCaptor.forClass(ItemRejectedEvent.class);
 
 	    verify(eventPublisher).publish(captor.capture());
+	    verifyNoInteractions(userService);
+	    
+	    assertThat(captor.getValue().entityId()).isEqualTo(itemId);
+	    assertThat(captor.getValue().actorId()).isEqualTo(currentUserId);
+	}
+	
+	@Test
+	void shouldRejectItemAndBanOwner() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
 
+	    item.setItemStatus(ItemStatus.ANALISYS);
+
+	    ItemRejectedRequestDto dto =
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE, true);
+
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.BLOCKED))
+	            .thenReturn(1);
+
+	    itemService.rejectItem(itemId, dto);
+
+	    verify(itemRepository)
+	            .updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.BLOCKED);
+
+	    ArgumentCaptor<ItemRejectedEvent> captor =
+	            ArgumentCaptor.forClass(ItemRejectedEvent.class);
+
+	    verify(eventPublisher).publish(captor.capture());
+	    verify(userService).toggleUserBanStatus(owner.getId());
+	    
+	    assertThat(captor.getValue().entityId()).isEqualTo(itemId);
+	    assertThat(captor.getValue().actorId()).isEqualTo(currentUserId);
+	}
+	
+	@Test
+	void shouldNotBanWhenOwnerAlreadyBannedOnRejectAndBanItem() {
+	    String currentUserId = owner.getId();
+	    String itemId = item.getId();
+
+	    item.setItemStatus(ItemStatus.ANALISYS);
+
+	    ItemRejectedRequestDto dto =
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE, true);
+
+	    owner.setUserStatus(UserStatus.BANNED);
+	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
+
+	    when(currentUserProvider.currentUserId()).thenReturn(currentUserId);
+	    when(queryRepository.getUpdateStatusContext(itemId))
+	            .thenReturn(Optional.of(context));
+	    when(itemRepository.updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.BLOCKED))
+	            .thenReturn(1);
+
+	    itemService.rejectItem(itemId, dto);
+
+	    verify(itemRepository)
+	            .updateStatus(itemId, ItemStatus.ANALISYS, ItemStatus.BLOCKED);
+
+	    ArgumentCaptor<ItemRejectedEvent> captor =
+	            ArgumentCaptor.forClass(ItemRejectedEvent.class);
+
+	    verify(eventPublisher).publish(captor.capture());
+	    verifyNoInteractions(userService);
+	    
 	    assertThat(captor.getValue().entityId()).isEqualTo(itemId);
 	    assertThat(captor.getValue().actorId()).isEqualTo(currentUserId);
 	}
@@ -1120,7 +1188,7 @@ public class ItemServiceTest {
 	    String itemId = item.getId();
 
 	    ItemRejectedRequestDto dto =
-	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE, false);
 
 	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
 
@@ -1143,7 +1211,7 @@ public class ItemServiceTest {
 	    item.setItemStatus(ItemStatus.ANALISYS);
 
 	    ItemRejectedRequestDto dto =
-	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE);
+	            new ItemRejectedRequestDto(ItemRejectionReason.INVALID_TITLE, false);
 
 	    UpdateItemStatusContext context = ItemTestFactory.toUpdateItemStatusContext(item, owner);
 

@@ -26,6 +26,7 @@ public final class UserTestFactory {
         user.setPassword(value);
         user.setBirthDate(LocalDate.now());
         user.setAuthMetadata(authMetadata);
+        user.setUserStatus(UserStatus.ACTIVE);
         
         user.setLocale("pt-BR");
         user.setTimezone("America/Sao_Paulo");
