@@ -38,6 +38,7 @@ import br.com.omnirent.user.domain.AuthMetadata;
 import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.LoggedUserResponseDTO;
 import br.com.omnirent.user.dto.UserDetailsDTO;
+import br.com.omnirent.user.dto.UserPreferencesDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
 import br.com.omnirent.user.dto.UserSummaryDTO;
@@ -232,6 +233,27 @@ public class UserService {
 				queryRepository.searchUsers(usernameFilter, userStatusFilter,
 						pageable));
 	}
+	
+	@Transactional
+	public UserPreferencesDTO changePreferences(UserPreferencesDTO preferences) {
+	    String newTimezone = preferences.timezone() != null
+	        ? resolveTimezone(preferences.timezone())
+	        : null;
+
+	    String newLanguage = preferences.locale() != null
+	        ? resolveLocale(preferences.locale())
+	        : null;
+
+	    int updated = userRepository.updatePreferences(
+	        currentUserProvider.currentUserId(),
+	        newTimezone, newLanguage);
+	    
+	    if (updated == 0) {
+			throw new ApiException(ConcurrencyErrorType.OPTMISTIC_LOCK);
+		}
+	    
+	    return new UserPreferencesDTO(newLanguage, newTimezone);
+	}	
 	
 	@Cacheable(value = "tokenVersion", key = "#userId")
 	public AuthMetadata getTokenVersion(String userId) {
