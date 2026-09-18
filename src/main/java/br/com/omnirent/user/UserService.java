@@ -28,6 +28,7 @@ import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.RoleNotFoundException;
 import br.com.omnirent.exception.domain.apptype.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.apptype.UserErrorType;
+import br.com.omnirent.security.CookieService;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.security.auth.RoleRepository;
 import br.com.omnirent.security.domain.Role;
@@ -45,6 +46,7 @@ import br.com.omnirent.user.dto.UserSummaryDTO;
 import br.com.omnirent.user.event.UserBanToggledEvent;
 import br.com.omnirent.user.event.UserStatusChangeEvent;
 import br.com.omnirent.user.event.UserUpdatedEvent;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
@@ -67,6 +69,8 @@ public class UserService {
 	private UserValidationService validationService;
 	
 	private UserAuthorizationService authorizationService;
+	
+	private CookieService cookieService;
 	
 	private SpringDomainEventPublisher eventPublisher;
 	
@@ -164,7 +168,7 @@ public class UserService {
 	}
 
 	@Transactional
-	public void changeUserStatus() {
+	public void changeUserStatus(HttpServletResponse response) {
 		String userId = currentUserProvider.currentUserId();
 		ChangeUserStatusContext context = queryRepository.getUserStatusChangeContext(userId)
 				.orElseThrow(() -> new ApiException(UserErrorType.NOT_FOUND));
@@ -176,6 +180,11 @@ public class UserService {
 				UserStatus.INACTIVE : UserStatus.ACTIVE;
 		
 		updateStatus(userId, currentStatus, newStatus);
+		
+		if (newStatus == UserStatus.INACTIVE) {
+			invalidateUserTokens(userId);
+			cookieService.removeAccessTokenCookie(response);
+		}
 		
 		eventPublisher.publish(
 			    new UserStatusChangeEvent(

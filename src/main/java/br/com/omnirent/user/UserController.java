@@ -12,6 +12,7 @@ import br.com.omnirent.user.dto.LoggedUserResponseDTO;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserPreferencesDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -43,8 +44,8 @@ public class UserController {
 	}
 	
 	@PatchMapping("/changeStatus")
-	public void changeUserStatus() {
-		userService.changeUserStatus();
+	public void changeUserStatus(HttpServletResponse response) {
+		userService.changeUserStatus(response);
 	}
 	
 	@PatchMapping("/changePreferences")
