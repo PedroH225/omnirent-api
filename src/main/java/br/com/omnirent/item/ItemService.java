@@ -48,6 +48,7 @@ import br.com.omnirent.item.dto.ItemDisplayDTO;
 import br.com.omnirent.item.dto.ItemFeedDTO;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemUpdatedDTO;
+import br.com.omnirent.item.dto.LastUpdateDto;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import br.com.omnirent.item.event.ItemAddressChangedEvent;
 import br.com.omnirent.item.event.ItemApprovedEvent;
@@ -124,6 +125,11 @@ public class ItemService {
 
 	private ChangeItemSubCategoryContext getChangeItemSubCategoryContext(String id) {
 		return queryRepository.getChangeSubCategoryContext(id)
+				.orElseThrow(() -> new ApiException(ItemErrorType.NOT_FOUND));
+	}
+	
+	public LastUpdateDto getItemLastUpdate(String itemId) {
+		return queryRepository.findLastUpdateById(itemId)
 				.orElseThrow(() -> new ApiException(ItemErrorType.NOT_FOUND));
 	}
 	

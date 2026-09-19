@@ -1,7 +1,6 @@
 package br.com.omnirent.item;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.PageRequest;
@@ -21,16 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import br.com.omnirent.common.enums.EnumOption;
 import br.com.omnirent.common.enums.ItemCondition;
 import br.com.omnirent.common.enums.ItemEnums;
-import br.com.omnirent.common.enums.ItemStatus;
 import br.com.omnirent.common.page.PageResponseDTO;
 import br.com.omnirent.item.context.ItemFeedFilter;
 import br.com.omnirent.item.context.ItemImagesRequestDto;
-import br.com.omnirent.item.context.ItemRejectedRequestDto;
-import br.com.omnirent.item.context.SearchItemFilter;
-import br.com.omnirent.item.dto.ItemAnalisysDTO;
 import br.com.omnirent.item.dto.ItemCreatedDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
@@ -38,6 +32,7 @@ import br.com.omnirent.item.dto.ItemFeedDTO;
 import br.com.omnirent.item.dto.ItemFeedSort;
 import br.com.omnirent.item.dto.ItemRequestDTO;
 import br.com.omnirent.item.dto.ItemUpdatedDTO;
+import br.com.omnirent.item.dto.LastUpdateDto;
 import br.com.omnirent.item.dto.UpdateItemRequestDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -61,14 +56,19 @@ public class ItemController {
 		return itemService.getUserItems(pageable);
 	}
 	
-	@GetMapping("/find/user")
-	public PageResponseDTO<ItemDisplayDTO> findUserItems(Pageable pageable) {
-		return itemService.getUserItems(pageable);
-	}
-	
 	@GetMapping("/enums")
 	public ItemEnums getEnums() {
 		return itemService.getEnums();
+	}
+	
+	@GetMapping("/lastUpdate/{itemId}")
+	public LastUpdateDto getLastUpdate(@PathVariable String itemId) {
+		return itemService.getItemLastUpdate(itemId);
+	}
+	
+	@GetMapping("/find/user")
+	public PageResponseDTO<ItemDisplayDTO> findUserItems(Pageable pageable) {
+		return itemService.getUserItems(pageable);
 	}
 	
 	@GetMapping("/feed")

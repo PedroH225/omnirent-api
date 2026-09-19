@@ -22,6 +22,7 @@ import br.com.omnirent.item.domain.Item;
 import br.com.omnirent.item.dto.ItemAnalisysDTO;
 import br.com.omnirent.item.dto.ItemDetailDTO;
 import br.com.omnirent.item.dto.ItemDisplayDTO;
+import br.com.omnirent.item.dto.LastUpdateDto;
 
 public interface ItemQueryRepository extends Repository<Item, String> {
 		
@@ -165,4 +166,11 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 				AND i.itemStatus IN :status
 			""")
 	Page<ItemDisplayDTO> searchItems(String name, List<ItemStatus> status, Pageable pageable);
+
+	@Query("""
+		    SELECT new br.com.omnirent.item.dto.LastUpdateDto(i.updatedAt)
+		    FROM Item i
+		    WHERE i.id = :itemId
+		""")
+		Optional<LastUpdateDto> findLastUpdateById(String itemId);		
 }
