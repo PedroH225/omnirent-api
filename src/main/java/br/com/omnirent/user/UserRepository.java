@@ -38,5 +38,14 @@ public interface UserRepository extends JpaRepository<User, String> {
 	    WHERE u.id = :userId
 	    """)
 	int incrementTokenVersion(@Param("userId") String userId);
+
+	@Modifying
+	@Query("""
+		UPDATE User u
+	    SET u.timezone = coalesce(:timezone, u.timezone),
+	        u.locale = coalesce(:locale, u.locale)
+	    WHERE u.id = :userId
+			""")
+	int updatePreferences(String userId, String timezone, String locale);
 	
 }

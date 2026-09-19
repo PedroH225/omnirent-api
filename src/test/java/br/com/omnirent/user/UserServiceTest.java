@@ -34,6 +34,7 @@ import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.ConcurrencyErrorType;
 import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import br.com.omnirent.factory.UserTestFactory;
+import br.com.omnirent.security.CookieService;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.security.auth.RoleRepository;
 import br.com.omnirent.security.domain.Role;
@@ -43,6 +44,7 @@ import br.com.omnirent.user.domain.User;
 import br.com.omnirent.user.dto.UserDetailsDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
 import br.com.omnirent.user.dto.UserResponseDTO;
+import jakarta.servlet.http.HttpServletResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -80,8 +82,12 @@ public class UserServiceTest {
 	@Mock
 	private Clock clock;
 	
-    private final Instant fixedInstant = Instant.parse("2023-01-01T10:00:00Z");
-    
+	@Mock
+	private HttpServletResponse response;
+	
+	@Mock
+	private CookieService cookieService;
+	    
     private User user;
     
     private Role defaultRole = new Role();
@@ -310,7 +316,7 @@ public class UserServiceTest {
 		doThrow(new ApiException(UserErrorType.BANNED))
 				.when(autorizationService).requireNotBanned(UserStatus.BANNED);
 
-		assertThatThrownBy(() -> userService.changeUserStatus())
+		assertThatThrownBy(() -> userService.changeUserStatus(response))
 				.isInstanceOf(ApiException.class)
 				.satisfies(ex -> {
 					ApiException exception = (ApiException) ex;
@@ -330,8 +336,9 @@ public class UserServiceTest {
 		when(queryRepository.getUserStatusChangeContext(userId)).thenReturn(Optional.of(context));
 		when(context.currentUserStatus()).thenReturn(UserStatus.ACTIVE);
 		when(userRepository.updateUserStatus(userId, UserStatus.ACTIVE, UserStatus.INACTIVE)).thenReturn(1);
-
-		userService.changeUserStatus();
+		when(userRepository.incrementTokenVersion(userId)).thenReturn(1);
+		
+		userService.changeUserStatus(response);
 
 		verify(autorizationService).requireNotBanned(UserStatus.ACTIVE);
 		verify(userRepository).updateUserStatus(userId, UserStatus.ACTIVE, UserStatus.INACTIVE);
@@ -347,7 +354,7 @@ public class UserServiceTest {
 		when(context.currentUserStatus()).thenReturn(UserStatus.INACTIVE);
 		when(userRepository.updateUserStatus(userId, UserStatus.INACTIVE, UserStatus.ACTIVE)).thenReturn(1);
 		
-		userService.changeUserStatus();
+		userService.changeUserStatus(response);
 
 		verify(autorizationService).requireNotBanned(UserStatus.INACTIVE);
 		verify(userRepository).updateUserStatus(userId, UserStatus.INACTIVE, UserStatus.ACTIVE);
@@ -361,7 +368,7 @@ public class UserServiceTest {
 		when(currentUserProvider.currentUserId()).thenReturn(userId);
 		when(queryRepository.getUserStatusChangeContext(userId)).thenReturn(Optional.empty());
 
-		assertThatThrownBy(() -> userService.changeUserStatus())
+		assertThatThrownBy(() -> userService.changeUserStatus(response))
         .isInstanceOf(ApiException.class)
         .satisfies(ex -> {
             ApiException exception = (ApiException) ex;
@@ -381,7 +388,7 @@ public class UserServiceTest {
 		when(context.currentUserStatus()).thenReturn(UserStatus.ACTIVE);
 		when(userRepository.updateUserStatus(userId, UserStatus.ACTIVE, UserStatus.INACTIVE)).thenReturn(0);
 
-		assertThatThrownBy(() -> userService.changeUserStatus())
+		assertThatThrownBy(() -> userService.changeUserStatus(response))
 			.isInstanceOf(ApiException.class)
 	        .satisfies(ex -> {
 	            ApiException exception = (ApiException) ex;

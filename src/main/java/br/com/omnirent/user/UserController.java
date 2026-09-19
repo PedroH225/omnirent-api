@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.omnirent.common.enums.UserEnums;
 import br.com.omnirent.user.dto.LoggedUserResponseDTO;
 import br.com.omnirent.user.dto.UserDetailsDTO;
+import br.com.omnirent.user.dto.UserPreferencesDTO;
 import br.com.omnirent.user.dto.UserRequestDTO;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -42,7 +44,12 @@ public class UserController {
 	}
 	
 	@PatchMapping("/changeStatus")
-	public void changeUserStatus() {
-		userService.changeUserStatus();
+	public void changeUserStatus(HttpServletResponse response) {
+		userService.changeUserStatus(response);
+	}
+	
+	@PatchMapping("/changePreferences")
+	public UserPreferencesDTO changeUserPreferences(@RequestBody UserPreferencesDTO preferences) {
+		return userService.changePreferences(preferences);
 	}
 }
