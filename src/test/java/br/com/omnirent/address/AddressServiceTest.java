@@ -27,6 +27,7 @@ import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
+import br.com.omnirent.item.ItemRepository;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
 import br.com.omnirent.user.domain.User;
@@ -39,6 +40,9 @@ public class AddressServiceTest {
 
 	@Mock
 	private AddressRepository addressRepository;
+	
+	@Mock
+	private ItemRepository itemRepository;
 
 	@Mock
 	private UserService userService;
