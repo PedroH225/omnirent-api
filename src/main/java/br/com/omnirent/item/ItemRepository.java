@@ -50,5 +50,12 @@ public interface ItemRepository extends JpaRepository<Item, String> {
 			""")
 	int updateItemSubCategory(@Param("id")String itemId, @Param("subCategoryId")String subCategoryId,
 			@Param("currentSubCategoryId")String currentSubCategory, @Param("status")ItemStatus status);
-
+	
+	@Modifying
+	@Query("""
+	    UPDATE Item i
+	    SET i.updatedAt = CURRENT_TIMESTAMP
+	    WHERE i.pickupAddress.id = :addressId
+	""")
+	int touchUpdatedAtByAddressId(String addressId);
 }

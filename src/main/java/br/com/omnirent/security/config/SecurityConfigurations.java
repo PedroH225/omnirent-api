@@ -76,6 +76,7 @@ public class SecurityConfigurations {
                                 "/category/findAll",
                                 "/item/enums",
                                 "/item/feed",
+                                "/item/lastUpdate/**",
                                 "/item/find/**",
                                 "/webhooks/**",
                                 "/oauth2/**",

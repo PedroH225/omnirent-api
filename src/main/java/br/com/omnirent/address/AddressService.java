@@ -17,8 +17,10 @@ import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AddressErrorType;
+import br.com.omnirent.item.ItemRepository;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -26,6 +28,8 @@ import lombok.AllArgsConstructor;
 public class AddressService {
 
 	private AddressRepository addressRepository;
+	
+	private ItemRepository itemRepository;
 		
 	private UserService userService;
 	
@@ -71,6 +75,7 @@ public class AddressService {
 		return result;
 	}
 	
+	@Transactional
 	public AddressResponseDTO updateAddress(AddressRequestDTO addressDTO) {
 		Address address = findById(addressDTO.id());
 		
@@ -81,6 +86,8 @@ public class AddressService {
 		AddressResponseDTO result = mapper.toDto(addressRepository.save(address));
 		
 		AddressAuditSnapshot newData = mapper.toAuditSnapshot(result);
+		
+		itemRepository.touchUpdatedAtByAddressId(address.getId());
 		
 		eventPublisher.publish(new AddressUpdatedEvent(
 				AuditAction.ADDRESS_UPDATED,
