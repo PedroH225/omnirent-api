@@ -106,7 +106,7 @@ public class TokenService {
 		}
         
         AuthenticatedUser authenticatedUser = new AuthenticatedUser(
-        		id, null, null, authorities, tokenVer, globalVer);
+        		id, id, null, authorities, tokenVer, globalVer);
 
         return new UsernamePasswordAuthenticationToken(
                 authenticatedUser, null, authorities);

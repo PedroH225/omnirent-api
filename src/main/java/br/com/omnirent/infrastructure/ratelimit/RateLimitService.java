@@ -85,6 +85,8 @@ public class RateLimitService {
 	    state.setBlockedUntil(now.plus(duration));
 
 	    state.incrementPenaltyLevel(properties.penalties().size() - 1);
+	    
+	    log.debug("Penalty applied: {}", state);
 	}
 	
 	private Duration getRemainingTime(Instant end, Instant now) {
