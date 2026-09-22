@@ -17,6 +17,7 @@ import br.com.omnirent.common.audit.AuditAction;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AddressErrorType;
+import br.com.omnirent.item.ItemQueryRepository;
 import br.com.omnirent.item.ItemRepository;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
@@ -30,6 +31,8 @@ public class AddressService {
 	private AddressRepository addressRepository;
 	
 	private ItemRepository itemRepository;
+	
+	private ItemQueryRepository itemQueryRepository;
 		
 	private UserService userService;
 	
@@ -99,6 +102,9 @@ public class AddressService {
 	
 	public void deleteAddress(String addressId) {
 		Address address = findById(addressId);
+		if (itemQueryRepository.existsByAddress(addressId)) {
+			throw new ApiException(AddressErrorType.ADDRESS_IN_USE);
+		} 
 		addressRepository.delete(address);
 		
 		eventPublisher.publish(new AddressDeletedEvent(
