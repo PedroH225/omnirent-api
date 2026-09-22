@@ -25,12 +25,23 @@ public class RateLimitFilter extends OncePerRequestFilter {
 	
 	private final ApiErrorResponseWriter apiErrorWriter;
 	
+	
+	private static final List<String> RATE_LIMIT_IGNORED_PATHS = List.of(
+	        "/ws/",
+	        "/webhooks/stripe"
+	);	
+	
 	protected void doFilterInternal(
 			HttpServletRequest request, HttpServletResponse response, 
 			FilterChain filterChain) throws ServletException, IOException {
 		RateLimitStrategy strategy = RateLimitStrategyResolver.resolve(
 				HttpMethod.valueOf(request.getMethod()),
 				request.getRequestURI());
+		
+	    if (shouldIgnoreRateLimit(request)) {
+	        filterChain.doFilter(request, response);
+	        return;
+	    }	
 		
 		List<ClientIdentifier> clientIdentifiers = identifierResolver.resolveIdentifier(request);
 
@@ -44,4 +55,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
 		}
 		filterChain.doFilter(request, response);
 	}
+
+	private boolean shouldIgnoreRateLimit(HttpServletRequest request) {
+	    String path = request.getServletPath();
+
+	    return RATE_LIMIT_IGNORED_PATHS.stream()
+	            .anyMatch(path::startsWith);
+	}	
 }
