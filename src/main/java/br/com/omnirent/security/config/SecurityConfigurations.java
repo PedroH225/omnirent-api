@@ -56,6 +56,9 @@ public class SecurityConfigurations {
                 .csrf(csrf -> csrf
                 		.spa()
                 		.csrfTokenRepository(repository)
+                		.ignoringRequestMatchers(
+                				"/ws/**",
+                				"/webhooks/stripe")
                 		)
                 .oauth2Login(oauth -> oauth.
                 		successHandler(oAuth2AuthenticationSuccessHandler)
