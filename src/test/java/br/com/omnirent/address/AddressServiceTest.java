@@ -24,9 +24,11 @@ import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
+import br.com.omnirent.exception.domain.apptype.AddressErrorType;
 import br.com.omnirent.exception.domain.apptype.UserErrorType;
 import br.com.omnirent.factory.AddressTestFactory;
 import br.com.omnirent.factory.UserTestFactory;
+import br.com.omnirent.item.ItemQueryRepository;
 import br.com.omnirent.item.ItemRepository;
 import br.com.omnirent.security.CurrentUserProvider;
 import br.com.omnirent.user.UserService;
@@ -43,6 +45,9 @@ public class AddressServiceTest {
 	
 	@Mock
 	private ItemRepository itemRepository;
+	
+	@Mock
+	private ItemQueryRepository itemQueryRepository;
 
 	@Mock
 	private UserService userService;
@@ -168,5 +173,20 @@ public class AddressServiceTest {
 		verify(addressRepository).findById(addressDto.id());
 		verifyNoMoreInteractions(addressRepository, mapper);
 
+	}
+	
+	@Test
+	void shouldThrowWhenAddressInUseOnDelete() {
+		String targetId = userAddress.getId();
+		when(addressRepository.findById(targetId))
+			.thenReturn(Optional.of(userAddress));
+		
+		when(itemQueryRepository.existsByAddress(targetId)).thenReturn(true);
+		
+		assertThatThrownBy(() -> addressService.deleteAddress(targetId))
+	    .isInstanceOfSatisfying(ApiException.class, exception -> {
+	        assertThat(exception.getErrorCode())
+	            .isEqualTo(AddressErrorType.ADDRESS_IN_USE.getErrorCode());
+	    });
 	}
 }
