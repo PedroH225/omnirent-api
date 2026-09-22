@@ -2,6 +2,7 @@ package br.com.omnirent.address;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -22,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.com.omnirent.address.domain.Address;
 import br.com.omnirent.address.dto.AddressRequestDTO;
 import br.com.omnirent.address.dto.AddressResponseDTO;
+import br.com.omnirent.address.event.AddressDeletedEvent;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
 import br.com.omnirent.exception.common.ApiException;
 import br.com.omnirent.exception.domain.apptype.AddressErrorType;
@@ -173,6 +175,20 @@ public class AddressServiceTest {
 		verify(addressRepository).findById(addressDto.id());
 		verifyNoMoreInteractions(addressRepository, mapper);
 
+	}
+	
+	@Test
+	void shouldDeleteAddress() {
+		String targetId = userAddress.getId();
+		when(addressRepository.findById(targetId))
+			.thenReturn(Optional.of(userAddress));
+		
+		when(itemQueryRepository.existsByAddress(targetId)).thenReturn(false);
+		
+		addressService.deleteAddress(targetId);
+	
+		verify(addressRepository).delete(userAddress);
+		verify(eventPublisher).publish(any(AddressDeletedEvent.class));
 	}
 	
 	@Test
