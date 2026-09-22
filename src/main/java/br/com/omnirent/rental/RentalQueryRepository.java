@@ -116,10 +116,10 @@ public interface RentalQueryRepository extends Repository<Rental, String>  {
 		    FROM Rental r
 		    WHERE r.renterId = :userId
 		      AND r.itemId = :itemId
-		      AND r.rentalStatus = :expired
+		      AND r.rentalStatus IN :targetStatus
 		      AND r.expiredAt >= :threshold
 		""")
-	Optional<Instant> canCreateRental(String userId, String itemId, RentalStatus expired, Instant threshold);
+	Optional<Instant> canCreateRental(String userId, String itemId, RentalStatus[] targetStatus, Instant threshold);
 
 	@Query("""
 			SELECT new br.com.omnirent.rental.dto.RentalOperationDTO(

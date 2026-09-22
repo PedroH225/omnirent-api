@@ -3,9 +3,7 @@ package br.com.omnirent.rental;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.data.domain.Page;
@@ -27,7 +25,6 @@ import br.com.omnirent.exception.domain.apptype.RentalErrorType;
 import br.com.omnirent.item.ItemService;
 import br.com.omnirent.item.context.ItemInfo;
 import br.com.omnirent.item.context.ItemRentedContext;
-import br.com.omnirent.payment.dto.CheckoutCompletedDTO;
 import br.com.omnirent.payment.dto.PaymentUpdateDTO;
 import br.com.omnirent.payment.event.PaymentRequestedEvent;
 import br.com.omnirent.rental.context.RentalInUseContext;
@@ -331,7 +328,9 @@ public class RentalService {
 		
 		validateTransition(currStatus, targetStatus);
 		
-		rentalRepository.updateRentalStatus(rentId, targetStatus);
+		Instant expiredAt = clock.instant();
+		
+		rentalRepository.updateStatusAndExpiredAt(rentId, targetStatus, expiredAt);
 		itemService.recalculateAvailability(context.getItemId(), targetStatus);
 
 		eventPublisher.publish(new RentalCanceledEvent(
@@ -350,7 +349,7 @@ public class RentalService {
 		RentalStatus currStatus = context.getRentalStatus();
 		validateTransition(currStatus, targetStatus);
 		
-		rentalRepository.markExpired(rentId, targetStatus, currTime);
+		rentalRepository.updateStatusAndExpiredAt(rentId, targetStatus, currTime);
 		itemService.recalculateAvailability(context.getItemId(), targetStatus);
 
 		eventPublisher.publish(new RentalExpiredEvent(

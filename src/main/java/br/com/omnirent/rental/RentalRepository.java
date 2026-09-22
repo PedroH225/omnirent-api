@@ -2,7 +2,6 @@ package br.com.omnirent.rental;
 
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,7 +30,7 @@ public interface RentalRepository extends JpaRepository<Rental, String> {
 			SET r.rentalStatus = :status, r.expiredAt = :expiredAt
 			WHERE r.id = :id
 			""")
-	void markExpired(@Param("id")String rentalId, RentalStatus status, Instant expiredAt);
+	void updateStatusAndExpiredAt(@Param("id")String rentalId, RentalStatus status, Instant expiredAt);
 	
 	@Modifying
 	@Query("""
