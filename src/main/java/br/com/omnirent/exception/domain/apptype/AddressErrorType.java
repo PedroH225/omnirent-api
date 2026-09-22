@@ -8,8 +8,9 @@ import lombok.Getter;
 @Getter
 public enum AddressErrorType implements AppErrorType {
 
-    NOT_FOUND("NOT_FOUND", "ADDRESS_NOT_FOUND", "not_found", HttpStatus.NOT_FOUND);
-    	
+    NOT_FOUND("NOT_FOUND", "ADDRESS_NOT_FOUND", "not_found", HttpStatus.NOT_FOUND),
+    ADDRESS_IN_USE("CONFLICT", "ADDRESS_IN_USE", "in_use", HttpStatus.NOT_FOUND);
+
     private String errorType;
 	
 	private String errorCode;

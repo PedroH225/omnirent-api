@@ -173,4 +173,11 @@ public interface ItemQueryRepository extends Repository<Item, String> {
 		    WHERE i.id = :itemId
 		""")
 		Optional<LastUpdateDto> findLastUpdateById(String itemId);		
+
+	@Query("""
+		    SELECT CASE WHEN COUNT(i) > 0 THEN true ELSE false END
+		    FROM Item i
+		    WHERE i.pickupAddress.id = :addressId
+		    """)
+		boolean existsByAddress(String addressId);
 }
