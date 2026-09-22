@@ -342,7 +342,7 @@ public class RentalServiceTest {
 	}
 	
 	@Test
-	void shouldCancelRental() {
+	void shouldCancelAndExpireRental() {
 		String currentUser = owner.getId();
 
 		String rentalId = rental.getId();
@@ -359,7 +359,7 @@ public class RentalServiceTest {
 		
 		verify(currentUserProvider).currentUserId();
 		verify(authorizationService).requireOne(allowedActors, currentUser);
-		verify(rentalRepository).updateRentalStatus(rentalId, targetStatus);
+		verify(rentalRepository).updateStatusAndExpiredAt(rentalId, targetStatus, clock.instant());
 	}
 	
 	@Test
