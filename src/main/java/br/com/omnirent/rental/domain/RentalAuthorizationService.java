@@ -35,7 +35,7 @@ public class RentalAuthorizationService {
 		Instant thresold = ZonedDateTime.now(clock).minusMinutes(30).toInstant();
 		
 		Optional<Instant> optExpired = queryRepository.canCreateRental(
-				userId, itemId, RentalStatus.EXPIRED, thresold);
+				userId, itemId, new RentalStatus[]{RentalStatus.EXPIRED, RentalStatus.CANCELLED}, thresold);
 		
 		if (optExpired.isPresent()) {
 			ZonedDateTime when = 
