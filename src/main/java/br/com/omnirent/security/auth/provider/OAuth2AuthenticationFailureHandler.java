@@ -39,7 +39,7 @@ public class OAuth2AuthenticationFailureHandler implements AuthenticationFailure
 
         apiWriter.onApiError(request, response, apiException);
         
-		response.sendRedirect(String.format("%s/login?error=%s", 
+		response.sendRedirect(String.format("%s/oauth/callback?error=%s", 
 				appProperties.frontUrl(), apiException.getErrorCode()));
 	}
 	

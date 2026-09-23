@@ -63,7 +63,7 @@ public class OAuth2AuthenticationFailureHandlerTest {
 		verify(apiWriter).onApiError(eq(request), eq(response), captor.capture());
 
 		assertThat(captor.getValue()).isSameAs(apiException);
-		verify(response).sendRedirect("http://localhost:3000/login?error=" + apiException.getErrorCode());
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=" + apiException.getErrorCode());
 	
 		verifyNoMoreInteractions(apiWriter);
 	}
@@ -81,7 +81,7 @@ public class OAuth2AuthenticationFailureHandlerTest {
 
 		assertThat(captor.getValue().getErrorCode())
         	.isEqualTo(AuthenticationErrorType.OAUTH_ACCESS_DENIED.getErrorCode());
-		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=" + captor.getValue().getErrorCode());
 	}
 	
 	@Test
@@ -97,7 +97,7 @@ public class OAuth2AuthenticationFailureHandlerTest {
 
 		assertThat(captor.getValue().getErrorCode())
 			.isEqualTo(AuthenticationErrorType.OAUTH_PROVIDER_UNAVAILABLE.getErrorCode());
-		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=" + captor.getValue().getErrorCode());
 	}
 	
 	@Test
@@ -113,7 +113,7 @@ public class OAuth2AuthenticationFailureHandlerTest {
 
 		assertThat(captor.getValue().getErrorCode())
 			.isEqualTo(AuthenticationErrorType.OAUTH_AUTHENTICATION_FAILED.getErrorCode());
-		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=" + captor.getValue().getErrorCode());
 	}
 	
 	@Test
@@ -128,7 +128,7 @@ public class OAuth2AuthenticationFailureHandlerTest {
 
 		assertThat(captor.getValue().getErrorCode())
 			.isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorCode());
-		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=" + captor.getValue().getErrorCode());
 	}
 	
 	@Test
@@ -143,7 +143,7 @@ public class OAuth2AuthenticationFailureHandlerTest {
 
 		assertThat(captor.getValue().getErrorCode())
 			.isEqualTo(AuthenticationErrorType.AUTHENTICATION_SERVICE_ERROR.getErrorCode());
-		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=" + captor.getValue().getErrorCode());
 	}
 	
 	@Test
@@ -158,7 +158,7 @@ public class OAuth2AuthenticationFailureHandlerTest {
 
 		assertThat(captor.getValue().getErrorCode())
 			.isEqualTo(AuthenticationErrorType.INVALID_CREDENTIALS.getErrorCode());
-		verify(response).sendRedirect("http://localhost:3000/login?error=" + captor.getValue().getErrorCode());
+		verify(response).sendRedirect("http://localhost:3000/oauth/callback?error=" + captor.getValue().getErrorCode());
 	}
 	
 	@Test
@@ -167,7 +167,7 @@ public class OAuth2AuthenticationFailureHandlerTest {
 		when(appProperties.frontUrl()).thenReturn("http://localhost:3000");
 
 		ArgumentCaptor<ApiException> captor = ArgumentCaptor.forClass(ApiException.class);
-		doThrow(new IOException("Redirect failed")).when(response).sendRedirect("http://localhost:3000/login?error=INVALID_CREDENTIALS");
+		doThrow(new IOException("Redirect failed")).when(response).sendRedirect("http://localhost:3000/oauth/callback?error=INVALID_CREDENTIALS");
 
 		assertThrowsExactly(IOException.class, () -> failureHandler.onAuthenticationFailure(request, response, ex));
 
