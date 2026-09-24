@@ -17,9 +17,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class OAuth2AuthenticationFailureHandler implements AuthenticationFailureHandler {
 
 	private ApiErrorResponseWriter apiWriter;
@@ -61,6 +63,15 @@ public class OAuth2AuthenticationFailureHandler implements AuthenticationFailure
 	
 	private ApiException resolveOauthError(AuthenticationException ex) {
 		OAuth2AuthenticationException oauthError = (OAuth2AuthenticationException) ex;
+		
+	    log.error(
+	            "OAuth authentication failed. errorCode={}, description={}, uri={}",
+	            oauthError.getError().getErrorCode(),
+	            oauthError.getError().getDescription(),
+	            oauthError.getError().getUri(),
+	            ex
+	        );
+	    
 		String errorCode = oauthError.getError().getErrorCode();
 		return switch (errorCode) {
 		    case "access_denied" ->
