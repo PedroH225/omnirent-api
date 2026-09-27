@@ -194,7 +194,7 @@ public class ItemImageService {
         Thumbnails
                 .of(bufferedImage)
                 .size(1920, 1920)
-                .outputFormat("webp")
+                .outputFormat("jpeg")
                 .outputQuality(0.8)
                 .toOutputStream(outputStream);
 
