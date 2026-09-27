@@ -1,30 +1,52 @@
 # OmniRent API
+
 ## Description
+
 Backend of the OmniRent platform, a marketplace for renting various types of equipment.
 
 The application allows users to list equipment so that other users can search, reserve, and rent items for defined periods.
 
 ## Objective
+
 The project was developed as a backend portfolio project focused on production-oriented system architectures and real-world engineering practices.
 
+In addition to the platform's core features, the project explores authentication and authorization, asynchronous processing, messaging, payments, real-time communication, auditing, caching, observability, and integrations with external services.
+
 ## Technologies
-* **Backend**: Java, Spring Framework (Web, Security), JPA/Hibernate
-* **Authentication**: JWT, OAuth2 (Google)
-* **Database**: MySQL 8, Query DTOs, optimized queries
+
+* **Backend**: Java 21, Spring Boot, Spring Framework (Web, Security), JPA/Hibernate
+* **Authentication**: JWT, OAuth2 (Google, GitHub)
+* **Database**: PostgreSQL, Neon (production), Query DTOs, optimized queries
 * **File Storage**: Cloudflare R2 (Amazon S3-compatible API)
 * **Infrastructure**: Docker, Docker Compose, AWS (EC2, EBS, CloudWatch, EventBridge)
 * **CI/CD**: GitHub Actions
 * **Testing**: JUnit 5, Mockito, Testcontainers, AssertJ
 * **Messaging**: RabbitMQ
-* **Observability**: Structured logging, SLF4J, Logback
+* **Real-Time Communication**: WebSocket, STOMP
+* **Observability**: Structured logging, SLF4J, Logback, CloudWatch
 * **Auditing**: Tracking of critical system actions and changes
-* **Payments**: Stripe (Sandbox)
+* **Payments**: Stripe Checkout, Webhooks, and refunds (Sandbox)
+* **Security**: CSRF protection, role-based access control, rate limiting, and session invalidation
 * **Localization**: API response internationalization and timezone handling
 
+## Architecture
+
+The application is structured with a clear separation between domain logic, persistence, security, external integrations, and asynchronous processing.
+
+The HTTP layer is responsible for exposing API resources, while business rules and state transitions remain isolated within application services.
+
+Internal events and messaging are used to decouple operations such as notifications, auditing, and the processing of important system changes.
+
+External integrations, such as Stripe and Cloudflare R2, are kept separate from the application's core business logic.
+
+Critical operations also validate entity state transitions to prevent invalid changes and preserve system consistency.
+
 ## Setup
+
 **1.** Configure your environment variables: [Example](.env-example)
 
 **2.** Run:
+
 ```bash
 docker compose up
 ```
@@ -32,33 +54,139 @@ docker compose up
 ## Features
 
 ### Equipment
-- Users can list equipment for rent
-- Filter equipment by condition, title, category and subcategories
-- Sort by recent, highest price and lowest prices
-- Equipment availability management
-- Listing information updates
-- Upload up to 5 images per item
+
+* Users can list equipment for rent
+* Filter equipment by condition, title, category, and subcategory
+* Sort by most recent, highest price, and lowest price
+* Equipment availability management
+* Listing information updates
+* Upload up to 5 images per item
+* Listing moderation through the administrative area
+* Preservation of relevant listing information for completed and ongoing rentals
 
 ### Rentals
-- Rental requests for defined periods
-- Equipment availability validation
-- Rental lifecycle management
-- Preserved history of rented equipment information
+
+* Rental requests for defined periods
+* Equipment availability validation
+* Rental lifecycle management
+* Preserved history of rented equipment information
+* Validation and control of rental status transitions
+* Preparation, shipping, usage, and return workflows
+* Rental cancellation and expiration according to platform rules
 
 ### Payments
-- Rental checkout through online payment
-- Automatic status updates after payment confirmation
-- Payment cancellation and refunds
-- Rental renewal through a new payment
+
+* Rental checkout through online payment
+* Stripe Checkout session creation
+* Automatic status updates after payment confirmation
+* Processing of Stripe Webhooks
+* Payment cancellation and refunds
+* Rental renewal through a new payment
+* Synchronization between payment status and rental state
 
 ### Authentication
-- User registration
-- Login with email and password
-- Login using Google and Github accounts
+
+* User registration
+* Login with email and password
+* Login using Google and GitHub accounts
+* JWT-based authentication
+* Access token storage in an HttpOnly cookie
+* Role-based access control
+* Session invalidation through token versioning
+
+### Administration
+
+* User search and management
+* Account banning and reactivation
+* Equipment search and management
+* Listing approval and rejection
+* Equipment blocking and unblocking
+* Role-based protection of administrative endpoints
+
+### Security
+
+* JWT stored in an HttpOnly cookie
+* CSRF protection
+* Access control based on authentication and roles
+* Token invalidation through user-associated versioning
+* Global session invalidation when required
+* Rate limiting based on IP address and authenticated users
+* Centralized handling of authentication and authorization failures
+
+### Real-Time Communication
+
+* Communication with the frontend through WebSocket and STOMP
+* Real-time payment status updates
+* Client notification after payment processing and confirmation
+* Communication decoupled from traditional API requests
+
+### Asynchronous Processing
+
+* Event processing through RabbitMQ
+* Notification delivery decoupled from the main request flow
+* Processing of operations that do not need to block HTTP requests
+* Integration with internal events generated by domain operations
+
+### Auditing
+
+* Tracking of important actions performed on the platform
+* Recording of relevant state changes
+* Storage of before-and-after information when required
+* Auditing of administrative actions and critical operations
+
+### Cache
+
+* Caching of frequently accessed information
+* Reduction of repeated database queries
+* Caching of metadata used during authentication validation
+* Cache invalidation when necessary to preserve consistency
 
 ### System
-- Tracking of important actions and changes
-- Notification and payment processing
-- Automatic updates for overdue rental and payment statuses
-- Simulated delivery workflow with automatic status updates after a defined period
-- Rate limiting based on IP address and authenticated users
+
+* Tracking of important actions and changes
+* Notification and payment processing
+* Automatic updates for overdue rental and payment statuses
+* Simulated delivery workflow with automatic status updates after a defined period
+* Rate limiting based on IP address and authenticated users
+* Centralized API error handling
+* Internationalization of messages returned to clients
+* Consistent date and timezone handling
+
+## Testing
+
+* Unit testing with JUnit 5
+* Dependency mocking with Mockito
+* Assertions with AssertJ
+* Integration testing with Testcontainers
+* Execution of real database instances in containers during integration tests
+* Testing of business rules, persistence, and cross-layer flows
+
+## Infrastructure
+
+The application runs in Docker containers and can be started locally through Docker Compose.
+
+In production, the application services run on an AWS EC2 instance, while the PostgreSQL database is hosted on Neon.
+
+CloudWatch is used for infrastructure monitoring, while EventBridge is used to automate infrastructure-related operations.
+
+Equipment images are stored in Cloudflare R2 through an Amazon S3-compatible API.
+
+## Integrations
+
+### Stripe
+
+Stripe is used to process rental payments.
+
+Payment confirmation is handled through Webhooks, allowing the backend to update payment and rental state without depending on the user's browser returning from the checkout flow.
+
+### Cloudflare R2
+
+Cloudflare R2 is used to store equipment images.
+
+The integration uses an Amazon S3-compatible API, keeping file storage management decoupled from the application.
+
+### OAuth2
+
+Google and GitHub can be used as external authentication providers.
+
+After authentication, users are integrated into the same session flow used by the application's other login methods.
