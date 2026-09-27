@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import br.com.omnirent.common.enums.RentalStatus;
 import br.com.omnirent.common.event.SpringDomainEventPublisher;
-import br.com.omnirent.rental.context.RentalInUseAuditSnapshot;
 import br.com.omnirent.rental.context.RentalInUseContext;
 import br.com.omnirent.rental.context.RentalStatusChangeContext;
 import br.com.omnirent.rental.event.RentalLateEvent;
@@ -32,7 +31,7 @@ public class RentalSchedule {
 	private Clock clock;
 
 	@Transactional
-	@Scheduled(fixedRate = 30000)
+	@Scheduled(fixedRateString = "${app.scheduler-rate}")
 	public void updateLateRentals() {
 		List<String> lateRentalsIds = queryRepository.findLateRentals(RentalStatus.IN_USE);
 
@@ -46,7 +45,7 @@ public class RentalSchedule {
 	}
 	
 	@Transactional
-	@Scheduled(fixedRate = 30000)
+	@Scheduled(fixedRateString = "${app.scheduler-rate}")
 	public void updateShippedRentals() {
 		Instant threshold = ZonedDateTime.now(clock).minusHours(1).toInstant();
 		
