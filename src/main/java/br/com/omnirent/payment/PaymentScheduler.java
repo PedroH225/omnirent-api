@@ -28,7 +28,7 @@ public class PaymentScheduler {
 	@Scheduled(fixedRateString = "${app.scheduler-rate}")
 		public void markExpiredPayments() {
 		//Instant threshold = ZonedDateTime.now(clock).minusSeconds(1).toInstant();
-		Instant threshold = ZonedDateTime.now(clock).minusMinutes(30).toInstant();
+		Instant threshold = ZonedDateTime.now(clock).minusMinutes(10).toInstant();
 
 		List<String> expiredIds = 
 				queryRepository.findExpiredIds(PaymentStatus.PENDING, threshold);
